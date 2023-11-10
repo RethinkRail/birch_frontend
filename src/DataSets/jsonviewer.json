@@ -1,0 +1,2010 @@
+[
+  {
+  "car_id": "APPP220433",
+  "work_order": "WO_00653",
+  "arrival_date": "2023-09-01T00:00:00.000Z",
+  "material_eta": "1901-05-01T00:00:00.000Z",
+  "clean_date": "2023-10-05T00:00:00.000Z",
+  "projected_out_date": "2024-10-05T00:00:00.000T",
+  "invoice_date": "2023-10-23T00:00:00.000Z",
+  "el_index": "U",
+  "is_storage": 0,
+  "locked_by": 5, 
+  "shipped_date": "1900-01-01T00:00:00.000Z",
+  "finished_date": "1900-01-01T00:00:00.000Z",
+  "invoice_net_days": 30,
+  "invoice_number": "NYC20230393",
+  "purchase_order": "",
+  "reason_to_come": "CLEAN CLEAN FOR HOME..HYDROCARBON MIXTURE)\n",
+  "joblist": [
+    {
+      "labor_time": 26,
+      "quantity": 1
+    },
+    {
+      "labor_time": 3,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    }
+  ], 
+  "timesheets": [
+    {
+      "duration": 0
+    },
+    {
+      "duration": 6360
+    },
+    {
+      "duration": 12360
+    },
+    {
+      "duration": 10620
+    },
+    {
+      "duration": 6720
+    },
+    {
+      "duration": 2340
+    }
+  ],
+  "yard": {
+    "name": "NEWYORK YARD",
+    "id": 1,
+    "splc": "684441",
+    "abbreviation": "NYC",
+    "detail_source": "SH",
+    "facility_type": "CS",
+    "billing_address": "BENEFICIARY ACCOUNT NAME: NEWYORK YARD SERVICES LLC\nBANK ACCOUNT NUMBER: 45666176\nROUTING NUMBER: 983111003"
+  },
+  "railcar": {
+    "products": {
+      "name": "BUTADIENz AND HYDROCARBON MIXTURES"
+    },
+    "owner": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    },
+    "lessee": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    }
+  },
+  "workupdates": [
+    {
+      "status_id": 960,
+      "update_date": "2025-10-24T21:52:34.000Z",
+      "comment": "CAb RELEASED 10/24",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE - RELEASED TO RR"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-23T13:23:01.000Z",
+      "comment": "uploaded to fleetwatch",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T18:35:47.000Z",
+      "comment": "DISPO REQUESTED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T14:54:38.000Z",
+      "comment": "ACCOUNTING APPROVED FINAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T12:35:05.000Z",
+      "comment": "SENT FOR FURTHER REVIEW 10/20/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:30.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:19.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 750,
+      "update_date": "2023-10-19T16:58:09.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "QA HITS"
+      }
+    },
+    {
+      "status_id": 700,
+      "update_date": "2023-10-17T11:00:03.000Z",
+      "comment": "OPS COMPLETE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER QA"
+      }
+    },
+    {
+      "status_id": 650,
+      "update_date": "2023-10-17T10:54:41.000Z",
+      "comment": "OPS REVIEW",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "OPERATIONS PRE-FINAL"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-13T13:10:17.000Z",
+      "comment": "complete to QA today",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-12T11:29:52.000Z",
+      "comment": "CAR IS FLARED AND STEAMED MOVE TO RACK FOR HEAD REMOVAL ON FRIDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-11T12:17:37.000Z",
+      "comment": "had to give up track for track crew to tamp. back at flare now",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-09T11:32:07.000Z",
+      "comment": "FLARE TUESDAY 10-10",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T22:01:37.000Z",
+      "comment": "Pressure at 90 psi when we started flare. 8 hours we were at 10 psi",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T11:08:42.000Z",
+      "comment": "FLARE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-09-29T12:21:30.000Z",
+      "comment": "HI PRESSURE RACK MONDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-08-29T14:21:11.000Z",
+      "comment": "WAITING CLEANING",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-08-29T12:06:18.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 190,
+      "update_date": "2023-08-29T00:32:53.000Z",
+      "comment": "ESTIMATE APPROVED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING MATERIAL"
+      }
+    },
+    {
+      "status_id": 180,
+      "update_date": "2023-08-28T13:57:03.000Z",
+      "comment": "ESTIMATE SENT TO CUSTOMER",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING CUSTOMER DECISION"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T23:37:19.000Z",
+      "comment": "ACCOUNTING APPROVED INITIAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T21:36:06.000Z",
+      "comment": "INITIAL SENT FOR FURTHER REVIEW 8/25/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T20:20:22.000Z",
+      "comment": "Accounting approved initial\n",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T16:09:18.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:06:58.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:21.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:08.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T13:10:07.000Z",
+      "comment": "740 YARD WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T11:16:44.000Z",
+      "comment": "WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-21T13:23:58.000Z",
+      "comment": "CAR ARRIVED 8/20/2023",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T20:11:09.000Z",
+      "comment": "PAPERWORK IN CAR FILE",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:17:08.000Z",
+      "comment": "CAR FILE CREATED ",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:13:21.000Z",
+      "comment": "CREATED BY APRIL_S",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    }
+  ],
+  "routing_matrix_task_assignment": [
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "morganbird"
+      }
+    },
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "bross"
+      }
+    }
+  ],
+  "storage_information": [],
+  "secondary_owner_info": null
+},
+  {
+  "car_id": "APPP220432",
+  "work_order": "WO_00653",
+  "arrival_date": "2023-07-02T00:00:00.000Z",
+  "material_eta": "1980-05-01T00:00:00.000Z",
+  "clean_date": "2023-10-05T00:00:00.000Z",
+  "projected_out_date": "2023-10-05T00:00:00.000T",
+  "invoice_date": "2023-10-23T00:00:00.000Z",
+  "el_index": "U",
+  "is_storage": 0,
+  "locked_by": -1, 
+  "shipped_date": "1900-01-01T00:00:00.000Z",
+  "finished_date": "1900-01-01T00:00:00.000Z",
+  "invoice_net_days": 30,
+  "invoice_number": "NYC20230393",
+  "purchase_order": "",
+  "reason_to_come": "CLEAN CLEAN FOR HOME..HYDROCARBON MIXTURE)\n",
+  "joblist": [
+    {
+      "labor_time": 26,
+      "quantity": 1
+    },
+    {
+      "labor_time": 3,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    }
+  ], 
+  "timesheets": [
+    {
+      "duration": 0
+    },
+    {
+      "duration": 6360
+    },
+    {
+      "duration": 12360
+    },
+    {
+      "duration": 10620
+    },
+    {
+      "duration": 6720
+    },
+    {
+      "duration": 2340
+    }
+  ],
+  "yard": {
+    "name": "NEWYORK YARD",
+    "id": 1,
+    "splc": "684441",
+    "abbreviation": "NYC",
+    "detail_source": "SH",
+    "facility_type": "CS",
+    "billing_address": "BENEFICIARY ACCOUNT NAME: NEWYORK YARD SERVICES LLC\nBANK ACCOUNT NUMBER: 45666176\nROUTING NUMBER: 983111003"
+  },
+  "railcar": {
+    "products": {
+      "name": "BUTADIENE AND HYDROCARBON MIXTURES"
+    },
+    "owner": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    },
+    "lessee": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    }
+  },
+  "workupdates": [
+    {
+      "status_id": 950,
+      "update_date": "2023-10-24T21:52:34.000Z",
+      "comment": "CAR RELEASED 10/24",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE - RELEASED TO RR"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-23T13:23:01.000Z",
+      "comment": "uploaded to fleetwatch",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T18:35:47.000Z",
+      "comment": "DISPO REQUESTED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T14:54:38.000Z",
+      "comment": "ACCOUNTING APPROVED FINAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T12:35:05.000Z",
+      "comment": "SENT FOR FURTHER REVIEW 10/20/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:30.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:19.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 750,
+      "update_date": "2023-10-19T16:58:09.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "QA HITS"
+      }
+    },
+    {
+      "status_id": 700,
+      "update_date": "2023-10-17T11:00:03.000Z",
+      "comment": "OPS COMPLETE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER QA"
+      }
+    },
+    {
+      "status_id": 650,
+      "update_date": "2023-10-17T10:54:41.000Z",
+      "comment": "OPS REVIEW",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "OPERATIONS PRE-FINAL"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-13T13:10:17.000Z",
+      "comment": "complete to QA today",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-12T11:29:52.000Z",
+      "comment": "CAR IS FLARED AND STEAMED MOVE TO RACK FOR HEAD REMOVAL ON FRIDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-11T12:17:37.000Z",
+      "comment": "had to give up track for track crew to tamp. back at flare now",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-09T11:32:07.000Z",
+      "comment": "FLARE TUESDAY 10-10",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T22:01:37.000Z",
+      "comment": "Pressure at 90 psi when we started flare. 8 hours we were at 10 psi",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T11:08:42.000Z",
+      "comment": "FLARE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-09-29T12:21:30.000Z",
+      "comment": "HI PRESSURE RACK MONDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-08-29T14:21:11.000Z",
+      "comment": "WAITING CLEANING",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-08-29T12:06:18.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 190,
+      "update_date": "2023-08-29T00:32:53.000Z",
+      "comment": "ESTIMATE APPROVED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING MATERIAL"
+      }
+    },
+    {
+      "status_id": 180,
+      "update_date": "2023-08-28T13:57:03.000Z",
+      "comment": "ESTIMATE SENT TO CUSTOMER",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING CUSTOMER DECISION"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T23:37:19.000Z",
+      "comment": "ACCOUNTING APPROVED INITIAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T21:36:06.000Z",
+      "comment": "INITIAL SENT FOR FURTHER REVIEW 8/25/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T20:20:22.000Z",
+      "comment": "Accounting approved initial\n",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T16:09:18.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:06:58.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:21.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:08.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T13:10:07.000Z",
+      "comment": "740 YARD WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T11:16:44.000Z",
+      "comment": "WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-21T13:23:58.000Z",
+      "comment": "CAR ARRIVED 8/20/2023",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T20:11:09.000Z",
+      "comment": "PAPERWORK IN CAR FILE",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:17:08.000Z",
+      "comment": "CAR FILE CREATED ",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:13:21.000Z",
+      "comment": "CREATED BY APRIL_S",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    }
+  ],
+  "routing_matrix_task_assignment": [
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "morganbird"
+      }
+    },
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "bross"
+      }
+    }
+  ],
+  "storage_information": [],
+  "secondary_owner_info": null
+},
+  {
+  "car_id": "APPP220432",
+  "work_order": "WO_00653",
+  "arrival_date": "2023-11-04T00:00:00.000Z",
+  "material_eta": "2021-05-01T00:00:00.000Z",
+  "clean_date": "2023-10-05T00:00:00.000Z",
+  "projected_out_date": "2023-10-05T00:00:00.000T",
+  "invoice_date": "2023-10-23T00:00:00.000Z",
+  "el_index": "U",
+  "is_storage": 0,
+  "locked_by": 5, 
+  "shipped_date": "1900-01-01T00:00:00.000Z",
+  "finished_date": "1900-01-01T00:00:00.000Z",
+  "invoice_net_days": 30,
+  "invoice_number": "NYC20230393",
+  "purchase_order": "",
+  "reason_to_come": "CLEAN CLEAN FOR HOME..HYDROCARBON MIXTURE)\n",
+  "joblist": [
+    {
+      "labor_time": 26,
+      "quantity": 1
+    },
+    {
+      "labor_time": 3,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    }
+  ], 
+  "timesheets": [
+    {
+      "duration": 0
+    },
+    {
+      "duration": 6360
+    },
+    {
+      "duration": 12360
+    },
+    {
+      "duration": 10620
+    },
+    {
+      "duration": 6720
+    },
+    {
+      "duration": 2340
+    }
+  ],
+  "yard": {
+    "name": "NEWYORK YARD",
+    "id": 1,
+    "splc": "684441",
+    "abbreviation": "NYC",
+    "detail_source": "SH",
+    "facility_type": "CS",
+    "billing_address": "BENEFICIARY ACCOUNT NAME: NEWYORK YARD SERVICES LLC\nBANK ACCOUNT NUMBER: 45666176\nROUTING NUMBER: 983111003"
+  },
+  "railcar": {
+    "products": {
+      "name": "BUTADIENE AND HYDROCARBON MIXTURES"
+    },
+    "owner": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    },
+    "lessee": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    }
+  },
+  "workupdates": [
+    {
+      "status_id": 950,
+      "update_date": "2023-10-24T21:52:34.000Z",
+      "comment": "CAR RELEASED 10/24",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE - RELEASED TO RR"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-23T13:23:01.000Z",
+      "comment": "uploaded to fleetwatch",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T18:35:47.000Z",
+      "comment": "DISPO REQUESTED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T14:54:38.000Z",
+      "comment": "ACCOUNTING APPROVED FINAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T12:35:05.000Z",
+      "comment": "SENT FOR FURTHER REVIEW 10/20/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:30.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:19.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 750,
+      "update_date": "2023-10-19T16:58:09.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "QA HITS"
+      }
+    },
+    {
+      "status_id": 700,
+      "update_date": "2023-10-17T11:00:03.000Z",
+      "comment": "OPS COMPLETE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER QA"
+      }
+    },
+    {
+      "status_id": 650,
+      "update_date": "2023-10-17T10:54:41.000Z",
+      "comment": "OPS REVIEW",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "OPERATIONS PRE-FINAL"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-13T13:10:17.000Z",
+      "comment": "complete to QA today",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-12T11:29:52.000Z",
+      "comment": "CAR IS FLARED AND STEAMED MOVE TO RACK FOR HEAD REMOVAL ON FRIDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-11T12:17:37.000Z",
+      "comment": "had to give up track for track crew to tamp. back at flare now",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-09T11:32:07.000Z",
+      "comment": "FLARE TUESDAY 10-10",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T22:01:37.000Z",
+      "comment": "Pressure at 90 psi when we started flare. 8 hours we were at 10 psi",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T11:08:42.000Z",
+      "comment": "FLARE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-09-29T12:21:30.000Z",
+      "comment": "HI PRESSURE RACK MONDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-08-29T14:21:11.000Z",
+      "comment": "WAITING CLEANING",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-08-29T12:06:18.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 190,
+      "update_date": "2023-08-29T00:32:53.000Z",
+      "comment": "ESTIMATE APPROVED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING MATERIAL"
+      }
+    },
+    {
+      "status_id": 180,
+      "update_date": "2023-08-28T13:57:03.000Z",
+      "comment": "ESTIMATE SENT TO CUSTOMER",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING CUSTOMER DECISION"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T23:37:19.000Z",
+      "comment": "ACCOUNTING APPROVED INITIAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T21:36:06.000Z",
+      "comment": "INITIAL SENT FOR FURTHER REVIEW 8/25/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T20:20:22.000Z",
+      "comment": "Accounting approved initial\n",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T16:09:18.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:06:58.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:21.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:08.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T13:10:07.000Z",
+      "comment": "740 YARD WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T11:16:44.000Z",
+      "comment": "WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-21T13:23:58.000Z",
+      "comment": "CAR ARRIVED 8/20/2023",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T20:11:09.000Z",
+      "comment": "PAPERWORK IN CAR FILE",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:17:08.000Z",
+      "comment": "CAR FILE CREATED ",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:13:21.000Z",
+      "comment": "CREATED BY APRIL_S",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    }
+  ],
+  "routing_matrix_task_assignment": [
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "morganbird"
+      }
+    },
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "bross"
+      }
+    }
+  ],
+  "storage_information": [],
+  "secondary_owner_info": null
+},
+  {
+  "car_id": "APPP220432",
+  "work_order": "WO_00653",
+  "arrival_date": "2023-08-03T00:00:00.000Z",
+  "material_eta": "1902-05-01T00:00:00.000Z",
+  "clean_date": "2023-10-05T00:00:00.000Z",
+  "projected_out_date": "2023-10-05T00:00:00.000T",
+  "invoice_date": "2023-10-23T00:00:00.000Z",
+  "el_index": "U",
+  "is_storage": 0,
+  "locked_by": 5, 
+  "shipped_date": "2020-01-01T00:00:00.000Z",
+  "finished_date": "1900-01-01T00:00:00.000Z",
+  "invoice_net_days": 30,
+  "invoice_number": "NYC20230393",
+  "purchase_order": "",
+  "reason_to_come": "CLEAN CLEAN FOR HOME..HYDROCARBON MIXTURE)\n",
+  "joblist": [
+    {
+      "labor_time": 26,
+      "quantity": 1
+    },
+    {
+      "labor_time": 3,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    },
+    {
+      "labor_time": 0.25,
+      "quantity": 1
+    }
+  ], 
+  "timesheets": [
+    {
+      "duration": 0
+    },
+    {
+      "duration": 6360
+    },
+    {
+      "duration": 12360
+    },
+    {
+      "duration": 10620
+    },
+    {
+      "duration": 6720
+    },
+    {
+      "duration": 2340
+    }
+  ],
+  "yard": {
+    "name": "NEWYORK YARD",
+    "id": 1,
+    "splc": "684441",
+    "abbreviation": "NYC",
+    "detail_source": "SH",
+    "facility_type": "CS",
+    "billing_address": "BENEFICIARY ACCOUNT NAME: NEWYORK YARD SERVICES LLC\nBANK ACCOUNT NUMBER: 45666176\nROUTING NUMBER: 983111003"
+  },
+  "railcar": {
+    "products": {
+      "name": "BUTADIENE AND HYDROCARBON MIXTURES"
+    },
+    "owner": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    },
+    "lessee": {
+      "name": "LYONDELL C/O ALLTRANSTEK"
+    }
+  },
+  "workupdates": [
+    {
+      "status_id": 950,
+      "update_date": "2023-10-24T21:52:34.000Z",
+      "comment": "CAR RELEASED 10/24",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE - RELEASED TO RR"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-23T13:23:01.000Z",
+      "comment": "uploaded to fleetwatch",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T18:35:47.000Z",
+      "comment": "DISPO REQUESTED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T14:54:38.000Z",
+      "comment": "ACCOUNTING APPROVED FINAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-20T12:35:05.000Z",
+      "comment": "SENT FOR FURTHER REVIEW 10/20/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:30.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 800,
+      "update_date": "2023-10-19T16:58:19.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "COMPLETE WAITING DISPO"
+      }
+    },
+    {
+      "status_id": 750,
+      "update_date": "2023-10-19T16:58:09.000Z",
+      "comment": "FINAL ESTIMATE SUBMITTED FOR REVIEW",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "QA HITS"
+      }
+    },
+    {
+      "status_id": 700,
+      "update_date": "2023-10-17T11:00:03.000Z",
+      "comment": "OPS COMPLETE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER QA"
+      }
+    },
+    {
+      "status_id": 650,
+      "update_date": "2023-10-17T10:54:41.000Z",
+      "comment": "OPS REVIEW",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "OPERATIONS PRE-FINAL"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-13T13:10:17.000Z",
+      "comment": "complete to QA today",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 300,
+      "update_date": "2023-10-12T11:29:52.000Z",
+      "comment": "CAR IS FLARED AND STEAMED MOVE TO RACK FOR HEAD REMOVAL ON FRIDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER VALVE TEARDOWN"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-11T12:17:37.000Z",
+      "comment": "had to give up track for track crew to tamp. back at flare now",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-09T11:32:07.000Z",
+      "comment": "FLARE TUESDAY 10-10",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T22:01:37.000Z",
+      "comment": "Pressure at 90 psi when we started flare. 8 hours we were at 10 psi",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-10-04T11:08:42.000Z",
+      "comment": "FLARE",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-09-29T12:21:30.000Z",
+      "comment": "HI PRESSURE RACK MONDAY",
+      "user": {
+        "name": "clayton",
+        "id": 6
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 200,
+      "update_date": "2023-08-29T14:21:11.000Z",
+      "comment": "WAITING CLEANING",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "WAITING CLEANING"
+      }
+    },
+    {
+      "status_id": 225,
+      "update_date": "2023-08-29T12:06:18.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER CLEANING"
+      }
+    },
+    {
+      "status_id": 190,
+      "update_date": "2023-08-29T00:32:53.000Z",
+      "comment": "ESTIMATE APPROVED",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING MATERIAL"
+      }
+    },
+    {
+      "status_id": 180,
+      "update_date": "2023-08-28T13:57:03.000Z",
+      "comment": "ESTIMATE SENT TO CUSTOMER",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "WAITING CUSTOMER DECISION"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T23:37:19.000Z",
+      "comment": "ACCOUNTING APPROVED INITIAL",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T21:36:06.000Z",
+      "comment": "INITIAL SENT FOR FURTHER REVIEW 8/25/23",
+      "user": {
+        "name": "steve",
+        "id": 1
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T20:20:22.000Z",
+      "comment": "Accounting approved initial\n",
+      "user": {
+        "name": "aprilbir",
+        "id": 5
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 175,
+      "update_date": "2023-08-25T16:09:18.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "WAITING APPROVAL"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:06:58.000Z",
+      "comment": "NO MATERIALS",
+      "user": {
+        "name": "jessica",
+        "id": 4
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:21.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 153,
+      "update_date": "2023-08-25T16:01:08.000Z",
+      "comment": "INBOUND ESTIMATION COMPLETED",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER ESTIMATION (DATA ENTRY)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T13:10:07.000Z",
+      "comment": "740 YARD WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-25T11:16:44.000Z",
+      "comment": "WILL COMPLETE ESTIMATE TODAY",
+      "user": {
+        "name": "rselman",
+        "id": 17
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 151,
+      "update_date": "2023-08-21T13:23:58.000Z",
+      "comment": "CAR ARRIVED 8/20/2023",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "UNDER INSPECTION (PHYSICAL)"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T20:11:09.000Z",
+      "comment": "PAPERWORK IN CAR FILE",
+      "user": {
+        "name": "mallory",
+        "id": 16
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:17:08.000Z",
+      "comment": "CAR FILE CREATED ",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    },
+    {
+      "status_id": 100,
+      "update_date": "2023-08-15T17:13:21.000Z",
+      "comment": "CREATED BY APRIL_S",
+      "user": {
+        "name": "asanches ",
+        "id": 8
+      },
+      "statuscode": {
+        "title": "ENROUTE"
+      }
+    }
+  ],
+  "routing_matrix_task_assignment": [
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "morganbird"
+      }
+    },
+    {
+      "task_description": "INVOICE",
+      "user": {
+        "name": "bross"
+      }
+    }
+  ],
+  "storage_information": [],
+  "secondary_owner_info": null
+}
+]

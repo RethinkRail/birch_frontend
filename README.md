@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+#Run this before
+
+update arr_database.workorder set material_eta ='1900-01-01 00:00:00' where material_eta= '0000-00-00 00:00:00';
+update arr_database.workorder set invoice_date ='1900-01-01 00:00:00' where material_eta= '0000-00-00 00:00:00';
+
+
 ## Available Scripts
 
 In the project directory, you can run:

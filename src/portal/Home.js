@@ -3,6 +3,7 @@ import axios from "axios";
 import {differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import TaskRow from "../components/TaskRow";
 import ActiveOrdersTable from "../components/ActiveOrdersTable";
+import WorkOrderDataTable from "../components/WorkOrderDataTable";
 const Home = () =>{
     const [workOrders, setWorkOrders] = useState([]);
     const [activeTasks,setActiveTask] = useState([])
@@ -111,8 +112,13 @@ const Home = () =>{
                         </table>
                     </div>
                 </div>
-
             ) : null}
+            {workOrders.length>0 && statusCodes.length>0?(
+                <WorkOrderDataTable
+                    workOrders={workOrders}
+                    statusCode ={statusCodes}
+                />
+            ):null}
 
         </React.Fragment>
     )

@@ -25,9 +25,13 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) 
 export function convertSqlToFormattedDate(sqlDateTime) {
     // Create a Date object from the SQL date time string
     var sqlDate = new Date(sqlDateTime);
-    var month = sqlDate.getMonth() + 1; // Months are zero-based, so add 1
-    var day = sqlDate.getDate();
+
+    // Get month, day, and year components
+    var month = (sqlDate.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    var day = sqlDate.getDate().toString().padStart(2, '0');
     var year = sqlDate.getFullYear();
-    var formattedDate = month + '/' + day + '/' + year;
+
+    // Formatted date with two-digit month and day
+    var formattedDate = month + '-' + day + '-' + year;
     return formattedDate;
 }

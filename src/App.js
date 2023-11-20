@@ -14,9 +14,7 @@ function App() {
     useEffect(() => {
         checkUserToken();
     }, [isLoggedIn]);
-
     return (
-
         <React.Fragment>
             {isLoggedIn && <Navbar/>}
             <Outlet/>

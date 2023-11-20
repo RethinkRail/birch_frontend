@@ -218,7 +218,7 @@ const ActiveOrdersTable = ({ activeOrdersJson }) => {
 
             </div>
             <div className="overflow-x-auto w-full mt-[20px] ml-[-1px] mx-auto border rounded-[8px]">
-                <table className="   border-y py-[12px]  w-full  bg-white   text-[#686868] ">
+                <table className="border-y py-[12px]  w-full  bg-white   text-[#686868]">
                     <thead className="uppercase text-[12px] font-medium bg-[#DCE5FF] ">
                         <tr className='h-[44px]'>
                             <th onClick={() => sorting("LHR")} className="h-[44px] p-0  flex justify-between ml-[16px] items-center cursor-pointer">LHR
@@ -364,7 +364,7 @@ const ActiveOrdersTable = ({ activeOrdersJson }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {activeOrdersJson.map((Order, index) => (
+                        {modifyedActiveOrders.map((Order, index) => (
 
                             <tr key={index} className={` h-[72px] text-[14px]  font-medium  ${index % 2 === 1 ? 'bg-[#F7F9FF]' : ''}`}>
                                 <td className="px-[16px]">{

@@ -71,7 +71,22 @@ const Home = () =>{
     const handleMarkTaskAsComplete =(task_id) =>{
         console.log(task_id)
     }
+    const updateWorkUpdates =(work_id,status_id,status_text) =>{
 
+    }
+    const handleChangeMaterialETA = (work_id,date) =>{
+        console.log(date.toISOString())
+        console.log(work_id)
+    }
+    const handleChangePOD= (work_id,date) =>{
+
+    }
+    const handleMarkedFinalized= (work_id) =>{
+
+    }
+    const handleMarkedShipped= (work_id) =>{
+
+    }
     useEffect(() => {
         getActiveTasks();
     }, []);
@@ -88,16 +103,16 @@ const Home = () =>{
     return(
         <React.Fragment>
             {activeTasks.length>0 ? (
-                <div>
-                    <h2 className="text-[24px] font-semibold mt-[13px]">Your Tasks</h2>
+                <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
+                    <h2 className="text-[18px] font-semibold mt-[13px]">Your Tasks</h2>
                     <div className="overflow-x-auto w-full mt-[8px] mx-auto border rounded-[8px]">
                         <table className="  mx-auto   w-full font-inter bg-white  text-[#686868] font-semibold">
                             <thead className="uppercase text-[12px]  ">
-                                <tr>
-                                    <th className="bg-[#DCE5FF] px-[24px] w-[360px] text-left  h-[46px]  whitespace-nowrap rounded-l ">CAR NUMBER</th>
-                                    <th className="bg-[#DCE5FF] px-[24px] w-[383px] text-left  h-[46px] whitespace-nowrap   ">TASK</th>
-                                    <th className="bg-[#DCE5FF] px-[24px] w-[308px] text-left  h-[46px] whitespace-nowrap  ">ACTIVE FOR DAY(S)</th>
-                                    <th className="bg-[#DCE5FF] px-[24px] w-[308px] text-center h-[46px] whitespace-nowrap   rounded-r ">MARK AS COMPLETE</th>
+                                <tr className='px-6'>
+                                    <th className="bg-[#DCE5FF] px-[10px] py-2 w-[360px] text-left  h-[24px]  whitespace-nowrap rounded-l ">CAR NUMBER</th>
+                                    <th className="bg-[#DCE5FF] px-[5px] w-[383px] text-left  h-[24px] whitespace-nowrap   ">TASK</th>
+                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] justify-center h-[24px] whitespace-nowrap  ">ACTIVE FOR DAY(S)</th>
+                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] text-center h-[24px] whitespace-nowrap   rounded-r ">MARK AS COMPLETE</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[13.7px] font-medium">
@@ -113,13 +128,19 @@ const Home = () =>{
                     </div>
                 </div>
             ) : null}
-            {workOrders.length>0 && statusCodes.length>0?(
-                <WorkOrderDataTable
-                    workOrders={workOrders}
-                    statusCode ={statusCodes}
-                />
-            ):null}
-
+            <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
+                {workOrders.length>0 && statusCodes.length>0?(
+                    <WorkOrderDataTable
+                        workOrders={workOrders}
+                        statusCode ={statusCodes}
+                        updateWorkUpdates={updateWorkUpdates}
+                        updateMaterialETA={handleChangeMaterialETA}
+                        updatePOD={handleChangePOD}
+                        updateMarkAsFinalized={handleMarkedFinalized}
+                        updateMarkAsShipped={handleMarkedShipped}
+                    />
+                ):null}
+            </div>
         </React.Fragment>
     )
 }

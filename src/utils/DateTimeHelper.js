@@ -1,3 +1,4 @@
+const { format } = require('date-fns');
 /**
  * Calculate difference between two dates , date must be in SQL format like 2023-01-01T00:00:00
  * @param latestTimeStamp
@@ -23,14 +24,13 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) 
  * @returns {string}
  */
 export function convertSqlToFormattedDate(sqlDateTime) {
-    // Create a Date object from the SQL date time string
-    var sqlDate = new Date(sqlDateTime);
-
+    const sqlDate = new Date(sqlDateTime);
+    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'America/Chicago' });
+    const localDateTime = new Date(localDateString)
     // Get month, day, and year components
-    var month = (sqlDate.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
-    var day = sqlDate.getDate().toString().padStart(2, '0');
-    var year = sqlDate.getFullYear();
-
+    var month = (localDateTime.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    var day = localDateTime.getDate().toString().padStart(2, '0');
+    var year = localDateTime.getFullYear();
     // Formatted date with two-digit month and day
     var formattedDate = month + '-' + day + '-' + year;
     return formattedDate;

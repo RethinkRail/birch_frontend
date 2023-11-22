@@ -3,7 +3,6 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 const qs = require('qs');
 
-
 const Login = () =>{
     const navigate = useNavigate()
     const [password,setPassword]= useState("");

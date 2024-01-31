@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Outlet} from "react-router-dom";
 import Navbar from "./portal/navbar/Navbar";
-
+import {ToastContainer} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const checkUserToken = () => {
@@ -16,6 +17,7 @@ function App() {
     }, [isLoggedIn]);
     return (
         <React.Fragment>
+            <ToastContainer />
             {isLoggedIn && <Navbar/>}
             <Outlet/>
         </React.Fragment>

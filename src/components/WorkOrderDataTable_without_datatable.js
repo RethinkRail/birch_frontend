@@ -6,8 +6,6 @@ import $ from 'jquery';
 import CommentModal from "./CommentModal";
 import {NavLink} from "react-router-dom";
 import 'datatables.net';
-import {AiFillCaretDown} from "react-icons/ai";
-import ActiveOrdersEditModal from "./ActiveOrdersEditModal";
 
 const WorkOrderDataTable =({workOrders,statusCode}) =>{
     const [commentObject, setCommentObject] = useState([])
@@ -26,7 +24,7 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
             'last_content': workOrder.railcar.products.name,
             'status':workOrder.workupdates[0].status_id,
             'comment':workOrder.workupdates,
-            'material_eta':workOrder.material_eta !== '1900-01-01T00:00:00.000Z'? convertSqlToFormattedDate(workOrder.material_eta):null,
+            'material_eta':workOrder.material_eta !== 'process.env.REACT_APP_DEFAULT_DATE'? convertSqlToFormattedDate(workOrder.material_eta):null,
             'projected_out_date': convertSqlToFormattedDate(workOrder.projected_out_date),
             'finalized':workOrder.locked_by,
             'shipped':workOrder.shipped_date,
@@ -299,7 +297,7 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
                             <td className="align-middle">
                                 <input
                                     type="checkbox"
-                                    checked={wo.shipped !== "1900-01-01T00:00:00.000Z"}
+                                    checked={wo.shipped !== "process.env.REACT_APP_DEFAULT_DATE"}
                                     className="checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]" />
                             </td>
                             <td className="pl-[31px] align-middle">

@@ -19,7 +19,7 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) 
 }
 
 /**
- * Convert sql format date to mm/dd/yyyy format
+ * Convert sql format date to mm-dd-yyyy format
  * @param sqlDateTime
  * @returns {string}
  */
@@ -33,5 +33,27 @@ export function convertSqlToFormattedDate(sqlDateTime) {
     var year = localDateTime.getFullYear();
     // Formatted date with two-digit month and day
     var formattedDate = month + '-' + day + '-' + year;
+    return formattedDate;
+}
+
+/**
+ *
+ * @param sqlDateTime
+ * @returns {string}
+ */
+export function convertSqlToFormattedDateTime(sqlDateTime) {
+    const sqlDate = new Date(sqlDateTime);
+    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'America/Chicago' });
+    const localDateTime = new Date(localDateString)
+    // Get month, day, and year components
+    var month = (localDateTime.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    var day = localDateTime.getDate().toString().padStart(2, '0');
+    var year = localDateTime.getFullYear();
+
+    var hour = localDateTime.getHours().toString().padStart(2, '0');
+    var minute = localDateTime.getMinutes().toString().padStart(2, '0');
+    var second = localDateTime.getSeconds().toString().padStart(2, '0');
+    // Formatted date with two-digit month and day
+    var formattedDate = month + '-' + day + '-' + year+' '+hour+':'+minute+':'+second;
     return formattedDate;
 }

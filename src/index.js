@@ -8,6 +8,7 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import Auth from "./auth/Auth";
 import Login from "./auth/login/Login";
 import Home from "./portal/Home";
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <BrowserRouter basename={'/'}>

@@ -1,21 +1,19 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
-import {differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import TaskRow from "../components/TaskRow";
-import ActiveOrdersTable from "../components/ActiveOrdersTable";
 import WorkOrderDataTable from "../components/WorkOrderDataTable";
-import {
-    arraysAreEqual,
-    removeObjectByProperty,
-    updateObjectByIdInsideArray
-} from "../utils/CommonHelper";
-import DatePicker from "react-datepicker";
-import DatePickerDialog from "../components/DatePickerDialog";
+import {showToastMessage, updateObjectByIdInsideArray} from "../utils/CommonHelper";
+import Modal from "react-modal";
+
+
 const qs = require('qs');
 const Home = () =>{
     const [workOrders, setWorkOrders] = useState([]);
     const [activeTasks,setActiveTask] = useState([])
     const [statusCodes,setStatusCodes] = useState([])
+    const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+    const [completingTask,setcompletingTask]= useState(null)
+    const routingStatusTextArea = useRef(null);
     const getActiveTasks =() =>{
         let config = {
             method: 'get',
@@ -43,7 +41,8 @@ const Home = () =>{
 
         axios.request(config)
             .then((response) => {
-                setWorkOrders(response.data)
+                console.log(response.data)
+                setWorkOrders(response.data.active_workorder)
             })
             .catch((error) => {
                 console.log(error);
@@ -69,16 +68,34 @@ const Home = () =>{
                     return Promise.resolve();
                 });
         }else {
-
             return Promise.resolve()
         }
     }
-    const handleMarkTaskAsComplete =(task_id) =>{
-        console.log(task_id)
-        setActiveTask(removeObjectByProperty(activeTasks,"id",task_id))
+    const handleMarkTaskAsComplete =(task) =>{
+        setcompletingTask(task)
+        setIsCommentModalOpen(true)
     }
-    const updateWorkUpdates =(work_id,status_id,status_text) =>{
-
+    const updateWorkUpdates =(work_id,statusObject,statusCode) =>{
+        const workOrder = workOrders.find(workOrder => workOrder.id === work_id);
+        if (workOrder) {
+            const workupdates = workOrder.workupdates;
+            console.log(workupdates);
+            const newWorkUpdate = {
+                "status_id":statusObject["status_id"],
+                "update_date":statusObject["update_date"],
+                "comment":statusObject["comment"],
+                "user":{
+                    "name":JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['name'],
+                    "id":JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+                },
+                "statuscode":{
+                    "title":statusCode
+                }
+            }
+            workupdates.unshift(newWorkUpdate)
+            const updatedWorkOrders =updateObjectByIdInsideArray(workOrders,'id',work_id,{workupdates:workupdates})
+            setWorkOrders(updatedWorkOrders)
+        }
     }
     const handleChangeMaterialETA = (work_id,date) =>{
         console.log(date)
@@ -99,7 +116,7 @@ const Home = () =>{
 
         axios.request(config)
             .then((response) => {
-                const updatedWorkOrders =updateObjectByIdInsideArray(workOrders,'id',work_id,{material_eta:response.data})
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{material_eta:response.data})
                 setWorkOrders(updatedWorkOrders)
             })
             .catch((error) => {
@@ -111,7 +128,6 @@ const Home = () =>{
             'updated_date': date? date.toISOString():null,
             'workorder_id': work_id
         });
-
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
@@ -180,6 +196,71 @@ const Home = () =>{
                 console.log(error);
             });
     }
+    const customStylesForCommentModal = {
+        content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            width:'400px',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+        },
+    };
+    const submitTaskUpdate = () => {
+        // On closing comment modal updating everything
+        if(getValueById("statusUpdateMessage").length<1){
+            return
+        }
+        let data = qs.stringify({
+            'routing_step_code': completingTask["routing_code"],
+            'work_id': completingTask["work_id"],
+            'routing_matrix_id': completingTask["rm_id"],
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
+            'task_comment': getValueById("statusUpdateMessage"),
+            'brc_status_code': completingTask["brc_code"]
+        });
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+'mark_task_as_complete',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+        axios.request(config)
+            .then((response) => {
+                updateWorkUpdates(response.data["work_id"],response.data,completingTask["task_description"])
+                //setActiveTask(removeObjectByProperty(activeTasks,"id",completingTask["id"]))
+                console.log(response.data);
+                setcompletingTask(null)
+                setIsCommentModalOpen(false)
+                getActiveTasks()
+                showToastMessage("Task updated successful",1)
+            })
+            .catch((error) => {
+                console.log(error);
+                setcompletingTask(null)
+                setIsCommentModalOpen(false)
+            });
+    };
+
+    const cancelTaskUpdate =() =>{
+        setcompletingTask(null)
+        setIsCommentModalOpen(false)
+    }
+
+    const getValueById = (id) => {
+        const element = routingStatusTextArea.current;
+        if (element && element.id === id) {
+            return element.value;
+        }
+        return null;
+    };
+
+
+
     useEffect(() => {
         getActiveTasks();
     }, []);
@@ -196,9 +277,6 @@ const Home = () =>{
 
     return(
         <React.Fragment>
-            <div>
-
-            </div>
             {activeTasks.length>0 ? (
                 <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
                     <h2 className="text-[18px] font-semibold mt-[13px]">Your Tasks</h2>
@@ -226,8 +304,6 @@ const Home = () =>{
                 </div>
             ) : null}
             <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
-
-
                 {workOrders.length>0 && statusCodes.length>0?(
                     <WorkOrderDataTable
                         workOrders={workOrders}
@@ -240,6 +316,17 @@ const Home = () =>{
                     />
                 ):null}
             </div>
+            <Modal
+                isOpen={isCommentModalOpen}
+                contentLabel="POST COMMENT"
+                style={customStylesForCommentModal}
+            >
+                    <textarea id="statusUpdateMessage" rows="2"  ref={routingStatusTextArea}
+                              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"
+                              placeholder="Write your comments here..."></textarea>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={submitTaskUpdate}>SUBMIT</button>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2" onClick={cancelTaskUpdate}>CANCEL</button>
+            </Modal>
         </React.Fragment>
     )
 }

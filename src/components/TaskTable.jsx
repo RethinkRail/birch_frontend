@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 const TaskTable = ({ tasks,onCheccked }) => {
     const [modifyedTasks, setModifyedTasks] = useState(tasks)  //modifyedTasks will save modifyed list after changing checkbox

@@ -1,9 +1,7 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {round2Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from "react-datepicker";
-import CommentModal from "./CommentModal";
-import {NavLink} from "react-router-dom";
 import DataTable from "react-data-table-component";
 
 const WorkOrderDataTable =({workOrders,statusCode}) =>{

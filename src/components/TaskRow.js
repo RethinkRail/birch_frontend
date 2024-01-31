@@ -1,6 +1,9 @@
 import {differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
+import {useState} from "react";
 
 const TaskRow = ({task,onCheck,index}) =>{
+    const [taskCompletionComment,setTaskCompletionComment]= useState("")
+    const [isModalOpen, setIsModalOpen] = useState(false);
     return(
         <tr key={index} className={`${index % 2 === 1 ? 'bg-[#F7F9FF] text-[] border-y' : 'border-t'}`}>
             <td className=" whitespace-nowrap px-[10px] p-[8px] font-medium text-xs">{task.railcar_id}</td>
@@ -9,7 +12,8 @@ const TaskRow = ({task,onCheck,index}) =>{
             <td className="text-center">
                 <input
                     type="checkbox"
-                    onChange={() => onCheck(task.id)}
+                    onChange={() => onCheck(task)}
+                    checked={false}
                     className=" checkbox checkbox-primary w-3 h-3" />
             </td>
         </tr>

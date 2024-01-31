@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { BsChevronDown } from 'react-icons/bs';
+import {useState} from "react";
+import {NavLink} from "react-router-dom";
 
 const Navbar = () => {
     const [isHovered, setHovered] = useState(false);

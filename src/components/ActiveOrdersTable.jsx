@@ -1,15 +1,13 @@
-import { type } from '@testing-library/user-event/dist/type';
-import React, { useEffect, useState } from 'react';
+import React, {useState} from 'react';
 
-import { AiFillCaretDown } from 'react-icons/ai';
+import {AiFillCaretDown} from 'react-icons/ai';
 
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ActiveOrdersEditModal from './ActiveOrdersEditModal';
 import CommentModal from './CommentModal';
-import { NavLink } from 'react-router-dom';
-
+import {NavLink} from 'react-router-dom';
 
 
 // Function to format a date as 'dd/mm/yyyy'
@@ -430,7 +428,7 @@ const ActiveOrdersTable = ({ activeOrdersJson }) => {
                                     <input
                                         type="checkbox"
                                         // onChange={() => handleOrderCheckboxChange(index, "SHIPPED")}
-                                        checked={Order.shipped_date !== "1900-01-01T00:00:00.000Z"}
+                                        checked={Order.shipped_date !== process.env.REACT_APP_DEFAULT_DATE}
                                         className=" checkbox checkbox-primary mt-[6px] ml-[33px] w-[20px] h-[20px]" />
                                 </td>
                                 <td className="pl-[31px]">

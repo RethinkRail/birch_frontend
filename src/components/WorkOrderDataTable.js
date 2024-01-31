@@ -1,33 +1,41 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {round2Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from "react-datepicker";
 import CommentModal from "./CommentModal";
 import {NavLink} from "react-router-dom";
-import {AiFillCaretDown} from "react-icons/ai";
-import ActiveOrdersEditModal from "./ActiveOrdersEditModal";
 import DataTable from "react-data-table-component";
-import {CSSObject} from "styled-components";
 import Modal from 'react-modal'; // Make sure to install react-modal
+import axios from "axios";
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const qs = require('qs');
+
 const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
+    const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
+    const [workIdForComment, setWorkIdForComment] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [railcarToChangeStaus,setRailCarToChangeStatus]= useState("")
+    const [updatedStatusCode,setupdatedStatusCode]= useState("")
     const workOrderData = [];
+    const statusCommentDropDown = useRef(null);
     workOrders.forEach((workOrder,index) =>{
         const laborHours = workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0);
         const durationHours = workOrder.timesheets.reduce((acc, item) => acc + item.duration / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
-        var actual_dif= differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19),workOrder.arrival_date)["days"]
+        var actual_dif= workOrder.arrival_date==process.env.REACT_APP_DEFAULT_DATE?0: differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19),workOrder.arrival_date)["days"]
         const workOrderObject ={
             'lhr':!isNaN(percentage) && isFinite(percentage)?  round2Dec(percentage)+"%":"0.00%",
             'dif':actual_dif,
             'railcar_id':workOrder.railcar_id,
-            'arrival_date':convertSqlToFormattedDate(workOrder.arrival_date),
+            'arrival_date':workOrder.arrival_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.arrival_date),
             'last_content': workOrder.railcar.products.name,
             'status':workOrder.workupdates[0].status_id,
             'comment':workOrder.workupdates,
-            'material_eta':workOrder.material_eta !== '1900-01-01T00:00:00.000Z'? convertSqlToFormattedDate(workOrder.material_eta):null,
-            'projected_out_date': convertSqlToFormattedDate(workOrder.projected_out_date),
+            'material_eta':workOrder.material_eta !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.material_eta):null,
+            'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.projected_out_date):null,
             'finalized':workOrder.locked_by,
             'shipped':workOrder.shipped_date,
             'work_id':workOrder.id,
@@ -35,27 +43,69 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
         }
         workOrderData.push(workOrderObject)
     })
-
-
-    const handleDropdownChange = (index,value) =>{
-        openModal(index)
+    const customStylesForCommentModal = {
+        content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            width:'400px',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+        },
+    };
+    const handleDropdownChange = (e,workId) =>{
+        e.preventDefault()
+        openStatusDialog(workId,e.target.value)
     }
-
-    const openModal = (rowIndex) => {
+    const openStatusDialog = (workId,new_status) => {
+        setupdatedStatusCode(new_status)
+        setRailCarToChangeStatus(workId)
         setIsModalOpen(true)
     };
+    const postStatus = () => {
+        var comment = getValueById("statusUpdateMessageFromDropDown");
+        if(comment.length===0){
+            return
+        }
+        let data = qs.stringify({
+            'work_id': railcarToChangeStaus,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+            'status_id': updatedStatusCode.split(":")[0],
+            'comment': comment
+        });
 
-    const closeModal = () => {
-        setIsModalOpen(false);
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+'post_work_updates',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                updateWorkUpdates(railcarToChangeStaus,response.data,updatedStatusCode.split(":")[1])
+                setRailCarToChangeStatus("")
+                setupdatedStatusCode("")
+                setIsModalOpen(false);
+            })
+            .catch((error) => {
+                console.log(error);
+                setIsModalOpen(false);
+                setRailCarToChangeStatus("")
+                setupdatedStatusCode("")
+                setIsModalOpen(false);
+            });
     };
-
     const workOrdersTableColumn = [
         {
             name: "LHR",
             selector: row => row.lhr,
             sortable: true,
             width: '6%'
-
         },
         {
             name: "DIF",
@@ -70,7 +120,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
             name: "CAR",
             selector: row =>  row.railcar_id,
             sortable: true,
-            width: '9%'
+            width: '8%'
         },
         {
             name: "ARR.DATE",
@@ -91,11 +141,11 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "10%",
+            width: "14%",
             cell: (row) => (
-                <select onChange={(e) => handleDropdownChange(row.index, e.target.value)} disabled={row.finalized>0} className={`w-24 placeholder-opacity-90 mr-6 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
+                <select onChange={(e) => handleDropdownChange(e,row.work_id)} disabled={row.finalized>0} className={`w-32 placeholder-opacity-90 mr-4 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
                     {statusCode.map((sc) => (
-                        <option className={'w-18'} key={sc.code} selected={row.status === sc.code}>
+                        <option className={'w-29'} key={sc.code} selected={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
                         </option>
                     ))}
@@ -111,8 +161,11 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
             className: "p-2",
             cell: (row) => (
                 <span onClick={ () =>{
+                    notify("Comment must not be empty!!!");
+                    <ToastContainer />
                     document.getElementById('commentModal').showModal()
                     setCommentObject(row.comment)
+                    setWorkIdForComment(row.work_id)
                 }} className="cursor-pointer  whitespace-pre-line  text-ellipsis">{row.comment[0].comment}</span>
             ),
             sortable: true
@@ -143,7 +196,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
             cell:(row) =>(
                 <DatePicker
                     customInput={<CustomDateInput value={row.projected_out_date} />}
-                    selected={new Date(row.projected_out_date)}
+                    selected={row.projected_out_date?new Date(row.projected_out_date):null}
                     onChange = {newDate =>updatePOD(row.work_id,newDate)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
@@ -151,7 +204,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                 />
             ),
             sortable: true,
-            width: "9%",
+            width: "6%",
         },
         {
             name: "FINALIZED",
@@ -171,12 +224,12 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
             name: "SHIPPED",
             selector: row =>  row.shipped,
             width: "9%",
-            className: "justify-center",
+            className: "justify-center mr-[6]",
             sortable: true,
             cell:(row)=>(
                     <DatePicker
-                        customInput={<CustomDateInput value={row.shipped !=="1900-01-01T00:00:00.000Z"?row.shipped:null } />}
-                        selected={row.shipped !=="1900-01-01T00:00:00.000Z"?new Date(row.shipped):null}
+                        customInput={<CustomDateInput value={row.shipped !==process.env.REACT_APP_DEFAULT_DATE?row.shipped:null } />}
+                        selected={row.shipped !==process.env.REACT_APP_DEFAULT_DATE?new Date(row.shipped):null}
                         onChange = {newDate =>updateMarkAsShipped(row.work_id,newDate)}
                         showYearDropdown
                         isClearable
@@ -189,8 +242,8 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
             selector: row =>  row.work_id,
             width: "6%",
             sortable: false,
-            padding:"0px",
-            className: "mt-[10px]",
+            padding:"10px",
+            className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <NavLink to="/d">
                     <span className='align-middle mt-[10px]'>
@@ -203,6 +256,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                 </NavLink>
             ),
         },
+        //
     ];
     const conditionalRowStyles = [
         {
@@ -235,10 +289,14 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                 style: {"font-size":"11px","font-family": 'Inter',"font-weight":"500"},
             }
         }
-    const handleSave = (text) => {
-        // Handle saving the text (e.g., send it to an API)
-        console.log('Text saved:', text);
+    const getValueById = (id) => {
+        const element = statusCommentDropDown.current;
+        if (element && element.id === id) {
+            return element.value;
+        }
+        return null;
     };
+
     return(
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
@@ -268,20 +326,28 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                     fixedHeader={false}
                     className="display nowrap compact stripe"
                     customStyles={myStyles}
-
                 />
             </div>
-            {/*<ActiveOrdersEditModal index={itemIndexForModal} />*/}
-            {/*    <ActiveOrdersEditModal index={itemIndexForModal} />*/}
-                <CommentModal data={commentObject} />
+                <CommentModal
+                    data={commentObject}
+                    work_id={workIdForComment}
+                    updateWorkUpdates={updateWorkUpdates}
+                />
                 <Modal
                     isOpen={isModalOpen}
-                    onRequestClose={closeModal}
-                    contentLabel="Example Modal"
+                    onRequestClose={()=>{
+                            if(getValueById("statusUpdateMessageFromDropDown")!==''){
+                                postStatus()
+                            }
+                        }
+                    }
+                    contentLabel="POST COMMENT"
+                    style={customStylesForCommentModal}
                 >
-                    <h2>Dropdown Value Changed</h2>
-                    <p></p>
-                    <button onClick={closeModal}>Close Modal</button>
+                    <textarea id="statusUpdateMessageFromDropDown" rows="2" ref={statusCommentDropDown}
+                              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"
+                              placeholder="Write your comments here..."></textarea>
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatus}>SUBMIT</button>
                 </Modal>
         </div >
 
@@ -306,6 +372,7 @@ const CustomDateInput = ({ value, onClick }) => (
     </div>
 );
 
+// Function to get the value by element ID
 
 
 

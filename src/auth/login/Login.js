@@ -1,7 +1,6 @@
 import React, {useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import {showToastMessage} from "../../utils/CommonHelper";
 import {toast, ToastContainer} from "react-toastify";
 
 const qs = require('qs');

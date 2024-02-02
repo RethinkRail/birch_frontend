@@ -1,7 +1,8 @@
 import React, {useRef, useState} from "react";
 import {round2Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
-import DatePicker from "react-datepicker";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import CommentModal from "./CommentModal";
 import {NavLink} from "react-router-dom";
 import DataTable from "react-data-table-component";

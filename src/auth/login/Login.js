@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {showToastMessage} from "../../utils/CommonHelper";
@@ -10,8 +10,10 @@ const Login = () =>{
     const navigate = useNavigate()
     const [password,setPassword]= useState("");
     const [username,setUsername]= useState("");
+    const toastId = useRef(null)
     const submitLoginForm = (e) =>{
         e.preventDefault();
+        toastId.current = toast.loading("Loading...")
         let data = qs.stringify({
             'username': username,
             'password': password
@@ -31,21 +33,34 @@ const Login = () =>{
                 console.log(response.status)
                 if(response.status===200){
                     localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
-                    toast.success("Login success", {
-                        autoClose: 2000,
+                    toast.update(toastId.current, {
+                        render: "Login Success",
+                        autoClose: 1000,
+                        type: "success",
                         hideProgressBar: true,
-                        onClose: () => {
-                            navigate("/")
-                        },
+                        isLoading: false
                     });
+                    navigate("/")
                 }else {
-                    showToastMessage("Wrong username or password",2)
+                    toast.update(toastId.current, {
+                        render: "Wrong username/password",
+                        autoClose: 1000,
+                        type: "error",
+                        hideProgressBar: true,
+                        isLoading: false
+                    });
                 }
 
             })
             .catch((error) => {
                 console.log(error);
-                showToastMessage("Something went wrong",2)
+                toast.update(toastId.current, {
+                    render: "Something went wrong",
+                    autoClose: 3000,
+                    type: "error",
+                    hideProgressBar: true,
+                    isLoading: false
+                });
             });
     }
 

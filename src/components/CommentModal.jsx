@@ -27,6 +27,7 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
     //console.log(groupedItems[groupedItems.length-1])
     const closeModal =()=>{
         if (commentModal) {
+            statusTextArea.current.value = ''
             commentModal.close();
         }
     }
@@ -55,17 +56,20 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
                 .then((response) => {
                     updateWorkUpdates(work_id,response.data,Object.values(groupedItems)[0].status_id)
                     if (commentModal) {
+                        statusTextArea.current.value = ''
                         commentModal.close();
                     }
                 })
                 .catch((error) => {
                     console.log(error);
                     if (commentModal) {
+                        statusTextArea.current.value = ''
                         commentModal.close();
                     }
                 });
         }else {
             if (commentModal) {
+                statusTextArea.current.value = ''
                 commentModal.close();
             }
         }
@@ -97,7 +101,7 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
                         {groupedItem.names.map((name, i) => (
                             <div className='flex justify-between my-1 text-[16px]'>
                                 <span className='w-1/4'><h6 className='font-medium'>{name}</h6> <span className='font-normal italic '>{groupedItem.comment_date}</span></span>
-                                <span className='w-3/4'> {groupedItem.comments[i]}</span>
+                                <span className='w-3/4 font-light'> {groupedItem.comments[i]}</span>
                             </div>
                         ))}
                     </div>

@@ -3,7 +3,6 @@ docker kill birch_frontend
 docker stop birch_frontend
 docker rm birch_frontend
 docker build -t birch_frontend .
-docker system prune -a
 #docker run -d --name birch_backend -p 8090:8090 birch_backend:latest
 #docker run -d -p 8090:8090 birch_backend:latest
 docker run -d --name birch_frontend -p 5060:5060 birch_frontend:latest

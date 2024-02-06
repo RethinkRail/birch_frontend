@@ -13,11 +13,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const qs = require('qs');
 
-const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
+const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
     const [workIdForComment, setWorkIdForComment] = useState(null)
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isStatusDropDownModalOpen, setIsStatusDropDownModalOpen] = useState(false);
+    const [isOrderDetailsModalOpen,setIsOrderDetailsModalOpen] = useState(false)
     const [railcarToChangeStaus,setRailCarToChangeStatus]= useState("")
     const [updatedStatusCode,setupdatedStatusCode]= useState("")
     const workOrderData = [];
@@ -44,6 +45,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
         }
         workOrderData.push(workOrderObject)
     })
+    console.log(commonData)
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -62,7 +64,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
     const openStatusDialog = (workId,new_status) => {
         setupdatedStatusCode(new_status)
         setRailCarToChangeStatus(workId)
-        setIsModalOpen(true)
+        setIsStatusDropDownModalOpen(true)
     };
     const postStatus = () => {
         var comment = getValueById("statusUpdateMessageFromDropDown");
@@ -91,14 +93,14 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                 updateWorkUpdates(railcarToChangeStaus,response.data,updatedStatusCode.split(":")[1])
                 setRailCarToChangeStatus("")
                 setupdatedStatusCode("")
-                setIsModalOpen(false);
+                setIsStatusDropDownModalOpen(false);
             })
             .catch((error) => {
                 console.log(error);
-                setIsModalOpen(false);
+                setIsStatusDropDownModalOpen(false);
                 setRailCarToChangeStatus("")
                 setupdatedStatusCode("")
-                setIsModalOpen(false);
+                setIsStatusDropDownModalOpen(false);
             });
     };
     const workOrdersTableColumn = [
@@ -335,7 +337,7 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                     updateWorkUpdates={updateWorkUpdates}
                 />
                 <Modal
-                    isOpen={isModalOpen}
+                    isOpen={isStatusDropDownModalOpen}
                     onRequestClose={()=>{
                             if(getValueById("statusUpdateMessageFromDropDown")!==''){
                                 postStatus()
@@ -350,9 +352,8 @@ const WorkOrderDataTable =({workOrders,statusCode,updateWorkUpdates,updateMateri
                               placeholder="Write your comments here..."></textarea>
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatus}>SUBMIT</button>
                 </Modal>
+
         </div >
-
-
         </React.Fragment>
     )
 }

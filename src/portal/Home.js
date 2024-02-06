@@ -12,6 +12,7 @@ const Home = () =>{
     const [workOrders, setWorkOrders] = useState([]);
     const [activeTasks,setActiveTask] = useState([])
     const [statusCodes,setStatusCodes] = useState([])
+    const [commonData,setCommonData] = useState(null)
     const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
     const [completingTask,setcompletingTask]= useState(null)
     const routingStatusTextArea = useRef(null);
@@ -45,13 +46,8 @@ const Home = () =>{
             .then((response) => {
                 console.log(response.data)
                 setWorkOrders(response.data.active_workorder)
-                toast.update(toastId.current, {
-                    render: "All Work order loaded",
-                    autoClose: 1000,
-                    type: "success",
-                    hideProgressBar: true,
-                    isLoading: false
-                });
+
+                return Promise.resolve();
             })
             .catch((error) => {
                 console.log(error);
@@ -62,6 +58,7 @@ const Home = () =>{
                     hideProgressBar: true,
                     isLoading: false
                 });
+                return Promise.resolve();
             });
 
     }
@@ -86,6 +83,32 @@ const Home = () =>{
         }else {
             return Promise.resolve()
         }
+    }
+
+    const getAllCommonData =() =>{
+        let config = {
+            method: 'get',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+'get_all_common_data',
+            headers: { }
+        };
+
+        axios.request(config)
+            .then((response) => {
+                setCommonData(response.data)
+                toast.update(toastId.current, {
+                    render: "All data loaded",
+                    autoClose: 1000,
+                    type: "success",
+                    hideProgressBar: true,
+                    isLoading: false
+                });
+                return Promise.resolve();
+            })
+            .catch((error) => {
+                console.log(error);
+                return Promise.resolve();
+            });
     }
     const handleMarkTaskAsComplete =(task) =>{
         setcompletingTask(task)
@@ -275,8 +298,6 @@ const Home = () =>{
         return null;
     };
 
-    // navigate("/")
-
     useEffect(() => {
         getActiveTasks();
     }, []);
@@ -284,11 +305,11 @@ const Home = () =>{
         //getAllStatusCode()
         toastId.current = toast.loading("Loading...")
         getAllStatusCode()
-            .then(() => {
-                getActiveWorkOrders();
-            })
+            .then(() => getActiveWorkOrders())
+            .then(() => getAllCommonData())
             .catch((error) => {
-                console.error("Error:", error);
+                // Handle any errors that occur during the sequence
+                console.error("Error during sequential execution:", error);
             });
     }, []);
 
@@ -321,10 +342,11 @@ const Home = () =>{
                 </div>
             ) : null}
             <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
-                {workOrders.length>0 && statusCodes.length>0?(
+                {workOrders.length>0 && statusCodes.length>0  && commonData?(
                     <WorkOrderDataTable
                         workOrders={workOrders}
                         statusCode ={statusCodes}
+                        commonData = {commonData}
                         updateWorkUpdates={updateWorkUpdates}
                         updateMaterialETA={handleChangeMaterialETA}
                         updatePOD={handleChangePOD}

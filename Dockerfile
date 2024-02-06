@@ -2,10 +2,10 @@
 FROM node:19-bullseye
 
 
-# Set the working directory to /app
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
+# Copy package.json and package-lock.json to the container
 COPY package*.json ./
 
 # Install dependencies
@@ -14,17 +14,11 @@ RUN npm install
 # Copy the rest of the application code to the container
 COPY . .
 
-# Build the React app for production
+# Build the React app
 RUN npm run build
 
-# Use an nginx web server to serve the built app
-FROM nginx:alpine
-
-# Copy the build output from the previous stage to the nginx html directory
-COPY --from=0 /app/build /usr/share/nginx/html
-
-# Expose port 80 for the web server
+# Expose the port that the app will run on
 EXPOSE 5060
 
-# Start the nginx web server
-CMD ["nginx", "-g", "daemon off;"]
+# Run the React app
+CMD ["npm", "start"]

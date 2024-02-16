@@ -51,13 +51,7 @@ const Home = () =>{
             })
             .catch((error) => {
                 console.log(error);
-                toast.update(toastId.current, {
-                    render: "Something went wrong",
-                    autoClose: 1000,
-                    type: "error",
-                    hideProgressBar: true,
-                    isLoading: false
-                });
+     
                 return Promise.resolve();
             });
 
@@ -84,31 +78,30 @@ const Home = () =>{
             return Promise.resolve()
         }
     }
-
     const getAllCommonData =() =>{
-        let config = {
-            method: 'get',
-            maxBodyLength: Infinity,
-            url: process.env.REACT_APP_BIRCH_API_URL+'get_all_common_data',
-            headers: { }
-        };
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: process.env.REACT_APP_BIRCH_API_URL+'get_all_common_data',
+                headers: { }
+            };
 
-        axios.request(config)
-            .then((response) => {
-                setCommonData(response.data)
-                toast.update(toastId.current, {
-                    render: "All data loaded",
-                    autoClose: 1000,
-                    type: "success",
-                    hideProgressBar: true,
-                    isLoading: false
+            axios.request(config)
+                .then((response) => {
+                    setCommonData(response.data)
+                    toast.update(toastId.current, {
+                        render: "All data loaded",
+                        autoClose: 1000,
+                        type: "success",
+                        hideProgressBar: true,
+                        isLoading: false
+                    });
+                    return Promise.resolve();
+                })
+                .catch((error) => {
+                    console.log(error);
+                    return Promise.resolve();
                 });
-                return Promise.resolve();
-            })
-            .catch((error) => {
-                console.log(error);
-                return Promise.resolve();
-            });
     }
     const handleMarkTaskAsComplete =(task) =>{
         setcompletingTask(task)
@@ -136,11 +129,252 @@ const Home = () =>{
             setWorkOrders(updatedWorkOrders)
         }
     }
+    const handleChangeArrivalDate = (work_id,date) =>{
+        console.log(date)
+        let data = qs.stringify({
+            'arrival_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_arrival_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{arrival_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    const handleInspectedlDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'inspected_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_inspection_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                console.log("inspection"+response)
+                console.log("inspection"+response.data)
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{inspected_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleChangeCleanDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'clean_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_clean_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{clean_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleChangeRepairScheduleDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'repair_schedule_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_repair_schedule_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{repair_schedule_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleChangePaintDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'paint_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_paint_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{paint_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    const handleRepairDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'repair_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_repair_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{repair_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleFinalDate = (work_id,date) =>{
+        let data = qs.stringify({
+            'final_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_repair_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{final_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleQADate = (work_id,date) =>{
+        let data = qs.stringify({
+            'qa_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_qa_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{qa_date:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    const handleMTI = (work_id,date) =>{
+        let data = qs.stringify({
+            'month_to_invoice': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+ 'update_mti',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders,'id',work_id,{month_to_invoice:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
     const handleChangeMaterialETA = (work_id,date) =>{
         console.log(date)
         let data = qs.stringify({
             'updated_date': date? date.toISOString():null,
-            'workorder_id': work_id
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         });
 
         let config = {
@@ -164,8 +398,9 @@ const Home = () =>{
     }
     const handleChangePOD= (work_id,date) =>{
         let data = qs.stringify({
-            'updated_date': date? date.toISOString():null,
-            'workorder_id': work_id
+            'projected_out_date': date? date.toISOString():null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         });
         let config = {
             method: 'post',
@@ -213,7 +448,8 @@ const Home = () =>{
     const handleMarkedShipped= (work_id,date) =>{
         let data = qs.stringify({
             'updated_date': date? date.toISOString():null,
-            'workorder_id': work_id
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
         });
         let config = {
             method: 'post',
@@ -316,7 +552,7 @@ const Home = () =>{
     return(
         <React.Fragment>
             {activeTasks.length>0 ? (
-                <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
+                <div className="font-inter ">
                     <h2 className="text-[18px] font-semibold mt-[13px]">Your Tasks</h2>
                     <div className="overflow-x-auto w-full mt-[8px] mx-auto border rounded-[8px]">
                         <table className="  mx-auto   w-full font-inter bg-white  text-[#686868] font-semibold">
@@ -341,14 +577,23 @@ const Home = () =>{
                     </div>
                 </div>
             ) : null}
-            <div className="lg:px-[40PX] font-inter md:px-2 sm:p-2 ">
+            <div className="font-inter">
                 {workOrders.length>0 && statusCodes.length>0  && commonData?(
                     <WorkOrderDataTable
                         workOrders={workOrders}
                         statusCode ={statusCodes}
                         commonData = {commonData}
                         updateWorkUpdates={updateWorkUpdates}
+                        updateArrivalDate={handleChangeArrivalDate}
+                        updateInspectedDate={handleInspectedlDate}
+                        updateCleanDate={handleChangeCleanDate}
+                        updateRepairScheduleDate={handleChangeRepairScheduleDate}
+                        updatePaintDate={handleChangePaintDate}
+                        updateRepairDate={handleRepairDate}
+                        updateFinalDate={handleFinalDate}
+                        updateQADate={handleQADate}
                         updateMaterialETA={handleChangeMaterialETA}
+                        updateMTI={handleMTI}
                         updatePOD={handleChangePOD}
                         updateMarkAsFinalized={handleMarkedFinalized}
                         updateMarkAsShipped={handleMarkedShipped}

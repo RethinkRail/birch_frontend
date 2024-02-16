@@ -1,5 +1,5 @@
 // Table.js
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Jobs from '../DataSets/get_jobs.json'
 // This component represents a draggable table with the ability to rearrange rows.
 

@@ -21,7 +21,7 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
         groupedItems[statusKey].names.push(item.user.name);
         groupedItems[statusKey].comments.push(item.comment);
     });
-    // console.log(Object.values(groupedItems)[0].status_id)
+    // console.log(Object.values(groupedItems))
     // const sorted_grouped_items = Object.values(groupedItems).sort((a,b)=>a.status-b.status)
     // console.log(sorted_grouped_items)
     //console.log(groupedItems[groupedItems.length-1])

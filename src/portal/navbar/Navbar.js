@@ -2,19 +2,19 @@ import {useState} from "react";
 import {NavLink} from "react-router-dom";
 
 const Navbar = () => {
-    const [isHovered, setHovered] = useState(false);
-    const [isHovered2, setHovered2] = useState(false);
+    const [isHoveredPrimary, setIsHoveredPrimary] = useState(false);
+    const [isHoveredSecondary, setIsHoveredSecondary] = useState(false);
 
     const handleMouseLeave = () => {
-        setHovered(false);
+        setIsHoveredPrimary(false);
     };
 
     const handleHover2 = () => {
-        setHovered2(true);
+        setIsHoveredSecondary(true);
     };
 
     const handleMouseLeave2 = () => {
-        setHovered2(false);
+        setIsHoveredSecondary(false);
     };
 
 
@@ -37,10 +37,10 @@ const Navbar = () => {
             <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/History">History</NavLink>
             <NavLink
                 onMouseEnter={() => {
-                    setHovered(true)
-                    setHovered2(false)
+                    setIsHoveredPrimary(true)
+                    setIsHoveredSecondary(false)
                 }}
-                onMouseLeave={() => setHovered2(false)}
+                onMouseLeave={() => setIsHoveredSecondary(false)}
                 className={({ isActive }) => isActive ? active_class : in_active_class} to="/Report">
                 Report
                 <svg className="ml-[13px]" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,8 +49,8 @@ const Navbar = () => {
             </NavLink>
             <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Inventory" > Inventory</NavLink>
             <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Database">Database</NavLink>
-            <p onMouseEnter={() => setHovered2(true)}
-               onMouseLeave={() => setHovered(false)}
+            <p onMouseEnter={() => setIsHoveredSecondary(true)}
+               onMouseLeave={() => setIsHoveredPrimary(false)}
                className=" rounded-[6px]  ">
                 <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management">
                     Management
@@ -63,8 +63,8 @@ const Navbar = () => {
             <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Sync">Sync</NavLink>
         </>
     return (
-        <div className={`w-full p-0  mx-auto ${(isHovered || isHovered2) && "mb-[64px]"}`}>
-            <div className=" p-0 ">
+        <div className={`w-full p-0  mx-auto ${(isHoveredPrimary || isHoveredSecondary) && "mb-[64px]"}`}>
+            <div >
                 <div className=" hidden lg:flex md:flex justify-between  bg-[#002E54] text-white w-full items-center px-[20px] ">
                     <ul className="menu menu-horizontal px-0  font-medium flex justify-between text-[16px]">
                         {navebarItems}
@@ -93,11 +93,11 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {isHovered &&
+            {isHoveredPrimary &&
                 <ul
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    className={`bg-[#002E54] py-[8px] px-[34px]  border-t-[1px] border-gray-600 items-center  flex justify-center gap-[12px] h-[45px] text-white absolute opacity-0 whitespace-nowrap w-[1440px] transform transition-all duration-300 ${isHovered ? 'opacity-100 scale-100' : 'scale-0'}`}>
+                    onMouseEnter={() => setIsHoveredPrimary(true)}
+                    onMouseLeave={() => setIsHoveredPrimary(false)}
+                    className={`bg-[#002E54] py-[8px] px-[34px]  border-t-[1px] border-gray-600 items-center  flex justify-center gap-[12px] h-[45px] text-white  opacity-0 whitespace-nowrap  transform transition-all duration-300 ${isHoveredPrimary ? 'opacity-100 scale-100' : 'scale-0'}`}>
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink1">submenu 1</NavLink>
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink2">submenu 2</NavLink>
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink3" > submenu 3</NavLink >
@@ -106,11 +106,11 @@ const Navbar = () => {
             }
 
             {
-                isHovered2 &&
+                isHoveredSecondary &&
                 <ul
-                    onMouseEnter={() => setHovered2(true)}
-                    onMouseLeave={() => setHovered2(false)}
-                    className={`bg-[#002E54] py-[8px] px-[34px]  items-center gap-[12px] border-t-[1px] border-gray-600  text-white absolute h-[45px] opacity-0 whitespace-nowrap flex justify-center w-[1440px] transform transition-all duration-300 ${isHovered2 ? 'opacity-100 scale-100' : 'scale-0'}`}>
+                    onMouseEnter={() => setIsHoveredSecondary(true)}
+                    onMouseLeave={() => setIsHoveredSecondary(false)}
+                    className={`bg-[#002E54] py-[8px] px-[34px]  items-center gap-[12px] border-t-[1px] border-gray-600  text-white  h-[45px] opacity-0 whitespace-nowrap flex justify-center  transform transition-all duration-300 ${isHoveredSecondary ? 'opacity-100 scale-100' : 'scale-0'}`}>
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/BRC-User" >BRC User</NavLink>
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Crews" > Crews</NavLink >
                     <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Routine-Matrix" > Routine Matrix</NavLink >

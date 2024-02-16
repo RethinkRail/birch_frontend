@@ -4,27 +4,33 @@ import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CommentModal from "./CommentModal";
-import {NavLink} from "react-router-dom";
 import DataTable from "react-data-table-component";
 import Modal from 'react-modal'; // Make sure to install react-modal
 import axios from "axios";
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import OrderDetails from "./OrderDetails";
+import StatusChangeDropDownModal from "./StatusChangeDropDownModal";
+import CustomDateInput from "./CustomDateInput";
 
 const qs = require('qs');
 
-const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
+const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,updateArrivalDate,updateInspectedDate,updateCleanDate,
+                               updateRepairScheduleDate,updatePaintDate,updateRepairDate,updateFinalDate,updateQADate,updateMTI,
+                               updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
     const [workIdForComment, setWorkIdForComment] = useState(null)
     const [isStatusDropDownModalOpen, setIsStatusDropDownModalOpen] = useState(false);
-    const [workOrderToView,setWorkOrderToView]= useState([])
+    const [workOrderToView,setWorkOrderToView]= useState(null)
     const [railcarToChangeStaus,setRailCarToChangeStatus]= useState("")
     const [updatedStatusCode,setupdatedStatusCode]= useState("")
     const workOrderData = [];
     const statusCommentDropDown = useRef(null);
+    // const orderDetailsModal = document.getElementById('orderDetailsModal');
+    //orderDetailsModal.close()
     workOrders.forEach((workOrder,index) =>{
+        console.log(workOrder)
         const laborHours = workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0);
         const durationHours = workOrder.timesheets.reduce((acc, item) => acc + item.duration / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
@@ -35,14 +41,23 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             'dif':actual_dif,
             'railcar_id':workOrder.railcar_id,
             'arrival_date':workOrder.arrival_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.arrival_date),
+            'inspected_date':workOrder.inspected_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.inspected_date),
+            'clean_date':workOrder.clean_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.clean_date),
+            'repair_schedule_date':workOrder.repair_schedule_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.repair_schedule_date),
+            'paint_date':workOrder.paint_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.paint_date),
+            'repair_date':workOrder.repair_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.repair_date),
+            'final_date':workOrder.final_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.final_date),
+            'qa_date':workOrder.qa_date==process.env.REACT_APP_DEFAULT_DATE?null:convertSqlToFormattedDate(workOrder.qa_date),
+            'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.projected_out_date):null,
+            'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.month_to_invoice):null,
             'last_content': workOrder.railcar.products.name,
             'status':workOrder.workupdates[0].status_id,
             'comment':workOrder.workupdates,
             'material_eta':workOrder.material_eta !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.material_eta):null,
-            'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE? convertSqlToFormattedDate(workOrder.projected_out_date):null,
             'finalized':workOrder.locked_by,
             'shipped':workOrder.shipped_date,
             'work_id':workOrder.id,
+            'is_storage':workOrder.is_storage,
             'index':index
         }
         workOrderData.push(workOrderObject)
@@ -68,8 +83,9 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         setIsStatusDropDownModalOpen(true)
     };
     const postStatus = () => {
+        //console.log(comment)
         var comment = getValueById("statusUpdateMessageFromDropDown");
-        if(comment.length===0){
+        if(comment == null || comment.length === 0){
             return
         }
         let data = qs.stringify({
@@ -145,7 +161,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "14%",
+            width: "12%",
             cell: (row) => (
                 <select onChange={(e) => handleDropdownChange(e,row.work_id)} disabled={row.finalized>0} className={`w-32 placeholder-opacity-90 mr-4 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
                     {statusCode.map((sc) => (
@@ -165,8 +181,6 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             className: "p-2",
             cell: (row) => (
                 <span onClick={ () =>{
-                    notify("Comment must not be empty!!!");
-                    <ToastContainer />
                     document.getElementById('commentModal').showModal()
                     setCommentObject(row.comment)
                     setWorkIdForComment(row.work_id)
@@ -208,7 +222,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                 />
             ),
             sortable: true,
-            width: "6%",
+            width: "7%",
         },
         {
             name: "FINALIZED",
@@ -241,6 +255,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                     />
             )
         },
+
         {
             name: "ACTION",
             selector: row =>  row.workOrder,
@@ -250,8 +265,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={()=>{
-                    document.getElementById('orderDetailsModal').showModal()
-                    setWorkOrderToView(row.workOrder)
+                    handleShowOrderDetails(row.workOrder)
                 }}>
                     {/* svg for eye icon  */}
                     <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -260,7 +274,6 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                     </svg>
                 </span>
             ),
-
         },
         //
     ];
@@ -302,7 +315,14 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         }
         return null;
     };
-
+    const handleShowOrderDetails = (row) => {
+        console.log(row)
+        console.log(row.workOrder)
+        setWorkOrderToView(row);
+        setTimeout(() => {
+            document.getElementById('orderDetailsModal').showModal();
+        }, 150);
+    };
     return(
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
@@ -333,12 +353,22 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                     className="display nowrap compact stripe"
                     customStyles={myStyles}
                 />
+
+
+                {/*{workOrderToView!==null && (*/}
+                {/*    <OrderDetails*/}
+                {/*        workOrder={workOrderToView}*/}
+                {/*        commonData={commonData}*/}
+                {/*    />*/}
+                {/*)}*/}
             </div>
                 <CommentModal
                     data={commentObject}
                     work_id={workIdForComment}
                     updateWorkUpdates={updateWorkUpdates}
                 />
+
+
                 <Modal
                     isOpen={isStatusDropDownModalOpen}
                     onRequestClose={()=>{
@@ -356,31 +386,48 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatus}>SUBMIT</button>
                 </Modal>
 
-                <OrderDetails
-                    workOrder={workOrderToView}
-                    commonData={commonData}
-                />
 
+                {workOrderToView!==null?(
+                    <OrderDetails
+                        workOrder={workOrderToView}
+                        statusCode={statusCode}
+                        updateWorkUpdates={updateWorkUpdates}
+                        updateArrivalDate={updateArrivalDate}
+                        updateInspectedDate={updateInspectedDate}
+                        updateCleanDate={updateCleanDate}
+                        updateRepairScheduleDate={updateRepairScheduleDate}
+                        updatePaintDate={updatePaintDate}
+                        updateRepairDate={updateRepairDate}
+                        updateFinalDate={updateFinalDate}
+                        updateQADate={updateQADate}
+                        updatePOD={updatePOD}
+                        updateMTI={updateMTI}
+                        updateMarkAsShipped={updateMarkAsShipped}
+                    />
+                ):null}
+                {/*<OrderDetails*/}
+                {/*    workOrder={workOrderToView}*/}
+                {/*/>*/}
         </div >
         </React.Fragment>
     )
 }
 
-const CustomDateInput = ({ value, onClick }) => (
-    <div className="w-fit mx-auto">
-        <div onClick={onClick} className='flex items-center justify-between  border  rounded-[4px] w-[95px] whitespace-nowrap overflow-hidden h-[32px] '>
-            <p className='pl-[4px] py-[6px]'>{value}</p>
-            {/*{ showButton &&*/}
-            {/*    <button className='mr-[5px]'>*/}
-            {/*        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
-            {/*            <path d="M15.75 7.5H2.25M12 1.5V4.5M6 1.5V4.5M5.85 16.5H12.15C13.4101 16.5 14.0402 16.5 14.5215 16.2548C14.9448 16.039 15.289 15.6948 15.5048 15.2715C15.75 14.7902 15.75 14.1601 15.75 12.9V6.6C15.75 5.33988 15.75 4.70982 15.5048 4.22852C15.289 3.80516 14.9448 3.46095 14.5215 3.24524C14.0402 3 13.4101 3 12.15 3H5.85C4.58988 3 3.95982 3 3.47852 3.24524C3.05516 3.46095 2.71095 3.80516 2.49524 4.22852C2.25 4.70982 2.25 5.33988 2.25 6.6V12.9C2.25 14.1601 2.25 14.7902 2.49524 15.2715C2.71095 15.6948 3.05516 16.039 3.47852 16.2548C3.95982 16.5 4.58988 16.5 5.85 16.5Z" stroke="#686868" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />*/}
-            {/*        </svg>*/}
-            {/*    </button>*/}
-            {/*}*/}
-
-        </div>
-    </div>
-);
+// const CustomDateInput = ({ value, onClick }) => (
+//     <div className="w-fit mx-auto">
+//         <div onClick={onClick} className='flex items-center justify-between  border  rounded-[4px] w-[95px] whitespace-nowrap overflow-hidden h-[32px] '>
+//             <p className='pl-[4px] py-[6px]'>{value}</p>
+//             {/*{ showButton &&*/}
+//             {/*    <button className='mr-[5px]'>*/}
+//             {/*        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
+//             {/*            <path d="M15.75 7.5H2.25M12 1.5V4.5M6 1.5V4.5M5.85 16.5H12.15C13.4101 16.5 14.0402 16.5 14.5215 16.2548C14.9448 16.039 15.289 15.6948 15.5048 15.2715C15.75 14.7902 15.75 14.1601 15.75 12.9V6.6C15.75 5.33988 15.75 4.70982 15.5048 4.22852C15.289 3.80516 14.9448 3.46095 14.5215 3.24524C14.0402 3 13.4101 3 12.15 3H5.85C4.58988 3 3.95982 3 3.47852 3.24524C3.05516 3.46095 2.71095 3.80516 2.49524 4.22852C2.25 4.70982 2.25 5.33988 2.25 6.6V12.9C2.25 14.1601 2.25 14.7902 2.49524 15.2715C2.71095 15.6948 3.05516 16.039 3.47852 16.2548C3.95982 16.5 4.58988 16.5 5.85 16.5Z" stroke="#686868" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />*/}
+//             {/*        </svg>*/}
+//             {/*    </button>*/}
+//             {/*}*/}
+//
+//         </div>
+//     </div>
+// );
 
 // Function to get the value by element ID
 

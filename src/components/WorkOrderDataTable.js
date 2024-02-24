@@ -17,7 +17,7 @@ const qs = require('qs');
 
 const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,updateArrivalDate,updateInspectedDate,updateCleanDate,
                                updateRepairScheduleDate,updatePaintDate,updateRepairDate,updateFinalDate,updateQADate,updateMTI,
-                               updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped}) =>{
+                               updateMaterialETA,updatePOD,updateMarkAsFinalized,updateMarkAsShipped,updateReasonToCome}) =>{
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
     const [workIdForComment, setWorkIdForComment] = useState(null)
@@ -389,6 +389,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
 
                 {workOrderToView!==null?(
                     <OrderDetails
+                        commonData={commonData}
                         workOrder={workOrderToView}
                         statusCode={statusCode}
                         updateWorkUpdates={updateWorkUpdates}
@@ -403,6 +404,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                         updatePOD={updatePOD}
                         updateMTI={updateMTI}
                         updateMarkAsShipped={updateMarkAsShipped}
+                        updateReasonToCome={updateReasonToCome}
                     />
                 ):null}
                 {/*<OrderDetails*/}

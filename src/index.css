@@ -15,3 +15,8 @@
     background-color: transparent ;
     opacity: 0.2;
 }
+
+.react-datepicker-wrapper {
+    width: 100% !important;
+}
+

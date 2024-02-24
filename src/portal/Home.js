@@ -471,6 +471,36 @@ const Home = () =>{
                 console.log(error);
             });
     }
+
+    const handleUpdateReasonToCome= (work_id,reasonToCome) =>{
+        console.log(work_id)
+        console.log(reasonToCome)
+        let data = qs.stringify({
+            'reason_to_come': reasonToCome,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+        });
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL+'update_reason_to_come',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                console.log(JSON.stringify(response.data));
+                const updatedWorkOrders =updateObjectByIdInsideArray(workOrders,'id',work_id,{reason_to_come:response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -597,6 +627,7 @@ const Home = () =>{
                         updatePOD={handleChangePOD}
                         updateMarkAsFinalized={handleMarkedFinalized}
                         updateMarkAsShipped={handleMarkedShipped}
+                        updateReasonToCome={handleUpdateReasonToCome}
                     />
                 ):null}
             </div>

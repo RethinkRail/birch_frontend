@@ -30,9 +30,8 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
     workOrders.forEach((workOrder,index) =>{
-        console.log(workOrder)
-        const laborHours = workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0);
-        const durationHours = workOrder.timesheets.reduce((acc, item) => acc + item.duration / 3600, 0);
+        const laborHours = workOrder.joblist!= null? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0):0;
+        const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
         var actual_dif= workOrder.arrival_date==process.env.REACT_APP_DEFAULT_DATE?0: differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19),workOrder.arrival_date)["days"]
         const workOrderObject ={
@@ -131,7 +130,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             name: "DIF",
             selector: row =>  row.dif,
             sortable: true,
-            width: '5%',
+            width: '4%',
             cell:(row)=>(
                 <span className="whitespace-pre-line ">{row.dif>0?row.dif:"-"}</span>
             ),
@@ -141,13 +140,6 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             selector: row =>  row.railcar_id,
             sortable: true,
             width: '8%'
-        },
-        {
-            name: "ARR.DATE",
-            selector: row =>  row.arrival_date,
-            sortable: true,
-            width: '8%',
-
         },
         {
             name: "LAST CONTENT",
@@ -161,11 +153,11 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "12%",
+            width: "14%",
             cell: (row) => (
-                <select onChange={(e) => handleDropdownChange(e,row.work_id)} disabled={row.finalized>0} className={`w-32 placeholder-opacity-90 mr-4 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
+                <select onChange={(e) => handleDropdownChange(e,row.work_id)} disabled={row.finalized>0} className={`w-full  placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
                     {statusCode.map((sc) => (
-                        <option className={'w-29'} key={sc.code} selected={row.status === sc.code}>
+                        <option className={'w-full whitespace-pre-line '} key={sc.code} selected={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
                         </option>
                     ))}
@@ -177,13 +169,15 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         {
             name: "COMMENT",
             selector: row =>  row.comment,
-            width: "10%",
-            className: "p-2",
+            width: "15%",
+
             cell: (row) => (
                 <span onClick={ () =>{
-                    document.getElementById('commentModal').showModal()
-                    setCommentObject(row.comment)
-                    setWorkIdForComment(row.work_id)
+                    if (row.finalized == null) {
+                        document.getElementById('commentModal').showModal();
+                        setCommentObject(row.comment);
+                        setWorkIdForComment(row.work_id);
+                    }
                 }} className="cursor-pointer  whitespace-pre-line  text-ellipsis">{row.comment[0].comment}</span>
             ),
             sortable: true
@@ -191,7 +185,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         {
             name: "MATERIAL ETA",
             selector: row => row.material_eta,
-            width: "10%",
+            width: "9%",
             cell:(row) =>(
                 <span>
                     <DatePicker
@@ -222,7 +216,7 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                 />
             ),
             sortable: true,
-            width: "7%",
+            width: "8%",
         },
         {
             name: "FINALIZED",
@@ -230,19 +224,22 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             width: "8%",
             sortable: true,
             cell:(row) =>(
-                <input
-                    disabled={row.finalized>1}
-                    type="checkbox"
-                    onChange={(event) =>updateMarkAsFinalized(row.work_id,event.target.checked)}
-                    checked={row.finalized !== null}
-                    className=" checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]" />
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <input
+                        disabled={row.finalized > 1}
+                        type="checkbox"
+                        onChange={(event) => updateMarkAsFinalized(row.work_id, event.target.checked)}
+                        checked={row.finalized !== null}
+                        className="checkbox checkbox-primary"
+                    />
+                </div>
             )
         },
+
         {
             name: "SHIPPED",
             selector: row =>  row.shipped,
             width: "9%",
-            className: "justify-center mr-[6]",
             sortable: true,
             cell:(row)=>(
                     <DatePicker
@@ -256,12 +253,13 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             )
         },
 
+
         {
-            name: "ACTION",
+            name: "VIEW",
             selector: row =>  row.workOrder,
             width: "6%",
             sortable: false,
-            padding:"10px",
+
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={()=>{
@@ -283,30 +281,37 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
             style: {
                 backgroundColor: '#f4f4f6',
             },
-            classNames:["py-2", "whitespace-nowrap", "font-bold" ,"text-xs"]
+            classNames:["py-1", "whitespace-nowrap", "font-bold" ,"text-xs"]
         },
         {
             when: row => row.finalized <1 && row.index %2 ==1,
             style: {
                 backgroundColor: '#F7F9FF',
             },
-            classNames:["py-2", "whitespace-nowrap", "font-bold" ,"text-xs"]
+            classNames:["py-1", "whitespace-nowrap", "font-bold" ,"text-xs"]
         },
         {
             when: row => row.finalized <1 && row.index %2 ==0,
             style: {
                 backgroundColor: '#FFFFFFFF', // Yellow background for rows where age is less than 25
             },
-            classNames:["py-2", "whitespace-nowrap", "font-bold" ,"text-xs"]
+            classNames:["py-1", "whitespace-nowrap", "font-bold" ,"text-xs"]
         },
     ];
     const myStyles = {
             headRow:{
-                style: {"backgroundColor":"#DCE5FF","font-size":"11px","padding-right":"1px","font-family": 'Inter',"font-weight":"500"},
+                style: {"backgroundColor":"#DCE5FF","font-size":"10px","padding":"1px","font-family": 'Inter',"font-weight":"500"},
+            },
+            headCells: {
+                style: {
+                    paddingLeft: '10px',
+                    paddingRight: '2px',
+                },
             },
             cells:{
-                style: {"font-size":"11px","font-family": 'Inter',"font-weight":"500"},
-            }
+                style: {"font-size":"10px","font-family": 'Inter',"font-weight":"500","padding-left":"10px"},
+            },
+
         }
     const getValueById = (id) => {
         const element = statusCommentDropDown.current;
@@ -319,15 +324,19 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
         console.log(row)
         console.log(row.workOrder)
         setWorkOrderToView(row);
-        setTimeout(() => {
+        if(workOrderToView!== null){
             document.getElementById('orderDetailsModal').showModal();
-        }, 150);
+        }else {
+            setTimeout(() => {
+                document.getElementById('orderDetailsModal').showModal();
+            }, 150);
+        }
     };
     return(
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
             <div className="flex justify-between items-center mt-[10px] uppercase">
-                <h2 className="text-[18px]  font-semibold">Active Orders</h2>
+                <h2 className="text-[18px]  font-semibold">Work Orders</h2>
                 <button className='btn text-cetner normal-case  h-[24px] px-[18px] py-[5px] flex items-center justify-center bg-[#002E54] text-white text-[14px] font-medium hover:bg-[#002f54]'>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 4.16663V15.8333M4.16669 9.99996H15.8334" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
@@ -367,8 +376,6 @@ const WorkOrderDataTable =({workOrders,statusCode,commonData,updateWorkUpdates,u
                     work_id={workIdForComment}
                     updateWorkUpdates={updateWorkUpdates}
                 />
-
-
                 <Modal
                     isOpen={isStatusDropDownModalOpen}
                     onRequestClose={()=>{

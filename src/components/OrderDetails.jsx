@@ -22,7 +22,13 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
     const [ownerInvoiceNumber,setOwnerInvoiceNumber]= useState(workOrder.invoice_number)
     const [updatedStatusCode,setupdatedStatusCode]= useState("")
     const [isReasonToComeChanged,setIsReasonToComeChanged] = useState(false)
+    const [isBillingInformationChangedForOwner,setIsBillingInformationChangedForOwner] = useState(false)
     const reasonToComeRef = useRef(null);
+    const ownerPurchaseOrderRef = useRef(null);
+    const ownerInvoiceNumberRef = useRef(null);
+    const ownerInvoiceDaterRef = useRef(null);
+    const ownerInvoiceNetDaysrRef = useRef(null);
+
 
     useEffect(() => {
         setOwnerInvoiceNumber(workOrder.invoice_number);
@@ -117,13 +123,8 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
         document.getElementById("reasonToComeInDetails").value= workOrder.reason_to_come
     }
 
-
-
     const handleInvoiceClick =() =>{
-        console.log()
-        console.log(document.getElementById("invoice_number_input").value)
         if(ownerInvoiceNumber == ""){
-            console.log("here")
             let config = {
                 method: 'get',
                 maxBodyLength: Infinity,
@@ -134,21 +135,19 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
             axios.request(config)
                 .then((response) => {
                     setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(response.data[0].f0))
-                    console.log(JSON.stringify(response.data));
-                    console.log(JSON.stringify(response.data[0].f0));
                 })
                 .catch((error) => {
                     console.log(error);
                 });
         }else {
-            console.log("here 2")
-            console.log(ownerInvoiceNumber)
             setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
         }
     }
     //handleInvoiceNumberChangeOwner
 
     const handleInvoiceNumberChangeOwner = (event) =>{
+        console.log(event.target.value)
+        console.log("handleInvoiceNumberChangeOwner")
         setOwnerInvoiceNumber(event.target.value)
     }
     const invoiceGeneratorFromLastInvoce = (last_invoice_number) =>{
@@ -156,11 +155,11 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
         return workOrder.yard.invoice_identifier+new Date().getFullYear().toString()+(parseInt(lastFour)+1).toString().padStart(4, '0')
     }
 
-    const handleInvoiceDateChanged =() =>{
-
+    const handleOwnerInvoiceDateChanged =() =>{
+        console.log("hi")
     }
 
-    const getValueById = (id) => {
+    const getValueByIdStatusCommentDropDown = (id) => {
         const element = statusCommentDropDownInDetails.current;
         if (element && element.id === id) {
             return element.value;
@@ -177,7 +176,7 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
     };
 
     const postStatusFromDetails = () =>{
-        var comment = getValueById("statusUpdateMessageFromDropDownInDetails");
+        var comment = getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDownInDetails");
         if(comment == null || comment.length === 0){
             return
         }
@@ -234,9 +233,6 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
         }
     }
 
-    console.log(workOrder)
-    console.log(isReasonToComeChanged)
-
     const formatTasks = (tasks) => {
         const taskMap = new Map();
         // Populate hashmap
@@ -263,9 +259,9 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
     return (
         <div>
             <dialog id="orderDetailsModal" className="modal rounded-md h-full ">
-                <div className="w-full bg-white h-full">
-                    <div className="bg-white max-h-full  max-h-[100vh] w-full pb-5 rounded-md overflow-auto">
-                        <div className="w-full fixed fixed h-[60px]  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
+                <div className="w-full bg-white">
+                    <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
+                        <div className="w-full fixed  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
                             <span className="float-left">{workOrder.railcar_id!=null?workOrder.railcar_id:""}</span>
                             <form method="dialog">
                                 <div className="float-right mr-5">
@@ -276,11 +272,10 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                     </button>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                     <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto">
-                        <div className="absolute top-1/3 right-4 ">
+                        <div className="absolute top-1/3 right-4">
                             <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
                                 <li className='flex h-fit text-[10px] p-0'>
                                     <span className="p-1">
@@ -355,33 +350,33 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                             </div>
                                         </div>
                                         <div className="mt-[8px]  grid grid-cols-5 gap-0.5">
-                                            <div className="p-1">
+                                            <div className="p-1 items-start">
                                                 <p className='text-xs font-normal'>Arrival Date</p>
-                                                <span>
-                                              <DatePicker
-                                                  customInput={<CustomDateInput value={workOrder.arrival_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.arrival_date:null } />}
-                                                  selected={workOrder.arrival_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.arrival_date):null}
-                                                  onChange = {
-                                                      newDate =>handleArrivalDate(newDate)
-                                                  }
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                              />
-                                        </span>
+                                                <span className="w-full items-start align-top">
+                                                  <DatePicker
+                                                      customInput={<CustomDateInput value={workOrder.arrival_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.arrival_date:null } />}
+                                                      selected={workOrder.arrival_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.arrival_date):null}
+                                                      onChange = {
+                                                          newDate =>handleArrivalDate(newDate)
+                                                      }
+                                                      showYearDropdown
+                                                      dateFormat="MM-dd-yyyy"
+                                                  />
+                                                </span>
                                             </div>
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Inspection Date</p>
                                                 <span>
-                                              <DatePicker
-                                                  customInput={<CustomDateInput value={workOrder.inspected_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.inspected_date:null } />}
-                                                  selected={workOrder.inspected_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.inspected_date):null}
-                                                  onChange = {
-                                                      newDate =>handleInspectionDate(newDate)
-                                                  }
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                              />
-                                        </span>
+                                                  <DatePicker
+                                                      customInput={<CustomDateInput value={workOrder.inspected_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.inspected_date:null } />}
+                                                      selected={workOrder.inspected_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.inspected_date):null}
+                                                      onChange = {
+                                                          newDate =>handleInspectionDate(newDate)
+                                                      }
+                                                      showYearDropdown
+                                                      dateFormat="MM-dd-yyyy"
+                                                  />
+                                                </span>
                                             </div>
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Clean Date</p>
@@ -414,32 +409,32 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                             <div className="p-1">
                                                 <p className='text-xs font-normal'>Paint Date</p>
                                                 <span >
-                                              <DatePicker
-                                                  customInput={<CustomDateInput value={workOrder.paint_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.paint_date:null } />}
-                                                  selected={workOrder.paint_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.paint_date):null}
-                                                  onChange = {
-                                                      newDate =>handlePaintDate(newDate)
-                                                  }
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                              />
-                                        </span>
+                                                      <DatePicker
+                                                          customInput={<CustomDateInput value={workOrder.paint_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.paint_date:null } />}
+                                                          selected={workOrder.paint_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.paint_date):null}
+                                                          onChange = {
+                                                              newDate =>handlePaintDate(newDate)
+                                                          }
+                                                          showYearDropdown
+                                                          dateFormat="MM-dd-yyyy"
+                                                      />
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="mt-[8px]  grid grid-cols-5 gap-0.5">
                                             <div className="p-1 ">
                                                 <p className='text-xs font-normal'>Repair Date</p>
                                                 <span >
-                                              <DatePicker
-                                                  customInput={<CustomDateInput value={workOrder.repair_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.repair_date:null } />}
-                                                  selected={workOrder.repair_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.repair_date):null}
-                                                  onChange = {
-                                                      newDate =>handleRepairDate(newDate)
-                                                  }
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                              />
-                                        </span>
+                                                  <DatePicker
+                                                      customInput={<CustomDateInput value={workOrder.repair_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.repair_date:null } />}
+                                                      selected={workOrder.repair_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.repair_date):null}
+                                                      onChange = {
+                                                          newDate =>handleRepairDate(newDate)
+                                                      }
+                                                      showYearDropdown
+                                                      dateFormat="MM-dd-yyyy"
+                                                  />
+                                                </span>
                                             </div>
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Final Date</p>
@@ -458,16 +453,16 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                             <div className="p-1">
                                                 <p className='text-xs font-normal'>QA Date</p>
                                                 <span >
-                                              <DatePicker
-                                                  customInput={<CustomDateInput value={workOrder.qa_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.qa_date:null } />}
-                                                  selected={workOrder.qa_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.qa_date):null}
-                                                  onChange = {
-                                                      newDate =>handleQADate(newDate)
-                                                  }
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                              />
-                                        </span>
+                                                  <DatePicker
+                                                      customInput={<CustomDateInput value={workOrder.qa_date !==process.env.REACT_APP_DEFAULT_DATE?workOrder.qa_date:null } />}
+                                                      selected={workOrder.qa_date !==process.env.REACT_APP_DEFAULT_DATE?new Date(workOrder.qa_date):null}
+                                                      onChange = {
+                                                          newDate =>handleQADate(newDate)
+                                                      }
+                                                      showYearDropdown
+                                                      dateFormat="MM-dd-yyyy"
+                                                  />
+                                                </span>
                                             </div>
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>POD</p>
@@ -498,6 +493,9 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                         </span>
                                             </div>
                                         </div>
+                                        <div className="mt-[8px]  grid grid-cols-5 gap-0.5">
+
+                                        </div>
                                     </div>
                                     <div className='grid grid-cols-2 gap-10'>
 
@@ -517,7 +515,7 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
 
                                             <div className='p-1 mt-[10px]'>
                                                 <p className='text-xs font-normal'>Routing Status</p>
-                                                <p>{formatTasks(workOrder.routing_matrix_task_assignment)}</p>
+                                                <p>{formatTasks(workOrder.routing_matrix_task_assignment)==""?"ALL steps completed":formatTasks(workOrder.routing_matrix_task_assignment)}</p>
                                             </div>
 
 
@@ -610,7 +608,7 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                 <div className="grid grid-cols-3 gap-x-0.5">
                                     <div className='p-2'>
                                         <p>Purchase Order</p>
-                                        <input type="text" className="input input-bordered  h-8 mt-2 w-full"></input>
+                                        <input type="text" className="input input-bordered  h-8 mt-2 w-full" ref={ownerPurchaseOrderRef} id="purchase_order_owner"></input>
                                         <p className='mt-2'>INVOICE NUMBER</p>
                                         <div className="relative">
 
@@ -640,18 +638,16 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                                             style={{ width: '100%' }}
                                             customInput={<CustomDateInputFullWidth value={workOrder.invoice_date !== process.env.REACT_APP_DEFAULT_DATE ? workOrder.invoice_date : null} />}
                                             selected={workOrder.invoice_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.invoice_date) : null}
-                                            onChange={newDate => handleInvoiceDateChanged(newDate)}
+                                            onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
-
                                         />
-
 
                                         <p className='mt-2'>Due Date</p>
                                         <DatePicker
                                             customInput={<CustomDateInputFullWidth value={workOrder.invoice_date !== process.env.REACT_APP_DEFAULT_DATE ? addDays(workOrder.invoice_date,workOrder.invoice_net_days) : null} />}
                                             selected={workOrder.invoice_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(workOrder.invoice_date,workOrder.invoice_net_days)) : null}
-                                            onChange={newDate => handleInvoiceDateChanged(newDate)}
+                                            onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
                                         />
@@ -663,11 +659,57 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
 
                                     </div>
                                     <div className='p-2'>
-                                        <p>Bill To</p>
-                                        <input type="text" className="input input-bordered  h-8 mt-2 w-full disabled" value={workOrder.railcar.owner.name}></input>
+                                        <div>
+                                            <p>Bill To</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full " disabled value={workOrder.railcar.owner.name}></input>
+                                        </div>
+
+                                        <div className="mt-1">
+                                            <p>Address line 1</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full uppercase" disabled value={workOrder.railcar.owner.address_line1}></input>
+                                        </div>
+
+                                        <div className="mt-1">
+                                            <p>Address line 2</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full uppercase" disabled value={workOrder.railcar.owner.address_line2}></input>
+                                        </div>
+
+
+                                        <div className="flex flex-row mt-1">
+                                            <div className="pr-1 py-0 w-2/5">
+                                                <p>CITY</p>
+                                                <input type="text" className="input input-bordered  h-8 mt-2 w-full disabled uppercase" disabled value={workOrder.railcar.owner.city}></input>
+                                            </div>
+                                            <div className="w-1/5 pr-1 ">
+                                                <p>STATE</p>
+                                                <input type="text" className="input input-bordered  h-8 mt-2 w-full disabled uppercase" disabled  value={workOrder.railcar.owner.state}></input>
+                                            </div>
+                                            <div className="w-1/5 pr-1 ">
+                                                <p>ZIP</p>
+                                                <input type="text" className="input input-bordered  h-8 mt-2 w-full disabled uppercase" disabled  value={workOrder.railcar.owner.zip_code}></input>
+                                            </div>
+                                            <div className="w-1/5 pr-1 ">
+                                                <p>Country</p>
+                                                <input type="text" className="input input-bordered  h-8 mt-2 w-full disabled uppercase"  disabled value={workOrder.railcar.owner.country}></input>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                    <div className='p-2'>
-                                        <p>Purchase Order</p>
+                                    <div className='p-2 uppercase'>
+                                        <div>
+                                            <p>Contact Name</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full uppercase" disabled value={workOrder.railcar.owner.contact_name}></input>
+                                        </div>
+
+                                        <div className="mt-1">
+                                            <p>Contact Number</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full uppercase" disabled value={workOrder.railcar.owner.contact_number}></input>
+                                        </div>
+
+                                        <div className="mt-1">
+                                            <p>EMAIL</p>
+                                            <input type="text" className="input input-bordered  h-8 mt-2 w-full " disabled value={workOrder.railcar.owner.contact_email}></input>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -739,7 +781,7 @@ const OrderDetails = ({commonData, workOrder,statusCode,updateWorkUpdates,update
                     <Modal
                         isOpen={isStatusDropDownModalOpenInDetails}
                         onRequestClose={()=>{
-                            if(getValueById("statusUpdateMessageFromDropDown")!==''){
+                            if(getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDown")!==''){
                                 postStatusFromDetails()
                             }
                         }

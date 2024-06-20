@@ -15,7 +15,11 @@ module.exports = {
         'md': '700px',
         'lg': '1400px',
       },
+      colors:{
+        'light-blue': "#DCE5FF"
+      }
     },
+
     fontFamily: {
         'custom': ['Inter', 'Inter', 'sans'],
     },

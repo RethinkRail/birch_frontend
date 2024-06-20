@@ -582,33 +582,41 @@ const Home = () =>{
     return(
         <React.Fragment>
             {activeTasks.length>0 ? (
-                <div className="font-inter ">
-                    <h2 className="text-[18px] font-semibold mt-[13px]">Your Tasks</h2>
-                    <div className="overflow-x-auto w-full mt-[8px] mx-auto border rounded-[8px]">
-                        <table className="  mx-auto   w-full font-inter bg-white  text-[#686868] font-semibold">
-                            <thead className="uppercase text-[12px]  ">
-                                <tr className='px-6'>
-                                    <th className="bg-[#DCE5FF] px-[10px] py-2 w-[360px] text-left  h-[24px]  whitespace-nowrap rounded-l ">CAR NUMBER</th>
-                                    <th className="bg-[#DCE5FF] px-[5px] w-[383px] text-left  h-[24px] whitespace-nowrap   ">TASK</th>
-                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] justify-center h-[24px] whitespace-nowrap  ">ACTIVE FOR DAY(S)</th>
-                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] text-center h-[24px] whitespace-nowrap   rounded-r ">MARK AS COMPLETE</th>
+                <div className="font-inter collapse collapse-arrow bg-blue-50 mt-2">
+                    <input type="checkbox" defaultChecked />
+                    <div className="collapse-title text-[18px] font-semibold">
+                        Your Tasks
+                    </div>
+                    <div className="collapse-content">
+                        <table className="mx-auto w-full font-inter bg-white text-[#686868] font-semibold">
+                            <thead className="uppercase text-[12px]">
+                                <tr >
+                                    <th className="bg-[#DCE5FF] px-[10px] py-2 w-[360px] text-left h-[24px] whitespace-nowrap rounded-l">
+                                        CAR NUMBER
+                                    </th>
+                                    <th className="bg-[#DCE5FF] px-[5px] w-[383px] text-left h-[24px] whitespace-nowrap">
+                                        TASK
+                                    </th>
+                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] justify-center h-[24px] whitespace-nowrap">
+                                        ACTIVE FOR DAY(S)
+                                    </th>
+                                    <th className="bg-[#DCE5FF] px-[14px] w-[308px] text-center h-[24px] whitespace-nowrap rounded-r">
+                                        MARK AS COMPLETE
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="text-[13.7px] font-medium">
-                            {activeTasks.map((task, index) => (
-                                <TaskRow
-                                    task={task}
-                                    onCheck={handleMarkTaskAsComplete}
-                                    index={index}
-                                />
-                            ))}
+                                {activeTasks.map((task, index) => (
+                                    <TaskRow task={task} onCheck={handleMarkTaskAsComplete} index={index} />
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             ) : null}
             <div className="font-inter">
-                {workOrders.length>0 && statusCodes.length>0  && commonData?(
+                {workOrders.length>0 ?(
                     <WorkOrderDataTable
                         workOrders={workOrders}
                         statusCode ={statusCodes}

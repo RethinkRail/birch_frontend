@@ -20,3 +20,20 @@
     width: 100% !important;
 }
 
+.hidden {
+    display: none;
+}
+
+.block {
+    display: block;
+}
+
+
+.collapse-content-collapsed {
+    display: none;
+}
+
+.collapse-content-expanded {
+    display: block;
+}
+

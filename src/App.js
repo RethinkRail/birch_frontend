@@ -37,7 +37,6 @@ function App() {
 
                 axios.request(config)
                     .then((response) => {
-                        console.log(response.status)
                         if (response.status === 200) {
                             if(response.data.is_active ==1){
                                 setIsLoggedIn(true)

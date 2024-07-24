@@ -44,7 +44,9 @@ const OrderDetails = ({
 
     workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
 
-    const [reasonToCome,setReasonToCome] = useState(workOrder.reason_to_come)
+
+
+    const [reasonToCome, setReasonToCome] = useState(workOrder.reason_to_come);
 
     const [isStatusDropDownModalOpenInDetails, setIsStatusDropDownModalOpenInDetails] = useState(false);
     const statusCommentDropDownInDetails = useRef(null);
@@ -64,14 +66,14 @@ const OrderDetails = ({
 
 
     const [ownerInvoiceNetDays,setOwnerInvoiceNetDays] = useState(workOrder.invoice_net_days)
-    const [lesseeInvoiceNetDays,setLesseeInvoiceNetDays] = useState(workOrder.secondary_owner_info?.invoice_net_days ??'')
+    const [lesseeInvoiceNetDays,setLesseeInvoiceNetDays] = useState(workOrder.secondary_owner_info?workOrder.secondary_owner_info.invoice_net_days:0)
 
 
     const [ownerInvoiceDate,setOwnerInvoiceDate] = useState(workOrder.invoice_date)
     const [lesseeInvoiceDate,setLesseeInvoiceDate] = useState(workOrder.secondary_owner_info?.invoice_date ??'')
 
 
-
+    console.log(reasonToCome)
 
     const reasonToComeRef = useRef(null);
     const mowkRef = useRef(null);
@@ -254,11 +256,9 @@ const OrderDetails = ({
     }
 
     const handleUpdateReasonToCome = () => {
-        let updatedReasonToCome = getValueByIdReasonToCome("reasonToComeInDetails")
-        updateReasonToCome(workOrder.id, updatedReasonToCome)
-        workOrder.reason_to_come = updatedReasonToCome
+        updateReasonToCome(workOrder.id, reasonToCome)
         setIsReasonToComeChanged(false)
-        setReasonToCome(updatedReasonToCome)
+        setReasonToCome(reasonToCome)
     }
 
     const handleCancelReasonToCome = () => {
@@ -413,8 +413,8 @@ const OrderDetails = ({
     const handleReasonToComeChange = (event) => {
         const value = event.target.value.toString()
 
-        if (value.trim().toLocaleLowerCase() != workOrder.reason_to_come.trim().toLocaleLowerCase()) {
-            setReasonToCome(value.trim())
+        if (value.toLowerCase() != reasonToCome.toString().toLowerCase()) {
+            setReasonToCome(value)
             setIsReasonToComeChanged(true)
         } else {
             setIsReasonToComeChanged(false)
@@ -423,8 +423,8 @@ const OrderDetails = ({
 
 
     const handleOwnerPurchaseOrderChange = (event) => {
-        const value = event.target.value.toString().toLocaleLowerCase().trim()
-        if (value.trim() != workOrder.purchase_order.trim().toLocaleLowerCase()) {
+        const value = event.target.value.toString().toLowerCase().trim()
+        if (value.trim() != workOrder.purchase_order.toString().trim().toLowerCase()) {
             setIsBillingInformationChangedForOwner(true)
         } else {
             setIsBillingInformationChangedForOwner(false)
@@ -433,7 +433,7 @@ const OrderDetails = ({
 
     const handleOwnerInvoiceChange = (event) => {
         const value = event.target.value.toString().toLocaleLowerCase().trim()
-        if (value.trim() != workOrder.invoice_number.trim().toLocaleLowerCase()) {
+        if (value.trim() != workOrder.invoice_number.toString().trim().toLocaleLowerCase()) {
             setIsBillingInformationChangedForOwner(true)
         } else {
             setIsBillingInformationChangedForOwner(false)
@@ -956,9 +956,8 @@ const OrderDetails = ({
                                                     <p className='text-xs font-normal'>Reasons to come</p>
                                                     <textarea rows="2"
                                                               className='text-[#979C9E] w-full p-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4'
-                                                              ref={reasonToComeRef}
                                                               id="reasonToComeInDetails"
-                                                              value={reasonToCome}
+                                                              value={workOrder.reason_to_come}
                                                               onChange={handleReasonToComeChange}/>
 
                                                     {isReasonToComeChanged == true && ( // Render the button only if the reason is changed

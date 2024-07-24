@@ -298,6 +298,7 @@ const WorkOrderDataTable = ({
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={() => {
+                    setWorkOrderToView(null)
                     handleShowOrderDetails(row.workOrder)
                 }}>
                     {/* svg for eye icon  */}
@@ -366,10 +367,10 @@ const WorkOrderDataTable = ({
         return null;
     };
     const handleShowOrderDetails = (row) => {
-        console.log(row)
-        console.log(row.workOrder)
-        setWorkOrderToView(row);
+        setWorkOrderToView(row)
+
         if (workOrderToView !== null) {
+
             document.getElementById('orderDetailsModal').showModal();
         } else {
             setTimeout(() => {

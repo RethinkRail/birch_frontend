@@ -63,3 +63,35 @@ export function convertSqlToFormattedDateTime(sqlDateTime) {
     var formattedDate = month + '-' + day + '-' + year + ' ' + hour + ':' + minute + ':' + second;
     return formattedDate;
 }
+
+
+export function addDays(sqlDateTime, daysToAdd) {
+    // Convert SQL date to a Date object
+    const sqlDate = new Date(sqlDateTime);
+
+    // Calculate the time zone offset for 'America/Chicago'
+    const timeZoneOffset = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }).slice(-5);
+    const [hoursOffset, minutesOffset] = timeZoneOffset.split(':').map(Number);
+    const offsetInMilliseconds = (hoursOffset * 60 + minutesOffset) * 60 * 1000;
+
+    // Adjust the date to the 'America/Chicago' time zone
+    const localDateTime = new Date(sqlDate.getTime() - offsetInMilliseconds);
+
+    // Add the specified number of days
+    localDateTime.setDate(localDateTime.getDate() + daysToAdd);
+
+    // Get month, day, and year components
+
+    var month = (localDateTime.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    var day = localDateTime.getDate().toString().padStart(2, '0');
+    var year = localDateTime.getFullYear();
+
+    var hour = localDateTime.getHours().toString().padStart(2, '0');
+    var minute = localDateTime.getMinutes().toString().padStart(2, '0');
+    var second = localDateTime.getSeconds().toString().padStart(2, '0');
+    // Formatted date with two-digit month and day
+    var formattedDate = month + '-' + day + '-' + year + ' ' + hour + ':' + minute + ':' + second;
+
+
+    return formattedDate;
+}

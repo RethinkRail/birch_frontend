@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ActiveOrdersEditModal = ({ index }) => {
+const ActiveOrdersEditModal = ({index}) => {
     console.log("clicked for" + index);
     return (
         <div>

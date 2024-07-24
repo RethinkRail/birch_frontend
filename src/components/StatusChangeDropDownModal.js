@@ -8,7 +8,7 @@
 import React from 'react';
 import Modal from 'react-modal';
 
-const StatusChangeDropDownModal = ({ isOpen, onRequestClose, parentSelector, contentLabel }) => {
+const StatusChangeDropDownModal = ({isOpen, onRequestClose, parentSelector, contentLabel}) => {
 
     const customStylesForCommentModal = {
         content: {
@@ -16,7 +16,7 @@ const StatusChangeDropDownModal = ({ isOpen, onRequestClose, parentSelector, con
             left: '50%',
             right: 'auto',
             bottom: 'auto',
-            width:'400px',
+            width: '400px',
             marginRight: '-50%',
             transform: 'translate(-50%, -50%)',
         },

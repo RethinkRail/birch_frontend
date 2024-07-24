@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Modal from 'react-modal';
 
-const DatePickerDialog = ({ isOpen, onClose }) => {
+const DatePickerDialog = ({isOpen, onClose}) => {
     const [selectedDate, setSelectedDate] = useState(null);
     return (
         <Modal

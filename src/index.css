@@ -8,11 +8,12 @@
         font-family: Inter, system-ui, sans-serif;
     }
 }
+
 .checkbox:disabled {
     cursor: not-allowed;
     border-color: transparent;
     --tw-bg-opacity: 1;
-    background-color: transparent ;
+    background-color: transparent;
     opacity: 0.2;
 }
 

@@ -22,7 +22,7 @@ export function updateObjectById(array, idToUpdate, updatedProperties) {
     // If the object with the specified id is found
     if (index !== -1) {
         // Update the object with the new properties
-        array[index] = { ...array[index], ...updatedProperties };
+        array[index] = {...array[index], ...updatedProperties};
     }
     modifiedArray.push(...array)
     return modifiedArray
@@ -40,7 +40,7 @@ export function updateObjectByIdInsideArray(array, property, id, update) {
     return array.map(obj => {
         if (obj[property] === id) {
             // If the property matches the desired value, update the object
-            return { ...obj, ...update };
+            return {...obj, ...update};
         }
         // If the property doesn't match, return the original object
         return obj;
@@ -79,7 +79,7 @@ export function arraysAreEqual(arr1, arr2) {
  * @returns {JSX.Element}
  * @constructor
  */
-export function ControlledTextArea({ id, rows, className,placeholder, onChange, onUpdate }) {
+export function ControlledTextArea({id, rows, className, placeholder, onChange, onUpdate}) {
     const [value, setState] = useState('');
 
     const handleChange = e => {
@@ -108,9 +108,9 @@ export function ControlledTextArea({ id, rows, className,placeholder, onChange, 
  * @param message message to display as toast
  * @param type should be an integer for success 1, for error 2 , for warning 3
  */
-export const showToastMessage = (message,type) => {
+export const showToastMessage = (message, type) => {
 
-    switch (type){
+    switch (type) {
         case 1:
             toast.success(message, {
                 autoClose: 2000,

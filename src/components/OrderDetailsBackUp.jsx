@@ -283,7 +283,7 @@ const OrderDetails = ({
                     console.log(error);
                 });
         } else {
-            setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
+                setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
         }
     }
     //handleInvoiceNumberChangeOwner

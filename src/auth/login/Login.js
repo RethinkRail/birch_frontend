@@ -2,125 +2,147 @@ import React, {useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {auth} from "../../firebase";
+
+
 
 const qs = require('qs');
 
-const Login = () =>{
+const Login = () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("email")
+    provider.addScope("profile")
+    provider.setCustomParameters({
+        hd: "ihrail.com"
+    });
     const navigate = useNavigate()
-    const [password,setPassword]= useState("");
-    const [username,setUsername]= useState("");
     const toastId = useRef(null)
-    const submitLoginForm = (e) =>{
-        e.preventDefault();
+
+    const submitLoginForm = (event) => {
+        event.preventDefault();
         toastId.current = toast.loading("Loading...")
-        let data = qs.stringify({
-            'username': username,
-            'password': password
-        });
-        let config = {
-            method: 'post',
-            url: process.env.REACT_APP_BIRCH_API_URL+'login',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json'
-            },
-            data : data
-        };
+        signInWithPopup(auth, provider).then((user)=>{
 
-        axios.request(config)
-            .then((response) => {
-                console.log(response.status)
-                if(response.status===200){
-                    localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
-                    toast.update(toastId.current, {
-                        render: "Login Success",
-                        autoClose: 1000,
-                        type: "success",
-                        hideProgressBar: true,
-                        isLoading: false
-                    });
-                    navigate("/")
-                }else {
-                    toast.update(toastId.current, {
-                        render: "Wrong username/password",
-                        autoClose: 1000,
-                        type: "error",
-                        hideProgressBar: true,
-                        isLoading: false
-                    });
-                }
-
-            })
-            .catch((error) => {
-                console.log(error);
+            const domain = ( user.user.email || "").split("@").pop();
+            const isValid = domain === process.env.REACT_APP_WORKSPACE_DOMAIN;
+            if(!isValid){
+                auth.signOut();
                 toast.update(toastId.current, {
-                    render: "Something went wrong",
+                    render: `Only ${process.env.REACT_APP_WORKSPACE_DOMAIN} workspace is allowed!`,
                     autoClose: 3000,
                     type: "error",
                     hideProgressBar: true,
                     isLoading: false
                 });
-            });
-    }
+                return
+            }
 
-    const handlePassWordChange =(event)=>{
-        setPassword(event.target.value)
-    }
-    const handleUserNameChange = (event) =>{
-        setUsername(event.target.value)
+
+            let data = qs.stringify({
+                'name': user.user.displayName,
+                'email': user.user.email,
+                'access_token':user.user.accessToken
+            });
+
+            let config = {
+                method: 'post',
+                url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                data: data
+            };
+
+            axios.request(config)
+                .then((response) => {
+                    console.log(response.status)
+                    if (response.status === 200) {
+
+                        console.log(response)
+
+                        if(response.data.is_active ==0){
+
+                            toast.update(toastId.current, {
+                                render: "Your account is waiting for activation contact HR",
+                                autoClose: 5000,
+                                type: "info",
+                                hideProgressBar: true,
+                                isLoading: false,
+                            });
+                        }else if(response.data.is_active ==1){
+                            toast.update(toastId.current, {
+                                render: "Login successful",
+                                autoClose: 1000,
+                                type: "success",
+                                hideProgressBar: true,
+                                isLoading: false,
+                            });
+                            localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                            navigate("/")
+                        }else {
+                            toast.update(toastId.current, {
+                                render: "Your account is deactivated",
+                                autoClose: 5000,
+                                type: "error",
+                                hideProgressBar: true,
+                                isLoading: false,
+                            });
+                        }
+                    } else {
+                        toast.update(toastId.current, {
+                            render: "Something went wrong",
+                            autoClose: 3000,
+                            type: "error",
+                            hideProgressBar: true,
+                            isLoading: false
+                        });
+                    }
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                    toast.update(toastId.current, {
+                        render: "Something went wrong",
+                        autoClose: 3000,
+                        type: "error",
+                        hideProgressBar: true,
+                        isLoading: false
+                    });
+                });
+
+        }).catch((error) => {
+            console.log(error)
+            toast.update(toastId.current, {
+                render: "Something went wrong",
+                autoClose: 3000,
+                type: "error",
+                hideProgressBar: true,
+                isLoading: false
+            });
+        });
     }
 
     return (
         <React.Fragment>
-            <ToastContainer />
+            <ToastContainer/>
             <section className="bg-gray-50 dark:bg-gray-900">
                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-                        <img className="w-full h-10 mr-0" src={process.env.PUBLIC_URL + '/logo.png'} alt="logo" />
+                        <img className="w-full h-10 mr-0" src={process.env.PUBLIC_URL + '/logo.png'} alt="logo"/>
                     </a>
-                    <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-                        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                                Sign in to your account
-                            </h1>
-                            <form className="space-y-4 md:space-y-6">
-                                <div>
-                                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Your Username
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="username"
-                                        id="username"
-                                        value={username}
-                                        onChange={handleUserNameChange}
-                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="Username"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Password
-                                    </label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        id="password"
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={handlePassWordChange}
-                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        required
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="w-full text-blue-300 bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-white dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                                    onClick={submitLoginForm}>Login
-                                </button>
-                            </form>
-                        </div>
+                    <div className="px-6 sm:px-0 max-w-sm">
+                        <button type="button" onClick={submitLoginForm}
+                                className="text-white w-full  bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between mr-2 mb-2">
+                            <svg className="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab"
+                                 data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                                <path fill="currentColor"
+                                      d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                            </svg>
+                            Sign in with Google
+                            <div></div>
+                        </button>
                     </div>
                 </div>
             </section>

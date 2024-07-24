@@ -3,7 +3,7 @@ import {convertSqlToFormattedDateTime} from "../utils/DateTimeHelper";
 import qs from "qs";
 import axios from "axios";
 
-const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
+const CommentModal = ({data, work_id, updateWorkUpdates}) => {
     const groupedItems = {};
     const commentModal = document.getElementById('commentModal');
     const statusTextArea = useRef(null);
@@ -25,15 +25,15 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
     // const sorted_grouped_items = Object.values(groupedItems).sort((a,b)=>a.status-b.status)
     // console.log(sorted_grouped_items)
     //console.log(groupedItems[groupedItems.length-1])
-    const closeModal =()=>{
+    const closeModal = () => {
         if (commentModal) {
             statusTextArea.current.value = ''
             commentModal.close();
         }
     }
-    const saveNewComment = () =>{
+    const saveNewComment = () => {
         const newComment = getValueById("new_comment")
-        if(newComment.length>0){
+        if (newComment.length > 0) {
             // Call API
             let data = qs.stringify({
                 'work_id': work_id,
@@ -45,16 +45,16 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
             let config = {
                 method: 'post',
                 maxBodyLength: Infinity,
-                url: process.env.REACT_APP_BIRCH_API_URL+'post_work_updates',
+                url: process.env.REACT_APP_BIRCH_API_URL + 'post_work_updates',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                data : data
+                data: data
             };
 
             axios.request(config)
                 .then((response) => {
-                    updateWorkUpdates(work_id,response.data,Object.values(groupedItems)[0].status_id)
+                    updateWorkUpdates(work_id, response.data, Object.values(groupedItems)[0].status_id)
                     if (commentModal) {
                         statusTextArea.current.value = ''
                         commentModal.close();
@@ -67,7 +67,7 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
                         commentModal.close();
                     }
                 });
-        }else {
+        } else {
             if (commentModal) {
                 statusTextArea.current.value = ''
                 commentModal.close();
@@ -84,23 +84,27 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
     return (
         <dialog id="commentModal" className="modal rounded-md">
             <div className="bg-white  max-h-[95vh] w-[600px] pb-5 rounded-md overflow-auto">
-                <div className="w-[600px] fixed h-[60px]  bg-[#DCE5FF] px-6 py-[18px] text-xl font-semibold flex justify-between">
+                <div
+                    className="w-[600px] fixed h-[60px]  bg-[#DCE5FF] px-6 py-[18px] text-xl font-semibold flex justify-between">
                     Comments
                     <form method="dialog">
                         <button className="">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M18 6L6 18M6 6L18 18" stroke="#464646" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="#464646" stroke-width="2" stroke-linecap="round"
+                                      stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </form>
                 </div>
-                <div className='mt-[65px]' />
+                <div className='mt-[65px]'/>
                 {Object.values(groupedItems).map((groupedItem, index) => (
                     <div key={index} className="border my-2 rounded  border-[#D0D5DD] p-[14px] mx-[24px]">
                         <h2 className='font-semibold text-black-300'>{groupedItem.status_id + " : " + groupedItem.title}</h2>
                         {groupedItem.names.map((name, i) => (
                             <div className='flex justify-between my-1 text-[16px]'>
-                                <span className='w-1/4'><h6 className='font-medium'>{name}</h6> <span className='font-normal italic '>{groupedItem.comment_date}</span></span>
+                                <span className='w-1/4'><h6 className='font-medium'>{name}</h6> <span
+                                    className='font-normal italic '>{groupedItem.comment_date}</span></span>
                                 <span className='w-3/4 font-light'> {groupedItem.comments[i]}</span>
                             </div>
                         ))}
@@ -109,14 +113,18 @@ const CommentModal = ({ data ,work_id,updateWorkUpdates}) => {
 
                 <div className="mx-[24px] mb-[28px] mt-[24px] ">
                     <p className='text-[14px] font-medium mb-[3px]'>Add New Comment</p>
-                    <input type="text" className='input w-full input-bordered' id="new_comment" ref={statusTextArea} />
+                    <input type="text" className='input w-full input-bordered' id="new_comment" ref={statusTextArea}/>
                 </div>
 
                 <div className="mx-[24px] flex justify-end">
-                    <button className="btn text-[#464646] bg-white hover:bg-white border border-[#464646] w-[106px] h-[40px] px-[30px] py-[10px]" onClick={closeModal}>
+                    <button
+                        className="btn text-[#464646] bg-white hover:bg-white border border-[#464646] w-[106px] h-[40px] px-[30px] py-[10px]"
+                        onClick={closeModal}>
                         close
                     </button>
-                    <button className="btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px]"  onClick={saveNewComment}>
+                    <button
+                        className="btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px]"
+                        onClick={saveNewComment}>
                         save
                     </button>
                 </div>

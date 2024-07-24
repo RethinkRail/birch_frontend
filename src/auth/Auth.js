@@ -1,7 +1,7 @@
 import React from "react";
 import {Outlet} from "react-router-dom";
 
-const Auth =() =>{
+const Auth = () => {
     return (
         <React.Fragment>
             <Outlet/>

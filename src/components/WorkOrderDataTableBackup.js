@@ -4,36 +4,36 @@ import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils
 import DatePicker from "react-datepicker";
 import DataTable from "react-data-table-component";
 
-const WorkOrderDataTable =({workOrders,statusCode}) =>{
+const WorkOrderDataTable = ({workOrders, statusCode}) => {
     const [commentObject, setCommentObject] = useState([])
     const [modifiedWorkOrder, setModifiedWorkOrder] = useState([])
     const workOrderData = [];
-    workOrders.forEach(workOrder =>{
+    workOrders.forEach(workOrder => {
         const laborHours = workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0);
         const durationHours = workOrder.timesheets.reduce((acc, item) => acc + item.duration / 3600, 0);
         const percentage = durationHours == 0 ? 0 : (durationHours / laborHours) * 100;
-        const workOrderObject ={
-            'lhr':round2Dec(percentage)+"%",
-            'dif':differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19),workOrder.arrival_date)["days"],
-            'railcar_id':workOrder.railcar_id,
-            'arrival_date':convertSqlToFormattedDate(workOrder.arrival_date),
+        const workOrderObject = {
+            'lhr': round2Dec(percentage) + "%",
+            'dif': differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"],
+            'railcar_id': workOrder.railcar_id,
+            'arrival_date': convertSqlToFormattedDate(workOrder.arrival_date),
             'last_content': workOrder.railcar.products.name,
-            'status':workOrder.workupdates[0].status_id,
-            'comment':workOrder.workupdates,
-            'material_eta':convertSqlToFormattedDate(workOrder.material_eta),
+            'status': workOrder.workupdates[0].status_id,
+            'comment': workOrder.workupdates,
+            'material_eta': convertSqlToFormattedDate(workOrder.material_eta),
             'projected_out_date': convertSqlToFormattedDate(workOrder.projected_out_date),
-            'finalized':workOrder.locked_by,
-            'shipped':workOrder.shipped_date,
-            'work_id':workOrder.id
+            'finalized': workOrder.locked_by,
+            'shipped': workOrder.shipped_date,
+            'work_id': workOrder.id
         }
         console.log(workOrderObject)
         workOrderData.push(workOrderObject)
     })
 
 
-    useEffect(()=>{
+    useEffect(() => {
         setModifiedWorkOrder(workOrderData)
-    },[])
+    }, [])
     //setModifiedWorkOrder(workOrderData)
     const workOrdersTableColumn = [
         {
@@ -66,7 +66,8 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
             name: "STATUS",
             selector: "status",
             cell: (row) => (
-                <select className="text-[14px] font-mediumselect bg-transparent pl-[0px] border-0 max-w-[213px] focus:border-0 focus:ring-0">
+                <select
+                    className="text-[14px] font-mediumselect bg-transparent pl-[0px] border-0 max-w-[213px] focus:border-0 focus:ring-0">
                     {statusCode.map((sc) => (
                         <option key={sc.code} selected={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
@@ -87,7 +88,7 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
         {
             name: "MATERIAL ETA",
             selector: "material_eta",
-            cell:(row) =>(
+            cell: (row) => (
                 <DatePicker
                     // selected={projected_out_date[index]}
                     selected={new Date(row.projected_out_date.slice(0, 10))}
@@ -100,7 +101,7 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
         {
             name: "PROJECTED OUT DATE",
             selector: "projected_out_date",
-            cell:(row) =>(
+            cell: (row) => (
                 <DatePicker
                     // selected={projected_out_date[index]}
                     selected={new Date(row.projected_out_date.slice(0, 10))}
@@ -113,32 +114,32 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
         {
             name: "FINALIZED",
             selector: "finalized",
-            cell:(row) =>(
+            cell: (row) => (
                 <input
                     type="checkbox"
                     // onChange={() => handleOrderCheckboxChange(index, "FINALIZED")}
                     checked={row.locked_by > -1}
-                    className=" checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]" />
+                    className=" checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]"/>
             )
 
         },
         {
             name: "SHIPPED",
             selector: "shipped",
-            cell:(row)=>(
+            cell: (row) => (
                 <input
                     type="checkbox"
                     // onChange={() => handleOrderCheckboxChange(index, "FINALIZED")}
                     checked={row.locked_by > -1}
-                    className=" checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]" />
+                    className=" checkbox checkbox-primary mt-[6px] ml-[29px] w-[20px] h-[20px]"/>
             )
         },
         {
             name: "ACTION",
             selector: 'work_id',
-            width:"110px",
+            width: "110px",
             sortable: false,
-            padding:"0px",
+            padding: "0px",
             cell: (row) => (
                 <p></p>
             ),
@@ -168,8 +169,8 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
     };
 
     const customStyles = {
-        table:{
-          className:'sssss'
+        table: {
+            className: 'sssss'
         },
         headRow: {
             style: {
@@ -178,16 +179,16 @@ const WorkOrderDataTable =({workOrders,statusCode}) =>{
             className: 'custom-header-class', // apply a custom class name to the header row
         },
     };
-    return(
+    return (
         <div className="overflow-x-auto w-full mt-[20px] ml-[-1px] mx-auto border rounded-[8px]">
-            {modifiedWorkOrder.length>0?(
+            {modifiedWorkOrder.length > 0 ? (
                 <DataTable
                     columns={workOrdersTableColumn}
                     data={modifiedWorkOrder}
                     customStyles={customStyles}
                     options={workWorderTableOptions}
                 />
-            ):null}
+            ) : null}
 
         </div>
         //<CommentModal data={commentObject} />

@@ -1,14 +1,17 @@
 import {useState} from "react";
 import {NavLink, useNavigate} from "react-router-dom";
+import {auth} from "../../firebase";
 
 const Navbar = () => {
     const [isHoveredPrimary, setIsHoveredPrimary] = useState(false);
     const [isHoveredSecondary, setIsHoveredSecondary] = useState(false);
     const navigate = useNavigate()
-    const handleLogout = () =>{
+    const handleLogout = async() => {
+        await auth.signOut();
         localStorage.clear();
         return navigate('/auth/login');
     }
+
     const handleMouseLeave = () => {
         setIsHoveredPrimary(false);
     };
@@ -37,39 +40,48 @@ const Navbar = () => {
     const in_active_class = "py-2 hover:bg-[#1116]  text-[#F2F4F7] px-3 rounded-[6px] flex items-center h-[45px] "
     const navebarItems =
         <>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/">Work Order</NavLink>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/History">History</NavLink>
+            <NavLink className={({isActive}) => isActive ? active_class : in_active_class} to="/">Work Order</NavLink>
+            <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                     to="/History">History</NavLink>
             <NavLink
                 onMouseEnter={() => {
                     setIsHoveredPrimary(true)
                     setIsHoveredSecondary(false)
                 }}
-                onMouseLeave={() => setIsHoveredSecondary(false)}
-                className={({ isActive }) => isActive ? active_class : in_active_class} to="/Report">
+                onMouseOut={() => setIsHoveredSecondary(false)}
+                className={({isActive}) => isActive ? active_class : in_active_class} to="/Report">
                 Report
-                <svg className="ml-[13px]" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 9L12 15L18 9" stroke="#D0D5DD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <svg className="ml-[13px]" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9L12 15L18 9" stroke="#D0D5DD" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round"/>
                 </svg>
             </NavLink>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Inventory" > Inventory</NavLink>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Database">Database</NavLink>
+            <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                     to="/Inventory"> Inventory</NavLink>
+            <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                     to="/Database">Database</NavLink>
             <p onMouseEnter={() => setIsHoveredSecondary(true)}
                onMouseLeave={() => setIsHoveredPrimary(false)}
                className=" rounded-[6px]  ">
-                <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management">
+                <NavLink className={({isActive}) => isActive ? active_class : in_active_class} to="/management">
                     Management
-                    <svg className="ml-[12px]" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="#D0D5DD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <svg className="ml-[12px]" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 9L12 15L18 9" stroke="#D0D5DD" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round"/>
                     </svg>
                 </NavLink>
-            </p >
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Storage">Storage</NavLink>
+            </p>
+            <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                     to="/Storage">Storage</NavLink>
 
         </>
     return (
         <div className={`w-full p-0  mx-auto ${(isHoveredPrimary || isHoveredSecondary) && "mb-[64px]"}`}>
-            <div >
-                <div className=" hidden lg:flex md:flex justify-between  bg-[#002E54] text-white w-full items-center px-[20px] ">
+            <div>
+                <div
+                    className=" hidden lg:flex md:flex justify-between  bg-[#002E54] text-white w-full items-center px-[20px] ">
                     <ul className="menu menu-horizontal px-0  font-medium flex justify-between text-[16px]">
                         {navebarItems}
                     </ul>
@@ -86,9 +98,14 @@ const Navbar = () => {
                         {/*</svg>*/}
 
                         <div className="ml-[24px] tooltip  tooltip-bottom" data-tip="Log Out">
-                            <svg  className="ml-[24px] cursor-pointer" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"  onClick={handleLogout}>
-                                <path d="M0 0 C2.97922593 -0.02683987 5.95821295 -0.04676037 8.9375 -0.0625 C9.78763672 -0.07087891 10.63777344 -0.07925781 11.51367188 -0.08789062 C12.32255859 -0.09111328 13.13144531 -0.09433594 13.96484375 -0.09765625 C14.7137085 -0.10289307 15.46257324 -0.10812988 16.23413086 -0.11352539 C18 -0 18 -0 19 1 C19.04092937 3.33297433 19.04241723 5.66705225 19 8 C18.01 7.67 17.02 7.34 16 7 C16 5.68 16 4.36 16 3 C11.71 3 7.42 3 3 3 C3 9.27 3 15.54 3 22 C7.29 22 11.58 22 16 22 C16 20.35 16 18.7 16 17 C16.99 16.67 17.98 16.34 19 16 C19 18.64 19 21.28 19 24 C12.73 24 6.46 24 0 24 C-1.18807993 21.62384014 -1.12914522 20.1488258 -1.1328125 17.5 C-1.13410156 16.613125 -1.13539062 15.72625 -1.13671875 14.8125 C-1.13285156 13.884375 -1.12898437 12.95625 -1.125 12 C-1.12886719 11.071875 -1.13273438 10.14375 -1.13671875 9.1875 C-1.13542969 8.300625 -1.13414063 7.41375 -1.1328125 6.5 C-1.13168457 5.6853125 -1.13055664 4.870625 -1.12939453 4.03125 C-1 2 -1 2 0 0 Z " fill="#FEFEFE" transform="translate(2,0)"/>
-                                <path d="M0 0 C2.70931419 0.15481795 4.46584039 0.48172081 6.4453125 2.40234375 C7.67679642 3.89771708 8.8429837 5.4462924 10 7 C4.5 12 4.5 12 0 12 C0 11.01 0 10.02 0 9 C-1.98 9 -3.96 9 -6 9 C-6 7.02 -6 5.04 -6 3 C-4.02 3 -2.04 3 0 3 C0 2.01 0 1.02 0 0 Z " fill="#FEFEFE" transform="translate(13,6)"/>
+                            <svg className="ml-[24px] cursor-pointer" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" xmlns="http://www.w3.org/2000/svg" onClick={handleLogout}>
+                                <path
+                                    d="M0 0 C2.97922593 -0.02683987 5.95821295 -0.04676037 8.9375 -0.0625 C9.78763672 -0.07087891 10.63777344 -0.07925781 11.51367188 -0.08789062 C12.32255859 -0.09111328 13.13144531 -0.09433594 13.96484375 -0.09765625 C14.7137085 -0.10289307 15.46257324 -0.10812988 16.23413086 -0.11352539 C18 -0 18 -0 19 1 C19.04092937 3.33297433 19.04241723 5.66705225 19 8 C18.01 7.67 17.02 7.34 16 7 C16 5.68 16 4.36 16 3 C11.71 3 7.42 3 3 3 C3 9.27 3 15.54 3 22 C7.29 22 11.58 22 16 22 C16 20.35 16 18.7 16 17 C16.99 16.67 17.98 16.34 19 16 C19 18.64 19 21.28 19 24 C12.73 24 6.46 24 0 24 C-1.18807993 21.62384014 -1.12914522 20.1488258 -1.1328125 17.5 C-1.13410156 16.613125 -1.13539062 15.72625 -1.13671875 14.8125 C-1.13285156 13.884375 -1.12898437 12.95625 -1.125 12 C-1.12886719 11.071875 -1.13273438 10.14375 -1.13671875 9.1875 C-1.13542969 8.300625 -1.13414063 7.41375 -1.1328125 6.5 C-1.13168457 5.6853125 -1.13055664 4.870625 -1.12939453 4.03125 C-1 2 -1 2 0 0 Z "
+                                    fill="#FEFEFE" transform="translate(2,0)"/>
+                                <path
+                                    d="M0 0 C2.70931419 0.15481795 4.46584039 0.48172081 6.4453125 2.40234375 C7.67679642 3.89771708 8.8429837 5.4462924 10 7 C4.5 12 4.5 12 0 12 C0 11.01 0 10.02 0 9 C-1.98 9 -3.96 9 -6 9 C-6 7.02 -6 5.04 -6 3 C-4.02 3 -2.04 3 0 3 C0 2.01 0 1.02 0 0 Z "
+                                    fill="#FEFEFE" transform="translate(13,6)"/>
                             </svg>
                         </div>
 
@@ -102,11 +119,15 @@ const Navbar = () => {
                     onMouseEnter={() => setIsHoveredPrimary(true)}
                     onMouseLeave={() => setIsHoveredPrimary(false)}
                     className={`bg-[#002E54] py-[8px] px-[34px]  border-t-[1px] border-gray-600 items-center  flex justify-center gap-[12px] h-[45px] text-white  opacity-0 whitespace-nowrap  transform transition-all duration-300 ${isHoveredPrimary ? 'opacity-100 scale-100' : 'scale-0'}`}>
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink1">submenu 1</NavLink>
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink2">submenu 2</NavLink>
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink3" > submenu 3</NavLink >
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/submenu4"> submenu 4</NavLink >
-                </ul >
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class} to="/sublink1">submenu
+                        1</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class} to="/sublink2">submenu
+                        2</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/sublink3"> submenu 3</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/submenu4"> submenu 4</NavLink>
+                </ul>
             }
 
             {
@@ -115,16 +136,21 @@ const Navbar = () => {
                     onMouseEnter={() => setIsHoveredSecondary(true)}
                     onMouseLeave={() => setIsHoveredSecondary(false)}
                     className={`bg-[#002E54] py-[8px] px-[34px]  items-center gap-[12px] border-t-[1px] border-gray-600  text-white  h-[45px] opacity-0 whitespace-nowrap flex justify-center  transform transition-all duration-300 ${isHoveredSecondary ? 'opacity-100 scale-100' : 'scale-0'}`}>
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/BRC-User" >BRC User</NavLink>
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Crews" > Crews</NavLink >
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Routine-Matrix" > Routine Matrix</NavLink >
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management/Time-Approval" > Time Approval</NavLink >
-                    <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/Rail Car Log" > Rail Car Log</NavLink >
-                </ul >
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class} to="/BRC-User">BRC
+                        User</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/Crews"> Crews</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/Routine-Matrix"> Routine Matrix</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/management/Time-Approval"> Time Approval</NavLink>
+                    <NavLink className={({isActive}) => isActive ? active_class : in_active_class}
+                             to="/Rail Car Log"> Rail Car Log</NavLink>
+                </ul>
             }
 
 
-        </div >
+        </div>
     );
 };
 

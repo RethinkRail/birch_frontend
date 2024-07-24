@@ -1,10 +1,11 @@
-const { format } = require('date-fns');
+const {format} = require('date-fns');
+
 /**
  * Calculate difference between two dates , date must be in SQL format like 2023-01-01T00:00:00
  * @param latestTimeStamp
  * @param earlierTimeStamp
  */
-export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) {
+export function differenceBetweenTwoTimeStamp(latestTimeStamp, earlierTimeStamp) {
     const latestDateTimeObject = new Date(latestTimeStamp)
     const earlierDateTimeObject = new Date(earlierTimeStamp)
     // Calculate the time difference in milliseconds
@@ -15,7 +16,12 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) 
     const hoursDifference = Math.floor((timeDifference % millisecondsInADay) / (60 * 60 * 1000));
     const minutesDifference = Math.floor((timeDifference % (60 * 60 * 1000)) / (60 * 1000));
     const secondsDifference = Math.floor((timeDifference % (60 * 1000)) / 1000);
-    return {"days":daysDifference,"hours":hoursDifference,"minutes":minutesDifference,"seconds":secondsDifference}
+    return {
+        "days": daysDifference,
+        "hours": hoursDifference,
+        "minutes": minutesDifference,
+        "seconds": secondsDifference
+    }
 }
 
 /**
@@ -25,7 +31,7 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp,earlierTimeStamp) 
  */
 export function convertSqlToFormattedDate(sqlDateTime) {
     const sqlDate = new Date(sqlDateTime);
-    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'America/Chicago' });
+    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', {timeZone: 'America/Chicago'});
     const localDateTime = new Date(localDateString)
     // Get month, day, and year components
     var month = (localDateTime.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
@@ -43,7 +49,7 @@ export function convertSqlToFormattedDate(sqlDateTime) {
  */
 export function convertSqlToFormattedDateTime(sqlDateTime) {
     const sqlDate = new Date(sqlDateTime);
-    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'America/Chicago' });
+    const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', {timeZone: 'America/Chicago'});
     const localDateTime = new Date(localDateString)
     // Get month, day, and year components
     var month = (localDateTime.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
@@ -54,6 +60,6 @@ export function convertSqlToFormattedDateTime(sqlDateTime) {
     var minute = localDateTime.getMinutes().toString().padStart(2, '0');
     var second = localDateTime.getSeconds().toString().padStart(2, '0');
     // Formatted date with two-digit month and day
-    var formattedDate = month + '-' + day + '-' + year+' '+hour+':'+minute+':'+second;
+    var formattedDate = month + '-' + day + '-' + year + ' ' + hour + ':' + minute + ':' + second;
     return formattedDate;
 }

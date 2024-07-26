@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import TaskRow from "../components/TaskRow";
 import WorkOrderDataTable from "../components/WorkOrderDataTable";
-import {showToastMessage, updateObjectByIdInsideArray} from "../utils/CommonHelper";
+import {replaceItemInArray, showToastMessage, updateObjectByIdInsideArray} from "../utils/CommonHelper";
 import Modal from "react-modal";
 import {toast} from "react-toastify";
 
@@ -34,6 +34,25 @@ const Home = () => {
             });
 
     }
+
+    const getWorkOrderById = (work_id) => {
+        let config = {
+            method: 'get',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + work_id,
+            headers: {}
+        };
+
+        axios.request(config)
+            .then((response) => {
+                setWorkOrders(replaceItemInArray(workOrders,response.data))
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
     const getActiveWorkOrders = () => {
         let config = {
             method: 'get',
@@ -44,9 +63,7 @@ const Home = () => {
 
         axios.request(config)
             .then((response) => {
-                console.log(response.data)
                 setWorkOrders(response.data.active_workorder)
-
                 return Promise.resolve();
             })
             .catch((error) => {
@@ -749,6 +766,42 @@ const Home = () => {
             });
     }
 
+
+    const handleOwnerBillingInformationChanged= (is_for_owner,work_id, purchase_order,invoice_number,invoice_date,invoice_net_days) => {
+        const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        let data = qs.stringify({
+            'is_for_owner': is_for_owner,
+            'workorder_id': work_id,
+            'user_id': userId,
+            'purchase_order': purchase_order,
+            'invoice_number': invoice_number,
+            'invoice_date': invoice_date,
+            'invoice_net_days': invoice_net_days,
+        });
+        let config = {
+            method: 'post',
+            url: process.env.REACT_APP_BIRCH_API_URL + 'update_billing_information',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+        axios.request(config)
+            .then((response) => {
+                console.log(response)
+                getWorkOrderById(work_id)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    const handleBillToLessee = () =>{
+
+    }
+
+
+
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -893,6 +946,7 @@ const Home = () => {
                         updateTQ={handleChangeTQ}
                         updateRE={handleChangeRE}
                         updateEP={handleChangeEP}
+                        updateOwnerBilling={handleOwnerBillingInformationChanged}
                     />
                 ) : null}
             </div>

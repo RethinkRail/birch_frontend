@@ -132,3 +132,17 @@ export const showToastMessage = (message, type) => {
             break;
     }
 };
+
+/**
+ * Replace an ietm in array of object
+ * @param arr
+ * @param newItem
+ * @returns {*}
+ */
+export function replaceItemInArray(arr, newItem) {
+    const index = arr.findIndex(item => item.id === newItem.id);
+    if (index !== -1) {
+        arr[index] = newItem;
+    }
+    return arr;
+}

@@ -41,7 +41,8 @@ const WorkOrderDataTable = ({
                                 updateSP,
                                 updateTQ,
                                 updateRE,
-                                updateEP
+                                updateEP,
+                                updateOwnerBilling
                             }) => {
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
@@ -298,7 +299,7 @@ const WorkOrderDataTable = ({
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={() => {
-                    setWorkOrderToView(null)
+                    setWorkOrderToView(row.workOrder)
                     handleShowOrderDetails(row.workOrder)
                 }}>
                     {/* svg for eye icon  */}
@@ -366,17 +367,9 @@ const WorkOrderDataTable = ({
         }
         return null;
     };
-    const handleShowOrderDetails = (row) => {
-        setWorkOrderToView(row)
-
-        if (workOrderToView !== null) {
-
-            document.getElementById('orderDetailsModal').showModal();
-        } else {
-            setTimeout(() => {
-                document.getElementById('orderDetailsModal').showModal();
-            }, 150);
-        }
+    const handleShowOrderDetails = async (row) => {
+        await setWorkOrderToView(()=>row)
+        document.getElementById('orderDetailsModal').showModal();
     };
     return (
         <React.Fragment>
@@ -471,6 +464,7 @@ const WorkOrderDataTable = ({
                         updateTQ={updateTQ}
                         updateRE={updateRE}
                         updateEP={updateEP}
+                        updateOwnerBilling={updateOwnerBilling}
                     />
                 ) : null}
                 {/*<OrderDetails*/}

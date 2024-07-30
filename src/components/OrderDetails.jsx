@@ -43,6 +43,7 @@ const OrderDetails = ({
                           updateRE,
                           updateEP,
                           updateOwnerBilling,
+                          updateBillToLessee
                       }) => {
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
@@ -183,7 +184,6 @@ const OrderDetails = ({
         setEP(workOrder.ep);
         //setOwnerInvoiceNumber(workOrder.invoice_number);
         //setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
-
         setIsBilledToLessee(workOrder.secondary_owner_info==null?false:true)
     }, [workOrder]);
 
@@ -229,8 +229,16 @@ const OrderDetails = ({
         updateEP(workOrder.id, ep)
     }
 
-    const handleIsBilledToLessee =() =>{
+    const handleIsBilledToLessee =(e) =>{
+        const  is_checked = e.target.checked
 
+        if(is_checked){
+            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,true)
+            setIsBilledToLessee(true)
+        }else {
+            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,false)
+            setIsBilledToLessee(false)
+        }
     }
 
     const changeNetDays = (isForOwner,days,) =>{
@@ -1093,7 +1101,6 @@ const OrderDetails = ({
                                                         onChange={handleIsBilledToLessee}
                                                         checked={isBilledToLessee}
                                                         className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
-
                                                 </div>
                                             </div>
 
@@ -1524,16 +1531,12 @@ const OrderDetails = ({
                                                     <button
                                                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 
+                                                        onClick={updateBillingInformation(false)}
+
                                                     >
                                                         UPDATE
                                                     </button>
 
-                                                    <button
-                                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
-
-                                                    >
-                                                    CANCEL
-                                                    </button>
                                                 </span>
                                             </div>
 

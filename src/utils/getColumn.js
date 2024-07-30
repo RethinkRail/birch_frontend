@@ -25,15 +25,15 @@ const handleGetColumn = (tableFields, handleEditRow, setRowId, setRowCode, setDe
             };
         }
 
-        if (field.Field.toLowerCase() === "id") {
-            return {
-                name: field.Field.split("_").join(" "),
-                selector: row => row[field.Field],
-                sortable: true,
-                omit: true,
-            };
-        }
-
+        // if (field.Field.toLowerCase() === "id") {
+        //     return {
+        //         name: field.Field.split("_").join(" "),
+        //         selector: row => row[field.Field],
+        //         sortable: true,
+        //         omit: true,
+        //     };
+        // }
+        //
 
 
         return {

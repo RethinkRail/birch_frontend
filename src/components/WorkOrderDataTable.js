@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {round2Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from 'react-datepicker';
@@ -42,7 +42,8 @@ const WorkOrderDataTable = ({
                                 updateTQ,
                                 updateRE,
                                 updateEP,
-                                updateOwnerBilling
+                                updateOwnerBilling,
+                                updateBillToLessee
                             }) => {
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
@@ -55,6 +56,15 @@ const WorkOrderDataTable = ({
     const statusCommentDropDown = useRef(null);
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
+
+    useEffect(()=>{
+        if(workOrderToView!=null){
+            const wo= workOrders.find(obj => obj['id'] === workOrderToView.id)
+            setWorkOrderToView(wo)
+            
+        }
+        console.log("in action")
+    },[workOrders])
     workOrders.forEach((workOrder, index) => {
         const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
@@ -465,6 +475,7 @@ const WorkOrderDataTable = ({
                         updateRE={updateRE}
                         updateEP={updateEP}
                         updateOwnerBilling={updateOwnerBilling}
+                        updateBillToLessee={updateBillToLessee}
                     />
                 ) : null}
                 {/*<OrderDetails*/}

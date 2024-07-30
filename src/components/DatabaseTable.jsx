@@ -28,8 +28,6 @@ const DatabaseTable = () => {
         const handleFetchProducts = async () => {
             try {
                 const allTablesRes = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}all-tables`)
-
-
                 setAllTables(allTablesRes.data)
                 setSelectedTable(Object.keys(allTablesRes.data)[0])
             } catch (error) {

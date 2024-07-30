@@ -35,7 +35,7 @@ const Home = () => {
 
     }
 
-    const getWorkOrderById = (work_id) => {
+    const getWorkOrderById =  (work_id) => {
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -43,9 +43,16 @@ const Home = () => {
             headers: {}
         };
 
-        axios.request(config)
+         axios.request(config)
             .then((response) => {
-                setWorkOrders(replaceItemInArray(workOrders,response.data))
+                console.log(response.data)
+                console.log(workOrders)
+
+                // const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
+                // setWorkOrders(updatedWorkOrders)
+                const new_work_orders =  replaceItemInArray(workOrders,response.data)
+                console.log(new_work_orders)
+                setWorkOrders(new_work_orders)
             })
             .catch((error) => {
                 console.log(error);
@@ -64,6 +71,7 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 setWorkOrders(response.data.active_workorder)
+                console.log(workOrders)
                 return Promise.resolve();
             })
             .catch((error) => {
@@ -796,8 +804,40 @@ const Home = () => {
             });
     }
 
-    const handleBillToLessee = () =>{
+    const handleBillToLessee = async (work_id,lessee_id,is_billed_to_lessee) =>{
+        const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        let data = qs.stringify({
+            'work_id': work_id,
+            'user_id': userId,
+            'lessee_id': lessee_id,
+            'is_billed_to_lessee': is_billed_to_lessee,
 
+        });
+        console.log(data)
+        let config = {
+            method: 'post',
+            url: process.env.REACT_APP_BIRCH_API_URL + 'update_bill_to_lessee',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+        axios.request(config)
+            .then((response) => {
+                console.log(workOrders)
+                if(is_billed_to_lessee){
+                    const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
+                    setWorkOrders(updatedWorkOrders)
+                }else {
+                    const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
+                    setWorkOrders(updatedWorkOrders)
+                }
+
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     }
 
 
@@ -947,6 +987,7 @@ const Home = () => {
                         updateRE={handleChangeRE}
                         updateEP={handleChangeEP}
                         updateOwnerBilling={handleOwnerBillingInformationChanged}
+                        updateBillToLessee={handleBillToLessee}
                     />
                 ) : null}
             </div>

@@ -327,7 +327,6 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
     var invoice_header = record_format.value + billing_invoicing_party.value + billed_party.value + account_date.value + invoice_number.value + price_master_file_indicator.value;
     var repair_header = detail_source.value + document_reference_number.value + car_initial.value + car_number.value + kind_of_car_symbol.value + load_empty_indicator.value + repair_date.value + splc.value + repairing_party.value + repairing_party_invoice_number.value + repairing_party_document_reference_number.value + repair_facility_type.value;
 
-
     if (data.joblist != null) {
         data.joblist.forEach((item, i) => {
             location_on_car.value = getObjComputedValue(location_on_car, item.locationcode ? item.locationcode.code : null);
@@ -446,8 +445,8 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
 
             var other_detail = labor_rate.value + expanded_splc.value + cif_repairing_party.value + cif_billing_invoicing_party.value + cif_billed_party.value + cif_defect_jic_party.value + repair_facility_arrival_date.value + line_number.value + railinc_inbound_date_stamp.value + railinc_outbound_date_stamp.value + resubmitted_invoice_indicator.value + original_invoice_number.value + original_account_date.value + aar_component_id.value + ddct_incident_id.value + reserved_for_future_crb_use_5.value;
 
-
             if (forWhom == 1) {
+
                 en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
                 //console.log(en_txt.length)
             }

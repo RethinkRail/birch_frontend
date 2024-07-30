@@ -44,7 +44,7 @@ const OrderDetails = ({
                           updateEP,
                           updateOwnerBilling,
                       }) => {
-    // console.log(workOrder)
+    console.log(workOrder)
     // console.log(workOrder.reason_to_come)
     // console.log(commonData)
 

@@ -10,6 +10,7 @@ import Plus from './Plus'
 import { toast } from 'react-toastify'
 import DeleteModal from './DeleteModal'
 import {showToastMessage} from "../utils/CommonHelper";
+import DataTableSearch from "./DataTableSearch";
 
 const DatabaseTable = () => {
 
@@ -23,9 +24,12 @@ const DatabaseTable = () => {
     const [deleteModalShowing, setDeleteModalShowing] = useState(false)
     const [rowId, setRowId] = useState()
     const [rowCode, setRowCode] = useState()
+    const [filteredTable, setFilteredTable] = useState([]);
+    const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
+
 
     useEffect(() => {
-        const handleFetchProducts = async () => {
+        const handleFetchAllTables = async () => {
             try {
                 const allTablesRes = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}all-tables`)
                 setAllTables(allTablesRes.data)
@@ -34,9 +38,33 @@ const DatabaseTable = () => {
                 console.log(error, "An error occured when trying to fetch product")
             }
         }
-        handleFetchProducts()
+        handleFetchAllTables()
     }, [])
 
+    useEffect(() => {
+        if (searchTerm === '') {
+            setFilteredTable(table);
+        } else {
+            const lowercasedFilter = searchTerm.toLowerCase();
+            const filteredData = table.filter(item => {
+                return Object.keys(item).some(key => {
+                    const value = item[key];
+                    console.log(value)
+                    // Check if the value is a string before trying to call toLowerCase
+                    if (typeof value === 'string') {
+                        return value.toLowerCase().includes(lowercasedFilter);
+                    }
+                    // Optionally handle other types, like numbers, if needed:
+                    if (typeof value === 'number') {
+                        return value.toString().includes(lowercasedFilter);
+                    }
+                    // Ignore other types like objects or arrays
+                    return false;
+                });
+            });
+            setFilteredTable(filteredData);
+        }
+    }, [searchTerm, table]);
     useEffect(() => {
         const handleFetchTable = async () => {
             try {
@@ -53,7 +81,7 @@ const DatabaseTable = () => {
             }
         }
         handleFetchTable()
-    },[selectedTable, searchTerm])
+    },[selectedTable])
 
     const handleAddRow = (newRow) => {
         setTable((prevTable) => [...prevTable, newRow]);
@@ -166,18 +194,20 @@ const DatabaseTable = () => {
         }
         <div className='w-full flex flex-row justify-between items-center'>
             <button className='bg-[#002e54] px-3 py-1.5 rounded-md flex justify-center items-center gap-2 text-white' onClick={() => setModalShowing((prev) => (!prev))}>
-                <span className='flex w-4 h-4 items-center justify-center'><Plus /></span><span className='text-[12px]'>add a row</span>
+                <span className='flex w-4 h-4 items-center justify-center'><Plus /></span><span className='text-[12px]'>Add a new entry</span>
             </button>
             {/*<div className='border-[#002e54] border-[1px] px-3 py-1.5 w-[200px] rounded-md'>*/}
             {/*    <input type="text" className='h-full w-full flex-1 outline-none' placeholder='Search...' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />*/}
             {/*</div>*/}
+            <DataTableSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </div>
         {table && allTables && selectedTable ? (
+
             <div className="mt-[20px] ml-[1px] mx-auto border rounded-[8px] mb-10 m-1.5 w-full">
                 <DataTable
                         title=""
                         columns={handleGetColumn(allTables[selectedTable], handleEditRow, setRowId, setRowCode, setDeleteModalShowing)}
-                        data={table}
+                        data={filteredTable}
                         conditionalRowStyles={conditionalRowStyles}
                         striped={false}
                         dense={true}
@@ -186,7 +216,6 @@ const DatabaseTable = () => {
                         paginationPerPage={50}
                         paginationRowsPerPageOptions={[ 50,100,150,200]}
                         highlightOnHover={true}
-                        searching ={true}
                         className="display nowrap compact stripe"
                         customStyles={myStyles}
                     />

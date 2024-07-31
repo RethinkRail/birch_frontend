@@ -25,6 +25,18 @@ const handleGetColumn = (tableFields, handleEditRow, setRowId, setRowCode, setDe
             };
         }
 
+        if (field.Field.toLowerCase() === "id") {
+            return {
+                name: field.Field.split("_").join(" "),
+                selector: row => row[field.Field],
+                sortable: true,
+                omit:true,
+                cell: (row) => {
+                    return <span className={`max-w-[250px`}>{formatDate(row[field.Field]) || "_"}</span>;
+                }
+            };
+        }
+
         // if (field.Field.toLowerCase() === "id") {
         //     return {
         //         name: field.Field.split("_").join(" "),

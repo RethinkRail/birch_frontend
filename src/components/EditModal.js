@@ -10,7 +10,20 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
   // Setting the initial value of the input field when the modal appears
   useEffect(() => {
     if (editRowData) {
-      setInputValues(editRowData);
+      console.log(editRowData, "This is the edit row data")
+
+      const inputValueCopy = {...editRowData}
+      console.log(inputValueCopy)
+      if(relatedData) {
+        for(const key in inputValueCopy) {
+          const field = fields.find(field => field.Field.toLowerCase() === key);
+          if (field && tableSchema.some(schema => schema.name === field.Field && schema.isForeignKey) && inputValues[key] !== null) {
+
+            inputValueCopy[key] = relatedData[field.Field].find((obj) => Object.values(obj).some(value => String(value).toLowerCase() === String(inputValues[field.Field.toLowerCase()]).toLowerCase()))[tableSchema.find(schema => schema.name === field.Field).foreignKeyInfo.referencedColumn]
+          }
+        }
+      }
+      setInputValues(inputValueCopy);
     } else {
       const initialState = {};
       fields.filter(field => field.Field.toLowerCase() !== "id").forEach(field => {
@@ -18,7 +31,7 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
       });
       setInputValues(initialState);
     }
-  }, [editRowData, fields]);
+  }, [editRowData, fields, relatedData]);
 
   useEffect(() => {
     const fetchRelatedData = async () => {
@@ -37,6 +50,7 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
       }, {});
 
       setRelatedData(relatedDataMap);
+
     };
 
     fetchRelatedData();
@@ -71,6 +85,7 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
   // function to handle setting inputValue when input changes
   const handleInputChange = (e, fieldName, type) => {
     const { value } = e.target;
+    console.log("Input changed", value, fieldName, type)
     let parsedValue;
 
     if (type === 'number') {
@@ -120,8 +135,16 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
     const transformedValues = { ...filteredValue };
 
     for (const key in transformedValues) {
-      console.log(key)
       const field = fields.find(field => field.Field.toLowerCase() === key);
+      if (field && tableSchema.some(schema => schema.name === field.Field && schema.isForeignKey)) {
+        console.log(transformedValues[key], "This is the foreign key")
+        transformedValues[key] = parseInt(transformedValues[key]);
+      }
+      if (field && field.Type.toLowerCase() === 'datetime') {
+        transformedValues[key] = formatDateTime(transformedValues[key]);
+        console.log(transformedValues[key], "found one with type datetime");
+      }
+
       if (field && field.Field.toLowerCase() === 'last_update') {
         transformedValues[key] = new Date();
         console.log(transformedValues[key], "found one with type datetime");
@@ -200,14 +223,13 @@ const EditModal = ({ setModalShowing, fields, selectedTable, setTable, editRowDa
                 {tableSchema.find(schema => schema.name === field.Field && schema.isForeignKey) ? (
                     <select
                         className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2'
-                        // value={""}
-                        // defaultValue={editRowData && tableSchema.find(schema => schema.name === field.Field && schema.isForeignKey) ? editRowData[field.Field.toLowerCase()] : ''}
-                        value={editRowData && relatedData[field.Field] ? relatedData[field.Field].find((obj) => Object.values(obj).some(value => String(value).toLowerCase() === String(inputValues[field.Field.toLowerCase()]).toLowerCase()))[tableSchema.find(schema => schema.name === field.Field).foreignKeyInfo.referencedColumn] : inputValues[field.Field.toLowerCase()]}
+                        value={inputValues[field.Field] !== null ? inputValues[field.Field.toLowerCase()] : ""}
                         onChange={(e) => handleInputChange(e, field.Field.toLowerCase(), getInputType(field.Type))}
                     >
                       <option value=''>Select an option</option>
                       {relatedData[field.Field] && relatedData[field.Field].map(option => {
                         console.log(option, "This is the option")
+                        console.log("Recent value is", inputValues[field.Field.toLowerCase()])
                         const foreignKeyField = tableSchema.find(schema => schema.name === field.Field).foreignKeyInfo.referencedColumn;
                         console.log("Referenced field is", foreignKeyField)
                         return (

@@ -233,10 +233,10 @@ const OrderDetails = ({
         const  is_checked = e.target.checked
 
         if(is_checked){
-            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,true)
+            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,true,workOrder.work_order)
             setIsBilledToLessee(true)
         }else {
-            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,false)
+            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,false,workOrder.work_order)
             setIsBilledToLessee(false)
         }
     }

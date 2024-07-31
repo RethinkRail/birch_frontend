@@ -804,13 +804,14 @@ const Home = () => {
             });
     }
 
-    const handleBillToLessee = async (work_id,lessee_id,is_billed_to_lessee) =>{
+    const handleBillToLessee = async (work_id,lessee_id,is_billed_to_lessee,work_order) =>{
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
             'work_id': work_id,
             'user_id': userId,
             'lessee_id': lessee_id,
             'is_billed_to_lessee': is_billed_to_lessee,
+            'work_order': work_order,
 
         });
         console.log(data)

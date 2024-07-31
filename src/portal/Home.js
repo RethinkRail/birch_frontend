@@ -35,7 +35,7 @@ const Home = () => {
 
     }
 
-    const getWorkOrderById =  (work_id) => {
+    const getWorkOrderById =  async (work_id) => {
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -43,7 +43,7 @@ const Home = () => {
             headers: {}
         };
 
-         axios.request(config)
+        await axios.request(config)
             .then((response) => {
                 console.log(response.data)
                 console.log(workOrders)
@@ -288,7 +288,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangeExteriorPaintDate = (work_id, date) => {
         let data = qs.stringify({
             'exterior_paint': date ? date.toISOString() : null,
@@ -315,7 +314,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangePDDate = (work_id, date) => {
         let data = qs.stringify({
             'pd_date': date ? date.toISOString() : null,
@@ -342,7 +340,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleValveTearDownDate = (work_id, date) => {
         let data = qs.stringify({
             'valve_tear_down': date ? date.toISOString() : null,
@@ -369,7 +366,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleValveAssemblyDate = (work_id, date) => {
         let data = qs.stringify({
             'valve_date': date ? date.toISOString() : null,
@@ -396,7 +392,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleRepairDate = (work_id, date) => {
         let data = qs.stringify({
             'repair_date': date ? date.toISOString() : null,
@@ -477,7 +472,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleMTI = (work_id, date) => {
         let data = qs.stringify({
             'month_to_invoice': date ? date.toISOString() : null,
@@ -558,7 +552,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangeMOWK = (work_id, new_value) => {
         let data = qs.stringify({
             'mo_wk': new_value ? new_value : "",
@@ -585,7 +578,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangeSP = (work_id, new_value) => {
         let data = qs.stringify({
             'sp': new_value ? new_value : "",
@@ -612,7 +604,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangeTQ = (work_id, new_value) => {
         let data = qs.stringify({
             'tq': new_value ? new_value : "",
@@ -639,8 +630,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
-
     const handleChangeRE = (work_id, new_value) => {
         let data = qs.stringify({
             're': new_value ? new_value : "",
@@ -667,7 +656,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleChangeEP = (work_id, new_value) => {
         let data = qs.stringify({
             'ep': new_value ? new_value : "",
@@ -694,7 +682,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleMarkedFinalized = (work_id, is_checked) => {
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
@@ -744,7 +731,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleUpdateReasonToCome = (work_id, reasonToCome) => {
         console.log(work_id)
         console.log(reasonToCome)
@@ -773,9 +759,7 @@ const Home = () => {
                 console.log(error);
             });
     }
-
-
-    const handleOwnerBillingInformationChanged= (is_for_owner,work_id, purchase_order,invoice_number,invoice_date,invoice_net_days) => {
+    const handleBillingInformationChanged= async (is_for_owner,work_id, purchase_order,invoice_number,invoice_date,invoice_net_days) => {
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
             'is_for_owner': is_for_owner,
@@ -794,16 +778,17 @@ const Home = () => {
             },
             data: data
         };
-        axios.request(config)
+        await axios.request(config)
             .then((response) => {
+                console.log("calling donr")
                 console.log(response)
                 getWorkOrderById(work_id)
+
             })
             .catch((error) => {
                 console.log(error);
             });
     }
-
     const handleBillToLessee = async (work_id,lessee_id,is_billed_to_lessee,work_order) =>{
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
@@ -825,7 +810,8 @@ const Home = () => {
         };
         axios.request(config)
             .then((response) => {
-                console.log(workOrders)
+                console.log("calling done")
+                console.log(response.data)
                 if(is_billed_to_lessee){
                     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
                     setWorkOrders(updatedWorkOrders)
@@ -833,8 +819,6 @@ const Home = () => {
                     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
                     setWorkOrders(updatedWorkOrders)
                 }
-
-
             })
             .catch((error) => {
                 console.log(error);
@@ -987,7 +971,7 @@ const Home = () => {
                         updateTQ={handleChangeTQ}
                         updateRE={handleChangeRE}
                         updateEP={handleChangeEP}
-                        updateOwnerBilling={handleOwnerBillingInformationChanged}
+                        updateOwnerBilling={handleBillingInformationChanged}
                         updateBillToLessee={handleBillToLessee}
                     />
                 ) : null}

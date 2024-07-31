@@ -474,7 +474,7 @@ const WorkOrderDataTable = ({
                         updateTQ={updateTQ}
                         updateRE={updateRE}
                         updateEP={updateEP}
-                        updateOwnerBilling={updateOwnerBilling}
+                        updateBilling={updateOwnerBilling}
                         updateBillToLessee={updateBillToLessee}
                     />
                 ) : null}

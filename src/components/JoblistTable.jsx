@@ -1,16 +1,20 @@
 // Table.js
-import React, {useState} from 'react';
-import Jobs from '../DataSets/get_jobs.json'
+import React, {useEffect, useState} from 'react';
+
 // This component represents a draggable table with the ability to rearrange rows.
 
-const JoblistTable = () => {
+const JoblistTable = ({jobs}) => {
     // State to manage the table Jobs, which will be rearranged.
-    const [tableData, setTableData] = useState(Jobs);
+    const [tableData, setTableData] = useState([]);
 
     // Function to handle the drag start event for a row.
     const handleDragStart = (e, rowIndex) => {
         e.dataTransfer.setData('rowIndex', rowIndex);
     };
+    useEffect(() => {
+        console.log(jobs)
+        setTableData(jobs);
+    }, [jobs]);
 
     // Function to handle the drop event when a row is moved.
     const handleDrop = (e, rowIndex) => {

@@ -149,3 +149,19 @@ export  function replaceItemInArray(arr, newItem) {
     console.log(arr[index])
     return arr;
 }
+
+export const disableButtonsDuringAsync = async (isDisabled, containerRef) => {
+    // Find all buttons within the container
+    const buttons = containerRef.current.querySelectorAll('button');
+
+    // Disable all buttons
+    buttons.forEach((button) => {
+        button.disabled = isDisabled;
+        if (isDisabled) {
+            button.classList.add('rounded', 'opacity-50', 'cursor-not-allowed');
+        } else {
+            button.classList.remove('rounded', 'opacity-50', 'cursor-not-allowed');
+        }
+    });
+
+};

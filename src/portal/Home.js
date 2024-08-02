@@ -5,6 +5,8 @@ import WorkOrderDataTable from "../components/WorkOrderDataTable";
 import {replaceItemInArray, showToastMessage, updateObjectByIdInsideArray} from "../utils/CommonHelper";
 import Modal from "react-modal";
 import {toast} from "react-toastify";
+import WorkOrderModal from "../components/WorkOrderModal";
+import Plus from "../components/Plus";
 
 
 const qs = require('qs');
@@ -17,6 +19,7 @@ const Home = () => {
     const [completingTask, setcompletingTask] = useState(null)
     const routingStatusTextArea = useRef(null);
     const toastId = useRef(null)
+    const [workOrderModalShowing, setWorkOrderModalShowing] = useState(false)
     const getActiveTasks = () => {
         let config = {
             method: 'get',
@@ -93,6 +96,7 @@ const Home = () => {
             return axios.request(config)
                 .then((response) => {
                     setStatusCodes(response.data)
+                    console.log(response.data)
                     return Promise.resolve();
                 })
                 .catch((error) => {
@@ -976,6 +980,8 @@ const Home = () => {
                     />
                 ) : null}
             </div>
+
+            {workOrderModalShowing && <WorkOrderModal setWorkOrderModalShowing={setWorkOrderModalShowing} />}
             <Modal
                 isOpen={isCommentModalOpen}
                 contentLabel="POST COMMENT"
@@ -991,6 +997,11 @@ const Home = () => {
                         onClick={cancelTaskUpdate}>CANCEL
                 </button>
             </Modal>
+            <div className="p-5">
+                <button className="bg-[#002e54] h-8 w-8 p-1 rounded-full flex justify-center items-center fixed bottom-5 right-5" onClick={() => setWorkOrderModalShowing((prev) => (!prev))}>
+                    <Plus />
+                </button>
+            </div>
         </React.Fragment>
     )
 }

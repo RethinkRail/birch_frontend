@@ -9,15 +9,14 @@ import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
 import {
     convertSqlToFormattedDate,
     convertSqlToFormattedDateTime,
-    formatDateToSQL,
-    toSqlDatetime
+
 } from "../utils/DateTimeHelper";
-import {printAAR} from "../utils/aarHelper";
-import {printBBOM, printInvoice} from "../utils/documentPrinterHelper";
+
 import DatePicker from "react-datepicker";
-import {disableButtonsDuringAsync} from "../utils/CommonHelper";
-import JoblistTable from "./JoblistTable";
-import PartsTable from "./PartsTable";
+import { printATask, printBRC, printInvoice } from '../utils/documentPrintHelper';
+//
+// import JoblistTable from "./JoblistTable";
+// import PartsTable from "./PartsTable";
 
 const OrderDetails = ({
                           commonData,
@@ -51,6 +50,21 @@ const OrderDetails = ({
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
     // console.log(commonData)
+
+
+
+    // Method to show update and cancel button when purchase order, invoice number, invoice date, due date changes
+
+    const [ownerPurchaseOrderOriginal, setOwnerPurchaseOrderOriginal] = useState()
+    const [ownerInvoiceNumberOriginal, setOwnerInvoiceNumberOriginal] = useState()
+    const [ownerInvoiceDateOriginal, setOwnerInvoiceDateOriginal] = useState()
+    const [ownerDueDateOriginal, setOwnerDueDateOriginal] = useState()
+    const [ownerInvoiceNetDaysOriginal, setOwnerInvoiceNetDaysOriginal] = useState()
+    const [showButtons, setShowButtons] = useState(false)
+
+
+
+
     const containerRef = useRef();
     workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
 
@@ -155,23 +169,34 @@ const OrderDetails = ({
         setIsBillingInformationChangedForLessee(false)
 
         setOwnerPurchaseOrder(workOrder.purchase_order)
+        // This is for the button displayer function
+        setOwnerPurchaseOrderOriginal(workOrder.purchase_order)
         setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? '')
         setPurchaseOrderChangedForOwner(false)
         setPurchaseOrderChangedForLessee(false)
 
         setOwnerInvoiceNumber(workOrder.invoice_number)
+        // This is for the button displayer function
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number)
         setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? '')
         setInvoiceChangedForOwner(false)
         setInvoiceChangedForLessee(false)
 
 
         setOwnerInvoiceNetDays(workOrder.invoice_net_days)
+        // This is for the button displayer function
+        setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days)
         setLesseeInvoiceNetDays(workOrder.secondary_owner_info?workOrder.secondary_owner_info.invoice_net_days:0)
         setInvoiceNetDaysChangedForOwner(false)
         setInvoiceNetDaysChangedForLessee(false)
 
         console.log(workOrder.secondary_owner_info)
         setOwnerInvoiceDate(workOrder.invoice_date)
+        // This is for the button displayer function
+        setOwnerInvoiceDateOriginal(workOrder.invoice_date)
+
+        // This is for the button displayer function
+        setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date, workOrder.invoice_net_days)))
         if(workOrder.secondary_owner_info!=null){
             console.log(workOrder.secondary_owner_info.invoice_date==process.env.REACT_APP_DEFAULT_DATE)
         }
@@ -190,7 +215,12 @@ const OrderDetails = ({
         //setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
         setIsBilledToLessee(workOrder.secondary_owner_info==null?false:true)
     }, [workOrder]);
-
+    const formatDateToSQL=(date)=> {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
     const handleDropdownChangeInDetails = (e, workId) => {
         setupdatedStatusCode(e.target.value)
         setIsStatusDropDownModalOpenInDetails(true)
@@ -544,7 +574,7 @@ const OrderDetails = ({
         //
         //     console.log(purchaseorderChangedForOwner)
         // }
-        // checkBillingInformationChangedForOwner()
+        checkBillingInformationChangedForOwner()
     }
     const handleLesseePurchaseOrderChange = (event) => {
         const value = event.target.value.toString()
@@ -564,6 +594,14 @@ const OrderDetails = ({
     const handleOwnerInvoiceDateChanged = (value) => {
         setOwnerInvoiceDate(toSqlDatetime(value))
     }
+
+    function toSqlDatetime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     const handleLesseeInvoiceDateChanged = (value) => {
         console.log("lessee invoice date changed")
         setLesseeInvoiceDate(toSqlDatetime(value))
@@ -595,7 +633,6 @@ const OrderDetails = ({
 
     const updateBillingInformation = async (isForOwner)=>{
         console.log("called from here"+isForOwner)
-        disableButtonsDuringAsync(true,containerRef)
         if(isForOwner){
             const result = await  updateBilling(true,workOrder.id,ownerPurchaseOrder,ownerInvoiceNumber,ownerInvoiceDate,ownerInvoiceNetDays)
             console.log(result)
@@ -603,7 +640,6 @@ const OrderDetails = ({
             const result =await updateBilling(false,workOrder.id,lesseePurchaseOrder,lesseeInvoiceNumber,lesseeInvoiceDate,lesseeInvoiceNetDays)
             console.log(result)
         }
-        disableButtonsDuringAsync(false,containerRef)
     }
 
     const formatTasks = (tasks) => {
@@ -628,6 +664,33 @@ const OrderDetails = ({
 
         return result.trim(); // Remove trailing newline
     }
+
+    // This is for the...
+    useEffect(() => {
+        const handleCheckForButtons = () => {
+            if(ownerPurchaseOrder !== ownerPurchaseOrderOriginal || ownerInvoiceNumber !== ownerInvoiceNumberOriginal || ownerInvoiceDate !== ownerInvoiceDateOriginal || String(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== String(ownerDueDateOriginal)) {
+                console.log("Show buttons will be set to true")
+                ownerPurchaseOrder !== ownerPurchaseOrderOriginal ? console.log(`owner purchase order failed`) : console.log(`owner purchase order pass`)
+                ownerInvoiceNumber !== ownerInvoiceNumberOriginal ? console.log(`owner invoice number failed`) : console.log(`owner invoice number pass`)
+                ownerInvoiceDate !== ownerInvoiceDateOriginal ? console.log(`owner invoice date failed`) : console.log(`owner invoice date pass`)
+                console.log(addDays(ownerInvoiceDate, ownerInvoiceNetDays), "changed")
+                console.log(ownerDueDateOriginal, "original")
+                new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== ownerDueDateOriginal ? console.log(`owner due date failed`) : console.log(`owner due date pass`)
+                setShowButtons(true)
+            } else {
+                setShowButtons(false)
+            }
+        }
+        handleCheckForButtons()
+    }, [ownerInvoiceDate, ownerInvoiceNetDays, ownerPurchaseOrder, ownerInvoiceNumber])
+
+    const handleCancel = () => {
+        setOwnerPurchaseOrder(ownerPurchaseOrderOriginal)
+        setOwnerInvoiceNumber(ownerInvoiceNumberOriginal)
+        setOwnerInvoiceDate(ownerInvoiceDateOriginal)
+        setOwnerInvoiceNetDays(ownerInvoiceNetDaysOriginal)
+    }
+
     return (
         <div ref={containerRef}>
             <dialog id="orderDetailsModal" className="modal rounded-md h-full ">
@@ -653,7 +716,7 @@ const OrderDetails = ({
                         {/*Side menu*/}
                         <div className="absolute top-1/3 right-4">
                             <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
-                                <li className='flex h-fit text-[10px] p-0'>
+                                <li className='flex h-fit text-[10px] p-0' onClick={printBRC}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -666,7 +729,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printAAR(workOrder,false,1)}>
+                                    <span className="p-1" >
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -678,7 +741,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printBBOM(workOrder,1)}>
+                                    <span className="p-1" >
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -689,8 +752,8 @@ const OrderDetails = ({
                                         BBOM
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printInvoice(workOrder,1)}>
+                                <li className='flex h-fit text-[10px] p-0' onClick={printInvoice}>
+                                    <span className="p-1" >
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -713,7 +776,7 @@ const OrderDetails = ({
                                         BRC
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0'>
+                                <li className='flex h-fit text-[10px] p-0' onClick={() => printATask(workOrder)}>
                                 <span className="p-1">
                                     <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                          xmlns="http://www.w3.org/2000/svg">
@@ -1187,7 +1250,7 @@ const OrderDetails = ({
                                         <input type="text" className="input input-bordered  h-8 mt-2 w-full"
                                                onChange={handleOwnerPurchaseOrderChange}
 
-                                          id="purchase_order_owner" value={ownerPurchaseOrder}/>
+                                               id="purchase_order_owner" value={ownerPurchaseOrder}/>
                                         <p className='mt-2'>INVOICE NUMBER</p>
                                         <div className="relative">
 
@@ -1340,7 +1403,9 @@ const OrderDetails = ({
                                                    disabled value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
                                         </div>
 
-                                        <div className="mt-8">
+                                        do your work here
+                                        {showButtons && (
+                                            <div className="mt-8">
                                             <span >
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded  cursor-pointer"
@@ -1351,16 +1416,18 @@ const OrderDetails = ({
 
 
 
-                                                {/*<button*/}
-                                                {/*    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"*/}
-                                                {/*    onClick={cancelOwnerBillingInformationChange}*/}
+                                                <button
+                                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                                                    onClick={handleCancel}
 
-                                                {/*>*/}
-                                                {/*CANCEL*/}
-                                                {/*</button>*/}
+                                                >
+                                                CANCEL
+                                                </button>
                                             </span>
 
-                                        </div>
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             </div>
@@ -1375,7 +1442,7 @@ const OrderDetails = ({
                                         <div className='p-2'>
                                             <p>Purchase Order</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                                  id="purchase_order_lesseer" value={lesseePurchaseOrder} onChange={handleLesseePurchaseOrderChange}/>
+                                                   id="purchase_order_lesseer" value={lesseePurchaseOrder} onChange={handleLesseePurchaseOrderChange}/>
                                             <p className='mt-2'>INVOICE NUMBER</p>
                                             <div className="relative">
 
@@ -1546,8 +1613,8 @@ const OrderDetails = ({
                             )}
                             {/*End Order information Lessee */}
 
-                            <JoblistTable jobs={jobs} />
-                            <PartsTable />
+                            {/*<JoblistTable jobs={jobs} />*/}
+                            {/*<PartsTable />*/}
                             <div className="w-full bg-white p-[25px] flex mt-[24px] border rounded">
                                 <div className="">
                                     <h2 className='text-[16px] font-normal '>TOTAL HOURS</h2>

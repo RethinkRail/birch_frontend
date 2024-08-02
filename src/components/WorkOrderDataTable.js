@@ -70,6 +70,7 @@ const WorkOrderDataTable = ({
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
         var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
+
         const workOrderObject = {
             'workOrder': workOrder,
             'estimated_time':round2Dec(laborHours),

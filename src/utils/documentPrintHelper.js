@@ -1149,7 +1149,14 @@ function saveDivII(sTable, title, filename, landscape = false) {
 
     var win = window.open('', '', page_size);
     win.document.write('<html><head>');
-    win.document.write('<img style="position:absolute; width:16.68rem;" src="img\\36.png" ><div style="text-align:center; margin:0.84rem; font: 1rem Calibri;">' + title + '</div><br>');
+    win.document.write(
+        '<img style="position:absolute; width:16.68rem;" src="' +
+        process.env.PUBLIC_URL +
+        '/logo.png">' +
+        '<div style="text-align:center; margin:0.84rem; font: 1rem Calibri;">' +
+        title +
+        '</div><br>'
+    );
     win.document.write(style);
     win.document.write('<title>' + filename + '</title>');
     win.document.write('</head>');

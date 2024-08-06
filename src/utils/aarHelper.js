@@ -6,7 +6,6 @@
  **/
 
 import {round2Dec} from "./NumberHelper";
-import {convertSqlToFormattedDate} from "./DateTimeHelper";
 
 /**
  *  This method will generate 500 bytes AAR
@@ -15,120 +14,729 @@ import {convertSqlToFormattedDate} from "./DateTimeHelper";
  * @param forWhom 1 - combined , 2 for owner , 3 lessee
  */
 
-export function printAAR(item, _wheel_detail = false,forWhom) {
+export function printAAR(item, _wheel_detail = false, forWhom) {
     let data = null;
     let wheel_detail = _wheel_detail;
-    let record_format = { name: 'record_format', column: 1, length: 1, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let billing_invoicing_party = { name: 'billing_invoicing_party', column: 2, length: 4, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let billed_party = { name: 'billed_party', column: 6, length: 4, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let account_date = { name: 'account_date', column: 10, length: 4, formate: 'N', wheel_detail: wheel_detail, value: null };
-    let invoice_number = { name: 'invoice_number', column: 14, length: 16, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let price_master_file_indicator = { name: 'price_master_file_indicator', column: 30, length: 1, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let detail_source = { name: 'detail_source', column: 31, length: 2, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let document_reference_number = { name: 'document_reference_number', column: 33, length: 15, formate: 'A/N', wheel_detail: wheel_detail, value: null };
-    let car_initial = { name: 'car_initial', column: 48, length: 4, formate: 'A', wheel_detail: wheel_detail, value: null };
-    let car_number = { name: 'car_number', column: 52, length: 6, formate: 'N', wheel_detail: wheel_detail, value: null };
-    let kind_of_car_symbol = { name: 'kind_of_car_symbol', column: 58, length: 1, formate: 'A', wheel_detail: wheel_detail, value: null };
-    let load_empty_indicator = { name: 'load_empty_indicator', column: 59, length: 1, formate: 'A/N', wheel_detail: wheel_detail, value: null };
+    let record_format = {
+        name: 'record_format',
+        column: 1,
+        length: 1,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let billing_invoicing_party = {
+        name: 'billing_invoicing_party',
+        column: 2,
+        length: 4,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let billed_party = {
+        name: 'billed_party',
+        column: 6,
+        length: 4,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let account_date = {
+        name: 'account_date',
+        column: 10,
+        length: 4,
+        formate: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let invoice_number = {
+        name: 'invoice_number',
+        column: 14,
+        length: 16,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let price_master_file_indicator = {
+        name: 'price_master_file_indicator',
+        column: 30,
+        length: 1,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let detail_source = {
+        name: 'detail_source',
+        column: 31,
+        length: 2,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let document_reference_number = {
+        name: 'document_reference_number',
+        column: 33,
+        length: 15,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let car_initial = {
+        name: 'car_initial',
+        column: 48,
+        length: 4,
+        formate: 'A',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let car_number = {name: 'car_number', column: 52, length: 6, formate: 'N', wheel_detail: wheel_detail, value: null};
+    let kind_of_car_symbol = {
+        name: 'kind_of_car_symbol',
+        column: 58,
+        length: 1,
+        formate: 'A',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let load_empty_indicator = {
+        name: 'load_empty_indicator',
+        column: 59,
+        length: 1,
+        formate: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
-    let repair_date = { name: 'repair_date', column: 60, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let splc = { name: 'splc', column: 66, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let repairing_party = { name: 'repairing_party', column: 72, length: 4, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let repairing_party_invoice_number = { name: 'repairing_party_invoice_number', column: 76, length: 16, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let repairing_party_document_reference_number = { name: 'repairing_party_document_reference_number', column: 92, length: 15, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let repair_facility_type = { name: 'repair_facility_type', column: 107, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let location_on_car = { name: 'location_on_car', column: 109, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let reserved_for_future_crb_use_1 = { name: 'reserved_for_future_crb_use_1', column: 111, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let reserved_for_future_crb_use_2 = { name: 'reserved_for_future_crb_use_2', column: 112, length: 1, format: 'N', wheel_detail: wheel_detail, value: null };
-    let quantity = { name: 'quantity', column: 113, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let condition_code = { name: 'condition_code', column: 117, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let reserved_for_future_crb_use_3 = { name: 'reserved_for_future_crb_use_3', column: 118, length: 2, format: 'N', wheel_detail: wheel_detail, value: null };
-    let applied_job_code = { name: 'applied_job_code', column: 120, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let applied_qualifier = { name: 'applied_qualifier', column: 124, length: 3, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let why_made_code = { name: 'why_made_code', column: 127, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let reserved_for_future_crb_use_4 = { name: 'reserved_for_future_crb_use_4', column: 129, length: 2, format: 'N', wheel_detail: wheel_detail, value: null };
-    let removed_job_code = { name: 'removed_job_code', column: 131, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let removed_qualifier = { name: 'removed_qualifier', column: 135, length: 3, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let responsibility_code = { name: 'responsibility_code', column: 138, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let defect_card_jic_party = { name: 'defect_card_jic_party', column: 139, length: 4, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let defect_card_jic_date = { name: 'defect_card_jic_date', column: 143, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let labor_charge = { name: 'labor_charge', column: 149, length: 7, format: 'N', wheel_detail: wheel_detail, value: null };
-    let material_charge = { name: 'material_charge', column: 156, length: 8, format: 'N', wheel_detail: wheel_detail, value: null };
-    let material_sign = { name: 'material_sign', column: 164, length: 1, format: 'A', wheel_detail: wheel_detail, value: null };
-    let machine_priceable_indicator = { name: 'machine_priceable_indicator', column: 165, length: 1, format: 'A', wheel_detail: wheel_detail, value: null };
-    let wrong_repair_indicator = { name: 'wrong_repair_indicator', column: 166, length: 1, format: 'A', wheel_detail: wheel_detail, value: null };
-    let wheel_narrative = { name: 'wheel_narrative', column: 167, length: wheel_detail ? 28 : 50, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let applied_wheel_date = { name: 'applied_wheel_date', column: 195, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let applied_wheel_manufacture_code = { name: 'applied_wheel_manufacture_code', column: 199, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let applied_wheel_class_code = { name: 'applied_wheel_class_code', column: 201, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let applied_side_reading = { name: 'applied_side_reading', column: 202, length: 2, format: 'N', wheel_detail: wheel_detail, value: null };
-    let applied_finger_reading = { name: 'applied_finger_reading', column: 204, length: 2, format: 'N', wheel_detail: wheel_detail, value: null };
-    let removed_wheel_date = { name: 'removed_wheel_date', column: 206, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let removed_wheel_manufacture_code = { name: 'removed_wheel_manufacture_code', column: 210, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let removed_wheel_class_code = { name: 'removed_wheel_class_code', column: 212, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let removed_side_reading = { name: 'removed_side_reading', column: 213, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let removed_finger_reading = { name: 'removed_finger_reading', column: 215, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let labor_rate = { name: 'labor_rate', column: 217, length: 5, format: 'N', wheel_detail: wheel_detail, value: null };
-    let expanded_splc = { name: 'expanded_splc', column: 222, length: 9, format: 'N', wheel_detail: wheel_detail, value: null };
-    let cif_repairing_party = { name: 'cif_repairing_party', column: 231, length: 13, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let cif_billing_invoicing_party = { name: 'cif_billing_invoicing_party', column: 244, length: 13, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let cif_billed_party = { name: 'cif_billed_party', column: 257, length: 13, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let cif_defect_jic_party = { name: 'cif_defect_jic_party', column: 270, length: 13, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let repair_facility_arrival_date = { name: 'repair_facility_arrival_date', column: 283, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let line_number = { name: 'line_number', column: 289, length: 5, format: 'N', wheel_detail: wheel_detail, value: null };
-    let railinc_inbound_date_stamp = { name: 'railinc_inbound_date_stamp', column: 294, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let railinc_outbound_date_stamp = { name: 'railinc_outbound_date_stamp', column: 300, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let resubmitted_invoice_indicator = { name: 'resubmitted_invoice_indicator', column: 306, length: 1, format: 'A/N', wheel_detail: wheel_detail, value: null };
+    let repair_date = {
+        name: 'repair_date',
+        column: 60,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let splc = {name: 'splc', column: 66, length: 6, format: 'N', wheel_detail: wheel_detail, value: null};
+    let repairing_party = {
+        name: 'repairing_party',
+        column: 72,
+        length: 4,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let repairing_party_invoice_number = {
+        name: 'repairing_party_invoice_number',
+        column: 76,
+        length: 16,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let repairing_party_document_reference_number = {
+        name: 'repairing_party_document_reference_number',
+        column: 92,
+        length: 15,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let repair_facility_type = {
+        name: 'repair_facility_type',
+        column: 107,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let location_on_car = {
+        name: 'location_on_car',
+        column: 109,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let reserved_for_future_crb_use_1 = {
+        name: 'reserved_for_future_crb_use_1',
+        column: 111,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let reserved_for_future_crb_use_2 = {
+        name: 'reserved_for_future_crb_use_2',
+        column: 112,
+        length: 1,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let quantity = {name: 'quantity', column: 113, length: 4, format: 'N', wheel_detail: wheel_detail, value: null};
+    let condition_code = {
+        name: 'condition_code',
+        column: 117,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let reserved_for_future_crb_use_3 = {
+        name: 'reserved_for_future_crb_use_3',
+        column: 118,
+        length: 2,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_job_code = {
+        name: 'applied_job_code',
+        column: 120,
+        length: 4,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_qualifier = {
+        name: 'applied_qualifier',
+        column: 124,
+        length: 3,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let why_made_code = {
+        name: 'why_made_code',
+        column: 127,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let reserved_for_future_crb_use_4 = {
+        name: 'reserved_for_future_crb_use_4',
+        column: 129,
+        length: 2,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_job_code = {
+        name: 'removed_job_code',
+        column: 131,
+        length: 4,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_qualifier = {
+        name: 'removed_qualifier',
+        column: 135,
+        length: 3,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let responsibility_code = {
+        name: 'responsibility_code',
+        column: 138,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let defect_card_jic_party = {
+        name: 'defect_card_jic_party',
+        column: 139,
+        length: 4,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let defect_card_jic_date = {
+        name: 'defect_card_jic_date',
+        column: 143,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let labor_charge = {
+        name: 'labor_charge',
+        column: 149,
+        length: 7,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let material_charge = {
+        name: 'material_charge',
+        column: 156,
+        length: 8,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let material_sign = {
+        name: 'material_sign',
+        column: 164,
+        length: 1,
+        format: 'A',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let machine_priceable_indicator = {
+        name: 'machine_priceable_indicator',
+        column: 165,
+        length: 1,
+        format: 'A',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let wrong_repair_indicator = {
+        name: 'wrong_repair_indicator',
+        column: 166,
+        length: 1,
+        format: 'A',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let wheel_narrative = {
+        name: 'wheel_narrative',
+        column: 167,
+        length: wheel_detail ? 28 : 50,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_wheel_date = {
+        name: 'applied_wheel_date',
+        column: 195,
+        length: 4,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_wheel_manufacture_code = {
+        name: 'applied_wheel_manufacture_code',
+        column: 199,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_wheel_class_code = {
+        name: 'applied_wheel_class_code',
+        column: 201,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_side_reading = {
+        name: 'applied_side_reading',
+        column: 202,
+        length: 2,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let applied_finger_reading = {
+        name: 'applied_finger_reading',
+        column: 204,
+        length: 2,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_wheel_date = {
+        name: 'removed_wheel_date',
+        column: 206,
+        length: 4,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_wheel_manufacture_code = {
+        name: 'removed_wheel_manufacture_code',
+        column: 210,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_wheel_class_code = {
+        name: 'removed_wheel_class_code',
+        column: 212,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_side_reading = {
+        name: 'removed_side_reading',
+        column: 213,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let removed_finger_reading = {
+        name: 'removed_finger_reading',
+        column: 215,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let labor_rate = {name: 'labor_rate', column: 217, length: 5, format: 'N', wheel_detail: wheel_detail, value: null};
+    let expanded_splc = {
+        name: 'expanded_splc',
+        column: 222,
+        length: 9,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let cif_repairing_party = {
+        name: 'cif_repairing_party',
+        column: 231,
+        length: 13,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let cif_billing_invoicing_party = {
+        name: 'cif_billing_invoicing_party',
+        column: 244,
+        length: 13,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let cif_billed_party = {
+        name: 'cif_billed_party',
+        column: 257,
+        length: 13,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let cif_defect_jic_party = {
+        name: 'cif_defect_jic_party',
+        column: 270,
+        length: 13,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let repair_facility_arrival_date = {
+        name: 'repair_facility_arrival_date',
+        column: 283,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let line_number = {
+        name: 'line_number',
+        column: 289,
+        length: 5,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let railinc_inbound_date_stamp = {
+        name: 'railinc_inbound_date_stamp',
+        column: 294,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let railinc_outbound_date_stamp = {
+        name: 'railinc_outbound_date_stamp',
+        column: 300,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let resubmitted_invoice_indicator = {
+        name: 'resubmitted_invoice_indicator',
+        column: 306,
+        length: 1,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
-    let original_invoice_number = { name: 'original_invoice_number', column: 307, length: 16, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let original_account_date = { name: 'original_account_date', column: 323, length: 4, format: 'N', wheel_detail: wheel_detail, value: null };
-    let aar_component_id = { name: 'aar_component_id', column: 327, length: 14, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let ddct_incident_id = { name: 'ddct_incident_id', column: 341, length: 14, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let reserved_for_future_crb_use_5 = { name: 'reserved_for_future_crb_use_5', column: 353, length: 48, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let free_user_area = { name: 'free_user_area', column: 401, length: 100, format: 'A/N', wheel_detail: wheel_detail, value: null };
+    let original_invoice_number = {
+        name: 'original_invoice_number',
+        column: 307,
+        length: 16,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let original_account_date = {
+        name: 'original_account_date',
+        column: 323,
+        length: 4,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let aar_component_id = {
+        name: 'aar_component_id',
+        column: 327,
+        length: 14,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let ddct_incident_id = {
+        name: 'ddct_incident_id',
+        column: 341,
+        length: 14,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let reserved_for_future_crb_use_5 = {
+        name: 'reserved_for_future_crb_use_5',
+        column: 353,
+        length: 48,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let free_user_area = {
+        name: 'free_user_area',
+        column: 401,
+        length: 100,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
-    let total_record_count = { name: 'total_record_count', column: 33, length: 7, format: 'N', wheel_detail: wheel_detail, value: null };
-    let total_labor_charge = { name: 'total_labor_charge', column: 40, length: 10, format: 'N', wheel_detail: wheel_detail, value: null };
-    let total_material_charge = { name: 'total_material_charge', column: 50, length: 16, format: 'N', wheel_detail: wheel_detail, value: null };
-    let total_sign = { name: 'total_sign', column: 66, length: 1, format: 'A', wheel_detail: wheel_detail, value: null };
-    let invoice_date = { name: 'invoice_date', column: 67, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let taxpayer_id = { name: 'taxpayer_id', column: 73, length: 15, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let payment_term = { name: 'payment_term', column: 88, length: 2, format: 'N', wheel_detail: wheel_detail, value: null };
-    let payment_due_date = { name: 'payment_due_date', column: 90, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let railinc_inbound_date = { name: 'railinc_inbound_date', column: 96, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
-    let railinc_outbound_date = { name: 'railinc_outbound_date', column: 102, length: 6, format: 'N', wheel_detail: wheel_detail, value: null };
+    let total_record_count = {
+        name: 'total_record_count',
+        column: 33,
+        length: 7,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let total_labor_charge = {
+        name: 'total_labor_charge',
+        column: 40,
+        length: 10,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let total_material_charge = {
+        name: 'total_material_charge',
+        column: 50,
+        length: 16,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let total_sign = {name: 'total_sign', column: 66, length: 1, format: 'A', wheel_detail: wheel_detail, value: null};
+    let invoice_date = {
+        name: 'invoice_date',
+        column: 67,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let taxpayer_id = {
+        name: 'taxpayer_id',
+        column: 73,
+        length: 15,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let payment_term = {
+        name: 'payment_term',
+        column: 88,
+        length: 2,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let payment_due_date = {
+        name: 'payment_due_date',
+        column: 90,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let railinc_inbound_date = {
+        name: 'railinc_inbound_date',
+        column: 96,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let railinc_outbound_date = {
+        name: 'railinc_outbound_date',
+        column: 102,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
-    let rt_contact_type = { name: 'rt_contact_type', column: 31, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_company_name = { name: 'rt_company_name', column: 33, length: 50, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_name = { name: 'rt_name', column: 83, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_title = { name: 'rt_title', column: 118, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_phone = { name: 'rt_phone', column: 153, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_fax = { name: 'rt_fax', column: 178, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_email = { name: 'rt_email', column: 203, length: 60, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_address1 = { name: 'rt_address1', column: 263, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_address2 = { name: 'rt_address2', column: 308, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_address3 = { name: 'rt_address3', column: 353, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_address4 = { name: 'rt_address4', column: 398, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_city = { name: 'rt_city', column: 443, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_state = { name: 'rt_state', column: 478, length: 2, format: 'A', wheel_detail: wheel_detail, value: null };
-    let rt_country_code = { name: 'rt_country_code', column: 480, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let rt_zip_code = { name: 'rt_zip_code', column: 482, length: 10, format: 'A/N', wheel_detail: wheel_detail, value: null };
+    let rt_contact_type = {
+        name: 'rt_contact_type',
+        column: 31,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_company_name = {
+        name: 'rt_company_name',
+        column: 33,
+        length: 50,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_name = {name: 'rt_name', column: 83, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_title = {name: 'rt_title', column: 118, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_phone = {name: 'rt_phone', column: 153, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_fax = {name: 'rt_fax', column: 178, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_email = {name: 'rt_email', column: 203, length: 60, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_address1 = {
+        name: 'rt_address1',
+        column: 263,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_address2 = {
+        name: 'rt_address2',
+        column: 308,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_address3 = {
+        name: 'rt_address3',
+        column: 353,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_address4 = {
+        name: 'rt_address4',
+        column: 398,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_city = {name: 'rt_city', column: 443, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let rt_state = {name: 'rt_state', column: 478, length: 2, format: 'A', wheel_detail: wheel_detail, value: null};
+    let rt_country_code = {
+        name: 'rt_country_code',
+        column: 480,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let rt_zip_code = {
+        name: 'rt_zip_code',
+        column: 482,
+        length: 10,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
-    let bp_contact_type = { name: 'bp_contact_type', column: 31, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_company_name = { name: 'bp_company_name', column: 33, length: 50, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_name = { name: 'bp_name', column: 83, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_title = { name: 'bp_title', column: 118, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_phone = { name: 'bp_phone', column: 153, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_fax = { name: 'bp_fax', column: 178, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_email = { name: 'bp_email', column: 203, length: 60, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_address1 = { name: 'bp_address1', column: 263, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_address2 = { name: 'bp_address2', column: 308, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_address3 = { name: 'bp_address3', column: 353, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_address4 = { name: 'bp_address4', column: 398, length: 45, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_city = { name: 'bp_city', column: 443, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_state = { name: 'bp_state', column: 478, length: 2, format: 'A', wheel_detail: wheel_detail, value: null };
-    let bp_country_code = { name: 'bp_country_code', column: 480, length: 2, format: 'A/N', wheel_detail: wheel_detail, value: null };
-    let bp_zip_code = { name: 'bp_zip_code', column: 482, length: 10, format: 'A/N', wheel_detail: wheel_detail, value: null };
+    let bp_contact_type = {
+        name: 'bp_contact_type',
+        column: 31,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_company_name = {
+        name: 'bp_company_name',
+        column: 33,
+        length: 50,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_name = {name: 'bp_name', column: 83, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_title = {name: 'bp_title', column: 118, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_phone = {name: 'bp_phone', column: 153, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_fax = {name: 'bp_fax', column: 178, length: 25, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_email = {name: 'bp_email', column: 203, length: 60, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_address1 = {
+        name: 'bp_address1',
+        column: 263,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_address2 = {
+        name: 'bp_address2',
+        column: 308,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_address3 = {
+        name: 'bp_address3',
+        column: 353,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_address4 = {
+        name: 'bp_address4',
+        column: 398,
+        length: 45,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_city = {name: 'bp_city', column: 443, length: 35, format: 'A/N', wheel_detail: wheel_detail, value: null};
+    let bp_state = {name: 'bp_state', column: 478, length: 2, format: 'A', wheel_detail: wheel_detail, value: null};
+    let bp_country_code = {
+        name: 'bp_country_code',
+        column: 480,
+        length: 2,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let bp_zip_code = {
+        name: 'bp_zip_code',
+        column: 482,
+        length: 10,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
 
     var my_new_order = item;
     var filename = "BIRCH " + my_new_order.railcar_id + ".txt";
@@ -138,23 +746,23 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
 
 
     var owner_address = {
-        "id": forWhom==1 || forWhom ==2 ? owner.id:lessee.id,
-        "name": forWhom==1 || forWhom ==2 ? owner.name:lessee.name,
-        "labor_rate":  forWhom==1 || forWhom ==2 ? owner.labor_rate:lessee.labor_rate,
-        "markup_percent": forWhom==1 || forWhom ==2 ? owner.markup_percent:lessee.markup_percent,
-        "abbreviation": forWhom==1 || forWhom ==2 ? owner.abbreviation:lessee.abbreviation,
-        "billing_address": forWhom==1 || forWhom ==2 ? owner.billing_address:lessee.billing_address,
-        "address_line1": forWhom==1 || forWhom ==2 ? owner.address_line1:lessee.address_line1,
-        "address_line2": forWhom==1 || forWhom ==2 ? owner.address_line2:lessee.address_line2,
-        "city": forWhom==1 || forWhom ==2 ? owner.city:lessee.city,
-        "state": forWhom==1 || forWhom ==2 ? owner.state:lessee.state,
-        "country": forWhom==1 || forWhom ==2 ? owner.country:lessee.country,
-        "zip_code": forWhom==1 || forWhom ==2 ? owner.zip_code:lessee.zip_code,
-        "contact_name": forWhom==1 || forWhom ==2 ? owner.contact_name:lessee.contact_name,
-        "contact_number":forWhom==1 || forWhom ==2 ? owner.contact_number:lessee.contact_number,
-        "contact_email": forWhom==1 || forWhom ==2 ? owner.contact_email:lessee.contact_email,
-        "is_po": forWhom==1 || forWhom ==2 ? owner.is_po:lessee.is_po,
-        "is_active": forWhom==1 || forWhom ==2 ? owner.is_active:lessee.is_active
+        "id": forWhom == 1 || forWhom == 2 ? owner.id : lessee.id,
+        "name": forWhom == 1 || forWhom == 2 ? owner.name : lessee.name,
+        "labor_rate": forWhom == 1 || forWhom == 2 ? owner.labor_rate : lessee.labor_rate,
+        "markup_percent": forWhom == 1 || forWhom == 2 ? owner.markup_percent : lessee.markup_percent,
+        "abbreviation": forWhom == 1 || forWhom == 2 ? owner.abbreviation : lessee.abbreviation,
+        "billing_address": forWhom == 1 || forWhom == 2 ? owner.billing_address : lessee.billing_address,
+        "address_line1": forWhom == 1 || forWhom == 2 ? owner.address_line1 : lessee.address_line1,
+        "address_line2": forWhom == 1 || forWhom == 2 ? owner.address_line2 : lessee.address_line2,
+        "city": forWhom == 1 || forWhom == 2 ? owner.city : lessee.city,
+        "state": forWhom == 1 || forWhom == 2 ? owner.state : lessee.state,
+        "country": forWhom == 1 || forWhom == 2 ? owner.country : lessee.country,
+        "zip_code": forWhom == 1 || forWhom == 2 ? owner.zip_code : lessee.zip_code,
+        "contact_name": forWhom == 1 || forWhom == 2 ? owner.contact_name : lessee.contact_name,
+        "contact_number": forWhom == 1 || forWhom == 2 ? owner.contact_number : lessee.contact_number,
+        "contact_email": forWhom == 1 || forWhom == 2 ? owner.contact_email : lessee.contact_email,
+        "is_po": forWhom == 1 || forWhom == 2 ? owner.is_po : lessee.is_po,
+        "is_active": forWhom == 1 || forWhom == 2 ? owner.is_active : lessee.is_active
     }
 
     // ====================================================================================
@@ -192,11 +800,11 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
     let number_of_jobs = 0
 
 
-    let labor_cost= 0;
+    let labor_cost = 0;
     let material_cost = 0
     let total_hour = 0;
     let net_cost = 0;
-    if(forWhom ==1){
+    if (forWhom == 1) {
         workorder.joblist.forEach((myjob, i) => {
             number_of_jobs++;
             total_hour += (myjob.labor_time * myjob.quantity)
@@ -207,10 +815,10 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
                 total_material_cost += Number(round2Dec(single_mat_cost))
             });
         });
-        net_cost= labor_cost+material_cost
-    }else if(forWhom ==2){
+        net_cost = labor_cost + material_cost
+    } else if (forWhom == 2) {
         workorder.joblist.forEach((myjob, i) => {
-            if(myjob.secondary_bill_to_id == null){
+            if (myjob.secondary_bill_to_id == null) {
                 number_of_jobs++;
                 total_hour += (myjob.labor_time * myjob.quantity)
                 labor_cost += myjob.labor_cost
@@ -221,10 +829,10 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
                 });
             }
         });
-        net_cost= labor_cost+material_cost
-    }else {
+        net_cost = labor_cost + material_cost
+    } else {
         workorder.joblist.forEach((myjob, i) => {
-            if(myjob.secondary_bill_to_id !== null){
+            if (myjob.secondary_bill_to_id !== null) {
                 number_of_jobs++;
                 total_hour += (myjob.labor_time * myjob.quantity)
                 labor_cost += myjob.labor_cost
@@ -235,7 +843,7 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
                 });
             }
         });
-        net_cost= labor_cost+material_cost
+        net_cost = labor_cost + material_cost
     }
 
     let costs = {
@@ -249,14 +857,14 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
     total_record_count.value = getObjComputedValue(total_record_count, number_of_jobs);
     total_labor_charge.value = getObjComputedValue(total_labor_charge, costs.labor_cost * 100);
     total_material_charge.value = getObjComputedValue(total_material_charge, total_material_cost * 100);
-    account_date.value = getObjComputedValue(account_date, forWhom ==1 || forWhom ==2 ? new Date(workorder.invoice_date): new Date(workorder.secondary_owner_info.invoice_date));
-    invoice_number.value = getObjComputedValue(invoice_number, forWhom ==1 || forWhom ==2 ?workorder.invoice_number: workorder.secondary_owner_info.invoice_number);
-    invoice_date.value = getObjComputedValue(invoice_date, forWhom ==1 || forWhom ==2 ? new Date(workorder.invoice_date): new Date(workorder.secondary_owner_info.invoice_date));
+    account_date.value = getObjComputedValue(account_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
+    invoice_number.value = getObjComputedValue(invoice_number, forWhom == 1 || forWhom == 2 ? workorder.invoice_number : workorder.secondary_owner_info.invoice_number);
+    invoice_date.value = getObjComputedValue(invoice_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
 
-    let inv_number = forWhom ==1 || forWhom ==2 ? workorder.invoice_number: workorder.secondary_owner_info.invoice_number
+    let inv_number = forWhom == 1 || forWhom == 2 ? workorder.invoice_number : workorder.secondary_owner_info.invoice_number
     price_master_file_indicator.value = getObjComputedValue(price_master_file_indicator, _price_master_file_indicator);
 
-    repairing_party_invoice_number.value = getObjComputedValue(repairing_party_invoice_number, _repairing_party_invoice_number == null ? inv_number: _repairing_party_invoice_number);
+    repairing_party_invoice_number.value = getObjComputedValue(repairing_party_invoice_number, _repairing_party_invoice_number == null ? inv_number : _repairing_party_invoice_number);
 
     machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, _machine_priceable_indicator);
     material_sign.value = getObjComputedValue(material_sign, _material_sign);
@@ -350,7 +958,7 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
             material_charge.value = getObjComputedValue(material_charge, mat_cost_single_job * 100);
             if (parseInt(item.job_code_applied) > 6999) {
                 machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, "N");
-            }else {
+            } else {
                 machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, "Y");
             }
             wheel_narrative.value = getObjComputedValue(wheel_narrative, item.job_description);
@@ -662,7 +1270,7 @@ export function printAAR(item, _wheel_detail = false,forWhom) {
         total_sign.value + invoice_date.value;
     en_txt += padStringTo500(invoice_header + "Z".repeat(19) + totals_header) + "\n";
 
-    var textFileAsBlob = new Blob([en_txt], { type: 'text/plain' });
+    var textFileAsBlob = new Blob([en_txt], {type: 'text/plain'});
     console.log(textFileAsBlob)
     var fileNameToSaveAs = filename; //filename.extension
 

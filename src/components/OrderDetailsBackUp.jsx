@@ -8,7 +8,7 @@ import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
 import {convertSqlToFormattedDateTime} from "../utils/DateTimeHelper";
 import {printAAR} from "../utils/aarHelper";
-import {printBBOM, printInvoice} from "../utils/documentPrinterHelper";
+import {printBBOM, printInvoice} from "../utils/documentPrintHelper";
 import DatePicker from "react-datepicker";
 
 const OrderDetails = ({
@@ -44,7 +44,7 @@ const OrderDetails = ({
 
     workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
 
-    const [reasonToCome,setReasonToCome] = useState(workOrder.reason_to_come)
+    const [reasonToCome, setReasonToCome] = useState(workOrder.reason_to_come)
 
     const [isStatusDropDownModalOpenInDetails, setIsStatusDropDownModalOpenInDetails] = useState(false);
     const statusCommentDropDownInDetails = useRef(null);
@@ -56,21 +56,19 @@ const OrderDetails = ({
     const [isBillingInformationChangedForOwner, setIsBillingInformationChangedForOwner] = useState(false)
     const [isBillingInformationChangedForLessee, setIsBillingInformationChangedForLessee] = useState(false)
 
-    const [ownerPurchaseOrder,setOwnerPurchaseOrder] = useState(workOrder.purchase_order)
-    const [lesseePurchaseOrder,setLesseePurchaseOrder] = useState(workOrder.secondary_owner_info?.purchase_order ?? '')
+    const [ownerPurchaseOrder, setOwnerPurchaseOrder] = useState(workOrder.purchase_order)
+    const [lesseePurchaseOrder, setLesseePurchaseOrder] = useState(workOrder.secondary_owner_info?.purchase_order ?? '')
 
     const [ownerInvoiceNumber, setOwnerInvoiceNumber] = useState(workOrder.invoice_number)
     const [lesseeInvoiceNumber, setLesseeInvoiceNumber] = useState(workOrder.secondary_owner_info?.invoice_number ?? '')
 
 
-    const [ownerInvoiceNetDays,setOwnerInvoiceNetDays] = useState(workOrder.invoice_net_days)
-    const [lesseeInvoiceNetDays,setLesseeInvoiceNetDays] = useState(workOrder.secondary_owner_info?.invoice_net_days ??'')
+    const [ownerInvoiceNetDays, setOwnerInvoiceNetDays] = useState(workOrder.invoice_net_days)
+    const [lesseeInvoiceNetDays, setLesseeInvoiceNetDays] = useState(workOrder.secondary_owner_info?.invoice_net_days ?? '')
 
 
-    const [ownerInvoiceDate,setOwnerInvoiceDate] = useState(workOrder.invoice_date)
-    const [lesseeInvoiceDate,setLesseeInvoiceDate] = useState(workOrder.secondary_owner_info?.invoice_date ??'')
-
-
+    const [ownerInvoiceDate, setOwnerInvoiceDate] = useState(workOrder.invoice_date)
+    const [lesseeInvoiceDate, setLesseeInvoiceDate] = useState(workOrder.secondary_owner_info?.invoice_date ?? '')
 
 
     const reasonToComeRef = useRef(null);
@@ -125,31 +123,31 @@ const OrderDetails = ({
     const postMOWKUpdate = () => {
         updateMOWK(workOrder.id, mo_wk)
     }
-    const postSPUpdate =() =>{
+    const postSPUpdate = () => {
         updateSP(workOrder.id, sp)
     }
-    const postTQUpdate =() =>{
+    const postTQUpdate = () => {
         updateTQ(workOrder.id, tq)
     }
 
-    const postREUpdate =() =>{
+    const postREUpdate = () => {
         updateRE(workOrder.id, re)
     }
 
-    const postEPUpdate =() =>{
+    const postEPUpdate = () => {
         updateEP(workOrder.id, ep)
     }
 
-    const changeNetDays = (isForOwner,days,) =>{
-        if(isForOwner){
-            if(days != ownerInvoiceNetDays){
+    const changeNetDays = (isForOwner, days,) => {
+        if (isForOwner) {
+            if (days != ownerInvoiceNetDays) {
                 console.log(days)
                 setOwnerInvoiceNetDays(days)
                 //setOwnerInvoiceDate(new Date(addDays(ownerInvoiceDate,days)))
             }
 
-        }else {
-            if(days != lesseeInvoiceNetDays){
+        } else {
+            if (days != lesseeInvoiceNetDays) {
                 setLesseeInvoiceNetDays(days)
                 //setLesseeInvoiceDate(new Date(addDays(lesseeInvoiceDate,days)))
             }
@@ -283,13 +281,13 @@ const OrderDetails = ({
                     console.log(error);
                 });
         } else {
-                setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
+            setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
         }
     }
     //handleInvoiceNumberChangeOwner
 
     const handleInvoiceClickLessee = () => {
-        if (lesseeInvoiceNumber== null || lesseeInvoiceNumber == "" ) {
+        if (lesseeInvoiceNumber == null || lesseeInvoiceNumber == "") {
             let config = {
                 method: 'get',
                 maxBodyLength: Infinity,
@@ -395,9 +393,9 @@ const OrderDetails = ({
         storageInformation.forEach(obj => {
             const startDate = new Date(convertSqlToFormattedDateTime(obj.start_date));
             console.log(startDate)
-            if(obj.end_date === process.env.REACT_APP_DEFAULT_DATE){
-                sum +=0
-            }else {
+            if (obj.end_date === process.env.REACT_APP_DEFAULT_DATE) {
+                sum += 0
+            } else {
                 const endDate = new Date(convertSqlToFormattedDateTime(obj.end_date));
                 console.log(endDate)
                 const timeDiff = endDate.getTime() - startDate.getTime();
@@ -504,7 +502,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printAAR(workOrder,false,1)}>
+                                    <span className="p-1" onClick={() => printAAR(workOrder, false, 1)}>
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -516,7 +514,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printBBOM(workOrder,1)}>
+                                    <span className="p-1" onClick={() => printBBOM(workOrder, 1)}>
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -528,7 +526,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={()=>printInvoice(workOrder,1)}>
+                                    <span className="p-1" onClick={() => printInvoice(workOrder, 1)}>
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -617,7 +615,7 @@ const OrderDetails = ({
                                                 <span>
                                                   <DatePicker
                                                       customInput={<CustomDateInput
-                                                          value={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.inspected_date).toLocaleDateString() : null}/>}
+                                                          value={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date) : null}
                                                       onChange={
                                                           newDate => handleInspectionDate(newDate)
@@ -663,7 +661,7 @@ const OrderDetails = ({
                                                 <span>
                                               <DatePicker
                                                   customInput={<CustomDateInput
-                                                      value={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.repair_schedule_date).toLocaleDateString() : null}/>}
+                                                      value={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date) : null}
                                                   onChange={
                                                       newDate => handleRepairScheduleDate(newDate)
@@ -681,7 +679,7 @@ const OrderDetails = ({
                                                 <span>
                                                       <DatePicker
                                                           customInput={<CustomDateInput
-                                                              value={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.valve_date ).toLocaleDateString(): null}/>}
+                                                              value={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date) : null}
                                                           onChange={
                                                               newDate => handleValveAssemblyDate(newDate)
@@ -696,7 +694,7 @@ const OrderDetails = ({
                                                 <span>
                                                       <DatePicker
                                                           customInput={<CustomDateInput
-                                                              value={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ?new Date( workOrder.paint_date ).toLocaleDateString(): null}/>}
+                                                              value={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date) : null}
                                                           onChange={
                                                               newDate => handlePaintDate(newDate)
@@ -756,7 +754,7 @@ const OrderDetails = ({
                                                 <span>
                                                   <DatePicker
                                                       customInput={<CustomDateInput
-                                                          value={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.qa_date).toLocaleDateString() : null}/>}
+                                                          value={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date) : null}
                                                       onChange={
                                                           newDate => handleQADate(newDate)
@@ -771,7 +769,7 @@ const OrderDetails = ({
                                                 <span>
                                               <DatePicker
                                                   customInput={<CustomDateInput
-                                                      value={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.projected_out_date).toLocaleDateString() : null}/>}
+                                                      value={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date) : null}
                                                   onChange={
                                                       newDate => handlePOD(newDate)
@@ -920,7 +918,7 @@ const OrderDetails = ({
                                             </div>
 
                                             <div className='mt-[8px] '>
-                                                <p>{workOrder.storage_information.length > 0 && sumOfDayDifferences(workOrder.storage_information)>0 ? "Car is in storage and not billed for " + sumOfDayDifferences(workOrder.storage_information) + "  days" : ""}</p>
+                                                <p>{workOrder.storage_information.length > 0 && sumOfDayDifferences(workOrder.storage_information) > 0 ? "Car is in storage and not billed for " + sumOfDayDifferences(workOrder.storage_information) + "  days" : ""}</p>
                                             </div>
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
@@ -1026,13 +1024,15 @@ const OrderDetails = ({
                                     <div className='p-2'>
                                         <p>Purchase Order</p>
                                         <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                               ref={ownerPurchaseOrderRef} id="purchase_order_owner" value={ownerPurchaseOrder}/>
+                                               ref={ownerPurchaseOrderRef} id="purchase_order_owner"
+                                               value={ownerPurchaseOrder}/>
                                         <p className='mt-2'>INVOICE NUMBER</p>
                                         <div className="relative">
 
                                             <input type="text" id="invoice_number_input" value={ownerInvoiceNumber}
                                                    className="input input-bordered h-8 mt-2 w-full"
-                                                   onChange={handleInvoiceNumberChangeOwner} aria-valuemax={ownerInvoiceNumber}
+                                                   onChange={handleInvoiceNumberChangeOwner}
+                                                   aria-valuemax={ownerInvoiceNumber}
                                             />
                                             <button type="submit"
                                                     className="text-white absolute end-2.5 bottom-2 "
@@ -1086,7 +1086,7 @@ const OrderDetails = ({
                                             style={{width: '100%'}}
                                             customInput={<CustomDateInputFullWidth
                                                 value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ||  ownerInvoiceDate !== null? new Date(ownerInvoiceDate) : null}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}
                                             onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
@@ -1095,16 +1095,19 @@ const OrderDetails = ({
                                         <p className='mt-2'>Due Date</p>
                                         <DatePicker
                                             customInput={<CustomDateInputFullWidth
-                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE   ||  ownerInvoiceDate !== null? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE   ||  ownerInvoiceDate !== null? new Date(addDays(ownerInvoiceDate,ownerInvoiceNetDays)) : null}
+                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
                                             onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
                                         />
                                         <div className='mt-4'>
-                                            <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'  onClick={()=> changeNetDays(true,30)}>Net 30</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(true,60)}>Net 60</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(true,90)}>Net 90</span>
+                                            <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 30)}>Net 30</span>
+                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 60)}>Net 60</span>
+                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 90)}>Net 90</span>
                                         </div>
 
                                     </div>
@@ -1112,7 +1115,8 @@ const OrderDetails = ({
                                         <div>
                                             <p>Bill To</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                   disabled value={workOrder.railcar.owner_railcar_owner_idToowner.name}></input>
+                                                   disabled
+                                                   value={workOrder.railcar.owner_railcar_owner_idToowner.name}></input>
                                         </div>
 
                                         <div className="mt-1">
@@ -1135,25 +1139,29 @@ const OrderDetails = ({
                                                 <p>CITY</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.city}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.city}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>STATE</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.state}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.state}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>ZIP</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.zip_code}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.zip_code}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>Country</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.country}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.country}></input>
                                             </div>
                                         </div>
 
@@ -1176,11 +1184,12 @@ const OrderDetails = ({
                                         <div className="mt-1">
                                             <p>EMAIL</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                   disabled value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
+                                                   disabled
+                                                   value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
                                         </div>
 
                                         <div className="mt-8">
-                                            <span >
+                                            <span>
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 
@@ -1202,7 +1211,7 @@ const OrderDetails = ({
                             {/*End Order information Owner */}
 
                             {/*Order information Lessee */}
-                            {workOrder.secondary_owner_info != null &&(
+                            {workOrder.secondary_owner_info != null && (
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none">
 
                                     <h6 className='font-semibold '>Billing Information(Lessee)</h6>
@@ -1210,11 +1219,13 @@ const OrderDetails = ({
                                         <div className='p-2'>
                                             <p>Purchase Order</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                                   ref={lesseePurchaseOrderRef} id="purchase_order_lesseer" value={lesseePurchaseOrder}/>
+                                                   ref={lesseePurchaseOrderRef} id="purchase_order_lesseer"
+                                                   value={lesseePurchaseOrder}/>
                                             <p className='mt-2'>INVOICE NUMBER</p>
                                             <div className="relative">
 
-                                                <input type="text" id="invoice_number_input_lessee" value={lesseeInvoiceNumber}
+                                                <input type="text" id="invoice_number_input_lessee"
+                                                       value={lesseeInvoiceNumber}
                                                        className="input input-bordered h-8 mt-2 w-full"
                                                        onChange={handleInvoiceNumberChangeOwner}
                                                 />
@@ -1269,7 +1280,7 @@ const OrderDetails = ({
                                             <DatePicker
                                                 style={{width: '100%'}}
                                                 customInput={<CustomDateInputFullWidth
-                                                    value={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  || lesseeInvoiceDate !== null ? new Date(lesseeInvoiceDate) : null}/>}
+                                                    value={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || lesseeInvoiceDate !== null ? new Date(lesseeInvoiceDate) : null}/>}
                                                 selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || lesseeInvoiceDate !== null ? new Date(lesseeInvoiceDate) : null}
                                                 onChange={newDate => handleLesseeInvoiceDateChanged(newDate)}
                                                 showYearDropdown
@@ -1279,16 +1290,19 @@ const OrderDetails = ({
                                             <p className='mt-2'>Due Date</p>
                                             <DatePicker
                                                 customInput={<CustomDateInputFullWidth
-                                                    value={lesseeInvoiceDate!== process.env.REACT_APP_DEFAULT_DATE  || lesseeInvoiceDate !== null ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}/>}
-                                                selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  || lesseeInvoiceDate !== null ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
+                                                    value={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || lesseeInvoiceDate !== null ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}/>}
+                                                selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || lesseeInvoiceDate !== null ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
                                                 onChange={newDate => handleLesseeInvoiceDateChanged(newDate)}
                                                 showYearDropdown
                                                 dateFormat="MM-dd-yyyy"
                                             />
                                             <div className='mt-4'>
-                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'  onClick={()=>changeNetDays(false,30)}>Net 30</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(false,60)}>Net 60</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=>changeNetDays(false,90)}>Net 90</span>
+                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 30)}>Net 30</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 60)}>Net 60</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 90)}>Net 90</span>
                                             </div>
 
                                         </div>
@@ -1296,20 +1310,23 @@ const OrderDetails = ({
                                             <div>
                                                 <p>Bill To</p>
                                                 <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                       disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.name}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_lessee_idToowner.name}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Address line 1</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.address_line1}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Address line 2</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.address_line2}></input>
                                             </div>
 
@@ -1319,25 +1336,29 @@ const OrderDetails = ({
                                                     <p>CITY</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.city}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.city}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>STATE</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.state}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.state}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>ZIP</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.zip_code}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.zip_code}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>Country</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.country}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.country}></input>
                                                 </div>
                                             </div>
 
@@ -1346,25 +1367,28 @@ const OrderDetails = ({
                                             <div>
                                                 <p>Contact Name</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_name}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Contact Number</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_number}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>EMAIL</p>
                                                 <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                       disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_email}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_email}></input>
                                             </div>
 
                                             <div className="mt-8">
-                                            <span >
+                                            <span>
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 

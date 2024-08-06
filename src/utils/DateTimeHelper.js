@@ -70,7 +70,7 @@ export function addDays(sqlDateTime, daysToAdd) {
     const sqlDate = new Date(sqlDateTime);
 
     // Calculate the time zone offset for 'America/Chicago'
-    const timeZoneOffset = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }).slice(-5);
+    const timeZoneOffset = new Date().toLocaleString('en-US', {timeZone: 'America/Chicago'}).slice(-5);
     const [hoursOffset, minutesOffset] = timeZoneOffset.split(':').map(Number);
     const offsetInMilliseconds = (hoursOffset * 60 + minutesOffset) * 60 * 1000;
 

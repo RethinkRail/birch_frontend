@@ -57,14 +57,14 @@ const WorkOrderDataTable = ({
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
 
-    useEffect(()=>{
-        if(workOrderToView!=null){
-            const wo= workOrders.find(obj => obj['id'] === workOrderToView.id)
+    useEffect(() => {
+        if (workOrderToView != null) {
+            const wo = workOrders.find(obj => obj['id'] === workOrderToView.id)
             setWorkOrderToView(wo)
-            
+
         }
         console.log("in action")
-    },[workOrders])
+    }, [workOrders])
     workOrders.forEach((workOrder, index) => {
         const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
@@ -73,8 +73,8 @@ const WorkOrderDataTable = ({
 
         const workOrderObject = {
             'workOrder': workOrder,
-            'estimated_time':round2Dec(laborHours),
-            'labor_hours':round2Dec(durationHours),
+            'estimated_time': round2Dec(laborHours),
+            'labor_hours': round2Dec(durationHours),
             'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
             'dif': actual_dif,
             'railcar_id': workOrder.railcar_id,
@@ -164,8 +164,10 @@ const WorkOrderDataTable = ({
             selector: row => row.lhr,
             sortable: true,
             width: '6%',
-            cell:(row) =>(
-                <span className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]" data-tip={"Estimated Hour:"+row.estimated_time +"\nHours Applied:"+row.labor_hours+""}> {row.lhr}</span>
+            cell: (row) => (
+                <span
+                    className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
+                    data-tip={"Estimated Hour:" + row.estimated_time + "\nHours Applied:" + row.labor_hours + ""}> {row.lhr}</span>
             ),
         },
         {
@@ -379,7 +381,7 @@ const WorkOrderDataTable = ({
         return null;
     };
     const handleShowOrderDetails = async (row) => {
-        await setWorkOrderToView(()=>row)
+        await setWorkOrderToView(() => row)
         document.getElementById('orderDetailsModal').showModal();
     };
     return (

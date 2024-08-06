@@ -1,7 +1,7 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Outlet} from "react-router-dom";
 import Navbar from "./portal/navbar/Navbar";
-import {toast, ToastContainer} from "react-toastify";
+import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {auth} from "./firebase";
 import axios from "axios";
@@ -16,13 +16,13 @@ function App() {
 
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {
-            if(user ==null){
+            if (user == null) {
                 setIsLoggedIn(false)
-            }else {
+            } else {
                 let data = qs.stringify({
                     'name': user.displayName,
                     'email': user.email,
-                    'access_token':user.accessToken
+                    'access_token': user.accessToken
                 });
 
                 let config = {
@@ -38,9 +38,9 @@ function App() {
                 axios.request(config)
                     .then((response) => {
                         if (response.status === 200) {
-                            if(response.data.is_active ==1){
+                            if (response.data.is_active == 1) {
                                 setIsLoggedIn(true)
-                            }else {
+                            } else {
                                 setIsLoggedIn(false)
                             }
                         } else {

@@ -10,14 +10,14 @@ const ProtectedRoute = (props) => {
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {
 
-            if(user == null){
+            if (user == null) {
                 setIsLoggedIn(false)
                 return navigate('/auth/login');
-            }else {
+            } else {
                 let data = qs.stringify({
                     'name': user.displayName,
                     'email': user.email,
-                    'access_token':user.accessToken
+                    'access_token': user.accessToken
                 });
 
                 let config = {
@@ -33,9 +33,9 @@ const ProtectedRoute = (props) => {
                 axios.request(config)
                     .then((response) => {
                         if (response.status === 200) {
-                            if(response.data.is_active ==1){
+                            if (response.data.is_active == 1) {
                                 setIsLoggedIn(true)
-                            }else {
+                            } else {
 
                                 setIsLoggedIn(false)
                                 return navigate('/auth/login');

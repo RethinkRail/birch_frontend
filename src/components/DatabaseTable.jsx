@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import DataTable from 'react-data-table-component'
 import axios from 'axios'
 import Key from './Key'
@@ -7,7 +7,7 @@ import Code from './Code'
 import handleGetColumn from '../utils/getColumn'
 import EditModal from './EditModal'
 import Plus from './Plus'
-import { toast } from 'react-toastify'
+import {toast} from 'react-toastify'
 import DeleteModal from './DeleteModal'
 import {showToastMessage} from "../utils/CommonHelper";
 import DataTableSearch from "./DataTableSearch";
@@ -68,20 +68,20 @@ const DatabaseTable = () => {
     useEffect(() => {
         const handleFetchTable = async () => {
             try {
-                if(!selectedTable || selectedTable === null) {
+                if (!selectedTable || selectedTable === null) {
                     return
                 } else {
                     const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&searchTerm=${searchTerm}`)
                     console.log(response)
                     setTable(response.data.data)
-                    setTableSchema(response.data.schema)  
+                    setTableSchema(response.data.schema)
                 }
             } catch (error) {
                 console.log(error, "An error occured when fetching table ")
             }
         }
         handleFetchTable()
-    },[selectedTable])
+    }, [selectedTable])
 
     const handleAddRow = (newRow) => {
         setTable((prevTable) => [...prevTable, newRow]);
@@ -140,7 +140,7 @@ const DatabaseTable = () => {
     const handleDelete = async () => {
         try {
             console.log(`row id is ${rowId} and rowCode is ${rowCode}`)
-            if(!rowId && rowCode) {
+            if (!rowId && rowCode) {
                 console.log("Deleting based on code")
                 const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&code=${rowCode}`)
                 console.log(response, "This is the response from the delete request")
@@ -157,54 +157,60 @@ const DatabaseTable = () => {
             setDeleteModalShowing(false)
             console.log(error.response.data.message, "This is the error")
             toast.error("This entity is being used,hence can't be deleted")
-            showToastMessage(error.response.data.message,2)
+            showToastMessage(error.response.data.message, 2)
         }
     }
 
-  return (
-    <div className='flex justify-center items-center w-full px-12 flex-col'>
-        {allTables && 
-            <div className='flex flex-row w-full gap-10 py-5'>
-                <div className='flex-1 flex flex-col gap-2'>
-                    <h3>Select Table</h3>
-                    <select name="table" id="table" defaultValue={selectedTable} onChange={(e) => setSelectedTable(e.target.value)} placeholder='Select Table' className='text-[12px] p-1 rounded-md uppercase'>
-                        {Object.keys(allTables).map((table, index) => (
-                            !JSON.parse(process.env.REACT_APP_DB_OPERATION_EXCLUDED_TABLES).includes(table) ? (
-                                <option key={index} value={table}>{table.split("_").join(" ")}</option>
-                            ) : null
-                        ))}
-                    </select>
-                </div>
-                <div className='flex-1'>
-                    <h3>Schema</h3>
-                    <div className='text-[12px] grid grid-cols-2 gap-1.5'>
-                        {allTables[selectedTable].map((field, index) => (
-                            <div key={`field--${index}`} className='flex items-center gap-2 col-span-1'>
-                                <div className='flex justify-center items-center h-4 w-4'>
-                                    { field.Field.toLowerCase() === "id" ? <Key /> : field.Field.toLowerCase() === "code" ? <Code /> : <String /> }
+    return (
+        <div className='flex justify-center items-center w-full px-12 flex-col'>
+            {allTables &&
+                <div className='flex flex-row w-full gap-10 py-5'>
+                    <div className='flex-1 flex flex-col gap-2'>
+                        <h3>Select Table</h3>
+                        <select name="table" id="table" defaultValue={selectedTable}
+                                onChange={(e) => setSelectedTable(e.target.value)} placeholder='Select Table'
+                                className='text-[12px] p-1 rounded-md uppercase'>
+                            {Object.keys(allTables).map((table, index) => (
+                                !JSON.parse(process.env.REACT_APP_DB_OPERATION_EXCLUDED_TABLES).includes(table) ? (
+                                    <option key={index} value={table}>{table.split("_").join(" ")}</option>
+                                ) : null
+                            ))}
+                        </select>
+                    </div>
+                    <div className='flex-1'>
+                        <h3>Schema</h3>
+                        <div className='text-[12px] grid grid-cols-2 gap-1.5'>
+                            {allTables[selectedTable].map((field, index) => (
+                                <div key={`field--${index}`} className='flex items-center gap-2 col-span-1'>
+                                    <div className='flex justify-center items-center h-4 w-4'>
+                                        {field.Field.toLowerCase() === "id" ?
+                                            <Key/> : field.Field.toLowerCase() === "code" ? <Code/> : <String/>}
+                                    </div>
+                                    <p>
+                                        {field.Field}
+                                    </p>
                                 </div>
-                                <p>
-                                    {field.Field}
-                                </p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
+            }
+            <div className='w-full flex flex-row justify-between items-center'>
+                <button
+                    className='bg-[#002e54] px-3 py-1.5 rounded-md flex justify-center items-center gap-2 text-white'
+                    onClick={() => setModalShowing((prev) => (!prev))}>
+                    <span className='flex w-4 h-4 items-center justify-center'><Plus/></span><span
+                    className='text-[12px]'>Add a new entry</span>
+                </button>
+                {/*<div className='border-[#002e54] border-[1px] px-3 py-1.5 w-[200px] rounded-md'>*/}
+                {/*    <input type="text" className='h-full w-full flex-1 outline-none' placeholder='Search...' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />*/}
+                {/*</div>*/}
+                <DataTableSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
             </div>
-        }
-        <div className='w-full flex flex-row justify-between items-center'>
-            <button className='bg-[#002e54] px-3 py-1.5 rounded-md flex justify-center items-center gap-2 text-white' onClick={() => setModalShowing((prev) => (!prev))}>
-                <span className='flex w-4 h-4 items-center justify-center'><Plus /></span><span className='text-[12px]'>Add a new entry</span>
-            </button>
-            {/*<div className='border-[#002e54] border-[1px] px-3 py-1.5 w-[200px] rounded-md'>*/}
-            {/*    <input type="text" className='h-full w-full flex-1 outline-none' placeholder='Search...' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />*/}
-            {/*</div>*/}
-            <DataTableSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        </div>
-        {table && allTables && selectedTable ? (
+            {table && allTables && selectedTable ? (
 
-            <div className="mt-[20px] ml-[1px] mx-auto border rounded-[8px] mb-10 m-1.5 w-full">
-                <DataTable
+                <div className="mt-[20px] ml-[1px] mx-auto border rounded-[8px] mb-10 m-1.5 w-full">
+                    <DataTable
                         title=""
                         columns={handleGetColumn(allTables[selectedTable], handleEditRow, setRowId, setRowCode, setDeleteModalShowing)}
                         data={filteredTable}
@@ -214,19 +220,24 @@ const DatabaseTable = () => {
                         responsive={true}
                         pagination
                         paginationPerPage={50}
-                        paginationRowsPerPageOptions={[ 50,100,150,200]}
+                        paginationRowsPerPageOptions={[50, 100, 150, 200]}
                         highlightOnHover={true}
                         className="display nowrap compact stripe"
                         customStyles={myStyles}
                     />
-            </div>
-        ) : (
-            <div>Loading...</div>
-        )}
-        {deleteModalShowing && <DeleteModal setDeleteModalShowing={setDeleteModalShowing} handleDelete={handleDelete} setRowId={setRowId} setRowCode={setRowCode} />}
-        {modalShowing && <EditModal setModalShowing={setModalShowing} fields={allTables[selectedTable]} setTable={setTable} setEditRowData={setEditRowData} editRowData={editRowData} selectedTable={selectedTable} tableSchema={tableSchema} />}
-    </div>
-  )
+                </div>
+            ) : (
+                <div>Loading...</div>
+            )}
+            {deleteModalShowing &&
+                <DeleteModal setDeleteModalShowing={setDeleteModalShowing} handleDelete={handleDelete}
+                             setRowId={setRowId} setRowCode={setRowCode}/>}
+            {modalShowing &&
+                <EditModal setModalShowing={setModalShowing} fields={allTables[selectedTable]} setTable={setTable}
+                           setEditRowData={setEditRowData} editRowData={editRowData} selectedTable={selectedTable}
+                           tableSchema={tableSchema}/>}
+        </div>
+    )
 }
 
 export default DatabaseTable

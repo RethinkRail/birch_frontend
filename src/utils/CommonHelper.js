@@ -139,7 +139,7 @@ export const showToastMessage = (message, type) => {
  * @param newItem
  * @returns {*}
  */
-export  function replaceItemInArray(arr, newItem) {
+export function replaceItemInArray(arr, newItem) {
     const index = arr.findIndex(item => item.id === newItem.id);
     console.log(index)
     console.log(arr[index])

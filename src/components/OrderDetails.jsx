@@ -6,14 +6,10 @@ import CustomDateInput from "./CustomDateInput";
 import axios from "axios";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
-import {
-    convertSqlToFormattedDate,
-    convertSqlToFormattedDateTime,
-
-} from "../utils/DateTimeHelper";
+import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../utils/DateTimeHelper";
 
 import DatePicker from "react-datepicker";
-import { printATask, printBRC, printInvoice } from '../utils/documentPrintHelper';
+import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 //
 // import JoblistTable from "./JoblistTable";
 // import PartsTable from "./PartsTable";
@@ -52,7 +48,6 @@ const OrderDetails = ({
     // console.log(commonData)
 
 
-
     // Method to show update and cancel button when purchase order, invoice number, invoice date, due date changes
 
     const [ownerPurchaseOrderOriginal, setOwnerPurchaseOrderOriginal] = useState()
@@ -60,15 +55,14 @@ const OrderDetails = ({
     const [ownerInvoiceDateOriginal, setOwnerInvoiceDateOriginal] = useState()
     const [ownerDueDateOriginal, setOwnerDueDateOriginal] = useState()
     const [ownerInvoiceNetDaysOriginal, setOwnerInvoiceNetDaysOriginal] = useState()
-    const [showButtons, setShowButtons] = useState(false)
-
-
+    const [showButtonsOwner, setShowButtonsOwner] = useState(false)
+    const [showButtonsLessee, setShowButtonsLessee] = useState(false)
 
 
     const containerRef = useRef();
     workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
 
-    const [jobs,setJobs]= useState([])
+    const [jobs, setJobs] = useState([])
     const statusCommentDropDownInDetails = useRef(null);
 
 
@@ -83,27 +77,27 @@ const OrderDetails = ({
     const [isBillingInformationChangedForOwner, setIsBillingInformationChangedForOwner] = useState(false)
     const [isBillingInformationChangedForLessee, setIsBillingInformationChangedForLessee] = useState(false)
 
-    const [ownerPurchaseOrder,setOwnerPurchaseOrder] = useState(null)
-    const [lesseePurchaseOrder,setLesseePurchaseOrder] = useState(null)
-    const [purchaseorderChangedForOwner,setPurchaseOrderChangedForOwner] = useState(false)
-    const [purchaseorderChangedForLessee,setPurchaseOrderChangedForLessee] = useState(false)
+    const [ownerPurchaseOrder, setOwnerPurchaseOrder] = useState(null)
+    const [lesseePurchaseOrder, setLesseePurchaseOrder] = useState(null)
+    const [purchaseorderChangedForOwner, setPurchaseOrderChangedForOwner] = useState(false)
+    const [purchaseorderChangedForLessee, setPurchaseOrderChangedForLessee] = useState(false)
 
     const [ownerInvoiceNumber, setOwnerInvoiceNumber] = useState(null)
     const [lesseeInvoiceNumber, setLesseeInvoiceNumber] = useState(null)
-    const [invoiceChangedForOwner,setInvoiceChangedForOwner] = useState(false)
-    const [invoiceChangedForLessee,setInvoiceChangedForLessee] = useState(false)
+    const [invoiceChangedForOwner, setInvoiceChangedForOwner] = useState(false)
+    const [invoiceChangedForLessee, setInvoiceChangedForLessee] = useState(false)
 
 
-    const [ownerInvoiceNetDays,setOwnerInvoiceNetDays] = useState(null)
-    const [lesseeInvoiceNetDays,setLesseeInvoiceNetDays] = useState(null)
-    const [invoiceNetDaysChangedForOwner,setInvoiceNetDaysChangedForOwner] =useState(false)
-    const [invoiceNetDaysChangedForLessee,setInvoiceNetDaysChangedForLessee] =useState(false)
+    const [ownerInvoiceNetDays, setOwnerInvoiceNetDays] = useState(null)
+    const [lesseeInvoiceNetDays, setLesseeInvoiceNetDays] = useState(null)
+    const [invoiceNetDaysChangedForOwner, setInvoiceNetDaysChangedForOwner] = useState(false)
+    const [invoiceNetDaysChangedForLessee, setInvoiceNetDaysChangedForLessee] = useState(false)
 
 
-    const [ownerInvoiceDate,setOwnerInvoiceDate] = useState(null)
-    const [lesseeInvoiceDate,setLesseeInvoiceDate] = useState(null)
-    const [invoiceDateChangedForOwner,setInvoiceDateChangedForOwner] =useState(false)
-    const [invoiceDateChangedForLessee,setInvoiceDateChangedForLessee] =useState(false)
+    const [ownerInvoiceDate, setOwnerInvoiceDate] = useState(null)
+    const [lesseeInvoiceDate, setLesseeInvoiceDate] = useState(null)
+    const [invoiceDateChangedForOwner, setInvoiceDateChangedForOwner] = useState(false)
+    const [invoiceDateChangedForLessee, setInvoiceDateChangedForLessee] = useState(false)
 
 
     const [mo_wk, setMo_wk] = useState(null);
@@ -112,26 +106,26 @@ const OrderDetails = ({
     const [re, setRE] = useState(null);
     const [ep, setEP] = useState(null);
 
-    const [isBilledToLessee,setIsBilledToLessee]= useState(false)
+    const [isBilledToLessee, setIsBilledToLessee] = useState(false)
 
-    const checkBillingInformationChangedForOwner = ()=>{
+    const checkBillingInformationChangedForOwner = () => {
         console.log("called")
-        console.log(purchaseorderChangedForOwner+"purchse order")
+        console.log(purchaseorderChangedForOwner + "purchse order")
         console.log(invoiceChangedForOwner)
         console.log(invoiceNetDaysChangedForOwner)
         console.log(invoiceDateChangedForOwner)
-        console.log(purchaseorderChangedForOwner||invoiceChangedForOwner||invoiceNetDaysChangedForOwner|| invoiceDateChangedForOwner)
-        if(purchaseorderChangedForOwner||invoiceChangedForOwner||invoiceNetDaysChangedForOwner|| invoiceDateChangedForOwner){
+        console.log(purchaseorderChangedForOwner || invoiceChangedForOwner || invoiceNetDaysChangedForOwner || invoiceDateChangedForOwner)
+        if (purchaseorderChangedForOwner || invoiceChangedForOwner || invoiceNetDaysChangedForOwner || invoiceDateChangedForOwner) {
             setIsBillingInformationChangedForOwner(true)
-        }else {
+        } else {
             setIsBillingInformationChangedForOwner(false)
         }
     }
 
-    const checkBillingInformationChangedForLessee = ()=>{
-        if(purchaseorderChangedForLessee || invoiceChangedForLessee||invoiceNetDaysChangedForLessee|| invoiceDateChangedForLessee){
+    const checkBillingInformationChangedForLessee = () => {
+        if (purchaseorderChangedForLessee || invoiceChangedForLessee || invoiceNetDaysChangedForLessee || invoiceDateChangedForLessee) {
             setIsBillingInformationChangedForLessee(true)
-        }else {
+        } else {
             setIsBillingInformationChangedForLessee(false)
         }
     }
@@ -186,7 +180,7 @@ const OrderDetails = ({
         setOwnerInvoiceNetDays(workOrder.invoice_net_days)
         // This is for the button displayer function
         setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days)
-        setLesseeInvoiceNetDays(workOrder.secondary_owner_info?workOrder.secondary_owner_info.invoice_net_days:0)
+        setLesseeInvoiceNetDays(workOrder.secondary_owner_info ? workOrder.secondary_owner_info.invoice_net_days : 0)
         setInvoiceNetDaysChangedForOwner(false)
         setInvoiceNetDaysChangedForLessee(false)
 
@@ -197,11 +191,11 @@ const OrderDetails = ({
 
         // This is for the button displayer function
         setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date, workOrder.invoice_net_days)))
-        if(workOrder.secondary_owner_info!=null){
-            console.log(workOrder.secondary_owner_info.invoice_date==process.env.REACT_APP_DEFAULT_DATE)
+        if (workOrder.secondary_owner_info != null) {
+            console.log(workOrder.secondary_owner_info.invoice_date == process.env.REACT_APP_DEFAULT_DATE)
         }
 
-        setLesseeInvoiceDate(workOrder.secondary_owner_info==null?process.env.REACT_APP_DEFAULT_DATE:workOrder.secondary_owner_info.invoice_date)
+        setLesseeInvoiceDate(workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date)
         setInvoiceDateChangedForOwner(false)
         setInvoiceDateChangedForLessee(false)
 
@@ -213,9 +207,9 @@ const OrderDetails = ({
         setEP(workOrder.ep);
         //setOwnerInvoiceNumber(workOrder.invoice_number);
         //setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
-        setIsBilledToLessee(workOrder.secondary_owner_info==null?false:true)
+        setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
     }, [workOrder]);
-    const formatDateToSQL=(date)=> {
+    const formatDateToSQL = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
         const day = String(date.getDate()).padStart(2, '0');
@@ -248,43 +242,43 @@ const OrderDetails = ({
     const postMOWKUpdate = () => {
         updateMOWK(workOrder.id, mo_wk)
     }
-    const postSPUpdate =() =>{
+    const postSPUpdate = () => {
         updateSP(workOrder.id, sp)
     }
-    const postTQUpdate =() =>{
+    const postTQUpdate = () => {
         updateTQ(workOrder.id, tq)
     }
 
-    const postREUpdate =() =>{
+    const postREUpdate = () => {
         updateRE(workOrder.id, re)
     }
 
-    const postEPUpdate =() =>{
+    const postEPUpdate = () => {
         updateEP(workOrder.id, ep)
     }
 
-    const handleIsBilledToLessee =(e) =>{
-        const  is_checked = e.target.checked
-        if(is_checked){
-            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,true,workOrder.work_order)
+    const handleIsBilledToLessee = (e) => {
+        const is_checked = e.target.checked
+        if (is_checked) {
+            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
             setIsBilledToLessee(true)
-        }else {
-            updateBillToLessee(workOrder.id,workOrder.railcar.owner_railcar_lessee_idToowner.id,false,workOrder.work_order)
+        } else {
+            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
             setIsBilledToLessee(false)
         }
     }
 
-    const changeNetDays = (isForOwner,days,) =>{
-        if(isForOwner){
-            if(days != ownerInvoiceNetDays){
+    const changeNetDays = (isForOwner, days,) => {
+        if (isForOwner) {
+            if (days != ownerInvoiceNetDays) {
                 console.log(days)
                 setOwnerInvoiceNetDays(days)
                 // setInvoiceNetDaysChangedForOwner(true)
                 checkBillingInformationChangedForOwner()
             }
 
-        }else {
-            if(days != lesseeInvoiceNetDays){
+        } else {
+            if (days != lesseeInvoiceNetDays) {
                 setLesseeInvoiceNetDays(days)
                 setLesseeInvoiceNetDays(days)
                 setInvoiceNetDaysChangedForLessee(true)
@@ -424,7 +418,7 @@ const OrderDetails = ({
     //handleInvoiceNumberChangeOwner
 
     const handleInvoiceClickLessee = () => {
-        if (lesseeInvoiceNumber== null || lesseeInvoiceNumber == "" ) {
+        if (lesseeInvoiceNumber == null || lesseeInvoiceNumber == "") {
             let config = {
                 method: 'get',
                 maxBodyLength: Infinity,
@@ -519,9 +513,9 @@ const OrderDetails = ({
         storageInformation.forEach(obj => {
             const startDate = new Date(convertSqlToFormattedDateTime(obj.start_date));
             console.log(startDate)
-            if(obj.end_date === process.env.REACT_APP_DEFAULT_DATE){
-                sum +=0
-            }else {
+            if (obj.end_date === process.env.REACT_APP_DEFAULT_DATE) {
+                sum += 0
+            } else {
                 const endDate = new Date(convertSqlToFormattedDateTime(obj.end_date));
                 console.log(endDate)
                 const timeDiff = endDate.getTime() - startDate.getTime();
@@ -551,7 +545,7 @@ const OrderDetails = ({
 
     const handleOwnerPurchaseOrderChange = (event) => {
         const value = event.target.value.toString()
-        setOwnerPurchaseOrder(()=>value)
+        setOwnerPurchaseOrder(() => value)
 
         // console.log(value)
         // console.log(workOrder.purchase_order)
@@ -578,12 +572,12 @@ const OrderDetails = ({
     }
     const handleLesseePurchaseOrderChange = (event) => {
         const value = event.target.value.toString()
-        setLesseePurchaseOrder(()=>value)
+        setLesseePurchaseOrder(() => value)
     }
 
     const handleInvoiceNumberChangeOwner = (event) => {
         const value = event.target.value.toString().trim()
-        setOwnerInvoiceNumber(()=>value)
+        setOwnerInvoiceNumber(() => value)
     }
 
     const handleInvoiceNumberChangeLessee = (event) => {
@@ -608,22 +602,22 @@ const OrderDetails = ({
     }
 
 
-    const handleDueDateChanged = (isFowOwner,date) =>{
+    const handleDueDateChanged = (isFowOwner, date) => {
         console.log("due date is changed")
         const date1 = date;
-        const date2 = new Date(isFowOwner?ownerInvoiceDate:lesseeInvoiceDate);
+        const date2 = new Date(isFowOwner ? ownerInvoiceDate : lesseeInvoiceDate);
         const timeDifference = date1.getTime() - date2.getTime();
         const dayDifference = timeDifference / (1000 * 3600 * 24);
         console.log(dayDifference)
-        if(isFowOwner){
+        if (isFowOwner) {
             setOwnerInvoiceNetDays(dayDifference)
-        }else {
+        } else {
             setLesseeInvoiceNetDays(dayDifference)
         }
     }
 
 
-    const cancelOwnerBillingInformationChange =() =>{
+    const cancelOwnerBillingInformationChange = () => {
         setOwnerInvoiceDate(convertSqlToFormattedDate(workOrder.invoice_date))
         setOwnerInvoiceNumber(workOrder.invoice_number)
         setOwnerInvoiceNetDays(workOrder.invoice_net_days)
@@ -631,13 +625,17 @@ const OrderDetails = ({
         setIsBillingInformationChangedForOwner(false)
     }
 
-    const updateBillingInformation = async (isForOwner)=>{
-        console.log("called from here"+isForOwner)
-        if(isForOwner){
-            const result = await  updateBilling(true,workOrder.id,ownerPurchaseOrder,ownerInvoiceNumber,ownerInvoiceDate,ownerInvoiceNetDays)
-            console.log(result)
-        }else {
-            const result =await updateBilling(false,workOrder.id,lesseePurchaseOrder,lesseeInvoiceNumber,lesseeInvoiceDate,lesseeInvoiceNetDays)
+    const updateBillingInformation = async (isForOwner) => {
+        console.log("called from here" + isForOwner)
+        if (isForOwner) {
+            const result =  await updateBilling(true, workOrder.id, ownerPurchaseOrder, ownerInvoiceNumber, ownerInvoiceDate, ownerInvoiceNetDays)
+            setOwnerPurchaseOrderOriginal(ownerPurchaseOrder)
+            setOwnerInvoiceNumberOriginal(ownerInvoiceNumber)
+            setOwnerInvoiceDateOriginal(ownerInvoiceDate)
+            setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays)
+            setShowButtonsOwner(false)
+        } else {
+            const result = await updateBilling(false, workOrder.id, lesseePurchaseOrder, lesseeInvoiceNumber, lesseeInvoiceDate, lesseeInvoiceNetDays)
             console.log(result)
         }
     }
@@ -667,8 +665,8 @@ const OrderDetails = ({
 
     // This is for the...
     useEffect(() => {
-        const handleCheckForButtons = () => {
-            if(ownerPurchaseOrder !== ownerPurchaseOrderOriginal || ownerInvoiceNumber !== ownerInvoiceNumberOriginal || ownerInvoiceDate !== ownerInvoiceDateOriginal || String(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== String(ownerDueDateOriginal)) {
+        const handleCheckForButtonsOwner = () => {
+            if (ownerPurchaseOrder !== ownerPurchaseOrderOriginal || ownerInvoiceNumber !== ownerInvoiceNumberOriginal || ownerInvoiceDate !== ownerInvoiceDateOriginal || String(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== String(ownerDueDateOriginal)) {
                 console.log("Show buttons will be set to true")
                 ownerPurchaseOrder !== ownerPurchaseOrderOriginal ? console.log(`owner purchase order failed`) : console.log(`owner purchase order pass`)
                 ownerInvoiceNumber !== ownerInvoiceNumberOriginal ? console.log(`owner invoice number failed`) : console.log(`owner invoice number pass`)
@@ -676,13 +674,16 @@ const OrderDetails = ({
                 console.log(addDays(ownerInvoiceDate, ownerInvoiceNetDays), "changed")
                 console.log(ownerDueDateOriginal, "original")
                 new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== ownerDueDateOriginal ? console.log(`owner due date failed`) : console.log(`owner due date pass`)
-                setShowButtons(true)
+                setShowButtonsOwner(true)
             } else {
-                setShowButtons(false)
+                setShowButtonsOwner(false)
             }
         }
-        handleCheckForButtons()
+        handleCheckForButtonsOwner()
     }, [ownerInvoiceDate, ownerInvoiceNetDays, ownerPurchaseOrder, ownerInvoiceNumber])
+
+
+
 
     const handleCancel = () => {
         setOwnerPurchaseOrder(ownerPurchaseOrderOriginal)
@@ -729,7 +730,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" >
+                                    <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -740,8 +741,8 @@ const OrderDetails = ({
                                         ARR-500B
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" >
+                                <li className='flex h-fit text-[10px] p-0'  onClick={printBBOM}>
+                                    <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -753,18 +754,6 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0' onClick={printInvoice}>
-                                    <span className="p-1" >
-                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
-                                        </svg>
-                                        Invoice
-                                    </span>
-                                </li>
-                                <li className='flex h-fit text-[10px] p-0'>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -773,7 +762,7 @@ const OrderDetails = ({
                                                 stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
                                                 stroke-linejoin="round"/>
                                         </svg>
-                                        BRC
+                                        Invoice
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0' onClick={() => printATask(workOrder)}>
@@ -840,7 +829,7 @@ const OrderDetails = ({
                                                 <span>
                                                   <DatePicker
                                                       customInput={<CustomDateInput
-                                                          value={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.inspected_date).toLocaleDateString() : null}/>}
+                                                          value={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date) : null}
                                                       onChange={
                                                           newDate => handleInspectionDate(newDate)
@@ -886,7 +875,7 @@ const OrderDetails = ({
                                                 <span>
                                               <DatePicker
                                                   customInput={<CustomDateInput
-                                                      value={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.repair_schedule_date).toLocaleDateString() : null}/>}
+                                                      value={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date) : null}
                                                   onChange={
                                                       newDate => handleRepairScheduleDate(newDate)
@@ -904,7 +893,7 @@ const OrderDetails = ({
                                                 <span>
                                                       <DatePicker
                                                           customInput={<CustomDateInput
-                                                              value={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.valve_date ).toLocaleDateString(): null}/>}
+                                                              value={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date) : null}
                                                           onChange={
                                                               newDate => handleValveAssemblyDate(newDate)
@@ -919,7 +908,7 @@ const OrderDetails = ({
                                                 <span>
                                                       <DatePicker
                                                           customInput={<CustomDateInput
-                                                              value={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ?new Date( workOrder.paint_date ).toLocaleDateString(): null}/>}
+                                                              value={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date) : null}
                                                           onChange={
                                                               newDate => handlePaintDate(newDate)
@@ -979,7 +968,7 @@ const OrderDetails = ({
                                                 <span>
                                                   <DatePicker
                                                       customInput={<CustomDateInput
-                                                          value={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.qa_date).toLocaleDateString() : null}/>}
+                                                          value={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date) : null}
                                                       onChange={
                                                           newDate => handleQADate(newDate)
@@ -994,7 +983,7 @@ const OrderDetails = ({
                                                 <span>
                                               <DatePicker
                                                   customInput={<CustomDateInput
-                                                      value={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date( workOrder.projected_out_date).toLocaleDateString() : null}/>}
+                                                      value={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date) : null}
                                                   onChange={
                                                       newDate => handlePOD(newDate)
@@ -1143,7 +1132,7 @@ const OrderDetails = ({
                                             </div>
 
                                             <div className='mt-[8px] '>
-                                                <p>{workOrder.storage_information.length > 0 && sumOfDayDifferences(workOrder.storage_information)>0 ? "Car is in storage and not billed for " + sumOfDayDifferences(workOrder.storage_information) + "  days" : ""}</p>
+                                                <p>{workOrder.storage_information.length > 0 && sumOfDayDifferences(workOrder.storage_information) > 0 ? "Car is in storage and not billed for " + sumOfDayDifferences(workOrder.storage_information) + "  days" : ""}</p>
                                             </div>
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
@@ -1256,7 +1245,8 @@ const OrderDetails = ({
 
                                             <input type="text" id="invoice_number_input" value={ownerInvoiceNumber}
                                                    className="input input-bordered h-8 mt-2 w-full"
-                                                   onChange={handleInvoiceNumberChangeOwner} aria-valuemax={ownerInvoiceNumber}
+                                                   onChange={handleInvoiceNumberChangeOwner}
+                                                   aria-valuemax={ownerInvoiceNumber}
                                             />
                                             <button type="submit"
                                                     className="text-white absolute end-2.5 bottom-2 "
@@ -1310,7 +1300,7 @@ const OrderDetails = ({
                                             style={{width: '100%'}}
                                             customInput={<CustomDateInputFullWidth
                                                 value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ||  ownerInvoiceDate !== null? new Date(ownerInvoiceDate) : null}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}
                                             onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
@@ -1319,16 +1309,19 @@ const OrderDetails = ({
                                         <p className='mt-2'>Due Date</p>
                                         <DatePicker
                                             customInput={<CustomDateInputFullWidth
-                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE   ||  ownerInvoiceDate !== null? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE   ||  ownerInvoiceDate !== null? new Date(addDays(ownerInvoiceDate,ownerInvoiceNetDays)) : null}
-                                            onChange={newDate => handleDueDateChanged(true,newDate)}
+                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
+                                            onChange={newDate => handleDueDateChanged(true, newDate)}
                                             showYearDropdown
                                             dateFormat="MM-dd-yyyy"
                                         />
                                         <div className='mt-4'>
-                                            <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'  onClick={()=> changeNetDays(true,30)}>Net 30</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(true,60)}>Net 60</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(true,90)}>Net 90</span>
+                                            <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 30)}>Net 30</span>
+                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 60)}>Net 60</span>
+                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                  onClick={() => changeNetDays(true, 90)}>Net 90</span>
                                         </div>
 
                                     </div>
@@ -1336,7 +1329,8 @@ const OrderDetails = ({
                                         <div>
                                             <p>Bill To</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                   disabled value={workOrder.railcar.owner_railcar_owner_idToowner.name}></input>
+                                                   disabled
+                                                   value={workOrder.railcar.owner_railcar_owner_idToowner.name}></input>
                                         </div>
 
                                         <div className="mt-1">
@@ -1359,25 +1353,29 @@ const OrderDetails = ({
                                                 <p>CITY</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.city}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.city}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>STATE</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.state}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.state}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>ZIP</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.zip_code}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.zip_code}></input>
                                             </div>
                                             <div className="w-1/5 pr-1 ">
                                                 <p>Country</p>
                                                 <input type="text"
                                                        className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                       disabled value={workOrder.railcar.owner_railcar_owner_idToowner.country}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_owner_idToowner.country}></input>
                                             </div>
                                         </div>
 
@@ -1400,16 +1398,17 @@ const OrderDetails = ({
                                         <div className="mt-1">
                                             <p>EMAIL</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                   disabled value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
+                                                   disabled
+                                                   value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
                                         </div>
 
                                         do your work here
-                                        {showButtons && (
+                                        {showButtonsOwner && (
                                             <div className="mt-8">
-                                            <span >
+                                            <span>
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded  cursor-pointer"
-                                                    onClick={()=>updateBillingInformation(true)}
+                                                    onClick={() => updateBillingInformation(true)}
                                                 >
                                                     UPDATE
                                                 </button>
@@ -1434,7 +1433,7 @@ const OrderDetails = ({
                             {/*End Order information Owner */}
 
                             {/*Order information Lessee */}
-                            {workOrder.secondary_owner_info != null &&(
+                            {workOrder.secondary_owner_info != null && (
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none">
 
                                     <h6 className='font-semibold '>Billing Information(Lessee)</h6>
@@ -1442,11 +1441,13 @@ const OrderDetails = ({
                                         <div className='p-2'>
                                             <p>Purchase Order</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                                   id="purchase_order_lesseer" value={lesseePurchaseOrder} onChange={handleLesseePurchaseOrderChange}/>
+                                                   id="purchase_order_lesseer" value={lesseePurchaseOrder}
+                                                   onChange={handleLesseePurchaseOrderChange}/>
                                             <p className='mt-2'>INVOICE NUMBER</p>
                                             <div className="relative">
 
-                                                <input type="text" id="invoice_number_input_lessee" value={lesseeInvoiceNumber}
+                                                <input type="text" id="invoice_number_input_lessee"
+                                                       value={lesseeInvoiceNumber}
                                                        className="input input-bordered h-8 mt-2 w-full"
                                                        onChange={handleInvoiceNumberChangeLessee}
                                                 />
@@ -1511,16 +1512,19 @@ const OrderDetails = ({
                                             <p className='mt-2'>Due Date</p>
                                             <DatePicker
                                                 customInput={<CustomDateInputFullWidth
-                                                    value={lesseeInvoiceDate!== process.env.REACT_APP_DEFAULT_DATE   ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}/>}
-                                                selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
-                                                onChange={newDate => handleDueDateChanged(false,newDate)}
+                                                    value={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}/>}
+                                                selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
+                                                onChange={newDate => handleDueDateChanged(false, newDate)}
                                                 showYearDropdown
                                                 dateFormat="MM-dd-yyyy"
                                             />
                                             <div className='mt-4'>
-                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'  onClick={()=>changeNetDays(false,30)}>Net 30</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=> changeNetDays(false,60)}>Net 60</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={()=>changeNetDays(false,90)}>Net 90</span>
+                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 30)}>Net 30</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 60)}>Net 60</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                      onClick={() => changeNetDays(false, 90)}>Net 90</span>
                                             </div>
 
                                         </div>
@@ -1528,20 +1532,23 @@ const OrderDetails = ({
                                             <div>
                                                 <p>Bill To</p>
                                                 <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                       disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.name}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_lessee_idToowner.name}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Address line 1</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.address_line1}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Address line 2</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.address_line2}></input>
                                             </div>
 
@@ -1551,25 +1558,29 @@ const OrderDetails = ({
                                                     <p>CITY</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.city}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.city}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>STATE</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.state}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.state}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>ZIP</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.zip_code}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.zip_code}></input>
                                                 </div>
                                                 <div className="w-1/5 pr-1 ">
                                                     <p>Country</p>
                                                     <input type="text"
                                                            className="input input-bordered  h-8 mt-2 w-full disabled uppercase"
-                                                           disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.country}></input>
+                                                           disabled
+                                                           value={workOrder.railcar.owner_railcar_lessee_idToowner.country}></input>
                                                 </div>
                                             </div>
 
@@ -1578,28 +1589,31 @@ const OrderDetails = ({
                                             <div>
                                                 <p>Contact Name</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_name}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>Contact Number</p>
                                                 <input type="text"
-                                                       className="input input-bordered  h-8 mt-2 w-full uppercase" disabled
+                                                       className="input input-bordered  h-8 mt-2 w-full uppercase"
+                                                       disabled
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_number}></input>
                                             </div>
 
                                             <div className="mt-1">
                                                 <p>EMAIL</p>
                                                 <input type="text" className="input input-bordered  h-8 mt-2 w-full "
-                                                       disabled value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_email}></input>
+                                                       disabled
+                                                       value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_email}></input>
                                             </div>
                                             {}
                                             <div className="mt-8">
-                                                <span >
+                                                <span>
                                                     <button
                                                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                                        onClick={()=>updateBillingInformation(false)}
+                                                        onClick={() => updateBillingInformation(false)}
                                                     >
                                                         UPDATE
                                                     </button>

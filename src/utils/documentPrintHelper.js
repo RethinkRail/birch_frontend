@@ -577,6 +577,74 @@ const json_item = {
     "actual_labor_hours_ratio": 0.13666666666666666
 }
 
+const parts_for_bill = [
+    {
+        "id": 40729,
+        "code": "06-2350028",
+        "name": "DECAL. HOME SHOP",
+        "purchase_cost": 10.640000343322754,
+        "quantity": 2,
+        "markup_percent": 0.25999999046325684,
+        "part_condition": 1,
+        "totalcost": 26.81280066223144,
+        "availability": 1,
+        "additional_info": null,
+        "rev_primary": "pAINT/LINING"
+    },
+    {
+        "id": 40745,
+        "code": "06-2350044",
+        "name": "DECAL. REMOVE BEFORE LOADING. 16X55 DYNAGRAPHICS",
+        "purchase_cost": 9.4399995803833,
+        "quantity": 2,
+        "markup_percent": 0.25999999046325684,
+        "part_condition": 1,
+        "totalcost": 23.788798762512215,
+        "availability": 1,
+        "additional_info": null,
+        "rev_primary": "pAINT/LINING"
+    },
+    {
+        "id": 40766,
+        "code": "06-2350065",
+        "name": "DECAL. WARNING. DO NOT USE TAG. RED.",
+        "purchase_cost": 0.7300000190734863,
+        "quantity": 3,
+        "markup_percent": 0.25999999046325684,
+        "part_condition": 1,
+        "totalcost": 2.7594000512123102,
+        "availability": 1,
+        "additional_info": null,
+        "rev_primary": "pAINT/LINING"
+    },
+    {
+        "id": 52150,
+        "code": "18-5920008",
+        "name": "TAMPER SEAL. CABLE MCLP180 2K 12IN W/LOGO  RED",
+        "purchase_cost": 0.8600000143051147,
+        "quantity": 1,
+        "markup_percent": 0.25999999046325684,
+        "part_condition": 1,
+        "totalcost": 1.0836000098228453,
+        "availability": 1,
+        "additional_info": null,
+        "rev_primary": "ADMIN"
+    },
+    {
+        "id": 53609,
+        "code": "68476-85-7-B",
+        "name": "LIQUIFIED PETROLEUM GAS LPG BASE CLEANING",
+        "purchase_cost": 1985,
+        "quantity": 1,
+        "markup_percent": 0,
+        "part_condition": 1,
+        "totalcost": 1985,
+        "availability": 1,
+        "additional_info": null,
+        "rev_primary": "CLEAN"
+    }
+]
+
 export function printATask(joke) {
     console.log("Print a task called")
     var p = 0.7;
@@ -590,29 +658,29 @@ export function printATask(joke) {
 
     var totalhours = 0;
     var task_table = '<table class="mytable forjobs">';
-    var titles = ["LINE","LOC", "Description of Repair","QTY", "WMC", "Hrs"];
-    var inital_cols = ["Date","Tech Int.", "Sup Int.", "QA Int."];
+    var titles = ["LINE", "LOC", "Description of Repair", "QTY", "WMC", "Hrs"];
+    var inital_cols = ["Date", "Tech Int.", "Sup Int.", "QA Int."];
     var n_row = "<tr style='background: lightgray; text-align: center'><td style='width: 20px;text-align: center'>" + titles.join("</td><td>") +
         "</td><td style='width: 80px; text-align: center';'>" + inital_cols.join("</td><td style='width: 80px; text-align: center'>") +
         "</td></tr>";
     task_table += n_row;
     my_new_order.joblist.forEach((myjob, i) => {
         console.log(myjob)
-        var tech_date = myjob.crew_checked_time== null? "":UTCtoLocaleDateTime(myjob.crew_checked_time).split(" ")[0];
-        var qa_date = myjob.qa_checked_time== null? "":UTCtoLocaleDateTime(myjob.qa_checked_time).split(" ")[0];
-        var manager_checked_time = myjob.manager_checked_time== null? "":UTCtoLocaleDateTime(myjob.manager_checked_time).split(" ")[0];
+        var tech_date = myjob.crew_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.crew_checked_time).split(" ")[0];
+        var qa_date = myjob.qa_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.qa_checked_time).split(" ")[0];
+        var manager_checked_time = myjob.manager_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.manager_checked_time).split(" ")[0];
 
 
         var hour = p * parseFloat(myjob.qty) * parseFloat(myjob.labor_time);
-        var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.ln+ "</td><td style='width: 20px'>" + myjob.loc.code + "</td>";
+        var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.ln + "</td><td style='width: 20px'>" + myjob.loc.code + "</td>";
         row_html += "<td>" + myjob.des + "</td>";
         row_html += "<td>" + myjob.qty + "</td>";
         row_html += "<td>" + ('0' + myjob.wmc.code).slice(-2) + "</td>";
         row_html += "<td>" + hour.toFixed(2) + "</td>";
-        row_html += "<td>"+tech_date+"</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> "+getInitialsByNameId()+"</td><td style='font-size: 10px;font-weight: bold'>"+getInitialsByNameId()+'<br>'+manager_checked_time+"   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> "+getInitialsByNameId()+'<br>'+qa_date+"</td><tr>";
+        row_html += "<td>" + tech_date + "</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId() + "</td><td style='font-size: 10px;font-weight: bold'>" + getInitialsByNameId() + '<br>' + manager_checked_time + "   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId() + '<br>' + qa_date + "</td><tr>";
         row_html += "<tr><td style='border:0'></td><td style='border:0'>Qty</td><td style='border:0;padding-left: 10px'>Part #</td>";
         myjob.parts.forEach((part_item, p_i) => {
-            var additional_info = part_item.additional_info?":"+part_item.additional_info:""
+            var additional_info = part_item.additional_info ? ":" + part_item.additional_info : ""
             row_html += `<tr>
                             <td style='border:0'></td>
                             <td style='border:0'>${round2Dec(part_item.quantity)}</td>
@@ -775,6 +843,7 @@ export function printBRC() {
     var tbl_name = "BRC - " + my_new_order.railcar.rfid + "[" + my_new_order.work_order + "].pdf";
     saveDivII(sTable, tbl_title, tbl_name, true);
 }
+
 export function printInvoice() {
 
     console.log("Print invoice clicked")
@@ -795,10 +864,10 @@ export function printInvoice() {
     var rfid = my_new_order.railcar.rfid;
     var yard_address;
     var yard = my_new_order.spot.track.yard.name;
-    if(yard != null){
+    if (yard != null) {
         yard_address = my_new_order.spot.track.yard.address;
         yard_address = yard_address.replace('.', '\n');
-    }else {
+    } else {
         yard_address = "IRON HORSE RAIL SERVICES"
     }
 
@@ -870,7 +939,7 @@ export function printInvoice() {
     var all_parts_for_sort = [];
     my_new_order.joblist.forEach((myjob, i) => {
         myjob.parts.forEach(function (item) {
-            rate_per_line+= myjob.labor_rate;
+            rate_per_line += myjob.labor_rate;
             total_job_line++;
             all_parts_for_sort.push(item)
         });
@@ -886,7 +955,7 @@ export function printInvoice() {
 
     all_parts_for_sort.forEach(function (item) {
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-        var single_mat_cost =  round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
+        var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         total_material_cost += Number(round2Dec(single_mat_cost))
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' +
             item.name + '</td><td style="text-align: right;">' +
@@ -896,7 +965,7 @@ export function printInvoice() {
     });
 
 
-    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost(Average labor rate:'+round2Dec(rate_per_line/total_job_line)+')</td><td>' + labor_category +
+    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost(Average labor rate:' + round2Dec(rate_per_line / total_job_line) + ')</td><td>' + labor_category +
         '</td><td style="text-align: right;">' +
         '1' +
         '</td><td style="text-align: right;">' +
@@ -1035,6 +1104,23 @@ export function printInvoice() {
     }
 }
 
+
+export function printBBOM() {
+
+    // var parts_for_bill = parts_for_bill;
+
+    var bomTable = '<table class="mytable forjobs"><thead><tr style="background: lightgray;"><td>Code</td><td>Title</td><td>Quantity</td><td>Condition</td><td>Availability</td><td>Additional Info</td></tr></thead><tbody>';
+    parts_for_bill.forEach((item, i) => {
+        var additional_info= item.additional_info?item.additional_info:""
+        bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.name + '</td><td>' + round2Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
+    });
+    bomTable += '</tbody></table>';
+
+    var tbl_title = "Bill of Material for "
+    var tbl_name = "BOM - " +".pdf";
+    saveDivII(bomTable, tbl_title, tbl_name, false);
+}
+
 function saveDivII(sTable, title, filename, landscape = false) {
     var style = "<style>";
     style = style + "div { text-transform: uppercase; }"
@@ -1090,7 +1176,7 @@ function convertSecondsToDecimalHours(seconds) {
     var minutes = Math.floor((seconds % 3600) / 60);
     var decimalHours = hours + (minutes / 60);
     //return round2Dec(decimalHours); // Convert to decimal format with 2 decimal places
-    return round2Dec(seconds/3600); // Convert to decimal format with 2 decimal places
+    return round2Dec(seconds / 3600); // Convert to decimal format with 2 decimal places
 }
 
 // function toUTCDateTime(actual_date_time){
@@ -1098,17 +1184,17 @@ function convertSecondsToDecimalHours(seconds) {
 // }
 
 // Don't forget to handle the moment issues later
-function UTCtoLocaleDateTime(date_time){
+function UTCtoLocaleDateTime(date_time) {
     const currentTimeZone = 'UTC';
     const targetTimeZone = 'US/Central';
     // return moment.tz(date_time, currentTimeZone).tz(targetTimeZone).format("YYYY-MM-DD HH:mm:ss");
     return "2024-07-02 04:24:36"
 }
 
-function dateToString (lols) {
+function dateToString(lols) {
     return "August 4 2024"
 }
 
-function getInitialsByNameId (){
+function getInitialsByNameId() {
     return "AZ"
 }

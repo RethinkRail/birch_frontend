@@ -7,10 +7,10 @@
 
 
 // src/App.js
-import React, { useEffect } from 'react';
-import { auth, messaging } from './src/firebase';
-import { getToken } from 'firebase/messaging';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import React, {useEffect} from 'react';
+import {auth, messaging} from './src/firebase';
+import {getToken} from 'firebase/messaging';
+import {onAuthStateChanged, signInWithEmailAndPassword} from 'firebase/auth';
 
 function App() {
     useEffect(() => {
@@ -18,7 +18,7 @@ function App() {
             if (user) {
                 console.log('User signed in:', user);
                 try {
-                    const currentToken = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' });
+                    const currentToken = await getToken(messaging, {vapidKey: 'YOUR_VAPID_KEY'});
                     if (currentToken) {
                         console.log('FCM Token:', currentToken);
                         await saveTokenToServer(currentToken);
@@ -40,7 +40,7 @@ function App() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ token }),
+            body: JSON.stringify({token}),
         });
 
         if (response.ok) {

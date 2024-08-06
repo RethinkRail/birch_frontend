@@ -3,10 +3,10 @@ import Edit from "../components/Edit";
 
 // Function to format the date
 const formatDate = (dateString) => {
-    if(dateString==null){
+    if (dateString == null) {
         return ''
     }
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {year: 'numeric', month: 'long', day: 'numeric'};
     return new Date(dateString).toLocaleDateString();
 };
 
@@ -30,7 +30,7 @@ const handleGetColumn = (tableFields, handleEditRow, setRowId, setRowCode, setDe
                 name: field.Field.split("_").join(" "),
                 selector: row => row[field.Field],
                 sortable: true,
-                omit:true,
+                omit: true,
                 cell: (row) => {
                     return <span className={`max-w-[250px`}>{formatDate(row[field.Field]) || "_"}</span>;
                 }
@@ -53,26 +53,28 @@ const handleGetColumn = (tableFields, handleEditRow, setRowId, setRowCode, setDe
             selector: row => row[field.Field],
             sortable: true,
             cell: (row) => {
-                return <span className={`max-w-[250px`}>{row[field.Field] }</span>;
+                return <span className={`max-w-[250px`}>{row[field.Field]}</span>;
             }
         };
     });
 
     return [
-        { name: "Action", sortable: true, cell: (row) => (
+        {
+            name: "Action", sortable: true, cell: (row) => (
                 <span className="max-w-[100px] w-full flex flex-row items-center gap-[20px]">
         <span onClick={() => handleEditRow(row)} className="text-[10px] max-w-[100px] w-[15px] h-[15px] cursor-pointer">
-          <Edit />
+          <Edit/>
         </span>
         <span onClick={() => {
             setRowId(row.id);
             setRowCode(row.code);
             setDeleteModalShowing(true);
         }} className="text-[10px] max-w-[100px] w-[15px] h-[15px] cursor-pointer">
-          <Delete />
+          <Delete/>
         </span>
       </span>
-            )},
+            )
+        },
         ...coreColumns
     ];
 };

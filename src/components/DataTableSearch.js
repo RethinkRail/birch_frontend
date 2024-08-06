@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-const DataTableSearch = ({ searchTerm, setSearchTerm }) => {
+const DataTableSearch = ({searchTerm, setSearchTerm}) => {
     return (
         <input className="p-1"
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+               type="text"
+               placeholder="Search..."
+               value={searchTerm}
+               onChange={e => setSearchTerm(e.target.value)}
         />
     );
 };

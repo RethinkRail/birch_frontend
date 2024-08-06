@@ -38,7 +38,8 @@ const Home = () => {
 
     }
 
-    const getWorkOrderById =  async (work_id) => {
+    const getWorkOrderById = async (work_id) => {
+        console.log("getting wo by id")
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -53,7 +54,7 @@ const Home = () => {
 
                 // const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
                 // setWorkOrders(updatedWorkOrders)
-                const new_work_orders =  replaceItemInArray(workOrders,response.data)
+                const new_work_orders = replaceItemInArray(workOrders, response.data)
                 console.log(new_work_orders)
                 setWorkOrders(new_work_orders)
             })
@@ -118,6 +119,7 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 setCommonData(response.data)
+                console.log(response.data)
                 toast.update(toastId.current, {
                     render: "All data loaded",
                     autoClose: 1000,
@@ -763,7 +765,7 @@ const Home = () => {
                 console.log(error);
             });
     }
-    const handleBillingInformationChanged= async (is_for_owner,work_id, purchase_order,invoice_number,invoice_date,invoice_net_days) => {
+    const handleBillingInformationChanged = async (is_for_owner, work_id, purchase_order, invoice_number, invoice_date, invoice_net_days) => {
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
             'is_for_owner': is_for_owner,
@@ -793,7 +795,7 @@ const Home = () => {
                 console.log(error);
             });
     }
-    const handleBillToLessee = async (work_id,lessee_id,is_billed_to_lessee,work_order) =>{
+    const handleBillToLessee = async (work_id, lessee_id, is_billed_to_lessee, work_order) => {
         const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         let data = qs.stringify({
             'work_id': work_id,
@@ -816,10 +818,10 @@ const Home = () => {
             .then((response) => {
                 console.log("calling done")
                 console.log(response.data)
-                if(is_billed_to_lessee){
+                if (is_billed_to_lessee) {
                     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
                     setWorkOrders(updatedWorkOrders)
-                }else {
+                } else {
                     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
                     setWorkOrders(updatedWorkOrders)
                 }
@@ -829,6 +831,34 @@ const Home = () => {
             });
     }
 
+    const createWO = async (railcar_id, reason, rm) => {
+        let data = qs.stringify({
+            'railcar_id': railcar_id,
+            'reason': reason,
+            'rm': rm,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'create_work_order',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+
+        await axios.request(config)
+            .then((response) => {
+                console.log(response.data)
+                console.log("here")
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
 
 
     const customStylesForCommentModal = {
@@ -981,7 +1011,9 @@ const Home = () => {
                 ) : null}
             </div>
 
-            {workOrderModalShowing && <WorkOrderModal setWorkOrderModalShowing={setWorkOrderModalShowing} />}
+            {workOrderModalShowing &&
+                <WorkOrderModal setWorkOrderModalShowing={setWorkOrderModalShowing} routingMatrix={commonData.rm}
+                                createWO={createWO}/>}
             <Modal
                 isOpen={isCommentModalOpen}
                 contentLabel="POST COMMENT"
@@ -998,8 +1030,10 @@ const Home = () => {
                 </button>
             </Modal>
             <div className="p-5">
-                <button className="bg-[#002e54] h-8 w-8 p-1 rounded-full flex justify-center items-center fixed bottom-5 right-5" onClick={() => setWorkOrderModalShowing((prev) => (!prev))}>
-                    <Plus />
+                <button
+                    className="bg-[#002e54] h-8 w-8 p-1 rounded-full flex justify-center items-center fixed bottom-5 right-5"
+                    onClick={() => setWorkOrderModalShowing((prev) => (!prev))}>
+                    <Plus/>
                 </button>
             </div>
         </React.Fragment>

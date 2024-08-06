@@ -1,10 +1,9 @@
-import React, {useRef, useState} from "react";
+import React, {useRef} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
 import {auth} from "../../firebase";
-
 
 
 const qs = require('qs');
@@ -22,11 +21,11 @@ const Login = () => {
     const submitLoginForm = (event) => {
         event.preventDefault();
         toastId.current = toast.loading("Loading...")
-        signInWithPopup(auth, provider).then((user)=>{
+        signInWithPopup(auth, provider).then((user) => {
 
-            const domain = ( user.user.email || "").split("@").pop();
+            const domain = (user.user.email || "").split("@").pop();
             const isValid = domain === process.env.REACT_APP_WORKSPACE_DOMAIN;
-            if(!isValid){
+            if (!isValid) {
                 auth.signOut();
                 toast.update(toastId.current, {
                     render: `Only ${process.env.REACT_APP_WORKSPACE_DOMAIN} workspace is allowed!`,
@@ -42,7 +41,7 @@ const Login = () => {
             let data = qs.stringify({
                 'name': user.user.displayName,
                 'email': user.user.email,
-                'access_token':user.user.accessToken
+                'access_token': user.user.accessToken
             });
 
             let config = {
@@ -62,7 +61,7 @@ const Login = () => {
 
                         console.log(response)
 
-                        if(response.data.is_active ==0){
+                        if (response.data.is_active == 0) {
 
                             toast.update(toastId.current, {
                                 render: "Your account is waiting for activation contact HR",
@@ -71,7 +70,7 @@ const Login = () => {
                                 hideProgressBar: true,
                                 isLoading: false,
                             });
-                        }else if(response.data.is_active ==1){
+                        } else if (response.data.is_active == 1) {
                             toast.update(toastId.current, {
                                 render: "Login successful",
                                 autoClose: 1000,
@@ -81,7 +80,7 @@ const Login = () => {
                             });
                             localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
                             navigate("/")
-                        }else {
+                        } else {
                             toast.update(toastId.current, {
                                 render: "Your account is deactivated",
                                 autoClose: 5000,

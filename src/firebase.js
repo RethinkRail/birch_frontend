@@ -1,7 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging';
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-
+import {initializeApp} from 'firebase/app';
+import {getMessaging} from 'firebase/messaging';
+import {getAuth, GoogleAuthProvider} from "firebase/auth";
 
 
 const config = {

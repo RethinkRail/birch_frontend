@@ -28,7 +28,7 @@ root.render(
 
                 <Route path="/database" element={
                     <ProtectedRoute>
-                        <Database />
+                        <Database/>
                     </ProtectedRoute>
                 }>
                 </Route>

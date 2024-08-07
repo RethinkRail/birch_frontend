@@ -470,7 +470,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         wheel_detail: wheel_detail,
         value: null
     };
-
     let original_invoice_number = {
         name: 'original_invoice_number',
         column: 307,

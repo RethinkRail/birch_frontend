@@ -1,6 +1,6 @@
 const DeleteModal = ({handleDelete, setDeleteModalShowing, setRowId, setRowCode}) => {
     return (
-        <div className="absolute h-[100vh] w-full bg-[#2e2b2b40] flex flex-1 justify-center items-center"
+        <div className="fixed inset-0 bg-[#2e2b2b40] flex justify-center items-center"
              onClick={() => {
                  setRowId()
                  setRowCode()
@@ -22,6 +22,7 @@ const DeleteModal = ({handleDelete, setDeleteModalShowing, setRowId, setRowCode}
                 </div>
             </div>
         </div>
+
     )
 }
 

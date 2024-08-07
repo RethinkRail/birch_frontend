@@ -74,6 +74,7 @@ const Home = () => {
 
         axios.request(config)
             .then((response) => {
+                console.log(response.data.active_workorder)
                 setWorkOrders(response.data.active_workorder)
                 console.log(workOrders)
                 return Promise.resolve();
@@ -784,15 +785,16 @@ const Home = () => {
             },
             data: data
         };
-        await axios.request(config)
+        return axios.request(config)
             .then((response) => {
-                console.log("calling donr")
-                console.log(response)
-                getWorkOrderById(work_id)
-
+                console.log("calling done");
+                console.log(response);
+                return true;
             })
             .catch((error) => {
                 console.log(error);
+                console.log("An error occurred when handling billing");
+                return false;
             });
     }
     const handleBillToLessee = async (work_id, lessee_id, is_billed_to_lessee, work_order) => {

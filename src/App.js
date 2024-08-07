@@ -3,7 +3,7 @@ import {Outlet} from "react-router-dom";
 import Navbar from "./portal/navbar/Navbar";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {auth} from "./firebase";
+import {auth, onMessageListener, requestForToken} from "./firebase";
 import axios from "axios";
 import qs from "qs";
 
@@ -13,6 +13,17 @@ function App() {
     useEffect(() => {
         handleGetUser();
     }, [isLoggedIn]);
+
+    useEffect(() => {
+        requestForToken();
+    }, []);
+
+    onMessageListener()
+        .then((payload) => {
+            console.log('Message received. ', payload);
+
+        })
+        .catch((err) => console.log('Failed to receive message: ', err));
 
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {

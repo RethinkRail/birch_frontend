@@ -41,7 +41,9 @@ const OrderDetails = ({
                           updateRE,
                           updateEP,
                           updateBilling,
-                          updateBillToLessee
+                          updateBillToLessee,
+                          getActiveWorkOrders,
+                          handleBillingInformationChanged
                       }) => {
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
@@ -56,7 +58,15 @@ const OrderDetails = ({
     const [ownerDueDateOriginal, setOwnerDueDateOriginal] = useState()
     const [ownerInvoiceNetDaysOriginal, setOwnerInvoiceNetDaysOriginal] = useState()
     const [showButtonsOwner, setShowButtonsOwner] = useState(false)
+
+    // method to show update and cancel button when for lessee
+    const [lesseePurchaseOrderOriginal, setLesseePurchaseOrderOriginal] = useState()
+    const [lesseeInvoiceNumberOriginal, setLesseeInvoiceNumberOriginal] = useState()
+    const [lesseeInvoiceDateOriginal, setLesseeInvoiceDateOriginal] = useState()
+    const [lesseeDueDateOriginal, setLesseeDueDateOriginal] = useState()
+    const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
+
 
 
     const containerRef = useRef();
@@ -166,6 +176,7 @@ const OrderDetails = ({
         // This is for the button displayer function
         setOwnerPurchaseOrderOriginal(workOrder.purchase_order)
         setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? '')
+        setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? '')
         setPurchaseOrderChangedForOwner(false)
         setPurchaseOrderChangedForLessee(false)
 
@@ -173,6 +184,8 @@ const OrderDetails = ({
         // This is for the button displayer function
         setOwnerInvoiceNumberOriginal(workOrder.invoice_number)
         setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? '')
+        // this is for lessee button displayer
+        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? '')
         setInvoiceChangedForOwner(false)
         setInvoiceChangedForLessee(false)
 
@@ -181,6 +194,8 @@ const OrderDetails = ({
         // This is for the button displayer function
         setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days)
         setLesseeInvoiceNetDays(workOrder.secondary_owner_info ? workOrder.secondary_owner_info.invoice_net_days : 0)
+        // this is for the lessee button displayer function
+        setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info ? workOrder.secondary_owner_info.invoice_net_days : 0)
         setInvoiceNetDaysChangedForOwner(false)
         setInvoiceNetDaysChangedForLessee(false)
 
@@ -195,7 +210,19 @@ const OrderDetails = ({
             console.log(workOrder.secondary_owner_info.invoice_date == process.env.REACT_APP_DEFAULT_DATE)
         }
 
+        if (workOrder.secondary_owner_info != null) {
+            console.log(workOrder.secondary_owner_info.invoice_date == process.env.REACT_APP_DEFAULT_DATE)
+        }
+
         setLesseeInvoiceDate(workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date)
+        // this is for the lessee button displayer function
+        setLesseeInvoiceDateOriginal(workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date)
+
+        const invDateLessee = workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date
+        const invNetDateLessee = workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_net_days
+
+        setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null)
+
         setInvoiceDateChangedForOwner(false)
         setInvoiceDateChangedForLessee(false)
 
@@ -205,8 +232,10 @@ const OrderDetails = ({
         setTQ(workOrder.tq);
         setRE(workOrder.re);
         setEP(workOrder.ep);
-        //setOwnerInvoiceNumber(workOrder.invoice_number);
-        //setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
+        setOwnerInvoiceNumber(workOrder.invoice_number);
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number)
+        setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
+        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
         setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
     }, [workOrder]);
     const formatDateToSQL = (date) => {
@@ -428,6 +457,7 @@ const OrderDetails = ({
 
             axios.request(config)
                 .then((response) => {
+                    console.log(response.data[0].f0)
                     setLesseeInvoiceNumber(invoiceGeneratorFromLastInvoce(response.data[0].f0))
                 })
                 .catch((error) => {
@@ -626,17 +656,24 @@ const OrderDetails = ({
     }
 
     const updateBillingInformation = async (isForOwner) => {
-        console.log("called from here" + isForOwner)
         if (isForOwner) {
             const result =  await updateBilling(true, workOrder.id, ownerPurchaseOrder, ownerInvoiceNumber, ownerInvoiceDate, ownerInvoiceNetDays)
-            setOwnerPurchaseOrderOriginal(ownerPurchaseOrder)
-            setOwnerInvoiceNumberOriginal(ownerInvoiceNumber)
-            setOwnerInvoiceDateOriginal(ownerInvoiceDate)
-            setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays)
-            setShowButtonsOwner(false)
+            if(result){
+                setOwnerPurchaseOrderOriginal(ownerPurchaseOrder)
+                setOwnerInvoiceNumberOriginal(ownerInvoiceNumber)
+                setOwnerInvoiceDateOriginal(ownerInvoiceDate)
+                setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays)
+                setShowButtonsOwner(false)
+            }
         } else {
             const result = await updateBilling(false, workOrder.id, lesseePurchaseOrder, lesseeInvoiceNumber, lesseeInvoiceDate, lesseeInvoiceNetDays)
-            console.log(result)
+            if(result){
+                setLesseePurchaseOrder(lesseePurchaseOrder)
+                setLesseeInvoiceNumber(lesseeInvoiceNumber)
+                setLesseeInvoiceDate(lesseeInvoiceDate)
+                setLesseeInvoiceNetDays(lesseeInvoiceNetDays)
+                setShowButtonsLessee(false)
+            }
         }
     }
 
@@ -682,6 +719,25 @@ const OrderDetails = ({
         handleCheckForButtonsOwner()
     }, [ownerInvoiceDate, ownerInvoiceNetDays, ownerPurchaseOrder, ownerInvoiceNumber])
 
+    useEffect(() => {
+        const handleCheckForButtonsLessee = () => {
+            let calc = lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null
+            if (lesseePurchaseOrder !== lesseePurchaseOrderOriginal || lesseeInvoiceNumber !== lesseeInvoiceNumberOriginal || lesseeInvoiceDate !== lesseeInvoiceDateOriginal || (calc !== null && String(calc) !== String(lesseeDueDateOriginal))) {
+                console.log("Show buttons will be set to true")
+                lesseePurchaseOrder !== lesseePurchaseOrderOriginal ? console.log(`lessee purchase order failed`) : console.log(`lessee purchase order pass`)
+                lesseeInvoiceNumber !== lesseeInvoiceNumberOriginal ? console.log(`lessee invoice number failed`) : console.log(`lessee invoice number pass`)
+                lesseeInvoiceDate !== lesseeInvoiceDateOriginal ? console.log(`lessee invoice date failed`) : console.log(`lessee invoice date pass`)
+                console.log(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays), "changed")
+                console.log(lesseeDueDateOriginal, "original")
+                calc !== lesseeDueDateOriginal ? console.log(`lessee due date failed`) : console.log(`lessee due date pass`)
+                setShowButtonsLessee(true)
+            } else {
+                setShowButtonsLessee(false)
+            }
+        }
+        handleCheckForButtonsLessee()
+    }, [lesseeInvoiceDate, lesseeInvoiceNetDays, lesseePurchaseOrder, lesseeInvoiceNumber])
+
 
 
 
@@ -690,6 +746,13 @@ const OrderDetails = ({
         setOwnerInvoiceNumber(ownerInvoiceNumberOriginal)
         setOwnerInvoiceDate(ownerInvoiceDateOriginal)
         setOwnerInvoiceNetDays(ownerInvoiceNetDaysOriginal)
+    }
+
+    const handleLesseeCancel = () => {
+        setLesseePurchaseOrder(lesseePurchaseOrderOriginal)
+        setLesseeInvoiceNumber(lesseeInvoiceNumberOriginal)
+        setLesseeInvoiceDate(lesseeInvoiceDateOriginal)
+        setLesseeInvoiceNetDays(lesseeInvoiceNetDaysOriginal)
     }
 
     return (
@@ -1413,8 +1476,6 @@ const OrderDetails = ({
                                                     UPDATE
                                                 </button>
 
-
-
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
                                                     onClick={handleCancel}
@@ -1433,7 +1494,7 @@ const OrderDetails = ({
                             {/*End Order information Owner */}
 
                             {/*Order information Lessee */}
-                            {workOrder.secondary_owner_info != null && (
+                            {workOrder.secondary_owner_info  != null && (
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none">
 
                                     <h6 className='font-semibold '>Billing Information(Lessee)</h6>
@@ -1526,7 +1587,6 @@ const OrderDetails = ({
                                                 <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
                                                       onClick={() => changeNetDays(false, 90)}>Net 90</span>
                                             </div>
-
                                         </div>
                                         <div className='p-2'>
                                             <div>
@@ -1609,17 +1669,27 @@ const OrderDetails = ({
                                                        value={workOrder.railcar.owner_railcar_lessee_idToowner.contact_email}></input>
                                             </div>
                                             {}
-                                            <div className="mt-8">
-                                                <span>
-                                                    <button
-                                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                                        onClick={() => updateBillingInformation(false)}
-                                                    >
-                                                        UPDATE
-                                                    </button>
+                                            {showButtonsLessee && (
+                                                <div className="mt-8">
+                                                    <span>
+                                                        <button
+                                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded  cursor-pointer"
+                                                            onClick={() => updateBillingInformation(false)}
+                                                        >
+                                                            UPDATE
+                                                        </button>
 
-                                                </span>
-                                            </div>
+                                                        <button
+                                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                                                            onClick={handleLesseeCancel}
+
+                                                        >
+                                                        CANCEL
+                                                        </button>
+                                                    </span>
+
+                                                </div>
+                                            )}
 
                                         </div>
                                     </div>

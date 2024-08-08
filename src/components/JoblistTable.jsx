@@ -1,100 +1,100 @@
-// Table.js
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+    MaterialReactTable,
+    useMaterialReactTable,
+} from 'material-react-table';
+import { round2Dec } from "../utils/NumberHelper";
 
-// This component represents a draggable table with the ability to rearrange rows.
-
-const JoblistTable = ({jobs}) => {
-    // State to manage the table Jobs, which will be rearranged.
+const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
     const [tableData, setTableData] = useState([]);
-
-    // Function to handle the drag start event for a row.
-    const handleDragStart = (e, rowIndex) => {
-        e.dataTransfer.setData('rowIndex', rowIndex);
-    };
+    const [isBilledtoLessee,setIsBilledToLessee]= useState(false)
     useEffect(() => {
-        console.log(jobs)
-        setTableData(jobs);
-    }, [jobs]);
+        const jobListData = jobs.map((job) => ({
+            id: job.id,
+            ln: job.line_number,
+            loc: job.locationcode.code,
+            qty: job.quantity,
+            cc: job.conditioncode.code,
+            jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
+            aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?'':job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
+            description: job.job_description,
+            wmc: job.whymadecode.code,
+            labor: round2Dec(job.labor_time * job.labor_rate),
+            material: job.material_cost,
+            net: round2Dec(job.labor_cost + job.material_cost),
+            rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
+            is_billed_to_lessee: job.secondary_bill_to_id==null?false:true
+        }));
 
-    // Function to handle the drop event when a row is moved.
-    const handleDrop = (e, rowIndex) => {
-        e.preventDefault();
-        // Get the source index from the data transfer.
-        const sourceIndex = e.dataTransfer.getData('rowIndex');
-        // Create a copy of the table data.
-        const updatedData = [...tableData];
-        // Remove the dragged row from its original position.
-        const [draggedRow] = updatedData.splice(sourceIndex, 1);
-        // Insert the dragged row at the new position.
-        updatedData.splice(rowIndex, 0, draggedRow);
-        // Update the state with the rearranged data.
-        setTableData(updatedData);
-    };
+        setTableData(jobListData);
+        setIsBilledToLessee(is_billed_to_lessee)
+    }, [jobs,is_billed_to_lessee]);
 
-    // Function to handle the drag over event and allow dropping.
-    const handleAllowDrop = (e) => {
-        e.preventDefault();
-    };
-    const placeholderText = (
-        <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-                d="M17.7197 17.5085L14.797 14.5979M16.8699 9.59362C16.878 13.5056 13.7133 16.6835 9.80129 16.6917C5.88928 16.6998 2.71137 13.5351 2.70322 9.62311C2.69508 5.7111 5.85979 2.53319 9.77179 2.52505C13.6838 2.51691 16.8617 5.68161 16.8699 9.59362Z"
-                stroke="#686868" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>)
+    const columns = useMemo(
+        () => [
+            { accessorKey: 'id', header: 'id', size: 10 },
+            { accessorKey: 'ln', header: 'Line', size: 20 },
+            { accessorKey: 'loc', header: 'Loc', size: 20 },
+            { accessorKey: 'qty', header: 'Qty', size: 20 },
+            { accessorKey: 'cc', header: 'CC', size: 20 },
+            { accessorKey: 'jobcode', header: 'JC', size: 20 },
+            { accessorKey: 'aq', header: 'AQ', size: 20 },
+            { accessorKey: 'description', header: 'Description of Repair', size: 250 },
+            { accessorKey: 'wmc', header: 'WMC', size: 20 },
+            { accessorKey: 'labor', header: 'Labor Hrs', size: 20 },
+            { accessorKey: 'material', header: 'Material', size: 20 },
+            { accessorKey: 'net', header: 'Net Cost', size: 20 },
+            { accessorKey: 'rev', header: 'Revenue Category', size: 20 },
+            {
+                accessorKey: 'is_billed_to_lessee',
+                header: 'Bill to Lessee',
+                size: 20,
+                Cell: ({ row }) => {
+                    const isBilledToLessee = row.getValue('is_billed_to_lessee');
+                    console.log('is_billed_to_lessee:', isBilledToLessee); // Debug log
+
+                    return (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <input
+                                type="checkbox"
+                                checked={isBilledToLessee !== null}
+                                disabled={isBilledToLessee === null}
+                                className="checkbox checkbox-primary"
+                            />
+                        </div>
+                    );
+                },
+            },
+        ],
+        [],
+    );
+
+    const table = useMaterialReactTable({
+        columns,
+        data: tableData,
+        enablePagination: false,
+        enableFilters: false,
+        enableColumnFilters:false,
+        enableSorting:false,
+        enableExpandAll:false,
+        enableColumnActions:false,
+        enableDensityToggle:false,
+        enableExpanding:false,
+        enableFullScreenToggle:false,
+        enableGrouping:false,
+        enableRowDragging:true,
+        enableTopToolbar:false,
+        initialState: { columnVisibility: { id: false, is_billed_to_lessee: isBilledtoLessee } },
+    });
+
     return (
-        <div className="">
-            <div className="pt-[28px] flex justify-between">
-                <p className='text-[24px] font-semibold'>Job List</p>
-                <button className='btn btn-secondary normal-case'>Add job</button>
-            </div>
-            <div className="overflow-x-auto w-full mt-[33px] ml-[-1px] mx-auto   rounded-[8px]">
-                <table className=" py-[12px]  w-full  bg-transparent   text-[#475467] ">
-                    <thead className="uppercase text-[12px] font-medium bg-[#DCE5FF] ">
-                    <tr className='h-[44px] '>
-                        <th className='w-[54px]  py-[12px] pl-[14px]'>LN</th>
-                        <th className='w-[49px]  pl-[19px]'>LOC</th>
-                        <th className='w-[53px]  pl-[12px]'>QTY</th>
-                        <th className='w-[51px]  pl-[15px] '>CC</th>
-                        <th className='w-[69px]   '>JOB CODE</th>
-                        <th className='w-[58px]  '>AQ</th>
-                        <th className='w-[342px] text-left'>DESCRIPTION OF REPAIR</th>
-                        <th className='w-[90px]  '>WMC</th>
-                        <th className='w-[109px] '>LABOUR HRS</th>
-                        <th className='w-[116px] '>MATERIALS</th>
-                        <th className='w-[95px]  '>STATUS</th>
-                        <th className='w-[72px]  '>NET COST</th>
-                        <th className='w-[165px] '>REVENUE CATEGORY</th>
-                    </tr>
-                    </thead>
-                    <tbody className='text-[14px] font-medium'>
-                    {tableData.map((row, i) => (
-                        <tr
-                            key={row.CODE}
-                            onDragStart={(e) => handleDragStart(e, i)}
-                            onDrop={(e) => handleDrop(e, i)}
-                            onDragOver={handleAllowDrop}
-                            draggable
-                            className={` my-5 text-[14px] h-[72px] text-[#475467] ${i % 2 === 0 ? "bg-white" : "bg-transparent"}`}
-                        >
-                            <td className='pl-[18px]  w-[54px] text-center '>{i + 1}</td>
-                            <td className=' py-[16px] w-[49px] text-center '>{row.location_code}</td>
-                            <td className=' py-[16px] w-[53px] text-center '>{row.quantity}</td>
-                            <td className=' py-[16px] w-[51px] text-center '>{row.condition_code}</td>
-                            <td className=' py-[16px] w-[69px] text-center '>{row.job_code_applied}</td>
-                            <td className=' py-[16px] w-[58px] text-center '>--</td>
-                            <td className=' py-[16px] w-[342px] text-left '>{row.job_description}</td>
-                            <td className=' py-[16px] w-[90px] text-center '>{row.why_made_code}</td>
-                            <td className=' py-[16px] w-[109px] text-center '>{row.labor_time} HRS</td>
-                            <td className=' py-[16px] w-[72px] text-center '>$396.84</td>
-                            <td className=' py-[16px] w-[116px] text-center'>{row.material_cost}</td>
-                            <td className=' py-[16px] w-[95px] text-center '>N/A</td>
-                            <td className=' py-[16px] w-[165px] pl-[30px] '>Repair-Mechanical</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+        <div>
+            <div className="flex justify-between">
+                <h6 className='font-semibold'>Job List</h6>
+                <button className='btn btn-secondary btn-sm normal-case'>Add Job</button>
             </div>
 
+            <MaterialReactTable table={table} />
         </div>
     );
 };

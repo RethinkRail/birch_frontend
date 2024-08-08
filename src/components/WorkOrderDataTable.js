@@ -11,6 +11,7 @@ import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import OrderDetails from "./OrderDetails";
 import CustomDateInput from "./CustomDateInput";
+import ReorderableTable from "./ReorderableTable";
 
 const qs = require('qs');
 
@@ -416,6 +417,12 @@ const WorkOrderDataTable = ({
                         className="display nowrap compact stripe"
                         customStyles={myStyles}
                     />
+
+                    {/*<ReorderableTable*/}
+                    {/*    workOrderData={workOrderData}*/}
+                    {/*    columns={workOrdersTableColumn}*/}
+                    {/*    myStyles={myStyles}*/}
+                    {/*    conditionalRowStyles={conditionalRowStyles} />*/}
 
 
                     {/*{workOrderToView!==null && (*/}

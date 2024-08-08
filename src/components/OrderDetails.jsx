@@ -10,6 +10,8 @@ import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../util
 
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
+import JoblistTable from "./JoblistTable";
+
 //
 // import JoblistTable from "./JoblistTable";
 // import PartsTable from "./PartsTable";
@@ -1697,7 +1699,16 @@ const OrderDetails = ({
                             )}
                             {/*End Order information Lessee */}
 
-                            {/*<JoblistTable jobs={jobs} />*/}
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+
+                                <JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>
+                            </div>
+
+
+
+
+
+
                             {/*<PartsTable />*/}
                             <div className="w-full bg-white p-[25px] flex mt-[24px] border rounded">
                                 <div className="">

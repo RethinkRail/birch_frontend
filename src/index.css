@@ -37,4 +37,11 @@
 .collapse-content-expanded {
     display: block;
 }
+.custom-table .MuiTableCell-root {
+    font-size: 0.875rem; /* Adjust the size as needed */
+}
+
+.custom-table .MuiSvgIcon-root {
+    font-size: 1rem; /* Adjust SVG icon size if needed */
+}
 

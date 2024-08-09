@@ -11,6 +11,7 @@ import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../util
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 import JoblistTable from "./JoblistTable";
+import {round2Dec} from "../utils/NumberHelper";
 
 //
 // import JoblistTable from "./JoblistTable";
@@ -156,8 +157,37 @@ const OrderDetails = ({
     const ownerInvoiceNetDaysrRef = useRef(null);
     //const debouncedMOWK = useDebounce(workOrder.mo_wk, 300);
 
+    const [totalLaborHours,setTotalLaborHours]= useState()
+    const [totalLaborCost,setTotalLaborCost]= useState()
+    const [totalMatCost,setTotalMatCost]= useState()
 
-    console.log(isBillingInformationChangedForOwner)
+    const calculateJobCosts = (jobs) => {
+        let totalLaborCost = 0;
+        let totalLaborHours = 0;
+        let totalMaterialCost = 0;
+
+        jobs.forEach(job => {
+            // Calculate labor cost
+            const laborCost = job.labor_rate * job.labor_time * job.quantity;
+            totalLaborCost += laborCost;
+
+            // Calculate labor hours
+            const laborHours = job.labor_time * job.quantity;
+            totalLaborHours += laborHours;
+
+            // Calculate material cost
+            job.jobparts.forEach(part => {
+                const purchaseCost = part.purchase_cost * part.quantity;
+                const markup = purchaseCost * part.markup_percent;
+                const materialCost = purchaseCost + markup;
+                totalMaterialCost += materialCost;
+            });
+        });
+        setTotalLaborHours(totalLaborHours)
+        setTotalLaborCost(totalLaborCost)
+        setTotalMatCost(totalMaterialCost)
+
+    };
 
     useEffect(() => {
         console.log("use effect in orderdetails")
@@ -239,6 +269,7 @@ const OrderDetails = ({
         setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
         setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
         setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
+        calculateJobCosts(workOrder.joblist)
     }, [workOrder]);
     const formatDateToSQL = (date) => {
         const year = date.getFullYear();
@@ -1701,33 +1732,34 @@ const OrderDetails = ({
                             )}
                             {/*End Order information Lessee */}
 
+                            {/*Job list */}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
 
                                 <JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>
                             </div>
 
-
+                            {/*end job list */}
 
 
 
 
                             {/*<PartsTable />*/}
-                            <div className="w-full bg-white p-[25px] flex mt-[24px] border rounded">
+                            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
                                 <div className="">
-                                    <h2 className='text-[16px] font-normal '>TOTAL HOURS</h2>
-                                    <p className='text-[#979C9E] mt-[10px]'>110 hrs</p>
+                                    <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
                                 </div>
                                 <div className="">
-                                    <h2 className='text-[16px] font-normal '>TOTAL LABOUR</h2>
-                                    <p className='text-[#979C9E] mt-[10px]'>$ 9,829,874</p>
+                                    <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
                                 </div>
                                 <div className="">
-                                    <h2 className='text-[16px] font-normal '>TOTAL MATERIALS</h2>
-                                    <p className='text-[#979C9E] mt-[10px]'>$ 9,829,874</p>
+                                    <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
                                 </div>
                                 <div className="]">
-                                    <h2 className='text-[16px] font-normal '>TOTAL NET</h2>
-                                    <p className='text-[#979C9E] mt-[10px]'>$ 9,829,874</p>
+                                    <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,8 @@
 import {initializeApp} from 'firebase/app';
 import {getMessaging, getToken,onMessage } from 'firebase/messaging';
 import {getAuth, GoogleAuthProvider} from "firebase/auth";
+import axios from "axios";
+import qs from "qs";
 
 
 const config = {
@@ -19,11 +21,40 @@ export const messaging = getMessaging(app);
 
 
 export const requestForToken = () => {
-    return getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' })
+    return getToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_VAP_ID_KEY})
         .then((currentToken) => {
             if (currentToken) {
                 console.log('current token for client: ', currentToken);
-                // Send the token to your server and update the UI if necessary
+                if(JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]){
+                    return
+                }
+
+                let data = qs.stringify({
+                    'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
+                    'token': currentToken
+                });
+                let config = {
+                    method: 'post',
+                    url: process.env.REACT_APP_BIRCH_API_URL + 'update_token',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    data: data
+                };
+
+                axios.request(config)
+                    .then((response) => {
+                        console.log(response.status)
+                        if (response.status === 200) {
+                        } else {
+                            console.log("something wrong")
+                        }
+
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
                 // ...
             } else {
                 console.log('No registration token available. Request permission to generate one.');

@@ -6,8 +6,16 @@ import {
 import { round2Dec } from "../utils/NumberHelper";
 
 const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
+    // console.log(jobs)
     const [tableData, setTableData] = useState([]);
-    const [isBilledtoLessee,setIsBilledToLessee]= useState(false)
+    const [columnVisibility, setColumnVisibility] = useState({
+        is_billed_to_lessee: false,
+        id:false
+    });
+    useEffect(() => {
+        setColumnVisibility({ id:false,is_billed_to_lessee: is_billed_to_lessee }); //programmatically show firstName column
+    }, [is_billed_to_lessee]);
+
     useEffect(() => {
         const jobListData = jobs.map((job) => ({
             id: job.id,
@@ -25,10 +33,12 @@ const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
             is_billed_to_lessee: job.secondary_bill_to_id==null?false:true
         }));
+        console.log("SSS")
+        console.log(is_billed_to_lessee)
 
         setTableData(jobListData);
-        setIsBilledToLessee(is_billed_to_lessee)
-    }, [jobs,is_billed_to_lessee]);
+    }, [jobs]);
+
 
     const columns = useMemo(
         () => [
@@ -51,8 +61,6 @@ const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
                 size: 20,
                 Cell: ({ row }) => {
                     const isBilledToLessee = row.getValue('is_billed_to_lessee');
-                    console.log('is_billed_to_lessee:', isBilledToLessee); // Debug log
-
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <input
@@ -66,8 +74,21 @@ const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
                 },
             },
         ],
-        [],
+        [jobs],
     );
+
+    function swapLineNumbers(data, lineNumber1, lineNumber2) {
+        // Find the objects with the given line numbers
+        const obj1 = data.find(item => item.ln === lineNumber1);
+        const obj2 = data.find(item => item.ln === lineNumber2);
+
+        // Swap their line numbers
+        if (obj1 && obj2) {
+            [obj1.ln, obj2.ln] = [obj2.ln, obj1.ln];
+        }
+        data.sort((a, b) => a.ln - b.ln)
+        return data;
+    }
 
     const table = useMaterialReactTable({
         columns,
@@ -82,19 +103,37 @@ const JoblistTable = ({ jobs, commonData, is_billed_to_lessee }) => {
         enableExpanding:false,
         enableFullScreenToggle:false,
         enableGrouping:false,
-        enableRowDragging:true,
+        enableRowOrdering:true,
         enableTopToolbar:false,
-        initialState: { columnVisibility: { id: false, is_billed_to_lessee: isBilledtoLessee } },
+        initialState: { columnVisibility: { id: false } },
+        state: { columnVisibility },
+        onColumnVisibilityChange: setColumnVisibility,
+        muiRowDragHandleProps: ({ table }) => ({
+            onDragEnd: () => {
+                const { draggingRow, hoveredRow } = table.getState();
+                if (hoveredRow && draggingRow) {
+                    const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
+                    setTableData([...updatedTable]);
+                }
+            },
+        }),
     });
 
     return (
         <div>
-            <div className="flex justify-between">
+            <div className="flex justify-between mb-5 items-center">
                 <h6 className='font-semibold'>Job List</h6>
-                <button className='btn btn-secondary btn-sm normal-case'>Add Job</button>
+                <div className="flex space-x-2">
+                    <button className='btn btn-secondary btn-sm normal-case'>Paste Job</button>
+                    <button className='btn btn-secondary btn-sm normal-case'>Add Job</button>
+                </div>
+
             </div>
 
-            <MaterialReactTable table={table} />
+
+            <MaterialReactTable
+                table={table}
+            />
         </div>
     );
 };

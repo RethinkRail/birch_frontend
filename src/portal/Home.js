@@ -832,7 +832,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const createWO = async (railcar_id, reason, rm) => {
         let data = qs.stringify({
             'railcar_id': railcar_id,
@@ -861,7 +860,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
 
     const customStylesForCommentModal = {
         content: {
@@ -912,12 +910,10 @@ const Home = () => {
                 setIsCommentModalOpen(false)
             });
     };
-
     const cancelTaskUpdate = () => {
         setcompletingTask(null)
         setIsCommentModalOpen(false)
     }
-
     const getValueById = (id) => {
         const element = routingStatusTextArea.current;
         if (element && element.id === id) {

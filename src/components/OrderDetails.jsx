@@ -293,9 +293,11 @@ const OrderDetails = ({
         if (is_checked) {
             updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
             setIsBilledToLessee(true)
+            setJobs(workOrder.joblist)
         } else {
             updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
             setIsBilledToLessee(false)
+            setJobs(workOrder.joblist)
         }
     }
 

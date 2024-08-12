@@ -1432,7 +1432,7 @@ const OrderDetails = ({
                             </div>
                         </div>
                         {/*<JoblistTable />*/}
-                        {/*<PartsTable />*/}
+                        {/*<PartsTable2 />*/}
                         <div className="mt-[10px] p-[25px] border rounded-md ">
                             <h1 className="text-[24px] font-bold">Order updated</h1>
                             <div className="flex">

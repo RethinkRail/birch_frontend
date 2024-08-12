@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import Jobs from '../DataSets/get_jobs.json'
 // This component represents a draggable table with the ability to rearrange rows.
 
-const PartsTable = () => {
+const PartsTable2 = () => {
     // State to manage the table Jobs, which will be rearranged.
     const [ModifyedData, setModifyedData] = useState(Jobs.flatMap((job) => job.jobparts));
     console.log(ModifyedData);
@@ -81,4 +81,4 @@ const PartsTable = () => {
     );
 };
 
-export default PartsTable;
+export default PartsTable2;

@@ -11,11 +11,9 @@ import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../util
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 import JoblistTable from "./JoblistTable";
+import PartsTable from "./PartsTable";
 import {round2Dec} from "../utils/NumberHelper";
-
-//
-// import JoblistTable from "./JoblistTable";
-// import PartsTable from "./PartsTable";
+import StorageComponent from "./StorageComponent";
 
 const OrderDetails = ({
                           commonData,
@@ -1740,10 +1738,6 @@ const OrderDetails = ({
 
                             {/*end job list */}
 
-
-
-
-                            {/*<PartsTable />*/}
                             <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
                                 <div className="">
                                     <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
@@ -1762,7 +1756,20 @@ const OrderDetails = ({
                                     <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
                                 </div>
                             </div>
+                            </div>
+                        {/*Parts information*/}
+                        <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                            <PartsTable jobs={workOrder.joblist}/>
                         </div>
+
+                        {/*End Parts information*/}
+
+                        {/*Storage information*/}
+                        {workOrder.is_storage ==1 &&(
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                <StorageComponent initialEntries={workOrder.storage_information} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
+                            </div>
+                        )}
 
                         <div className="mt-[10px] p-[25px] border rounded-md ">
                             <h1 className="text-[24px] font-bold">Order updated</h1>

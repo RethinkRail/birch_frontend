@@ -10,11 +10,13 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CustomDateInput from "./CustomDateInput";
 
-
 const API_BASE_URL = process.env.REACT_APP_BIRCH_API_URL;
 
-
 const EntryRow = ({ entry, onChange, onDelete }) => {
+    if (!entry) {
+        return null; // Handle undefined entry gracefully
+    }
+
     const handleDateChange = (key, date) => {
         const updatedEntry = { ...entry, [key]: date };
         onChange(updatedEntry);
@@ -33,37 +35,47 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
         return '';
     };
 
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this entry?')) {
+            onDelete(entry.id);
+        }
+    };
+
+    const isDisabled = entry.is_billed;
+
     return (
         <tr className="border-b">
             <td className="p-2">
                 <DatePicker
                     customInput={
                         <CustomDateInput
-                            value={entry.start_date !==process.env.REACT_APP_DEFAULT_DATE || entry.start_date !== null ? new Date(entry.start_date).toLocaleDateString() : null}
+                            value={entry.start_date ? new Date(entry.start_date).toLocaleDateString() : ''}
                         />
                     }
-                    selected={entry.start_date !==process.env.REACT_APP_DEFAULT_DATE || entry.start_date !== null? new Date(entry.start_date) : null}
+                    selected={entry.start_date ? new Date(entry.start_date) : null}
                     onChange={(date) => handleDateChange('start_date', date)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
-                    className="w-full"
+                    disabled={isDisabled}
                 />
             </td>
             <td className="p-2">
                 <DatePicker
                     customInput={
                         <CustomDateInput
-                            value={entry.end_date !==process.env.REACT_APP_DEFAULT_DATE || entry.start_date !== null? new Date(entry.end_date).toLocaleDateString() : null}
+                            value={entry.end_date ? new Date(entry.end_date).toLocaleDateString() : ''}
                         />
                     }
-                    selected={entry.end_date !==process.env.REACT_APP_DEFAULT_DATE || entry.start_date !== null? new Date(entry.end_date) : null}
+                    selected={entry.end_date ? new Date(entry.end_date) : null}
                     onChange={(date) => handleDateChange('end_date', date)}
                     selectsEnd
+                    startDate={entry.start_date ? new Date(entry.start_date) : null}
+                    endDate={entry.end_date ? new Date(entry.end_date) : null}
                     minDate={entry.start_date ? new Date(entry.start_date) : null}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
                     className="w-full"
-
+                    disabled={isDisabled}
                 />
             </td>
             <td className="p-2 text-center">
@@ -74,13 +86,13 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
                     type="checkbox"
                     checked={entry.is_billed}
                     onChange={handleCheckboxChange}
-                    disabled={entry.is_billed} // Optionally disable if already billed
                 />
             </td>
             <td className="p-2 text-center">
                 <button
-                    onClick={() => onDelete(entry.id)}
-                    className="px-2 py-1 bg-red-500 text-white rounded shadow"
+                    onClick={handleDelete}
+                    className={`px-2 py-1 bg-red-500 text-white rounded shadow ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isDisabled}
                 >
                     Delete
                 </button>
@@ -95,8 +107,8 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     useEffect(() => {
         const mappedEntries = initialEntries.map((entry) => ({
             id: entry.id,
-            start_date: entry.start_date !== null ? new Date(entry.start_date) : null,
-            end_date: entry.end_date !== null ? new Date(entry.end_date) : null,
+            start_date: entry.start_date ? new Date(entry.start_date) : null,
+            end_date: entry.end_date ? new Date(entry.end_date) : null,
             is_billed: !!entry.is_billed,
         }));
         setEntries(mappedEntries);
@@ -147,19 +159,22 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
             }
         }
         setEntries(entries.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry));
-        await callWebService('update_storage_info/', 'POST', updatedEntry);
+        if (updatedEntry.id) {
+            await callWebService('update_storage_info/', 'POST', updatedEntry);
+        }
     };
 
     const deleteEntry = async (id) => {
-        setEntries(entries.filter(entry => entry.id !== id));
-        await callWebService('delete_storage_information/', 'DELETE', { id });
+        if (window.confirm('Are you sure you want to delete this entry?')) {
+            setEntries(entries.filter(entry => entry.id !== id));
+            await callWebService('delete_storage_information/', 'DELETE', { id });
+        }
     };
 
     useEffect(() => {
-        console.log("upddasa")
-        entries.forEach(async (entry) => {
-            if (!entry.id) {
-                console.log("updated")
+        const newEntries = entries.filter(entry => !entry.id);
+        newEntries.forEach(async (entry) => {
+            if (entry.start_date) {
                 await callWebService('create_storage_info/', 'POST', {
                     ...entry,
                     railcar_id,
@@ -170,35 +185,40 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     }, [entries, railcar_id, work_order]);
 
     return (
-        <div className="p-4">
-            <table className="w-full table-auto border-collapse">
-                <thead>
-                <tr className="bg-gray-200">
-                    <th className="p-2 border-b text-center">Start Date</th>
-                    <th className="p-2 border-b text-center">End Date</th>
-                    <th className="p-2 border-b text-center">Day Diff</th>
-                    <th className="p-2 border-b text-center">Is Billed</th>
-                    <th className="p-2 border-b text-center">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {entries.map(entry => (
-                    <EntryRow key={entry.id} entry={entry} onChange={updateEntry} onDelete={deleteEntry} />
-                ))}
-                </tbody>
-            </table>
+        <div>
+            <div className="flex justify-between mb-5 items-center">
+                <h6 className='font-semibold'>Storage Information</h6>
+            </div>
+            <div className="p-4">
+                <table className="w-full table-auto border-collapse">
+                    <thead>
+                    <tr className="bg-gray-200">
+                        <th className="p-2 border-b text-left">Start Date</th>
+                        <th className="p-2 border-b text-left">End Date</th>
+                        <th className="p-2 border-b text-center">Day Diff</th>
+                        <th className="p-2 border-b text-center">Is Billed</th>
+                        <th className="p-2 border-b text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {entries.map(entry => (
+                        <EntryRow key={entry.id || Math.random()} entry={entry} onChange={updateEntry} onDelete={deleteEntry} />
+                    ))}
+                    </tbody>
+                </table>
 
-            <div className="flex justify-center mt-4">
-                <button
-                    onClick={addNewEntry}
-                    className="px-4 py-2 bg-blue-500 text-white rounded shadow"
-                >
-                    Add New Entry
-                </button>
+                <div className="flex justify-center mt-4">
+                    <button
+                        onClick={addNewEntry}
+                        className="px-4 py-2 bg-blue-500 text-white rounded shadow"
+                    >
+                        Add New Entry
+                    </button>
+                </div>
             </div>
         </div>
+
     );
 };
 
 export default StorageComponent;
-

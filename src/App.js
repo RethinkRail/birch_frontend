@@ -3,7 +3,7 @@ import {Outlet} from "react-router-dom";
 import Navbar from "./portal/navbar/Navbar";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {auth, onMessageListener, requestForToken} from "./firebase";
+import {auth} from "./firebase";
 import axios from "axios";
 import qs from "qs";
 

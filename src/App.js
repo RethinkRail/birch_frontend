@@ -15,7 +15,7 @@ function App() {
     }, [isLoggedIn]);
 
     useEffect(() => {
-        requestForToken();
+       //requestForToken();
     }, []);
 
     onMessageListener()

@@ -1,8 +1,7 @@
 import {initializeApp} from 'firebase/app';
-import {getMessaging, getToken,onMessage } from 'firebase/messaging';
+
 import {getAuth, GoogleAuthProvider} from "firebase/auth";
-import axios from "axios";
-import qs from "qs";
+
 
 
 const config = {

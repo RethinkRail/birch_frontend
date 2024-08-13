@@ -18,12 +18,12 @@ function App() {
        //requestForToken();
     }, []);
 
-    onMessageListener()
-        .then((payload) => {
-            console.log('Message received. ', payload);
-
-        })
-        .catch((err) => console.log('Failed to receive message: ', err));
+    // onMessageListener()
+    //     .then((payload) => {
+    //         console.log('Message received. ', payload);
+    //
+    //     })
+    //     .catch((err) => console.log('Failed to receive message: ', err));
 
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {

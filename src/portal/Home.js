@@ -853,8 +853,9 @@ const Home = () => {
         await axios.request(config)
             .then((response) => {
                 console.log(response.data)
-                console.log("here")
+                const new_orders = workOrders.concat(response.data)
 
+                setWorkOrders(new_orders)
             })
             .catch((error) => {
                 console.log(error);

@@ -910,6 +910,39 @@ const Home = () => {
                 setIsCommentModalOpen(false)
             });
     };
+
+    const searchCar =async (railcar_id) =>{
+
+        let data = qs.stringify({
+            'railcar_id': railcar_id
+        });
+        showToastMessage("Searching car", 1)
+        let config = {
+            method: 'get',
+            maxBodyLength: Infinity,
+            url:  process.env.REACT_APP_BIRCH_API_URL+`get_history_car_by_railcar?railcar_id=${railcar_id}`,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                if (response.data.length > 0) {
+                    showToastMessage("Car found", 1)
+                    const new_orders = response.data.concat(workOrders);
+                    setWorkOrders(new_orders);
+                } else {
+                    showToastMessage("Car not found", 2)
+
+                }
+            })
+            .catch((error) => {
+                showToastMessage("Car not found", 2)
+                console.log(error);
+            });
+    }
     const cancelTaskUpdate = () => {
         setcompletingTask(null)
         setIsCommentModalOpen(false)
@@ -1005,6 +1038,7 @@ const Home = () => {
                         updateEP={handleChangeEP}
                         updateOwnerBilling={handleBillingInformationChanged}
                         updateBillToLessee={handleBillToLessee}
+                        searchCar = {searchCar}
                     />
                 ) : null}
             </div>

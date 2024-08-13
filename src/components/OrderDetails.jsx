@@ -14,6 +14,7 @@ import JoblistTable from "./JoblistTable";
 import PartsTable from "./PartsTable";
 import {round2Dec} from "../utils/NumberHelper";
 import StorageComponent from "./StorageComponent";
+import RailCareTimeLog from "./RailCareTimeLog";
 
 const OrderDetails = ({
                           commonData,
@@ -1764,6 +1765,14 @@ const OrderDetails = ({
 
                         {/*End Parts information*/}
 
+                        {/*Railcar log*/}
+                        <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                            <RailCareTimeLog workOrder={workOrder}/>
+                        </div>
+
+                        {/*Railcar log*/}
+
+
                         {/*Storage information*/}
                         {workOrder.is_storage ==1 &&(
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
@@ -1771,45 +1780,45 @@ const OrderDetails = ({
                             </div>
                         )}
 
-                        <div className="mt-[10px] p-[25px] border rounded-md ">
-                            <h1 className="text-[24px] font-bold">Order updated</h1>
-                            <div className="flex">
-                            <span className=' px-[24px] py-[16px] border-b-4 border-[#002E54]'>
-                                <h4 className='text-[20px] font-bold'>Inbounded</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <span className='px-[24px] py-[16px] border-b-2'>
-                                <h4 className='text-[20px] font-bold'>Inspected</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <span className='px-[24px] py-[16px] border-b-2'>
-                                <h4 className='text-[20px] font-bold'>Estimated</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <span className=' px-[24px] py-[16px] border-b-2'>
-                                <h4 className='text-[20px] font-bold'>Approved</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <span className='px-[24px] py-[16px] border-b-2'>
-                                <h4 className='text-[20px] font-bold'>Clean</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <span className=' px-[24px] py-[16px] border-b-2'>
-                                <h4 className='text-[20px] font-bold'>Blast</h4>
-                                <p className='text-[#475467]'>Aug 20</p>
-                            </span>
-                                <div className="w-[96px] py-[16px] flex border-b-2 justify-center items-center">
-                                    <div
-                                        className="w-[48px] h-[48px]  rounded-full bg-[#002E54] flex justify-center items-center">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2"
-                                                  stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        {/*<div className="mt-[10px] p-[25px] border rounded-md ">*/}
+                        {/*    <h1 className="text-[24px] font-bold">Order updated</h1>*/}
+                        {/*    <div className="flex">*/}
+                        {/*    <span className=' px-[24px] py-[16px] border-b-4 border-[#002E54]'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Inbounded</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <span className='px-[24px] py-[16px] border-b-2'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Inspected</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <span className='px-[24px] py-[16px] border-b-2'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Estimated</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <span className=' px-[24px] py-[16px] border-b-2'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Approved</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <span className='px-[24px] py-[16px] border-b-2'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Clean</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <span className=' px-[24px] py-[16px] border-b-2'>*/}
+                        {/*        <h4 className='text-[20px] font-bold'>Blast</h4>*/}
+                        {/*        <p className='text-[#475467]'>Aug 20</p>*/}
+                        {/*    </span>*/}
+                        {/*        <div className="w-[96px] py-[16px] flex border-b-2 justify-center items-center">*/}
+                        {/*            <div*/}
+                        {/*                className="w-[48px] h-[48px]  rounded-full bg-[#002E54] flex justify-center items-center">*/}
+                        {/*                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"*/}
+                        {/*                     xmlns="http://www.w3.org/2000/svg">*/}
+                        {/*                    <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2"*/}
+                        {/*                          stroke-linecap="round" stroke-linejoin="round"/>*/}
+                        {/*                </svg>*/}
+                        {/*            </div>*/}
+                        {/*        </div>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
                     </div>
                     {/*<dialog id="statusModalInDetails" className="modal rounded-md max-h-[100vh]">*/}
                     {/*    <textarea id="statusUpdateMessageFromDropDown" rows="2" ref={statusCommentDropDown}*/}

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {round2Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from 'react-datepicker';
@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import OrderDetails from "./OrderDetails";
 import CustomDateInput from "./CustomDateInput";
 import ReorderableTable from "./ReorderableTable";
+import debounce from 'lodash/debounce';
 
 const qs = require('qs');
 
@@ -44,8 +45,41 @@ const WorkOrderDataTable = ({
                                 updateRE,
                                 updateEP,
                                 updateOwnerBilling,
-                                updateBillToLessee
+                                updateBillToLessee,
+                                searchCar
                             }) => {
+
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Debounced function to handle search
+    const debouncedSearch = useCallback(
+        debounce((term) => {
+            console.log(`Searching for: ${term}`);
+            // Add your search logic here
+        }, 300), // Delay in milliseconds
+        []
+    );
+
+    const handleSearchClick = () => {
+        // alert(`Search clicked with term: ${searchTerm}`);
+        searchCar(searchTerm)
+        setSearchTerm(''); // Clear the search box
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            //alert(`Enter pressed with term: ${searchTerm}`);
+            searchCar(searchTerm)
+            setSearchTerm(''); // Clear the search box
+        }
+    };
+
+    const handleChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value); // Call debounced search function
+    };
+
     const notify = (message) => toast();
     const [commentObject, setCommentObject] = useState([])
     const [workIdForComment, setWorkIdForComment] = useState(null)
@@ -390,16 +424,17 @@ const WorkOrderDataTable = ({
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
                 <div className="flex justify-between items-center mt-[10px] uppercase">
                     <h2 className="text-[18px]  font-semibold">Work Orders</h2>
-                    <button
-                        className='btn text-cetner normal-case  h-[24px] px-[18px] py-[5px] flex items-center justify-center bg-[#002E54] text-white text-[14px] font-medium hover:bg-[#002f54]'>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 4.16663V15.8333M4.16669 9.99996H15.8334" stroke="white" stroke-width="1.66667"
-                                  stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span className='mt-[]'>
-                        NEW ORDER
-                    </span>
-                    </button>
+                    <div className='relative mr-1' >
+                        <input
+                            type='text'
+                            placeholder='Search history car ..'
+                            value={searchTerm}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className='w-full h-[24px] px-[18px] py-[18px] text-[14px] font-medium border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-[40px]'
+                        />
+
+                    </div>
 
                 </div>
                 <div className="mt-[20px] ml-[1px] mx-auto border rounded-[8px] mb-10 m-1.5">

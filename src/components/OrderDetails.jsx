@@ -19,6 +19,7 @@ import RailCareTimeLog from "./RailCareTimeLog";
 const OrderDetails = ({
                           commonData,
                           workOrder,
+                          handlePaste,
                           statusCode,
                           updateWorkUpdates,
                           updateArrivalDate,
@@ -1733,8 +1734,8 @@ const OrderDetails = ({
 
                             {/*Job list */}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-
-                                <JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>
+                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>
+                                {/*<JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>*/}
                             </div>
 
                             {/*end job list */}

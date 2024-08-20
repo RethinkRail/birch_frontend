@@ -1,113 +1,125 @@
-import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+
+import {Logo,Collapse, Item, Items, Navbar as BaseNavbar} from "ultimate-react-multilevel-menu";
+import classnames from 'classnames'
+import 'ultimate-react-multilevel-menu/dist/esm/index.css'
 import { auth } from "../../firebase";
+import {NavLink, useLocation, useNavigate} from "react-router-dom";
 
 const Navbar = () => {
-    const [isHoveredPrimary, setIsHoveredPrimary] = useState(false);
-    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-    const [isHoveredManagement, setIsHoveredManagement] = useState(false);
-    const [isSubmenuOpenManagement, setIsSubmenuOpenManagement] = useState(false);
-    const navigate = useNavigate();
+    // const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
 
+    const navItems = [
+        { title: 'Work Order', path: '/' },
+        { title: 'Database', path: '/database' },
+        {
+            title: 'Management',
+            children: [
+                { title: 'Birch User Management', path: '/user_management' },
+                { title: 'Team Member Management', path: '/team_member_management' },
+                { title: 'Routing Matrix', path: '/routing_matrix' }
+            ]
+        },
+        { title: 'Time Operation', path: '/time-operation' },
+        {
+            title: 'Report',
+            children: [
+                { title: 'Summary Report', path: '/summary_report' },
+                { title: 'Emission Report', path: '/emission_report' },
+                { title: 'Time Compare', path: '/time_compare' },
+                { title: 'Scheduler', path: '/scheduler' },
+                { title: 'Department Report', path: '/department_report' },
+                {
+                    title: 'Management Reports',
+                    children: [
+                        { title: 'Revenue by Customer', path: '/revenue_by_customer' },
+                        { title: 'Revenue by Department', path: '/revenue_by_department' },
+                        { title: 'Revenue Recognition', path: '/revenue_recognition' },
+                        { title: 'Billed Cars', path: '/billed_cars' }
+                    ]
+                },
+                {
+                    title: 'Operations Reports',
+                    children: [
+                        { title: 'Shop Summary Report', path: '/shop_summary_report' },
+                        { title: 'Manhours', path: '/manhours' },
+                        { title: 'Billing Efficiency', path: '/billing_efficiency' },
+                        { title: 'Utilization', path: '/utilization' },
+                        { title: 'POD Accuracy', path: '/pod_accuracy' },
+                        { title: 'Days in Status', path: '/days_in_status' }
+                    ]
+                },
+                {
+                    title: 'Purchasing',
+                    children: [
+                        { title: 'Revenue Recognition - Inventory', path: '/revenue_recognition_inventory' },
+                        { title: 'Allocated Inventory', path: '/allocated_inventory' }
+                    ]
+                },
+                {
+                    title: 'Misc. Reports',
+                    children: [
+                        { title: 'User Activity', path: '/user_activity' },
+                        { title: 'Emissions', path: '/emissions' },
+                        { title: 'QB Time Compare', path: '/qb_time_compare' }
+                    ]
+                }
+            ]
+        }
+    ];
+    const navigate = useNavigate();
+    const location = useLocation();
+    const currentPath = location.pathname;
+    console.log(currentPath)
     const handleLogout = async () => {
         await auth.signOut();
         localStorage.clear();
         return navigate('/auth/login');
     };
+    const renderNavItems = (items, selectedPath) => {
+        return items.map((navItem) => {
+            const isSelected = navItem.path === selectedPath;
+            const itemClassName = isSelected ? "menu-item menu-item-selected" : "menu-item";
 
-    const active_class = "bg-white hover:bg-[#efefef] text-[#002E54] py-2 px-3 h-[35px] my-auto flex mt-[px] pt-[9px] rounded-[6px]";
-    const in_active_class = "py-2 hover:bg-[#1116] text-[#F2F4F7] px-3 rounded-[6px] flex items-center h-[45px]";
+            if (navItem.children) {
+                return (
+                    <Items
+                        key={navItem.title}
+                        href={navItem.path || '#'}
+                        title={navItem.title}
+                        className={itemClassName} // Apply class to Items container
+                    >
+                        {renderNavItems(navItem.children, selectedPath)}
+                    </Items>
+                );
+            } else {
+                return (
+                    <Item
+                        key={navItem.title}
+                        href={navItem.path}
+                        className={itemClassName} // Apply class to Item
+                    >
+                        {navItem.title}
+                    </Item>
+                );
+            }
+        });
+    };
 
-    const navbarItems = (
-        <>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/">Work Order</NavLink>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/database">Database</NavLink>
-            <div
-                onMouseEnter={() => setIsHoveredPrimary(true)}
-                onMouseLeave={() => {
-                    if (!isSubmenuOpen) setIsHoveredPrimary(false);
-                }}
-                className="relative"
-            >
-                <NavLink
-                    className={({ isActive }) => isActive ? active_class : in_active_class}
-                    to="/report"
-                >
-                    Report
-                    <svg className="ml-[13px]" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="#D0D5DD" strokeWidth="2" strokeLinecap="round"
-                              strokeLinejoin="round" />
-                    </svg>
-                </NavLink>
-                {isHoveredPrimary && (
-                    <ul
-                        onMouseEnter={() => setIsSubmenuOpen(true)}
-                        onMouseLeave={() => {
-                            setIsSubmenuOpen(false);
-                            setIsHoveredPrimary(false);
-                        }}
-                        className={`absolute left-0 top-full bg-[#002E54] py-[8px] px-[34px] border-t-[1px] border-gray-600 items-center flex justify-center gap-[12px] h-[45px] text-white opacity-0 whitespace-nowrap transform transition-all duration-300 ${isHoveredPrimary ? 'opacity-100 scale-100' : 'scale-0'}`}
-                    >
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink1"
-                                 onClick={() => setIsHoveredPrimary(false)}>Summary Report</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink2"
-                                 onClick={() => setIsHoveredPrimary(false)}>Emission Report</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink3"
-                                 onClick={() => setIsHoveredPrimary(false)}>Time Compare</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink4"
-                                 onClick={() => setIsHoveredPrimary(false)}>Scheduler</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/sublink3"
-                                 onClick={() => setIsHoveredPrimary(false)}>Department Report</NavLink>
-                    </ul>
-                )}
-            </div>
-            <div
-                onMouseEnter={() => setIsHoveredManagement(true)}
-                onMouseLeave={() => {
-                    if (!isSubmenuOpenManagement) setIsHoveredManagement(false);
-                }}
-                className="relative"
-            >
-                <NavLink
-                    className={({ isActive }) => isActive ? active_class : in_active_class}
-                    to="/management"
-                >
-                    Management
-                    <svg className="ml-[13px]" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="#D0D5DD" strokeWidth="2" strokeLinecap="round"
-                              strokeLinejoin="round" />
-                    </svg>
-                </NavLink>
-                {isHoveredManagement && (
-                    <ul
-                        onMouseEnter={() => setIsSubmenuOpenManagement(true)}
-                        onMouseLeave={() => {
-                            setIsSubmenuOpenManagement(false);
-                            setIsHoveredManagement(false);
-                        }}
-                        className={`absolute left-0 top-full bg-[#002E54] py-[8px] px-[34px] border-t-[1px] border-gray-600 items-center flex justify-center gap-[12px] h-[45px] text-white opacity-0 whitespace-nowrap transform transition-all duration-300 ${isHoveredManagement ? 'opacity-100 scale-100' : 'scale-0'}`}
-                    >
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management/sub1"
-                                 onClick={() => setIsHoveredManagement(false)}>BIRCH User Management</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management/sub2"
-                                 onClick={() => setIsHoveredManagement(false)}>Team member management</NavLink>
-                        <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/management/sub3"
-                                 onClick={() => setIsHoveredManagement(false)}>Routing Matrix</NavLink>
-                    </ul>
-                )}
-            </div>
-            <NavLink className={({ isActive }) => isActive ? active_class : in_active_class} to="/time-operation">Time Operation</NavLink>
-        </>
-    );
+
+    // <BaseNavbar className ={classnames('bg-[#002E54]')}>
+    //     <Collapse>
+    //         {renderNavItems(navItems)}
+    //     </Collapse>
+    // </BaseNavbar>
 
     return (
-        <div className={`w-full p-0 mx-auto ${isHoveredPrimary || isHoveredManagement ? "mb-[64px]" : ""}`}>
+        <div className={`w-full p-0 mx-auto`}>
             <div className="hidden lg:flex md:flex justify-between bg-[#002E54] text-white w-full items-center px-[20px]">
-                <ul className="menu menu-horizontal px-0 font-medium flex justify-between text-[16px]">
-                    {navbarItems}
-                </ul>
+                <BaseNavbar style={{ backgroundColor: '#002E54' }}>
+                    <Collapse>
+                        {renderNavItems(navItems,currentPath)}
+                    </Collapse>
+                </BaseNavbar>
                 <div className="h-fit flex items-center my-2">
                     <div className="ml-[24px] tooltip tooltip-bottom" data-tip="Log Out">
                         <svg className="ml-[24px] cursor-pointer" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -123,7 +135,7 @@ const Navbar = () => {
                 </div>
             </div>
         </div>
-    );
+    )
 };
 
 export default Navbar;

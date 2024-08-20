@@ -16,7 +16,8 @@ module.exports = {
                 'lg': '1400px',
             },
             colors: {
-                'light-blue': "#DCE5FF"
+                'light-blue': "#DCE5FF",
+                'theme-blue':"#002E54"
             }
         },
 
@@ -28,7 +29,7 @@ module.exports = {
         themes: [
             {
                 mytheme: {
-                    "primary": "#ddd",
+                    "primary": "#002E54",
                     "secondary": "#463aa1",
                     "accent": "#c149ad",
                     "neutral": "#021431",

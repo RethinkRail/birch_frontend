@@ -11,6 +11,7 @@ import Plus from "../components/Plus";
 
 const qs = require('qs');
 const Home = () => {
+    const forceUpdate = React.useReducer(() => ({}), {})[1];
     const [workOrders, setWorkOrders] = useState([]);
     const [activeTasks, setActiveTask] = useState([])
     const [statusCodes, setStatusCodes] = useState([])
@@ -74,9 +75,9 @@ const Home = () => {
 
         axios.request(config)
             .then((response) => {
-                console.log(response.data.active_workorder)
+//                console.log(response.data.active_workorder)
                 setWorkOrders(response.data.active_workorder)
-                console.log(workOrders)
+                //console.log(workOrders)
                 return Promise.resolve();
             })
             .catch((error) => {
@@ -98,7 +99,7 @@ const Home = () => {
             return axios.request(config)
                 .then((response) => {
                     setStatusCodes(response.data)
-                    console.log(response.data)
+//                    console.log(response.data)
                     return Promise.resolve();
                 })
                 .catch((error) => {
@@ -120,7 +121,7 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 setCommonData(response.data)
-                console.log(response.data)
+//                console.log(response.data)
                 toast.update(toastId.current, {
                     render: "All data loaded",
                     autoClose: 1000,
@@ -854,7 +855,6 @@ const Home = () => {
             .then((response) => {
                 console.log(response.data)
                 const new_orders = workOrders.concat(response.data)
-
                 setWorkOrders(new_orders)
             })
             .catch((error) => {
@@ -955,6 +955,20 @@ const Home = () => {
         }
         return null;
     };
+    const handlePaste = (work_id, newJob) => {
+        setWorkOrders(prevWorkOrders => {
+            const updatedOrders = prevWorkOrders.map(workOrder => {
+                if (workOrder.id === work_id) {
+                    console.log('Updating joblist for workOrder:', workOrder);
+                    return { ...workOrder, joblist: [...workOrder.joblist, newJob] };
+                }
+                return workOrder;
+            });
+            console.log('Updated workOrders:', updatedOrders);
+            return updatedOrders;
+        });
+        forceUpdate()
+    };
 
     useEffect(() => {
         getActiveTasks();
@@ -1011,6 +1025,7 @@ const Home = () => {
                 {workOrders.length > 0 ? (
                     <WorkOrderDataTable
                         workOrders={workOrders}
+                        handlePaste={handlePaste}
                         statusCode={statusCodes}
                         commonData={commonData}
                         updateWorkUpdates={updateWorkUpdates}

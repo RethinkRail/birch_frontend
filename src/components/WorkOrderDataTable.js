@@ -18,6 +18,7 @@ const qs = require('qs');
 
 const WorkOrderDataTable = ({
                                 workOrders,
+                                handlePaste,
                                 statusCode,
                                 commonData,
                                 updateWorkUpdates,
@@ -92,13 +93,31 @@ const WorkOrderDataTable = ({
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
 
+
+    useEffect(() => {
+        const handleChanges = () => {
+           // console.log("Work orders changed from data table", workOrders)
+            if(workOrderToView !== null) {
+                const updated = workOrders.find(work => work.id == workOrderToView.id)
+                setWorkOrderToView(updated)
+            }
+        }
+        handleChanges()
+    }, [workOrders])
+    useEffect(() => {
+        const handleChanges = () => {
+//            console.log("Wawuuuu", workOrderToView)
+        }
+        handleChanges()
+    }, [workOrderToView])
+
     useEffect(() => {
         if (workOrderToView != null) {
             const wo = workOrders.find(obj => obj['id'] === workOrderToView.id)
             setWorkOrderToView(wo)
 
         }
-        console.log("in action")
+//        console.log("in action")
     }, [workOrders])
     workOrders.forEach((workOrder, index) => {
         const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
@@ -496,6 +515,7 @@ const WorkOrderDataTable = ({
                     <OrderDetails
                         commonData={commonData}
                         workOrder={workOrderToView}
+                        handlePaste={handlePaste}
                         statusCode={statusCode}
                         updateWorkUpdates={updateWorkUpdates}
                         updateArrivalDate={updateArrivalDate}

@@ -46,7 +46,9 @@ const OrderDetails = ({
                           updateBilling,
                           updateBillToLessee,
                           getActiveWorkOrders,
-                          handleBillingInformationChanged
+                          handleBillingInformationChanged,
+                          createAjob,
+                          updateAJob
                       }) => {
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
@@ -734,6 +736,8 @@ const OrderDetails = ({
 
         return result.trim(); // Remove trailing newline
     }
+
+
 
     // This is for the...
     useEffect(() => {
@@ -1734,7 +1738,7 @@ const OrderDetails = ({
 
                             {/*Job list */}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>
+                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee} createAjob={createAjob} updateAJob={updateAJob}/>
                                 {/*<JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>*/}
                             </div>
 

@@ -68,7 +68,7 @@ const RailCareTimeLog = ({ workOrder }) => {
         {
             name: 'JOB DESCRIPTION',
             selector: row => row.job_description,
-            width: "30%",
+            width: "38%",
         },
         {
             name: 'HOURS ESTIMATED',
@@ -79,12 +79,14 @@ const RailCareTimeLog = ({ workOrder }) => {
         {
             name: 'HOURS APPLIED',
             selector: row => round2Dec(row.hours_applied),
-            sortable: true
+            sortable: true,
+            width: "10%",
         },
         {
             name: 'HOURS APPLIED (RE WORK)',
             selector: row => round2Dec(row.hours_applied_rework),
-            sortable: true
+            sortable: true,
+            width: "10%",
         },
         {
             name: 'TEAM MEMBER COMPLETION TIME',
@@ -97,7 +99,8 @@ const RailCareTimeLog = ({ workOrder }) => {
                     isClearable
                     disabled={isDatePickerDisabled}
                 />
-            )
+            ),
+            width: "10%",
         },
         {
             name: 'IN PROCESS TIME',
@@ -110,7 +113,8 @@ const RailCareTimeLog = ({ workOrder }) => {
                     isClearable
                     disabled={isDatePickerDisabled || isProcessAndQaDisabled(row.job_id)}
                 />
-            )
+            ),
+            width: "10%",
         },
         {
             name: 'QA TIME',
@@ -123,7 +127,8 @@ const RailCareTimeLog = ({ workOrder }) => {
                     isClearable
                     disabled={isDatePickerDisabled || isProcessAndQaDisabled(row.job_id)}
                 />
-            )
+            ),
+            width: "10%",
         }
     ];
 
@@ -175,15 +180,15 @@ const RailCareTimeLog = ({ workOrder }) => {
                 </div>
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS APPLIED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalHoursApplied)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursApplied)}</p>
                 </div>
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL REWORK</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalRework)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'> {round2Dec(totalRework)}</p>
                 </div>
                 <div className="]">
                     <h2 className='text-[12px] font-normal '>Differnece</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(difference)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(difference)}</p>
                 </div>
             </div>
         </div>

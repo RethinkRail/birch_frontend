@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-
 import {round2Dec} from "../utils/NumberHelper";
+import {showToastMessage} from "../utils/CommonHelper";
+import {toast} from "react-toastify";
 
-const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, editData, setEditData }) => {
+const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, editData, setEditData ,createAjob,updateAJob}) => {
     console.log(editData)
+    console.log(commonData)
+    console.log(lineNumber)
 
     const [previousPart, setPreviousPart] = useState(null)
-
-    const [markupPercent, setMarkupPercent] = useState(workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || '')
-    const [hourlyRate, setHourlyRate] = useState(workOrder.railcar.owner_railcar_owner_idToowner.labor_rate || '')
+    const singleMarkUp = editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
+    const [markupPercent, setMarkupPercent] = useState(singleMarkUp? singleMarkUp:workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || '')
+    // const [hourlyRate, setHourlyRate] = useState(editData?editData.labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate)
     const [totalCost, setTotalCost] = useState('')
 
 
@@ -37,7 +40,15 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
             }
         } else {
             console.log("new")
-            newPart = { ...part, additional_info: "" }
+            newPart = {
+                additional_info: "",
+                purchase_cost: part?.price,
+                availability:1,
+                part_id: part.id,
+                unit: part.unit,
+                quantity: part.quantity,
+                parts:part
+            }
         }
         console.log(newPart, "This is the new Part")
         setJobParts(prev => [...prev, newPart])
@@ -46,24 +57,48 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
     const handleRemovePart = (partId) => {
         setDeleted(prev => [...prev, partId])
         setJobParts(prev => (
-            [...prev].filter(pv => pv.id !== partId)
+            [...prev].filter(pv => pv.part_id !== partId)
         ))
     }
 
     const handleFieldChange = (partId, field, value) => {
-        const part = jobParts.find(part => part.id == partId)
-        let updatedPart;
-        if(field === "quantity" || field === "purchase_cost") {
-            updatedPart = { ...part, [field]: Number(value) }
-        } else {
-            updatedPart  = { ...part, [field]: value }
+        console.log(partId);
+        console.log(field);
+        console.log(value);
+
+        // Find the part to be updated
+        const part = jobParts.find(job => job.part_id == partId);
+        if (!part) {
+            console.error("Part not found");
+            return;
         }
-        const updatedJobParts = jobParts.map((job) => (
-            job.id !== partId ? job : updatedPart
-        ))
-        console.log(updatedJobParts, "This is the updatedJobPart")
-        setJobParts(updatedJobParts)
-    }
+
+        // Determine if the update is for a field within `parts` or directly in `jobPart`
+        let updatedPart;
+        if (field in part.parts) {
+            updatedPart = {
+                ...part,
+                parts: {
+                    ...part.parts,
+                    [field]: value
+                }
+            };
+        } else {
+            updatedPart = {
+                ...part,
+                [field]: field === "quantity" || field === "purchase_cost" ? Number(value) : value
+            };
+        }
+
+        // Update the jobParts array with the modified part
+        const updatedJobParts = jobParts.map(job =>
+            job.part_id !== partId ? job : updatedPart
+        );
+
+        console.log(updatedJobParts, "This is the updatedJobParts");
+        setJobParts(updatedJobParts);
+    };
+
 
 
 
@@ -80,10 +115,43 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
         qualifier_code: "",
         qualifier_code_removed: "",
         labor_cost: "",
-        labor_time: "",
-        labor_rate: "",
+        labor_time: 0,
+        labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate,
         material_cost: "",
+        purchase: "",
     })
+
+    const [purchase, setPurchase] = useState("")
+
+    const [totalLabor, setTotalLabor] = useState("")
+    const [totalMaterial, setTotalMaterial] = useState("")
+    const [totalNet, setTotalNet] = useState("")
+
+    useEffect(() => {
+        console.log("Input value or job part changed")
+        let purchase = 0
+        for(let i = 0; i < jobParts.length; i++) {
+            purchase = purchase + (Number(jobParts[i]["purchase_cost"]) * Number(jobParts[i]["quantity"]))
+        }
+        setPurchase(purchase)
+    }, [jobParts])
+
+    useEffect(() => {
+        let newMaterial = Number(purchase) * (1 + Number(markupPercent))
+        setTotalMaterial(newMaterial)
+    }, [purchase, markupPercent])
+
+    useEffect(() => {
+        setTotalNet(Number(totalLabor) + Number(totalMaterial))
+    }, [totalLabor, totalMaterial])
+
+    useEffect(() => {
+        const handleInputValuesChange = () => {
+            console.log(inputValues["labor_rate"], inputValues["labor_time"], inputValues["quantity"])
+            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time"]) * Number(inputValues["quantity"]))
+        }
+        handleInputValuesChange()
+    }, [inputValues])
 
     useEffect(() => {
         const handleEditData = () => {
@@ -103,10 +171,8 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                     why_made_code: editData.whymadecode ? editData.whymadecode.code : "",
                     responsibility_code: editData.responsibilitycode ? editData.responsibilitycode.code : "",
                     condition_code:  editData.conditioncode ? editData.conditioncode.code : "",
-                    labor_time:  editData.jobcode_joblist_job_code_appliedTojobcode ? editData.jobcode_joblist_job_code_appliedTojobcode.time_custom : "",
-                    labor_cost:  editData.labor_cost ? editData.labor_cost : 0,
-
-
+                    labor_time:  editData.labor_time ,
+                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)
                 }))
                 console.log(editData.jobparts)
                 setPreviousPart(editData.jobparts)
@@ -118,10 +184,8 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
 
 
     const handleChange = (field, value) => {
-        // console.log(value)
-        // console.log(field)
-        // console.log(commonData.job_codes)
-        // console.log(commonData.job_codes.find(job_code => job_code.code == value))
+        console.log(field)
+        console.log(value)
 
         switch (field) {
             case 'job_code':
@@ -131,13 +195,27 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                     job_description: (() => {
                         const job = commonData.job_codes.find(job_code => job_code.code == value);
                         return job?.description || job?.title || "";
+                    })(),
+                    labor_time: (() => {
+                        const job = commonData.job_codes.find(job_code => job_code.code == value);
+                        return job?.time_custom || job?.time_standard ;
+                    })(),
+
+                    job_code_removed: (() => {
+                        const job = commonData.job_codes.find(job_code => job_code.code == value);
+                        return job?.code  ;
                     })()
                 }))
 
-            case 'responsibility_code':
+            case 'qualifier_code':
                 setInputValues(prev => ({
                     ...prev,
-                    [field]: parseInt(value)
+                    [field]: parseInt(value),
+
+                    qualifier_code_removed: (() => {
+                        const job = commonData.qualifier_codes.find(job_code => job_code.id == value);
+                        return job?.id  ;
+                    })()
                 }))
             case 'condition_code':
                 setInputValues(prev => ({
@@ -152,43 +230,71 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
         }
         console.log(field, value, "Input value changed")
     }
+    function processPartsArray(dataArray) {
+        return dataArray.map(item => {
+            // Remove the `parts` object
+            const { parts,unit, ...rest } = item;
+
+            // Calculate the totalcost
+            const totalcost = rest.quantity * rest.purchase_cost * (1 + rest.markup_percent);
+
+            // Return the updated object
+            return {
+                ...rest,
+                totalcost
+            };
+        });
+    }
+
 
     const handleSave = async () => {
         // The logic to call the end point will be here
 
         if(!editData) {
             console.log(inputValues, "This is the input values")
-            const populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 2}))
+            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 1}))
+            populatedJobPart = processPartsArray(populatedJobPart)
+            console.log(populatedJobPart)
             const dataToBackend = {
+                work_id: workOrder.id,
                 work_order: workOrder.work_order,
                 line_number: Number(lineNumber),
                 location_code: inputValues["location_code"],
                 quantity: Number(inputValues["quantity"]),
                 condition_code: Number(inputValues["condition_code"]),
                 job_code_applied: Number(inputValues["job_code"]),
-                qualifier_applied_id: Number(inputValues["qualifier_code"]),
+                qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
                 job_description: inputValues["job_description"],
                 why_made_code: inputValues["why_made_code"],
-                job_code_removed: Number(inputValues["job_code"]),
-                qualifier_removed_id: Number(inputValues["qualifier_code_removed"]),
-                responsibility_code: inputValues["responsibility"],
-                labor_cost: Number(inputValues["labor_cost"]),
+                job_code_removed: Number(inputValues["job_code_removed"]),
+                qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
+                responsibility_code: Number(inputValues["responsibility_code"]),
+                labor_cost: Number(totalLabor),
                 labor_time: Number(inputValues["labor_time"]),
                 labor_rate: Number(inputValues["labor_rate"]),
-                material_cost: Number(inputValues["material_cost"]),
+                material_cost: Number(totalMaterial),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsData: populatedJobPart,
-                user_id: 9
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
             }
+            console.log(populatedJobPart)
+            console.log(dataToBackend)
             console.log(dataToBackend, "This is the data to be sent to the backend.")
-            console.log(`${process.env.REACT_APP_BB_API_URL}create_job/`, "This is the backen url")
-            const response = await axios.post(`${process.env.REACT_APP_BB_API_URL}create_job/`, dataToBackend)
-            console.log(response, "This is the response from the backend")
+            //console.log(`${process.env.REACT_APP_BB_API_URL}create_job/`, "This is the backen url")
+            //const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}create_job/`, dataToBackend)
+            const response = await  createAjob(dataToBackend)
+            console.log(response)
+            if(response.status == 200){
+                setModalShowing(false)
+                toast("Wow so easy!")
+            }else {
+
+            }
         } else {
-            const populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 2}))
+            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 1}))
 
-
-            const jobPartsToDelete = previousPart.filter(part => deleted.includes(part.id))
+            populatedJobPart = processPartsArray(populatedJobPart)
+            const jobPartsToDelete = previousPart.filter(part => deleted.includes(part.part_id))
             const jobPartsToUpdate = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id);
 
@@ -198,12 +304,11 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                 return (
                     currentPart.quantity !== originalPart.quantity ||
                     currentPart.total_cost !== originalPart.total_cost ||
-                    currentPart.purchase_cost !== originalPart.purchase_cost ||
-                    currentPart.markup_percent !== originalPart.markup_percent || currentPart.additional_info !== originalPart.additional_info
+                    currentPart.purchase_cost !== originalPart.purchase_cost || currentPart.additional_info !== originalPart.additional_info
                 );
             });
 
-            const jobPartsToCreate = populatedJobPart.filter((currentPart) => {
+            const jobPartsToAdd = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id)
                 if(!originalPart) return currentPart
                 return false
@@ -211,30 +316,40 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
 
             const dataToBackend = {
                 work_order: workOrder.work_order,
-                line_number: Number(lineNumber),
+                work_id: workOrder.id,
+                line_number: Number(editData.line_number),
                 location_code: inputValues["location_code"],
                 quantity: Number(inputValues["quantity"]),
                 condition_code: Number(inputValues["condition_code"]),
                 job_code_applied: Number(inputValues["job_code"]),
-                qualifier_applied_id: Number(inputValues["qualifier_code"]),
+                qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
                 job_description: inputValues["job_description"],
                 why_made_code: inputValues["why_made_code"],
                 job_code_removed: Number(inputValues["job_code_removed"]),
-                qualifier_removed_id: Number(inputValues["qualifier_code_removed"]),
-                responsibility_code: inputValues["responsibility"],
-                labor_cost: Number(inputValues["labor_cost"]),
+                qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
+                responsibility_code: Number(inputValues["responsibility_code"]),
+                labor_cost: Number(totalLabor),
                 labor_time: Number(inputValues["labor_time"]),
                 labor_rate: Number(inputValues["labor_rate"]),
-                material_cost: Number(inputValues["material_cost"]),
+                material_cost: Number(totalMaterial),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
-                jobPartsToCreate,
+                jobPartsToAdd: jobPartsToAdd,
                 jobPartsToDelete,
                 jobPartsToUpdate,
-                user_id: 9
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
             }
+
+            console.log(dataToBackend)
             // the job
             console.log(dataToBackend, "This is the data to backend from the update")
-            const response = await axios.post(`${process.env.REACT_APP_BB_API_URL}update_a_job/${editData.id}`, dataToBackend)
+            const response = await  updateAJob(dataToBackend, workOrder.id)
+            console.log(response)
+            if(response.status == 200){
+                setModalShowing(false)
+                toast("Wow so easy!")
+            }else {
+
+            }
             console.log(response, "This is the response from the backend")
         }
     }
@@ -245,7 +360,7 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
             setEditData()
         }}>
             <div className="bg-white drop-shadow-md rounded-md w-[95%] max-w-[1600px] p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
-                Add jobs
+                {editData ? "Edit line number: "+editData.line_number : "ADD A JOB"}
                 <div className="grid grid-cols-3 gap-5">
                     <div className="col-span-1 flex flex-col gap-1.5">
                         <div className="h-10 bg-[#DCE5FF] rounded-md px-2 w-full flex justify-center items-center">
@@ -290,7 +405,7 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Applied (AQ)</label>
                             <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["qualifier_code"]} onChange={(e) => handleChange("qualifier_code", e.target.value)}>
-                                <option value=''>Select an option</option>
+                                <option >Select an option</option>
                                 {commonData.qualifier_codes.map((qualifiercode, index) => (
                                     <option key={`qualifiercode--${index}`} value={qualifiercode.id}>{qualifiercode.code+":"+qualifiercode.title}</option>
                                 ))}
@@ -299,7 +414,7 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Why Made Code (WMC)</label>
                             <select name="cc" id="cc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["why_made_code"]} onChange={(e) => handleChange("why_made_code", e.target.value)}>
-                                <option value=''>Select an option</option>
+                                <option >Select an option</option>
                                 {commonData.wmc_codes.map((wmc, index) => (
                                     <option key={`wmc--${index}`} value={wmc.code}>{wmc.code+":"+wmc.title}</option>
                                 ))}
@@ -313,7 +428,7 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Jobe Code Removed (JCR)</label>
                             <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["job_code_removed"]} onChange={(e) => handleChange("job_code_removed", e.target.value)}>
-                                <option value=''>Select an option</option>
+                                <option >Select an option</option>
                                 {commonData.job_codes.map((jobcode, index) => (
                                     <option key={`jobcode--${index}`} value={jobcode.code}>{jobcode.code+":"+jobcode.title}</option>
                                 ))}
@@ -322,7 +437,7 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Removed (RQ)</label>
                             <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["qualifier_code_removed"]} onChange={(e) => handleChange("qualifier_code_removed", e.target.value)}>
-                                <option value=''>Select an option</option>
+                                <option>Select an option</option>
                                 {commonData.qualifier_codes.map((qcr, index) => (
                                     <option key={`qcr--${index}`} value={qcr.id}>{qcr.code+":"+qcr.title}</option>
                                 ))}
@@ -375,12 +490,12 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                             <div key={index} className="w-[100%] grid grid-cols-5">
                                 <div className="col-span-3">{jobPart.parts.code+":"+jobPart.parts.title}</div>
                                 <div className="col-span-2 flex flex-row items-center gap-1">
-                                    <input type="text" name="" id="" className="w-[45%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.additional_info || ""} onChange={(e) => handleFieldChange(jobPart.id, "additional_info", e.target.value)} />
+                                    <input type="text" name="" id="" className="w-[45%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.additional_info || ""} onChange={(e) => handleFieldChange(jobPart.part_id, "additional_info", e.target.value)} />
                                     <input type="text" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1 " value={jobPart?.parts.unit} disabled={true} />
-                                    <input type="number" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.id, "quantity", e.target.value)} />
-                                    <input type="number" name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.id, "purchase_cost", e.target.value)} />
+                                    <input type="number" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(jobPart?.quantity)} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", e.target.value)} />
+                                    <input type="number" name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(jobPart?.purchase_cost)} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", e.target.value)} />
                                     <div className="w-[7%]">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => handleRemovePart(jobPart?.id)}>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => handleRemovePart(jobPart?.part_id)}>
                                             <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                     </div>
@@ -396,46 +511,52 @@ const EditJobModal = ({ lineNumber, workOrder , commonData,setModalShowing, edit
                         <div className="col-span-2 grid grid-cols-3 gap-1">
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">ST. Time (HR)</label>
-                                <input type="text" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_time"]} onChange={(e) => handleChange("labor_time",e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(inputValues["labor_time"])} onChange={(e) => handleChange("labor_time",e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Rate ($/HR)</label>
-                                <input type="text" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(hourlyRate)} onChange={(e) => handleChange("labor_rate", e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(inputValues["labor_rate"])} onChange={(e) => handleChange("labor_rate", e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Labor ($)</label>
-                                <input type="text" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_cost"]} onChange={(e) => handleChange("labor_cost", e.target.value)} />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalLabor)} readOnly />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Purchase ($)</label>
-                                <input type="text" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(purchase)} onChange={(e) => setPurchase(purchase)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Markup (%)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(markupPercent)} onChange={(e) => setMarkupPercent(e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Material ($)</label>
-                                <input type="text" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["material_cost"]} onChange={(e) => handleChange("material_cost", e.target.value)} />
+                                <input type="text"  disabled  name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalMaterial)} readOnly />
                             </div>
                             <div className="col-span-1" />
                             <div className="col-span-1" />
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Net ($)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={totalCost} onChange={(e) => setTotalCost(e.target.value)} />
+                                <input type="number"  disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalNet)} readOnly />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     <button className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center' onClick={handleSave}>
-                        {editData ? "Save" : "Add"}
+                        {editData ? "UPDATE" : "ADD"}
                     </button>
+                    {editData && (
+                        <button className="bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center">
+                            DELETE
+                        </button>
+                    )}
+
                     <button className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center' onClick={() => {
                         setModalShowing(false)
                         setEditData()
                     }}>
-                        Cancel
+                        CANCEL
                     </button>
                 </div>
             </div>

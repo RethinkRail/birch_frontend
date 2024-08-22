@@ -6,7 +6,7 @@ import {
 import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee }) => {
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob }) => {
     console.log(jobs)
     useEffect(() => {
         const jobListData = jobs.map((job) => ({
@@ -57,7 +57,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             description: job.job_description,
             wmc: job.whymadecode.code,
             labor: round2Dec(job.labor_time * job.labor_rate),
-            material: job.material_cost,
+            material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
             is_billed_to_lessee: job.secondary_bill_to_id==null?false:true
@@ -240,7 +240,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                 className="custom-table"
             />
 
-            {modalShowing && <EditJobModal lineNumber={jobs?.length + 1 || 1} workOrder={workOrder} commonData={commonData} setModalShowing={setModalShowing} editData={editData} setEditData={setEditData} />}
+            {modalShowing && <EditJobModal lineNumber={jobs?.length + 1 || 1} workOrder={workOrder} commonData={commonData} setModalShowing={setModalShowing} editData={editData} setEditData={setEditData} createAjob={createAjob} updateAJob={updateAJob} />}
         </div>
     );
 };

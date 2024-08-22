@@ -55,7 +55,7 @@ const PartsTable = ({ jobs }) => {
             name: 'TITLE',
             selector: row => row.title,
             sortable: true,
-            width: '33%',
+            width: '30%',
         },
         {
             name: 'COST',

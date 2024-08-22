@@ -862,6 +862,38 @@ const Home = () => {
             });
     }
 
+    const createAjob = async (jobdata) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}create_job/`, jobdata);
+            console.log("calling done");
+            console.log(response);
+            const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
+            setWorkOrders(updatedWO)
+            return response; // This returns the response object
+        } catch (error) {
+            console.log(error);
+            console.log("An error occurred when handling billing");
+            return error; // This returns the error object
+        }
+    };
+
+    const updateAJob = async (jobdata,id) => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}update_a_job/${id}`, jobdata);
+            console.log("calling done");
+            console.log(response);
+            const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
+            setWorkOrders(updatedWO)
+            return response; // This returns the response object
+        } catch (error) {
+            console.log(error);
+            console.log("An error occurred when handling billing");
+            return error; // This returns the error object
+        }
+    };
+
+
+
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -1055,6 +1087,8 @@ const Home = () => {
                         updateOwnerBilling={handleBillingInformationChanged}
                         updateBillToLessee={handleBillToLessee}
                         searchCar = {searchCar}
+                        createAjob = {createAjob}
+                        updateAJob = {updateAJob}
                     />
                 ) : null}
             </div>

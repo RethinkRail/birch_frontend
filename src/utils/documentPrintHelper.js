@@ -844,7 +844,7 @@ export function printBRC() {
     saveDivII(sTable, tbl_title, tbl_name, true);
 }
 
-export function printInvoice() {
+export function printInvoice(workorder, forWhom) {
 
     console.log("Print invoice clicked")
 

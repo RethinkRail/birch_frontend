@@ -1,6 +1,5 @@
 
-import {Logo,Collapse, Item, Items, Navbar as BaseNavbar} from "ultimate-react-multilevel-menu";
-import classnames from 'classnames'
+import {Collapse, Item, Items, Navbar as BaseNavbar} from "ultimate-react-multilevel-menu";
 import 'ultimate-react-multilevel-menu/dist/esm/index.css'
 import { auth } from "../../firebase";
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
@@ -69,7 +68,7 @@ const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const currentPath = location.pathname;
-    console.log(currentPath)
+
     const handleLogout = async () => {
         await auth.signOut();
         localStorage.clear();

@@ -13,10 +13,16 @@
     cursor: not-allowed;
     border-color: transparent;
     --tw-bg-opacity: 1;
+
     background-color: transparent;
     opacity: 0.2;
 }
-
+.checkbox-primary {
+    --chkbg: var(--p);
+    --chkfg: var(--pc);
+    --tw-border-opacity: 0.2 !important;
+    border-color: hsl(var(--p) / var(--tw-border-opacity));
+}
 .react-datepicker-wrapper {
     width: 100% !important;
 }
@@ -62,7 +68,7 @@
 
 /* Hover effect for menu items */
 .nav-item .nav-item:hover {
-    background-color: #d2d2d2 !important; /* Light black background on hover */
+    background-color: #eae5e5 !important; /* Light black background on hover */
     color: white !important; /* White text on hover */
 }
 

@@ -50,6 +50,7 @@ const WorkOrderDataTable = ({
                                 searchCar
                             }) => {
 
+    console.log(workOrders)
     const [searchTerm, setSearchTerm] = useState('');
 
     // Debounced function to handle search

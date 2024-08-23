@@ -4,14 +4,14 @@ import {round2Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
 import {toast} from "react-toastify";
 
-const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, editData, setEditData ,createAjob,updateAJob}) => {
+const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
     console.log(editData)
     console.log(commonData)
     console.log(lineNumber)
 
     const [previousPart, setPreviousPart] = useState(null)
-    const singleMarkUp = editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
-    const [markupPercent, setMarkupPercent] = useState(singleMarkUp? singleMarkUp:workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || '')
+    const singleMarkUp = editData && editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
+    const [markupPercent, setMarkupPercent] = useState(singleMarkUp? singleMarkUp:workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || 0)
     // const [hourlyRate, setHourlyRate] = useState(editData?editData.labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate)
     const [totalCost, setTotalCost] = useState('')
 
@@ -25,12 +25,15 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
 
     const handlePartChange = (partId) => {
         const part = commonData.parts.find(part => part.id == partId)
+        const existing_part = jobParts.find(part=>part.part_id == partId)
+        if(existing_part)
+            return
         let newPart
         if(editData) {
             console.log("edit")
             newPart = {
                 additional_info: "",
-                job_id: editData.jobId,
+                job_id: editData.id,
                 purchase_cost: part?.price,
                 availability:1,
                 part_id: part.id,
@@ -75,20 +78,27 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
 
         // Determine if the update is for a field within `parts` or directly in `jobPart`
         let updatedPart;
-        if (field in part.parts) {
-            updatedPart = {
-                ...part,
-                parts: {
-                    ...part.parts,
-                    [field]: value
-                }
-            };
-        } else {
-            updatedPart = {
-                ...part,
-                [field]: field === "quantity" || field === "purchase_cost" ? Number(value) : value
-            };
-        }
+        // if (field in part.parts) {
+        //     console.log("sas")
+        //     updatedPart = {
+        //         ...part,
+        //         parts: {
+        //             ...part.parts,
+        //             [field]: value
+        //         }
+        //     };
+        // } else {
+        //     console.log("sassssss")
+        //     updatedPart = {
+        //         ...part,
+        //         [field]: field === "quantity" || field === "purchase_cost" ? Number(value) : value
+        //     };
+        // }
+
+        updatedPart = {
+            ...part,
+            [field]: field === "quantity" || field === "purchase_cost" ? Number(value) : value
+        };
 
         // Update the jobParts array with the modified part
         const updatedJobParts = jobParts.map(job =>
@@ -172,7 +182,8 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                     responsibility_code: editData.responsibilitycode ? editData.responsibilitycode.code : "",
                     condition_code:  editData.conditioncode ? editData.conditioncode.code : "",
                     labor_time:  editData.labor_time ,
-                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)
+                    labor_rate:  editData.labor_rate ,
+                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)* Number(editData?.labor_rate)
                 }))
                 console.log(editData.jobparts)
                 setPreviousPart(editData.jobparts)
@@ -204,6 +215,12 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                     job_code_removed: (() => {
                         const job = commonData.job_codes.find(job_code => job_code.code == value);
                         return job?.code  ;
+                    })(),
+                    qualifier_code_removed: (() => {
+                        return '' ;
+                    })(),
+                    qualifier_code: (()=>{
+                        return ''
                     })()
                 }))
 
@@ -231,6 +248,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
         console.log(field, value, "Input value changed")
     }
     function processPartsArray(dataArray) {
+        console.log(dataArray)
         return dataArray.map(item => {
             // Remove the `parts` object
             const { parts,unit, ...rest } = item;
@@ -291,9 +309,11 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
 
             }
         } else {
+            console.log("here")
             let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 1}))
-
+            console.log(populatedJobPart)
             populatedJobPart = processPartsArray(populatedJobPart)
+            console.log(populatedJobPart)
             const jobPartsToDelete = previousPart.filter(part => deleted.includes(part.part_id))
             const jobPartsToUpdate = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id);
@@ -308,11 +328,15 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 );
             });
 
-            const jobPartsToAdd = populatedJobPart.filter((currentPart) => {
+            const  jobPartsToAdd = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id)
                 if(!originalPart) return currentPart
                 return false
             })
+            //
+            // jobPartsToAdd = jobPartsToAdd= jobPartsToAdd.map((jp)=>{
+            //     jp.job_id = editData.id
+            // })
 
             const dataToBackend = {
                 work_order: workOrder.work_order,
@@ -342,7 +366,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
             console.log(dataToBackend)
             // the job
             console.log(dataToBackend, "This is the data to backend from the update")
-            const response = await  updateAJob(dataToBackend, workOrder.id)
+            const response = await  updateAJob(dataToBackend, editData.id)
             console.log(response)
             if(response.status == 200){
                 setModalShowing(false)
@@ -353,7 +377,17 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
             console.log(response, "This is the response from the backend")
         }
     }
+    const handleDelete = async () =>{
 
+        const response = await  deleteJob(workOrder.id,editData.id)
+        console.log(response)
+        if(response.status == 200){
+            setModalShowing(false)
+            toast("Wow so easy!")
+        }else {
+
+        }
+    }
     return (
         <div className='fixed p-2 flex flex-col h-[100vh] overflow-y-auto bg-[#2e2b2b40] backdrop-blur-sm top-0 left-0 w-full justify-center items-center z-[100]' onClick={() => {
             setModalShowing((prev) => (!prev))
@@ -547,9 +581,17 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         {editData ? "UPDATE" : "ADD"}
                     </button>
                     {editData && (
-                        <button className="bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center">
+                        <button
+                            className={`text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center 
+                            ${editData.time_log.length > 0 ? 'bg-gray-300 tooltip tooltip-top before:whitespace-pre-wrap before:content-[attr(data-tip)]' : 'bg-[#002e54]'}`}
+                            onClick={handleDelete}
+                            disabled={editData.time_log.length > 0}
+                            data-tip={editData.time_log.length > 0 ? "Can't delete, time is logged in this line" : ""}
+                        >
                             DELETE
                         </button>
+
+
                     )}
 
                     <button className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center' onClick={() => {

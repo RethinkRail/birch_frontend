@@ -48,7 +48,8 @@ const OrderDetails = ({
                           getActiveWorkOrders,
                           handleBillingInformationChanged,
                           createAjob,
-                          updateAJob
+                          updateAJob,
+                          deleteJob
                       }) => {
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
@@ -75,7 +76,7 @@ const OrderDetails = ({
 
 
     const containerRef = useRef();
-    workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
+
 
     const [jobs, setJobs] = useState([])
     const statusCommentDropDownInDetails = useRef(null);
@@ -272,6 +273,7 @@ const OrderDetails = ({
         setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
         setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
         calculateJobCosts(workOrder.joblist)
+        workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
     }, [workOrder]);
     const formatDateToSQL = (date) => {
         const year = date.getFullYear();
@@ -1738,7 +1740,7 @@ const OrderDetails = ({
 
                             {/*Job list */}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee} createAjob={createAjob} updateAJob={updateAJob}/>
+                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee} createAjob={createAjob} updateAJob={updateAJob} deleteJob={deleteJob}/>
                                 {/*<JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>*/}
                             </div>
 

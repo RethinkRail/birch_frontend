@@ -49,7 +49,8 @@ const WorkOrderDataTable = ({
                                 updateBillToLessee,
                                 searchCar,
                                 createAjob,
-                                updateAJob
+                                updateAJob,
+                                deleteJob
                             }) => {
 
     console.log(workOrders)
@@ -546,6 +547,7 @@ const WorkOrderDataTable = ({
                         updateBillToLessee={updateBillToLessee}
                         createAjob={createAjob}
                         updateAJob={updateAJob}
+                        deleteJob={deleteJob}
                     />
                 ) : null}
                 {/*<OrderDetails*/}

@@ -5,10 +5,12 @@ import {
 } from 'material-react-table';
 import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
+import axios from "axios";
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob }) => {
-    console.log(jobs)
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob,deleteJob }) => {
+
     useEffect(() => {
+        jobs.sort((a, b) => a.line_number - b.line_number)
         const jobListData = jobs.map((job) => ({
             id: job.id,
             action: job,
@@ -20,6 +22,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null ? '' : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
             description: job.job_description,
             wmc: job.whymadecode.code,
+            labor_time: round2Dec(job.labor_time),
             labor: round2Dec(job.labor_time * job.labor_rate),
             material: job.material_cost,
             net: round2Dec(job.labor_cost + job.material_cost),
@@ -56,6 +59,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?'':job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
             description: job.job_description,
             wmc: job.whymadecode.code,
+            labor_time: round2Dec(job.labor_time),
             labor: round2Dec(job.labor_time * job.labor_rate),
             material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
@@ -129,7 +133,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             { accessorKey: 'aq', header: 'AQ', size: 5 },
             { accessorKey: 'description', header: 'Description of Repair', size: 20 },
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
-            { accessorKey: 'labor', header: 'Labor Hrs', size: 5 },
+            { accessorKey: 'labor_time', header: 'Labor Hrs', size: 5 },
+            { accessorKey: 'labor', header: 'Labor cost$', size: 5 },
             { accessorKey: 'material', header: 'Material', size: 5 },
             { accessorKey: 'net', header: 'Net Cost', size: 5 },
             { accessorKey: 'rev', header: 'Revenue', size: 5 ,grow: false, },
@@ -139,7 +144,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                 size: 5,
                 Cell: ({ row }) => {
                     const isBilledToLessee = row.getValue('is_billed_to_lessee');
-                    console.log(isBilledToLessee)
+
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <input
@@ -193,6 +198,24 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                 if (hoveredRow && draggingRow) {
                     const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
                     setTableData([...updatedTable]);
+                    const requestData = {
+                        line_one: draggingRow.original.ln,
+                        line_two: hoveredRow.original.ln,
+                        work_order: workOrder.work_order,
+                        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+                    };
+                    axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
+                        .then(response => {
+                            console.log('Success:', response.data);
+                            if(response.status==200){
+
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error.response ? error.response.data : error.message);
+                            setTableData(tableData);
+                        });
+
                 }
             },
         }),
@@ -240,7 +263,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                 className="custom-table"
             />
 
-            {modalShowing && <EditJobModal lineNumber={jobs?.length + 1 || 1} workOrder={workOrder} commonData={commonData} setModalShowing={setModalShowing} editData={editData} setEditData={setEditData} createAjob={createAjob} updateAJob={updateAJob} />}
+            {modalShowing && <EditJobModal lineNumber={jobs?.length + 1 || 1} workOrder={workOrder} commonData={commonData} setModalShowing={setModalShowing} editData={editData} setEditData={setEditData} createAjob={createAjob} updateAJob={updateAJob} deleteJob={deleteJob} />}
         </div>
     );
 };

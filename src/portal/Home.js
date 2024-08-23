@@ -878,6 +878,7 @@ const Home = () => {
     };
 
     const updateAJob = async (jobdata,id) => {
+        console.log(jobdata)
         try {
             const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}update_a_job/${id}`, jobdata);
             console.log("calling done");
@@ -889,6 +890,21 @@ const Home = () => {
             console.log(error);
             console.log("An error occurred when handling billing");
             return error; // This returns the error object
+        }
+    };
+
+    const deleteJob = async (workId, jobId) => {
+        try {
+            const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}delete_a_job/${workId}/jobs/${jobId}`,{
+                data:{
+                    user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+                }
+            });
+            const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
+            setWorkOrders(updatedWO)
+            return response; // This returns the response object
+        } catch (error) {
+            console.error('Error deleting job:', error.response ? error.response.data : error.message);
         }
     };
 
@@ -1089,6 +1105,7 @@ const Home = () => {
                         searchCar = {searchCar}
                         createAjob = {createAjob}
                         updateAJob = {updateAJob}
+                        deleteJob = {deleteJob}
                     />
                 ) : null}
             </div>

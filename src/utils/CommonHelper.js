@@ -165,3 +165,24 @@ export const disableButtonsDuringAsync = async (isDisabled, containerRef) => {
     });
 
 };
+
+export function updateSecondaryBillToId(data, mainObjectId, jobId, newSecondaryBillToId) {
+    return data.map(mainObj => {
+        if (mainObj.id === mainObjectId) {
+            // Update the specific job's secondary_bill_to_id
+            return {
+                ...mainObj,
+                joblist: mainObj.joblist.map(job => {
+                    if (job.id === jobId) {
+                        return {
+                            ...job,
+                            secondary_bill_to_id: newSecondaryBillToId
+                        };
+                    }
+                    return job;
+                })
+            };
+        }
+        return mainObj;
+    });
+}

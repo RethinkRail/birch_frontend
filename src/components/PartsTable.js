@@ -110,7 +110,7 @@ const PartsTable = ({ jobs }) => {
     return (
 
         <div>
-            <div className="flex justify-between mb-5 items-center">
+            <div className="flex justify-between mb-5 items-center ">
                 <h6 className='font-semibold'>Parts List</h6>
             </div>
             <DataTable

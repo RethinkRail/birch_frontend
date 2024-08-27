@@ -49,8 +49,12 @@ const WorkOrderDataTable = ({
                                 updateBillToLessee,
                                 searchCar,
                                 createAjob,
+                                pasteJobs,
                                 updateAJob,
-                                deleteJob
+                                deleteJob,
+                                handleStorageUpdate,
+                                handIsLockedForTimeClocking,
+                                updateBillToLesseForAJob
                             }) => {
 
     console.log(workOrders)
@@ -97,7 +101,7 @@ const WorkOrderDataTable = ({
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
 
-
+    const orderDetailsModal = document.getElementById('orderDetailsModal');
     useEffect(() => {
         const handleChanges = () => {
            // console.log("Work orders changed from data table", workOrders)
@@ -370,6 +374,7 @@ const WorkOrderDataTable = ({
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={() => {
+                    setWorkOrderToView(null)
                     setWorkOrderToView(row.workOrder)
                     handleShowOrderDetails(row.workOrder)
                 }}>
@@ -546,8 +551,12 @@ const WorkOrderDataTable = ({
                         updateBilling={updateOwnerBilling}
                         updateBillToLessee={updateBillToLessee}
                         createAjob={createAjob}
+                        pasteJobs={pasteJobs}
                         updateAJob={updateAJob}
                         deleteJob={deleteJob}
+                        handleStorageUpdate={handleStorageUpdate}
+                        handIsLockedForTimeClocking={handIsLockedForTimeClocking}
+                        updateBillToLesseForAJob={updateBillToLesseForAJob}
                     />
                 ) : null}
                 {/*<OrderDetails*/}

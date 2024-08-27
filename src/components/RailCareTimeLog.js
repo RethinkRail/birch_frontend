@@ -12,40 +12,28 @@ import DataTable from 'react-data-table-component';
 import 'react-datepicker/dist/react-datepicker.css';
 import { round2Dec } from "../utils/NumberHelper";
 
-const RailCareTimeLog = ({ workOrder }) => {
-    const [data, setData] = useState([]);
+const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
     const [datePickers, setDatePickers] = useState({
         crewChecked: {},
         managerChecked: {},
         qaChecked: {}
     });
+    console.log(railcarLog)
     const [totalHoursEstimated, setTotalHoursEstimated] = useState(0);
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
     const [difference, setDifference] = useState(0);
     useEffect(() => {
-        const fetchData = async () => {
-            if (workOrder && workOrder.id) {
-                try {
-                    const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
-                    setData(response.data);
-                    const estimated = data.reduce((sum, entry) => sum + entry.labor_time, 0);
-                    const applied = data.reduce((sum, entry) => sum + parseFloat(entry.hours_applied), 0);
-                    const rework = data.reduce((sum, entry) => sum + parseFloat(entry.hours_applied_rework), 0);
-                    const diff = estimated - (applied + rework);
+        const estimated = railcarLog.reduce((sum, entry) => sum + entry.labor_time, 0);
+        const applied = railcarLog.reduce((sum, entry) => sum + parseFloat(entry.hours_applied), 0);
+        const rework = railcarLog.reduce((sum, entry) => sum + parseFloat(entry.hours_applied_rework), 0);
+        const diff = estimated - (applied + rework);
 
-                    setTotalHoursEstimated(estimated);
-                    setTotalHoursApplied(applied);
-                    setTotalRework(rework);
-                    setDifference(diff);
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-            }
-        };
-
-        fetchData();
-    }, [workOrder]);
+        setTotalHoursEstimated(estimated);
+        setTotalHoursApplied(applied);
+        setTotalRework(rework);
+        setDifference(diff);
+    }, [railcarLog]);
 
     const handleDateChange = (type, jobId, date) => {
         setDatePickers(prevState => ({
@@ -57,7 +45,7 @@ const RailCareTimeLog = ({ workOrder }) => {
         }));
     };
 
-    const isDatePickerDisabled = workOrder?.locked_for_time_clocking === 1;
+    const isDatePickerDisabled = locked_for_time_clockinhg=== 1;
 
     // Check if the date picker should be disabled based on team member completion time
     const isProcessAndQaDisabled = (jobId) => {
@@ -69,6 +57,14 @@ const RailCareTimeLog = ({ workOrder }) => {
             name: 'JOB DESCRIPTION',
             selector: row => row.job_description,
             width: "38%",
+            cell: row => (
+                <div
+                    title={row.job_description}
+                    style={{ whiteSpace: "normal", wordWrap: "break-word" ,paddingTop:"5px",paddingBottom:"5px"}}
+                >
+                    {row.job_description}
+                </div>
+            )
         },
         {
             name: 'HOURS ESTIMATED',
@@ -161,7 +157,7 @@ const RailCareTimeLog = ({ workOrder }) => {
             <div className="overflow-x-auto">
                 <DataTable
                     columns={columns}
-                    data={data}
+                    data={railcarLog}
                     striped={false}
                     dense={true}
                     responsive={true}
@@ -173,7 +169,7 @@ const RailCareTimeLog = ({ workOrder }) => {
                 />
             </div>
 
-            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
+            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64 mb-[24px]" >
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS ESTIMATED</h2>
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursEstimated)} Hrs</p>

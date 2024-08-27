@@ -2,7 +2,12 @@ import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import TaskRow from "../components/TaskRow";
 import WorkOrderDataTable from "../components/WorkOrderDataTable";
-import {replaceItemInArray, showToastMessage, updateObjectByIdInsideArray} from "../utils/CommonHelper";
+import {
+    replaceItemInArray,
+    showToastMessage,
+    updateObjectByIdInsideArray,
+    updateSecondaryBillToId
+} from "../utils/CommonHelper";
 import Modal from "react-modal";
 import {toast} from "react-toastify";
 import WorkOrderModal from "../components/WorkOrderModal";
@@ -877,6 +882,25 @@ const Home = () => {
         }
     };
 
+    const pasteJobs = async (jobdata) => {
+        console.log(typeof jobdata)
+        const jobDataToPost = JSON.parse(localStorage.getItem("jobsToBePasted"))
+        console.log(jobDataToPost)
+        const user_id = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}create_jobs/`, {"jobsData": jobdata,"user_id": user_id});
+            console.log("calling done");
+            console.log(response);
+            const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
+            setWorkOrders(updatedWO)
+            return response; // This returns the response object
+        } catch (error) {
+            console.log(error);
+            console.log("An error occurred when handling billing");
+            return error; // This returns the error object
+        }
+    };
+
     const updateAJob = async (jobdata,id) => {
         console.log(jobdata)
         try {
@@ -908,19 +932,6 @@ const Home = () => {
         }
     };
 
-
-
-    const customStylesForCommentModal = {
-        content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            width: '400px',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-        },
-    };
     const submitTaskUpdate = () => {
         // On closing comment modal updating everything
         if (getValueById("statusUpdateMessage").length < 1) {
@@ -992,6 +1003,18 @@ const Home = () => {
                 console.log(error);
             });
     }
+
+    const customStylesForCommentModal = {
+        content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            width: '400px',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+        },
+    };
     const cancelTaskUpdate = () => {
         setcompletingTask(null)
         setIsCommentModalOpen(false)
@@ -1017,8 +1040,71 @@ const Home = () => {
         });
         forceUpdate()
     };
+    const handleStorageUpdate = async (work_id,is_storage) =>{
+        const requestData = {
+            work_id: work_id, // Replace with actual work order ID
+            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] , // Replace with actual user ID
+            is_storage: is_storage // or 'false', depending on your need
+        };
+
+        return await  axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_is_storage', requestData)
+            .then(response => {
+                // Handle success
+                const updatedWO= updateObjectByIdInsideArray(workOrders,"id",work_id,{"is_storage":response.data.is_storage} )
+                setWorkOrders(updatedWO)
+                return response.status
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error.response ? error.response.data : error.message);
+                return error
+            });
+    }
+    const handIsLockedForTimeClocking = async (work_id,locked_for_time_clocking) =>{
+        const requestData = {
+            work_id: work_id, // Replace with actual work order ID
+            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] , // Replace with actual user ID
+            locked_for_time_clocking: locked_for_time_clocking // or 'false', depending on your need
+        };
+
+        return await  axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_is_locked_for_time_clocking', requestData)
+            .then(response => {
+                // Handle success
+                const updatedWO= updateObjectByIdInsideArray(workOrders,"id",work_id,{"locked_for_time_clocking":response.data.locked_for_time_clocking} )
+                setWorkOrders(updatedWO)
+                return response.status
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error.response ? error.response.data : error.message);
+                return error
+            });
+    }
+
+    const updateBillToLesseForAJob = async (secondary_bill_to_id,job_id,workId) =>{
+        const requestData = {
+            secondary_bill_to_id: secondary_bill_to_id, // Replace with actual work order ID
+            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] , // Replace with actual user ID
+        };
+
+        return axios.patch(process.env.REACT_APP_BIRCH_API_URL+`update_lessee_billing/${job_id}`, requestData)
+            .then(response => {
+                // Handle success
+                console.log('Success:', response.data);
+                const updatedWo = updateSecondaryBillToId(workOrders,workId,job_id,secondary_bill_to_id)
+                setWorkOrders(updatedWo)
+                return true
+            })
+            .catch(error => {
+                // Handle error
+
+                console.error('Error:', error.response ? error.response.data : error.message);
+                return false
+            });
+    }
 
     useEffect(() => {
+        localStorage.setItem("jobsToBePasted", null)
         getActiveTasks();
     }, []);
     useEffect(() => {
@@ -1104,8 +1190,12 @@ const Home = () => {
                         updateBillToLessee={handleBillToLessee}
                         searchCar = {searchCar}
                         createAjob = {createAjob}
+                        pasteJobs = {pasteJobs}
                         updateAJob = {updateAJob}
                         deleteJob = {deleteJob}
+                        handleStorageUpdate = {handleStorageUpdate}
+                        handIsLockedForTimeClocking = {handIsLockedForTimeClocking}
+                        updateBillToLesseForAJob = {updateBillToLesseForAJob}
                     />
                 ) : null}
             </div>

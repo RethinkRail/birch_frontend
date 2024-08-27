@@ -1,6 +1,6 @@
 import axios from "axios"
 import {useEffect, useState} from "react"
-import CargoUpdate from "./CargoUpdate"
+import RailCarUpdate from "./RailCarUpdate"
 import {toast} from "react-toastify"
 
 const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) => {
@@ -190,14 +190,14 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
 
 
     return (
-        <div className="bg-white flex flex-col gap-4 rounded-md py-4 px-8 w-full max-w-[600px] z-50">
+        <div className="bg-white flex flex-col gap-4 rounded-md py-2 px-8 w-full max-w-[600px] z-50 mb-5 mt-5 overflow-y-scroll max-h-[90vh]">
             <div className="flex flex-col gap-2 w-full">
-                <h3 className="font-semibold">Order Info</h3>
-                <div className="w-full gap-10 text-[14px]">
+                <h4 className="font-semibold">Order Info</h4>
+                <div className="w-full gap-10 text-[10px]">
                     <div className="col-span-1 flex flex-col gap-2">
-                        <h4 className="-uppercase">Reason to come</h4>
+                        <h6 className="-uppercase">Reason to come</h6>
                         <input type="text"
-                               className="rounded-md p-5 border-[1px] border-solid border-[#000] flex outline-none"
+                               className="rounded-md p-2 border-[1px] border-solid border-[#000] flex outline-none"
                                value={reasonToCome} onChange={(e) => setReasonToCome(e.target.value)}/>
                         <p className="uppercase mt-2">Suggestion</p>
                         <div className="flex flex-row items-center gap-2 flex-wrap">
@@ -249,9 +249,9 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
                     </div>
                     <div className="">
                         {formShowing &&
-                            <CargoUpdate editRowData={lookupData} tableSchema={tableSchema} inputValues={inputValues}
-                                         setInputValues={setInputValues} relatedData={relatedData}
-                                         setRelatedData={setRelatedData} cargoNumber={rfiD}/>}
+                            <RailCarUpdate editRowData={lookupData} tableSchema={tableSchema} inputValues={inputValues}
+                                           setInputValues={setInputValues} relatedData={relatedData}
+                                           setRelatedData={setRelatedData} rfid={rfiD}/>}
                     </div>
                 </div>
             </div>

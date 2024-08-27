@@ -5,9 +5,9 @@ import {
 } from 'material-react-table';
 import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
-import axios from "axios";
+import axios, {all} from "axios";
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob,deleteJob }) => {
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
         jobs.sort((a, b) => a.line_number - b.line_number)
@@ -27,7 +27,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             material: job.material_cost,
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            is_billed_to_lessee: job.secondary_bill_to_id == null ? false : true
+            secondary_bill_to_id: job.secondary_bill_to_id == null ? false : true
         }));
 
         console.log("Updated jobListData from the joblist table:", jobListData);
@@ -44,7 +44,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
         id:false
     });
     useEffect(() => {
-        setColumnVisibility({ id:false,is_billed_to_lessee: is_billed_to_lessee }); //programmatically show firstName column
+        setColumnVisibility({ id:false,secondary_bill_to_id: is_billed_to_lessee }); //programmatically show firstName column
     }, [is_billed_to_lessee]);
 
     useEffect(() => {
@@ -73,16 +73,97 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
     }, [jobs]);
 
     const handleCopyJob = (jobToCopyId) => {
+        localStorage.setItem("jobsToBePasted", null)
         setCopiedJob(jobs.find(job => job.id === jobToCopyId) || null)
+        console.log(copiedJob)
+        let jobToBePasted = []
+        const copiedJobFormatted = {
+            work_id: workOrder.id,
+            work_order: workOrder.work_order,
+            line_number: Number(jobs.line_number),
+            location_code: copiedJob.locationcode.code,
+            quantity: copiedJob.quantity,
+            condition_code: copiedJob.conditioncode.code,
+            job_code_applied: copiedJob.jobcode_joblist_job_code_appliedTojobcode.code,
+            qualifier_applied_id: copiedJob.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: copiedJob.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
+            job_description: copiedJob.job_description,
+            why_made_code: copiedJob.whymadecode.code,
+            job_code_removed: copiedJob.jobcode_joblist_job_code_removedTojobcode.code,
+            qualifier_removed_id: copiedJob.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: copiedJob.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
+            responsibility_code: copiedJob.responsibilitycode?.id,
+            labor_cost: copiedJob.labor_cost,
+            labor_time: copiedJob.labor_time,
+            labor_rate: copiedJob.labor_rate,
+            material_cost: Number(round2Dec(copiedJob.material_cost)),
+            jobPartsData: copiedJob.jobparts.map(({ id, parts, ...rest }) => rest),
+            user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+        }
+
+        jobToBePasted.push(copiedJobFormatted)
+
+        localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
     }
 
-    const handlePasteJob = () => {
-        if(copiedJob === null) {
-            return
+    const handleCopyAllJobs = () => {
+        localStorage.setItem("jobsToBePasted", null)
+        let jobToBePasted = []
+        let i= 0
+        jobs.map((job)=>{
+            i++
+            console.log(job)
+            const copiedJobFormatted = {
+                work_id: workOrder.id,
+                work_order: workOrder.work_order,
+                line_number: Number(jobs.line_number),
+                location_code: job.locationcode.code,
+                quantity: job.quantity,
+                condition_code: job.conditioncode.code,
+                job_code_applied: job.jobcode_joblist_job_code_appliedTojobcode.code,
+                qualifier_applied_id: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
+                job_description: job.job_description,
+                why_made_code: job.whymadecode.code,
+                job_code_removed: job.jobcode_joblist_job_code_removedTojobcode.code,
+                qualifier_removed_id: job.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: job.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
+                responsibility_code: job.responsibilitycode.id,
+                labor_cost: job.labor_cost,
+                labor_time: job.labor_time,
+                labor_rate: job.labor_rate,
+                material_cost: Number(round2Dec(job.material_cost)),
+                jobPartsData: job.jobparts.map(({ id, parts, ...rest }) => rest),
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+            }
+            jobToBePasted.push(copiedJobFormatted)
+        })
+
+        console.log(jobToBePasted)
+
+        localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
+    }
+
+    const handlePasteJob = async () => {
+        const copiedJobs=  JSON.parse(localStorage.getItem("jobsToBePasted"))
+        const modifiledJobs = updateArray(copiedJobs,workOrder.id,workOrder.work_order,jobs.length)
+        console.log(modifiledJobs)
+        const response = await  handlePaste(modifiledJobs)
+        if(response.status==200){
+            localStorage.setItem("jobsToBePasted", null)
         }
-        console.log("The paste job function clicked", copiedJob)
-        const jobWithRandomId = { ...copiedJob, id: Math.floor(Math.random() * 100000), line_number: jobs.length + 1 }
-        handlePaste(workOrder.id, jobWithRandomId)
+    }
+
+    const updateArray = (data, newWorkId, newWorkOrder, startingLineNumber) => {
+        return data.map((item, index) => ({
+            ...item,
+            work_id: newWorkId,
+            work_order: newWorkOrder,
+            line_number: startingLineNumber + index + 1
+        }));
+    };
+
+    const handleJobBillToLessee = async (job_id,is_checked) =>{
+        //onChange={(e) => updateLockForTimeClocking(e.target.checked)}
+       //secondary_bill_to_id,job_id,workId
+        const response =    await updateBillToLesseForAJob(is_checked?workOrder.railcar.owner_railcar_lessee_idToowner.id:null,job_id,workOrder.id)
+        console.log(response)
     }
 
     const [copiedJob, setCopiedJob] = useState(null)
@@ -90,11 +171,11 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
 
     const columns = useMemo(
         () => [
-            { accessorKey: 'id', header: 'id', size: 5 },
+            { accessorKey: 'id', header: 'id', size: 2 },
             {
                 accessorKey: 'action',
                 header: 'Action',
-                size: 10,
+                size: 5,
 
                 Cell: ({ row }) => {
                     return (
@@ -114,10 +195,11 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                     );
                 },
             },
-            { accessorKey: 'ln', header: 'Line', size: 5 ,
+            { accessorKey: 'ln', header: 'Line', size: 2 ,
                 Cell: ({ row }) => {
                     return (
                         <div onClick={() => {
+                            setEditData(null)
                             setEditData(jobs.find(job => job.id === row.getValue("id")) || null)
                             setModalShowing(true)
                         }} class="flex justify-between items-center cursor-pointer">
@@ -126,24 +208,24 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
 
                     );
                 },},
-            { accessorKey: 'loc', header: 'Loc', size: 5 },
-            { accessorKey: 'qty', header: 'Qty', size: 5 },
-            { accessorKey: 'cc', header: 'CC', size: 5 },
-            { accessorKey: 'jobcode', header: 'JC', size: 5 },
-            { accessorKey: 'aq', header: 'AQ', size: 5 },
-            { accessorKey: 'description', header: 'Description of Repair', size: 20 },
+            { accessorKey: 'loc', header: 'Loc', size: 2 },
+            { accessorKey: 'qty', header: 'Qty', size: 3 },
+            { accessorKey: 'cc', header: 'CC', size: 3 },
+            { accessorKey: 'jobcode', header: 'JC', size: 3 },
+            { accessorKey: 'aq', header: 'AQ', size: 3 },
+            { accessorKey: 'description', header: 'Description of Repair', size: 15 },
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
-            { accessorKey: 'labor_time', header: 'Labor Hrs', size: 5 },
-            { accessorKey: 'labor', header: 'Labor cost$', size: 5 },
-            { accessorKey: 'material', header: 'Material', size: 5 },
-            { accessorKey: 'net', header: 'Net Cost', size: 5 },
-            { accessorKey: 'rev', header: 'Revenue', size: 5 ,grow: false, },
+            { accessorKey: 'labor_time', header: 'Labor Hrs', size: 2 },
+            { accessorKey: 'labor', header: 'Labor cost$', size: 2 },
+            { accessorKey: 'material', header: 'Material', size: 2 },
+            { accessorKey: 'net', header: 'Net Cost', size: 2 },
+            { accessorKey: 'rev', header: 'Revenue', size: 2  },
             {
-                accessorKey: 'is_billed_to_lessee',
+                accessorKey: 'secondary_bill_to_id',
                 header: 'Bill to Lessee',
-                size: 5,
+                size: 2,
                 Cell: ({ row }) => {
-                    const isBilledToLessee = row.getValue('is_billed_to_lessee');
+                    const isBilledToLessee = row.getValue('secondary_bill_to_id');
 
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -151,6 +233,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
                                 type="checkbox"
                                 checked={isBilledToLessee }
                                 disabled={isBilledToLessee}
+                                onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
                                 className="checkbox checkbox-primary"
                             />
                         </div>
@@ -247,9 +330,17 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             <div className="flex justify-between mb-5 items-center">
                 <h6 className='font-semibold'>Job List</h6>
                 <div className="flex space-x-2">
-                    <button className='btn btn-secondary btn-sm normal-case'>Copy all the jobs</button>
-                    <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>
+                    {tableData.length>0 &&(
+                        <button className='btn btn-secondary btn-sm normal-case' onClick={handleCopyAllJobs}>Copy all the jobs</button>
+                    )}
+
+
+                    {JSON.parse(localStorage.getItem("jobsToBePasted")) != null && (
+                        <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>
+                    )}
+
                     <button className='btn btn-secondary btn-sm normal-case' onClick={() => {
+                        setEditData(null)
                         setModalShowing(true)
                         console.log("Modal is now showing")
                     }}>Add Job</button>

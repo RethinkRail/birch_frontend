@@ -3,8 +3,10 @@ import axios from "axios"
 import {round2Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
 import {toast} from "react-toastify";
+import Select from "react-select";
 
-const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
+
+const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
     console.log(editData)
     console.log(commonData)
     console.log(lineNumber)
@@ -49,7 +51,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 availability:1,
                 part_id: part.id,
                 unit: part.unit,
-                quantity: part.quantity,
+                quantity: 1,
                 parts:part
             }
         }
@@ -270,7 +272,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
 
         if(!editData) {
             console.log(inputValues, "This is the input values")
-            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 1}))
+            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number( markupPercent), availability: 1}))
             populatedJobPart = processPartsArray(populatedJobPart)
             console.log(populatedJobPart)
             const dataToBackend = {
@@ -278,7 +280,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 work_order: workOrder.work_order,
                 line_number: Number(lineNumber),
                 location_code: inputValues["location_code"],
-                quantity: Number(inputValues["quantity"]),
+                quantity: Number(round2Dec(inputValues["quantity"])),
                 condition_code: Number(inputValues["condition_code"]),
                 job_code_applied: Number(inputValues["job_code"]),
                 qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
@@ -287,10 +289,11 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 job_code_removed: Number(inputValues["job_code_removed"]),
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
-                labor_cost: Number(totalLabor),
-                labor_time: Number(inputValues["labor_time"]),
-                labor_rate: Number(inputValues["labor_rate"]),
-                material_cost: Number(totalMaterial),
+
+                labor_cost: Number(round2Dec(totalLabor)),
+                labor_time: Number(round2Dec(inputValues["labor_time"])),
+                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
+                material_cost: Number(round2Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsData: populatedJobPart,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
@@ -303,6 +306,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
             const response = await  createAjob(dataToBackend)
             console.log(response)
             if(response.status == 200){
+
                 setModalShowing(false)
                 toast("Wow so easy!")
             }else {
@@ -310,7 +314,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
             }
         } else {
             console.log("here")
-            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: markupPercent, availability: 1}))
+            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number(markupPercent), availability: 1}))
             console.log(populatedJobPart)
             populatedJobPart = processPartsArray(populatedJobPart)
             console.log(populatedJobPart)
@@ -343,7 +347,7 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 work_id: workOrder.id,
                 line_number: Number(editData.line_number),
                 location_code: inputValues["location_code"],
-                quantity: Number(inputValues["quantity"]),
+                quantity: Number(round2Dec(inputValues["quantity"])),
                 condition_code: Number(inputValues["condition_code"]),
                 job_code_applied: Number(inputValues["job_code"]),
                 qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
@@ -352,10 +356,10 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                 job_code_removed: Number(inputValues["job_code_removed"]),
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
-                labor_cost: Number(totalLabor),
-                labor_time: Number(inputValues["labor_time"]),
-                labor_rate: Number(inputValues["labor_rate"]),
-                material_cost: Number(totalMaterial),
+                labor_cost: Number(round2Dec(totalLabor)),
+                labor_time: Number(round2Dec(inputValues["labor_time"])),
+                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
+                material_cost: Number(round2Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsToAdd: jobPartsToAdd,
                 jobPartsToDelete,
@@ -402,12 +406,21 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Location Code (LOC)</label>
-                            <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["location_code"]} onChange={(e) => handleChange("location_code", e.target.value)}>
-                                <option value=''>Select an option</option>
-                                {commonData.location_codes.map((locationcode, index) => (
-                                    <option key={`locationcode--${index}`} value={locationcode.code}>{locationcode.code+":"+locationcode.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="loc"
+                                id="loc"
+                                classNamePrefix="react-select" // To allow custom styling with your class names
+                                value={commonData.location_codes.map((locationcode) => ({
+                                    value: locationcode.code,
+                                    label: `${locationcode.code}: ${locationcode.title}`,
+                                })).find(option => option.value === inputValues["location_code"])}
+                                onChange={(selectedOption) => handleChange("location_code", selectedOption?.value)}
+                                options={commonData.location_codes.map((locationcode) => ({
+                                    value: locationcode.code,
+                                    label: `${locationcode.code}: ${locationcode.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-[12px] capitalize">QUANTITY(QTY)</label>
@@ -415,12 +428,21 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Condition Code (CC)</label>
-                            <select name="cc" id="cc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["condition_code"]} onChange={(e) => handleChange("condition_code", e.target.value)}>
-                                <option value=''>Select an option</option>
-                                {commonData.condition_codes.map((conditioncode, index) => (
-                                    <option key={`conditioncode--${index}`} value={conditioncode.code}>{conditioncode.code+":"+conditioncode.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="cc"
+                                id="cc"
+                                classNamePrefix="react-select" // To apply your custom styles
+                                value={commonData.condition_codes.map((conditioncode) => ({
+                                    value: conditioncode.code,
+                                    label: `${conditioncode.code}: ${conditioncode.title}`,
+                                })).find(option => option.value === inputValues["condition_code"])}
+                                onChange={(selectedOption) => handleChange("condition_code", selectedOption?.value)}
+                                options={commonData.condition_codes.map((conditioncode) => ({
+                                    value: conditioncode.code,
+                                    label: `${conditioncode.code}: ${conditioncode.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                     </div>
                     <div className="col-span-1 flex flex-col gap-1.5">
@@ -429,30 +451,57 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Job Code Applied (JC)</label>
-                            <select name="job" id="job" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["job_code"]} onChange={(e) => handleChange("job_code", e.target.value)}>
-                                <option value=''>Select an option</option>
-                                {commonData.job_codes.map((jobcode, index) => (
-                                    <option key={`jobcode--${index}`} value={jobcode.code}>{jobcode.code+":"+jobcode.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="job"
+                                id="job"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.job_codes.map((jobcode) => ({
+                                    value: jobcode.code,
+                                    label: `${jobcode.code}: ${jobcode.title}`,
+                                })).find(option => option.value === inputValues["job_code"])}
+                                onChange={(selectedOption) => handleChange("job_code", selectedOption?.value)}
+                                options={commonData.job_codes.map((jobcode) => ({
+                                    value: jobcode.code,
+                                    label: `${jobcode.code}: ${jobcode.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Applied (AQ)</label>
-                            <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["qualifier_code"]} onChange={(e) => handleChange("qualifier_code", e.target.value)}>
-                                <option >Select an option</option>
-                                {commonData.qualifier_codes.map((qualifiercode, index) => (
-                                    <option key={`qualifiercode--${index}`} value={qualifiercode.id}>{qualifiercode.code+":"+qualifiercode.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="loc"
+                                id="loc"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.qualifier_codes.map((qualifiercode) => ({
+                                    value: qualifiercode.id,
+                                    label: `${qualifiercode.code}: ${qualifiercode.title}`,
+                                })).find(option => option.value === inputValues["qualifier_code"])}
+                                onChange={(selectedOption) => handleChange("qualifier_code", selectedOption?.value)}
+                                options={commonData.qualifier_codes.map((qualifiercode) => ({
+                                    value: qualifiercode.id,
+                                    label: `${qualifiercode.code}: ${qualifiercode.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Why Made Code (WMC)</label>
-                            <select name="cc" id="cc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["why_made_code"]} onChange={(e) => handleChange("why_made_code", e.target.value)}>
-                                <option >Select an option</option>
-                                {commonData.wmc_codes.map((wmc, index) => (
-                                    <option key={`wmc--${index}`} value={wmc.code}>{wmc.code+":"+wmc.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="cc"
+                                id="cc"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.wmc_codes.map((wmc) => ({
+                                    value: wmc.code,
+                                    label: `${wmc.code}: ${wmc.title}`,
+                                })).find(option => option.value === inputValues["why_made_code"])}
+                                onChange={(selectedOption) => handleChange("why_made_code", selectedOption?.value)}
+                                options={commonData.wmc_codes.map((wmc) => ({
+                                    value: wmc.code,
+                                    label: `${wmc.code}: ${wmc.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                     </div>
                     <div className="col-span-1 flex flex-col gap-1.5">
@@ -461,30 +510,57 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Jobe Code Removed (JCR)</label>
-                            <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["job_code_removed"]} onChange={(e) => handleChange("job_code_removed", e.target.value)}>
-                                <option >Select an option</option>
-                                {commonData.job_codes.map((jobcode, index) => (
-                                    <option key={`jobcode--${index}`} value={jobcode.code}>{jobcode.code+":"+jobcode.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="loc"
+                                id="loc"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.job_codes.map((jobcode) => ({
+                                    value: jobcode.code,
+                                    label: `${jobcode.code}: ${jobcode.title}`,
+                                })).find(option => option.value === inputValues["job_code_removed"])}
+                                onChange={(selectedOption) => handleChange("job_code_removed", selectedOption?.value)}
+                                options={commonData.job_codes.map((jobcode) => ({
+                                    value: jobcode.code,
+                                    label: `${jobcode.code}: ${jobcode.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Removed (RQ)</label>
-                            <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["qualifier_code_removed"]} onChange={(e) => handleChange("qualifier_code_removed", e.target.value)}>
-                                <option>Select an option</option>
-                                {commonData.qualifier_codes.map((qcr, index) => (
-                                    <option key={`qcr--${index}`} value={qcr.id}>{qcr.code+":"+qcr.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="loc"
+                                id="loc"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.qualifier_codes.map((qcr) => ({
+                                    value: qcr.id,
+                                    label: `${qcr.code}: ${qcr.title}`,
+                                })).find(option => option.value === inputValues["qualifier_code_removed"])}
+                                onChange={(selectedOption) => handleChange("qualifier_code_removed", selectedOption?.value)}
+                                options={commonData.qualifier_codes.map((qcr) => ({
+                                    value: qcr.id,
+                                    label: `${qcr.code}: ${qcr.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Responsibility Code (RC)</label>
-                            <select name="cc" id="cc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' value={inputValues["responsibility_code"]} onChange={(e) => handleChange("responsibility_code", e.target.value)}>
-                                <option value=''>Select an option</option>
-                                {commonData.responsibility_codes.map((rc, index) => (
-                                    <option key={`rc--${index}`} value={rc.code}>{rc.code+":"+rc.title}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="cc"
+                                id="cc"
+                                classNamePrefix="react-select" // To allow custom styling
+                                value={commonData.responsibility_codes.map((rc) => ({
+                                    value: rc.code,
+                                    label: `${rc.code}: ${rc.title}`,
+                                })).find(option => option.value === inputValues["responsibility_code"])}
+                                onChange={(selectedOption) => handleChange("responsibility_code", selectedOption?.value)}
+                                options={commonData.responsibility_codes.map((rc) => ({
+                                    value: rc.code,
+                                    label: `${rc.code}: ${rc.title}`,
+                                }))}
+                                placeholder="Select an option"
+                            />
                         </div>
                     </div>
                 </div>
@@ -497,12 +573,17 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                             <label>Add A Part</label>
 
                         </div>
-                        <select name="loc" id="loc" className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' onChange={(e) => handlePartChange(e.target.value)}>
-                            <option value=''>Select an option</option>
-                            {commonData.parts.map((part, index) => (
-                                <option key={`locationcode--${index}`} value={part.id}>{part.code+":"+part.title}</option>
-                            ))}
-                        </select>
+                        <Select
+                            name="loc"
+                            id="loc"
+                            classNamePrefix="react-select" // To allow custom styling
+                            onChange={(selectedOption) => handlePartChange(selectedOption?.value)}
+                            options={commonData.parts.map((part) => ({
+                                value: part.id,
+                                label: `${part.code}: ${part.title}`,
+                            }))}
+                            placeholder="Select an option"
+                        />
                     </div>
                     {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -526,8 +607,8 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                                 <div className="col-span-2 flex flex-row items-center gap-1">
                                     <input type="text" name="" id="" className="w-[45%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.additional_info || ""} onChange={(e) => handleFieldChange(jobPart.part_id, "additional_info", e.target.value)} />
                                     <input type="text" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1 " value={jobPart?.parts.unit} disabled={true} />
-                                    <input type="number" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(jobPart?.quantity)} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", e.target.value)} />
-                                    <input type="number" name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(jobPart?.purchase_cost)} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", e.target.value)} />
+                                    <input type="number"  step={0.5} name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", parseFloat(e.target.value))} />
+                                    <input type="number" step={0.5} name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", parseFloat(e.target.value))} />
                                     <div className="w-[7%]">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => handleRemovePart(jobPart?.part_id)}>
                                             <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -545,11 +626,11 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                         <div className="col-span-2 grid grid-cols-3 gap-1">
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">ST. Time (HR)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(inputValues["labor_time"])} onChange={(e) => handleChange("labor_time",e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_time"]} onChange={(e) => handleChange("labor_time",e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Rate ($/HR)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(inputValues["labor_rate"])} onChange={(e) => handleChange("labor_rate", e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_rate"]} onChange={(e) => handleChange("labor_rate", e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Labor ($)</label>
@@ -557,11 +638,11 @@ const EditJobModal = ({ lineNumber, workOrder ,commonData ,setModalShowing, edit
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Purchase ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(purchase)} onChange={(e) => setPurchase(purchase)} />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={purchase} onChange={(e) => setPurchase(purchase)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Markup (%)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(markupPercent)} onChange={(e) => setMarkupPercent(e.target.value)} />
+                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Material ($)</label>

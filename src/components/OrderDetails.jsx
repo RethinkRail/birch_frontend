@@ -48,8 +48,12 @@ const OrderDetails = ({
                           getActiveWorkOrders,
                           handleBillingInformationChanged,
                           createAjob,
+                          pasteJobs,
                           updateAJob,
-                          deleteJob
+                          deleteJob,
+                          handleStorageUpdate,
+                          handIsLockedForTimeClocking,
+                          updateBillToLesseForAJob
                       }) => {
     console.log(workOrder)
     // console.log(workOrder.reason_to_come)
@@ -159,6 +163,8 @@ const OrderDetails = ({
     const ownerInvoiceDaterRef = useRef(null);
     const ownerInvoiceNetDaysrRef = useRef(null);
     //const debouncedMOWK = useDebounce(workOrder.mo_wk, 300);
+
+    const [railCarLog,setRailcarLog]=useState([])
 
     const [totalLaborHours,setTotalLaborHours]= useState()
     const [totalLaborCost,setTotalLaborCost]= useState()
@@ -274,7 +280,15 @@ const OrderDetails = ({
         setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
         calculateJobCosts(workOrder.joblist)
         workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
+        getRailCarTimeLog()
+
     }, [workOrder]);
+
+    const getRailCarTimeLog =async () => {
+        const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
+        console.log(response)
+        setRailcarLog(response.data)
+    }
     const formatDateToSQL = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
@@ -286,8 +300,6 @@ const OrderDetails = ({
         setIsStatusDropDownModalOpenInDetails(true)
     }
 
-    const orderDetailsModal = document.getElementById('orderDetailsModal');
-    //const statusTextArea = useRef(null);
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -299,6 +311,9 @@ const OrderDetails = ({
             transform: 'translate(-50%, -50%)',
         },
     };
+    const orderDetailsModal = document.getElementById('orderDetailsModal');
+    //const statusTextArea = useRef(null);
+
     const closeModal = () => {
         if (orderDetailsModal) {
             orderDetailsModal.close();
@@ -739,6 +754,23 @@ const OrderDetails = ({
         return result.trim(); // Remove trailing newline
     }
 
+    const updateStorage = async (is_checked) =>{
+
+        workOrder.is_storage = is_checked?1:0
+        const result = await handleStorageUpdate(workOrder.id,is_checked)
+        if(result!==200){
+            workOrder.is_storage = !is_checked?1:0
+        }
+    }
+
+    const updateLockForTimeClocking = async (is_checked) =>{
+
+        workOrder.locked_for_time_clocking = is_checked?1:0
+        const result = await handIsLockedForTimeClocking(workOrder.id,is_checked)
+        if(result!==200){
+            workOrder.locked_for_time_clocking = !is_checked?1:0
+        }
+    }
 
 
     // This is for the...
@@ -797,7 +829,7 @@ const OrderDetails = ({
     }
 
     return (
-        <div ref={containerRef}>
+        <div ref={containerRef} >
             <dialog id="orderDetailsModal" className="modal rounded-md h-full ">
                 <div className="w-full bg-white">
                     <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
@@ -1229,7 +1261,8 @@ const OrderDetails = ({
                                                     <input
                                                         disabled={workOrder.storage_information.length > 0}
                                                         type="checkbox"
-                                                        checked={workOrder.is_storage > 0}
+                                                        checked={workOrder.is_storage ==1}
+                                                        onChange={(e) => updateStorage(e.target.checked)}
                                                         className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
 
                                                 </div>
@@ -1245,7 +1278,8 @@ const OrderDetails = ({
                                                     <input
                                                         disabled={workOrder.locked_by != null}
                                                         type="checkbox"
-                                                        checked={workOrder.locked_for_time_clocking > 0}
+                                                        checked={workOrder.locked_for_time_clocking == 1}
+                                                        onChange={(e) => updateLockForTimeClocking(e.target.checked)}
                                                         className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
 
                                                 </div>
@@ -1740,8 +1774,17 @@ const OrderDetails = ({
 
                             {/*Job list */}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                                <JoblistTable handlePaste={handlePaste} jobs={workOrder.joblist} workOrder={workOrder} commonData = {commonData} is_billed_to_lessee={isBilledToLessee} createAjob={createAjob} updateAJob={updateAJob} deleteJob={deleteJob}/>
-                                {/*<JoblistTable jobs={workOrder.joblist} commonData = {commonData} is_billed_to_lessee={isBilledToLessee}/>*/}
+                                <JoblistTable
+                                    handlePaste={pasteJobs}
+                                    jobs={workOrder.joblist}
+                                    workOrder={workOrder}
+                                    commonData = {commonData}
+                                    is_billed_to_lessee={isBilledToLessee}
+                                    createAjob={createAjob}
+                                    updateAJob={updateAJob}
+                                    deleteJob={deleteJob}
+                                    updateBillToLesseForAJob={updateBillToLesseForAJob}/>
+
                             </div>
 
                             {/*end job list */}
@@ -1773,9 +1816,13 @@ const OrderDetails = ({
                         {/*End Parts information*/}
 
                         {/*Railcar log*/}
-                        <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
-                            <RailCareTimeLog workOrder={workOrder}/>
-                        </div>
+
+                        {railCarLog.length>0 &&(
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                                <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
+                            </div>
+                        )}
+
 
                         {/*Railcar log*/}
 
@@ -1833,7 +1880,9 @@ const OrderDetails = ({
                     {/*              placeholder="Write your comments here..."></textarea>*/}
                     {/*    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatusFromDetails}>SUBMIT</button>*/}
                     {/*</dialog>*/}
+                    <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5 h-10">
 
+                    </div>
                     <Modal
                         isOpen={isStatusDropDownModalOpenInDetails}
                         onRequestClose={() => {

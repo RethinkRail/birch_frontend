@@ -30,7 +30,7 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp, earlierTimeStamp)
  * @returns {string}
  */
 export function convertSqlToFormattedDate(sqlDateTime) {
-    console.log(sqlDateTime)
+
     const sqlDate = new Date(sqlDateTime);
     const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', {timeZone: 'America/Chicago'});
     const localDateTime = new Date(localDateString)

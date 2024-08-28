@@ -27,7 +27,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             material: job.material_cost,
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            secondary_bill_to_id: job.secondary_bill_to_id == null ? false : true
+            secondary_bill_to_id: job.secondary_bill_to_id
         }));
 
         console.log("Updated jobListData from the joblist table:", jobListData);
@@ -64,7 +64,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            is_billed_to_lessee: job.secondary_bill_to_id
+            secondary_bill_to_id: job.secondary_bill_to_id
         }));
         console.log("SSS")
         console.log(isBilledToLessee)
@@ -225,13 +225,13 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 header: 'Bill to Lessee',
                 size: 2,
                 Cell: ({ row }) => {
-                    const isBilledToLessee = row.getValue('is_billed_to_lessee');
-                    console.log(isBilledToLessee)
+                    const isBilled = row.getValue('secondary_bill_to_id');
+                    console.log(isBilled)
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <input
                                 type="checkbox"
-                                checked={isBilledToLessee != null }
+                                checked={isBilled  != null}
 
                                 onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
                                 className="checkbox checkbox-primary"

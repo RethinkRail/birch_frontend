@@ -323,6 +323,12 @@ const OrderDetails = ({
         } else {
         }
     }
+    function scrollToTop() {
+        const modalContent = document.getElementById('orderDetailsModal');
+        if (modalContent) {
+            modalContent.scrollTop = 0; // Scroll to the top
+        }
+    }
     const postMOWKUpdate = () => {
         updateMOWK(workOrder.id, mo_wk)
     }
@@ -1638,7 +1644,7 @@ const OrderDetails = ({
                                                    value={workOrder.railcar.owner_railcar_owner_idToowner.contact_email}></input>
                                         </div>
 
-                                        do your work here
+
                                         {showButtonsOwner && (
                                             <div className="mt-8">
                                             <span>

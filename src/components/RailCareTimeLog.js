@@ -11,14 +11,16 @@ import DatePicker from 'react-datepicker';
 import DataTable from 'react-data-table-component';
 import 'react-datepicker/dist/react-datepicker.css';
 import { round2Dec } from "../utils/NumberHelper";
+import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
+import CustomDateInput from "./CustomDateInput";
 
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
-    const [datePickers, setDatePickers] = useState({
-        crewChecked: {},
-        managerChecked: {},
-        qaChecked: {}
-    });
-    console.log(railcarLog)
+    // const [datePickers, setDatePickers] = useState({
+    //     crewChecked: {},
+    //     managerChecked: {},
+    //     qaChecked: {}
+    // });
+     console.log(railcarLog)
     const [totalHoursEstimated, setTotalHoursEstimated] = useState(0);
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
@@ -36,20 +38,20 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
     }, [railcarLog]);
 
     const handleDateChange = (type, jobId, date) => {
-        setDatePickers(prevState => ({
-            ...prevState,
-            [type]: {
-                ...prevState[type],
-                [jobId]: date
-            }
-        }));
+        // setDatePickers(prevState => ({
+        //     ...prevState,
+        //     [type]: {
+        //         ...prevState[type],
+        //         [jobId]: date
+        //     }
+        // }));
     };
 
     const isDatePickerDisabled = locked_for_time_clockinhg=== 1;
 
     // Check if the date picker should be disabled based on team member completion time
     const isProcessAndQaDisabled = (jobId) => {
-        return !datePickers.crewChecked[jobId];
+        // return !datePickers.crewChecked[jobId];
     };
 
     const columns = [
@@ -87,15 +89,19 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         {
             name: 'TEAM MEMBER COMPLETION TIME',
             cell: row => (
-                <span className="w-full items-start align-top">
+                <span className="w-full items-start align-top p-2">
                     <DatePicker
-                        selected={datePickers.crewChecked[row.job_id]}
+                        customInput={<CustomDateInputFullWidth
+                            value={row.crew_checked_time !== null? new Date(row.crew_checked_time).toLocaleDateString() : null}/>}
+                        selected={row.crew_checked_time !== null? new Date(row.crew_checked_time): null}
                         onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
                         placeholderText="Select date"
                         dateFormat="MM-dd-yyyy"
-                        isClearable
-                        disabled={isDatePickerDisabled}
+                        isClearable={row.crew_checked_time !== null}
+                        disabled={isDatePickerDisabled || row.crew_checked_time == null}
                     />
+
+
                 </span>
             ),
             width: "10%",
@@ -104,12 +110,14 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
             name: 'IN PROCESS TIME',
             cell: row => (
                 <DatePicker
-                    selected={datePickers.managerChecked[row.job_id]}
+                    customInput={<CustomDateInputFullWidth
+                        value={row.manager_checked_time !== null? new Date(row.manager_checked_time).toLocaleDateString() : null}/>}
+                    selected={row.manager_checked_time !== null? new Date(row.manager_checked_time): null}
                     onChange={(date) => handleDateChange('managerChecked', row.job_id, date)}
                     placeholderText="Select date"
                     dateFormat="MM-dd-yyyy"
                     isClearable
-                    disabled={isDatePickerDisabled || isProcessAndQaDisabled(row.job_id)}
+                    disabled={isDatePickerDisabled || row.crew_checked_time == null}
                 />
             ),
             width: "10%",
@@ -118,12 +126,14 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
             name: 'QA TIME',
             cell: row => (
                 <DatePicker
-                    selected={datePickers.qaChecked[row.job_id]}
+                    customInput={<CustomDateInputFullWidth
+                        value={row.qa_checked_time !== null? new Date(row.qa_checked_time).toLocaleDateString() : null}/>}
+                    selected={row.qa_checked_time !== null? new Date(row.qa_checked_time): null}
                     onChange={(date) => handleDateChange('qaChecked', row.job_id, date)}
                     placeholderText="Select date"
                     dateFormat="MM-dd-yyyy"
                     isClearable
-                    disabled={isDatePickerDisabled || isProcessAndQaDisabled(row.job_id)}
+                    disabled={isDatePickerDisabled || row.crew_checked_time == null}
                 />
             ),
             width: "10%",

@@ -226,7 +226,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 size: 2,
                 Cell: ({ row }) => {
                     const isBilled = row.getValue('secondary_bill_to_id');
-                    console.log(isBilled)
+
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <input

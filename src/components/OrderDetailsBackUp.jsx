@@ -514,7 +514,7 @@ const OrderDetails = ({
                                     </span>
                                 </li>
                                 <li className='flex h-fit text-[10px] p-0'>
-                                    <span className="p-1" onClick={() => printBBOM(workOrder, 1)}>
+                                    <span className="p-1" onClick={() => printBBOM(workOrder)}>
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path

@@ -7,7 +7,7 @@ import axios from "axios";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
 import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../utils/DateTimeHelper";
-
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 import JoblistTable from "./JoblistTable";
@@ -15,6 +15,7 @@ import PartsTable from "./PartsTable";
 import {round2Dec} from "../utils/NumberHelper";
 import StorageComponent from "./StorageComponent";
 import RailCareTimeLog from "./RailCareTimeLog";
+import {printAAR} from "../utils/aarHelper";
 
 const OrderDetails = ({
                           commonData,
@@ -127,6 +128,8 @@ const OrderDetails = ({
     const [ep, setEP] = useState(null);
 
     const [isBilledToLessee, setIsBilledToLessee] = useState(false)
+
+
 
     const checkBillingInformationChangedForOwner = () => {
         console.log("called")
@@ -593,23 +596,25 @@ const OrderDetails = ({
     }
 
     function sumOfDayDifferences(storageInformation) {
-        let sum = 0;
-        storageInformation.forEach(obj => {
-            const startDate = new Date(convertSqlToFormattedDateTime(obj.start_date));
-            console.log(startDate)
-            if (obj.end_date === process.env.REACT_APP_DEFAULT_DATE) {
-                sum += 0
-            } else {
-                const endDate = new Date(convertSqlToFormattedDateTime(obj.end_date));
-                console.log(endDate)
-                const timeDiff = endDate.getTime() - startDate.getTime();
-                const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days and round up
-                console.log(dayDiff)
-                sum += dayDiff;
-            }
+        const today = new Date();
 
-        });
-        return sum;
+        const sum = storageInformation.reduce((acc, item) => {
+            if (item.is_billed === 0) {
+                const startDate = new Date(item.start_date);
+                let endDate = item.end_date ? new Date(item.end_date) : today;
+
+                // Calculate the difference in milliseconds
+                const diffInMs = endDate - startDate;
+
+                // Convert milliseconds to days
+                const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+                return acc + diffInDays;
+            }
+            return acc;
+        }, 0);
+        console.log(sum)
+        return (sum % 1 > 0.5) ? Math.ceil(sum) : 0;
     }
 
     const handleReasonToComeChange = (event) => {
@@ -772,6 +777,67 @@ const OrderDetails = ({
         }
     }
 
+    const [openDialog, setOpenDialog] = useState(false);
+    const [docToDownload, setDocToDownload] = useState('');
+
+
+    const handleListItemClick = (what_to_download) => {
+
+        if (isBilledToLessee) {
+            if(what_to_download==='aar'){
+                setDocToDownload("aar")
+            }else if(what_to_download === 'brc'){
+                setDocToDownload("brc")
+            }else if(what_to_download==='invoice'){
+                setDocToDownload("invoice")
+            }
+            setOpenDialog(true);
+        } else {
+            if(what_to_download==='aar'){
+                printAAR(workOrder, false, 1);
+            }else if(what_to_download === 'brc'){
+                printBRC(workOrder,1)
+            }else if(what_to_download==='invoice'){
+                printInvoice(workOrder,1)
+            }
+        }
+    };
+
+    const handleDialogClose = () => {
+        setDocToDownload('')
+        setOpenDialog(false);
+    };
+
+    const handleButtonClick = (option) => {
+        if (option === 'owner') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 2);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,2)
+            }else if(docToDownload==='invoice'){
+                printInvoice(workOrder,2)
+            }
+        } else if (option === 'lessee') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 3);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,3)
+            }else if(docToDownload==='invoice'){
+                printInvoice(workOrder,3)
+            }
+            printAAR(workOrder, false, 2);
+        } else if (option === 'combined') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 1);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,1)
+            }else if(docToDownload==='invoice'){
+                printInvoice(workOrder,1)
+            }
+
+        }
+        handleDialogClose();
+    };
 
     // This is for the...
     useEffect(() => {
@@ -853,7 +919,7 @@ const OrderDetails = ({
                         {/*Side menu*/}
                         <div className="absolute top-1/3 right-4">
                             <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
-                                <li className='flex h-fit text-[10px] p-0' onClick={printBRC}>
+                                <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -865,7 +931,7 @@ const OrderDetails = ({
                                         BRC
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0'>
+                                <li className='flex h-fit text-[10px] p-0'  onClick={()=>handleListItemClick('aar')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -877,7 +943,7 @@ const OrderDetails = ({
                                         ARR-500B
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0'  onClick={printBBOM}>
+                                <li className='flex h-fit text-[10px] p-0'  onClick={()=>printBBOM(workOrder)}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -889,7 +955,7 @@ const OrderDetails = ({
                                         BBOM
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0' onClick={printInvoice}>
+                                <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('invoice')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -901,19 +967,38 @@ const OrderDetails = ({
                                         Invoice
                                     </span>
                                 </li>
-                                <li className='flex h-fit text-[10px] p-0' onClick={() => printATask(workOrder)}>
-                                <span className="p-1">
-                                    <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"
-                                            stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                            stroke-linejoin="round"/>
-                                    </svg>
-                                    Work Order
-                                </span>
+                                <li className='flex h-fit text-[10px] p-0' onClick={()=>printATask(workOrder)}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        Work Order
+                                    </span>
                                 </li>
                             </ul>
+                            <Dialog
+                                open={openDialog}
+                                onClose={handleDialogClose}
+                                container={() => document.querySelector('#orderDetailsModal')} // Ensure it appears within the correct component
+                                style={{ zIndex: 1300 }} // Ensure it has a proper zIndex
+                            >
+                                <DialogTitle>Select from the  Options</DialogTitle>
+                                <DialogActions>
+                                    <Button onClick={() => handleButtonClick('owner')} color="primary">
+                                        For Owner
+                                    </Button>
+                                    <Button onClick={() => handleButtonClick('lessee')} color="primary">
+                                        For Lessee
+                                    </Button>
+                                    <Button onClick={() => handleButtonClick('combined')} color="primary">
+                                        Combined
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                         </div>
                         {/*End Side menu*/}
                         <div className=" w-full">
@@ -949,12 +1034,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>Arrival Date</p>
                                                 <span className="w-full items-start align-top">
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.arrival_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.arrival_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.arrival_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.arrival_date) : null}
                                                       onChange={
                                                           newDate => handleArrivalDate(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -964,12 +1050,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Inspection Date</p>
                                                 <span>
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.inspected_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.inspected_date) : null}
                                                       onChange={
                                                           newDate => handleInspectionDate(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -979,13 +1066,14 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Clean Date</p>
                                                 <span>
                                               <DatePicker
-                                                  customInput={<CustomDateInput
+                                                  customInput={<CustomDateInputFullWidth
                                                       value={workOrder.clean_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.clean_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.clean_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.clean_date) : null}
                                                   onChange={
                                                       newDate => handleCleanDate(newDate)
                                                   }
                                                   disabled={workOrder.finalized > 0}
+                                                  isClearable
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -995,12 +1083,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>Valve tear down </p>
                                                 <span>
                                                       <DatePicker
-                                                          customInput={<CustomDateInput
+                                                          customInput={<CustomDateInputFullWidth
                                                               value={workOrder.valve_tear_down !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_tear_down).toLocaleDateString() : null}/>}
                                                           selected={workOrder.valve_tear_down !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_tear_down) : null}
                                                           onChange={
                                                               newDate => handleValveTearDownDate(newDate)
                                                           }
+                                                          isClearable
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1010,12 +1099,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Repair Scheduled </p>
                                                 <span>
                                               <DatePicker
-                                                  customInput={<CustomDateInput
+                                                  customInput={<CustomDateInputFullWidth
                                                       value={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.repair_schedule_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.repair_schedule_date) : null}
                                                   onChange={
                                                       newDate => handleRepairScheduleDate(newDate)
                                                   }
+                                                  isClearable
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1028,12 +1118,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>Valve assembly </p>
                                                 <span>
                                                       <DatePicker
-                                                          customInput={<CustomDateInput
+                                                          customInput={<CustomDateInputFullWidth
                                                               value={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.valve_date) : null}
                                                           onChange={
                                                               newDate => handleValveAssemblyDate(newDate)
                                                           }
+                                                          isClearable
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1043,12 +1134,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>Interior Paint </p>
                                                 <span>
                                                       <DatePicker
-                                                          customInput={<CustomDateInput
+                                                          customInput={<CustomDateInputFullWidth
                                                               value={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date).toLocaleDateString() : null}/>}
                                                           selected={workOrder.paint_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.paint_date) : null}
                                                           onChange={
                                                               newDate => handlePaintDate(newDate)
                                                           }
+                                                          isClearable
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1058,12 +1150,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>Exterior paint </p>
                                                 <span>
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.exterior_paint !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.exterior_paint).toLocaleDateString() : null}/>}
                                                       selected={workOrder.exterior_paint !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.exterior_paint) : null}
                                                       onChange={
                                                           newDate => handleExteriorPaintDate(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1073,12 +1166,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>PD date</p>
                                                 <span>
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.pd_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.pd_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.pd_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.pd_date) : null}
                                                       onChange={
                                                           newDate => handlePDDate(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1088,12 +1182,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Final Date</p>
                                                 <span>
                                               <DatePicker
-                                                  customInput={<CustomDateInput
+                                                  customInput={<CustomDateInputFullWidth
                                                       value={workOrder.final_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.final_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.final_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.final_date) : null}
                                                   onChange={
                                                       newDate => handleFinalDate(newDate)
                                                   }
+                                                  isClearable
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1103,12 +1198,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal'>QA Date</p>
                                                 <span>
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date).toLocaleDateString() : null}/>}
                                                       selected={workOrder.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.qa_date) : null}
                                                       onChange={
                                                           newDate => handleQADate(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1118,12 +1214,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>POD</p>
                                                 <span>
                                               <DatePicker
-                                                  customInput={<CustomDateInput
+                                                  customInput={<CustomDateInputFullWidth
                                                       value={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date).toLocaleDateString() : null}/>}
                                                   selected={workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.projected_out_date) : null}
                                                   onChange={
                                                       newDate => handlePOD(newDate)
                                                   }
+                                                  isClearable
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1133,12 +1230,13 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>MTI</p>
                                                 <span>
                                                   <DatePicker
-                                                      customInput={<CustomDateInput
+                                                      customInput={<CustomDateInputFullWidth
                                                           value={workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.month_to_invoice).toLocaleDateString() : null}/>}
                                                       selected={workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? new Date(workOrder.month_to_invoice) : null}
                                                       onChange={
                                                           newDate => handleMTI(newDate)
                                                       }
+                                                      isClearable
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1159,7 +1257,7 @@ const OrderDetails = ({
                                                 <span>
                                               <DatePicker
                                                   customInput={
-                                                      <CustomDateInput
+                                                      <CustomDateInputFullWidth
                                                           value={
                                                               workOrder.repair_date !== process.env.REACT_APP_DEFAULT_DATE
                                                                   ? new Date(workOrder.repair_date).toLocaleDateString()
@@ -1172,6 +1270,7 @@ const OrderDetails = ({
                                                           ? new Date(workOrder.repair_date)
                                                           : null
                                                   }
+                                                  isClearable
                                                   onChange={newDate => handleRepairDate(newDate)}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
@@ -1906,6 +2005,8 @@ const OrderDetails = ({
                     </Modal>
                 </div>
             </dialog>
+
+
         </div>
     );
 

@@ -8,13 +8,103 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import CustomDateInput from './CustomDateInput'; // Assuming you have this component
+import CustomDateInput from "./CustomDateInput";
 
 const API_BASE_URL = process.env.REACT_APP_BIRCH_API_URL;
 
+const EntryRow = ({ entry, onChange, onDelete }) => {
+    if (!entry) {
+        return null; // Handle undefined entry gracefully
+    }
+
+    const handleDateChange = (key, date) => {
+        console.log(key)
+        console.log(date)
+        const updatedEntry = { ...entry, [key]: date };
+        onChange(updatedEntry);
+    };
+
+    const handleCheckboxChange = () => {
+        const updatedEntry = { ...entry, is_billed: !entry.is_billed };
+        onChange(updatedEntry);
+    };
+
+    const calculateDayDifference = () => {
+        if (entry.start_date && entry.end_date) {
+            const diffTime = Math.abs(new Date(entry.end_date) - new Date(entry.start_date));
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+        return '';
+    };
+
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this entry?')) {
+            onDelete(entry.id);
+        }
+    };
+
+    const isDisabled = entry.is_billed;
+
+    return (
+        <tr className="border-b">
+            <td className="p-2">
+                <DatePicker
+                    customInput={
+                        <CustomDateInput
+                            value={entry.start_date ? new Date(entry.start_date).toLocaleDateString() : ''}
+                        />
+                    }
+                    selected={entry.start_date ? new Date(entry.start_date) : null}
+                    onChange={(date) => handleDateChange('start_date', date)}
+                    showYearDropdown
+                    dateFormat="MM-dd-yyyy"
+                    disabled={isDisabled}
+                />
+            </td>
+            <td className="p-2">
+                <DatePicker
+                    customInput={
+                        <CustomDateInput
+                            value={entry.end_date ? new Date(entry.end_date).toLocaleDateString() : ''}
+                        />
+                    }
+                    selected={entry.end_date ? new Date(entry.end_date) : null}
+                    onChange={(date) => handleDateChange('end_date', date)}
+                    selectsEnd
+                    startDate={entry.start_date ? new Date(entry.start_date) : null}
+                    endDate={entry.end_date ? new Date(entry.end_date) : null}
+                    minDate={entry.start_date ? new Date(entry.start_date) : null}
+                    showYearDropdown
+                    dateFormat="MM-dd-yyyy"
+                    className="w-full"
+                    disabled={isDisabled}
+                />
+            </td>
+            <td className="p-2 text-center">
+                {calculateDayDifference()}
+            </td>
+            <td className="p-2 text-center">
+                <input
+                    type="checkbox"
+                    checked={entry.is_billed}
+                    onChange={handleCheckboxChange}
+                />
+            </td>
+            <td className="p-2 text-center">
+                <button
+                    onClick={handleDelete}
+                    className={`px-2 py-1 bg-red-500 text-white rounded shadow ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isDisabled}
+                >
+                    Delete
+                </button>
+            </td>
+        </tr>
+    );
+};
+
 const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     const [entries, setEntries] = useState([]);
-    const [newEntryIds, setNewEntryIds] = useState(new Set());
 
     useEffect(() => {
         const mappedEntries = initialEntries.map((entry) => ({
@@ -26,32 +116,10 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
         setEntries(mappedEntries);
     }, [initialEntries]);
 
-    useEffect(() => {
-        const newEntries = entries.filter(entry => !entry.id && entry.start_date);
-
-        newEntries.forEach(async (entry) => {
-            // Check if the entry is already in the newEntryIds set
-            if (!newEntryIds.has(entry.id)) {
-                try {
-                    const result = await callWebService('create_storage_info/', 'POST', {
-                        ...entry,
-                        railcar_id,
-                        work_order
-                    });
-                    if (result.id) {
-                        // Add the new entry ID to the set to avoid re-creation
-                        setNewEntryIds(prev => new Set(prev).add(result.id));
-                        // Update the entry with the server-generated ID
-                        setEntries(entries.map(e => e === entry ? { ...entry, id: result.id } : e));
-                    }
-                } catch (error) {
-                    console.error('Error creating entry:', error);
-                }
-            }
-        });
-    }, [entries, railcar_id, work_order, newEntryIds]);
-
     const callWebService = async (url, method, body) => {
+        console.log(`Calling ${method} ${API_BASE_URL}${url}`);
+        console.log('Request Body:', body);
+
         try {
             const response = await fetch(`${API_BASE_URL}${url}`, {
                 method: method,
@@ -59,22 +127,23 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                 body: JSON.stringify(body),
             });
 
+            console.log('Response Status:', response.status);
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
+            console.log('Response Data:', result);
             return result;
         } catch (error) {
             console.error('Error calling web service:', error);
         }
     };
 
-    const addNewEntry = () => {
-        // Create a new entry with an empty ID to denote it's new
+    const addNewEntry = async () => {
         const newEntry = {
-            id: null,
             start_date: null,
             end_date: null,
             is_billed: false,
@@ -91,11 +160,7 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                 return;
             }
         }
-
-        // Update entry in state
         setEntries(entries.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry));
-
-        // Update entry on the server if it already exists
         if (updatedEntry.id) {
             await callWebService('update_storage_info/', 'POST', updatedEntry);
         }
@@ -108,88 +173,18 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
         }
     };
 
-    const EntryRow = ({ entry }) => {
-        if (!entry) {
-            return null; // Handle undefined entry gracefully
-        }
-
-        const handleDateChange = (key, date) => {
-            const updatedEntry = { ...entry, [key]: date };
-            updateEntry(updatedEntry);
-        };
-
-        const handleCheckboxChange = () => {
-            const updatedEntry = { ...entry, is_billed: !entry.is_billed };
-            updateEntry(updatedEntry);
-        };
-
-        const calculateDayDifference = () => {
-            if (entry.start_date && entry.end_date) {
-                const diffTime = Math.abs(new Date(entry.end_date) - new Date(entry.start_date));
-                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    useEffect(() => {
+        const newEntries = entries.filter(entry => !entry.id);
+        newEntries.forEach(async (entry) => {
+            if (entry.start_date) {
+                await callWebService('create_storage_info/', 'POST', {
+                    ...entry,
+                    railcar_id,
+                    work_order
+                });
             }
-            return '';
-        };
-
-        const isDisabled = entry.is_billed;
-
-        return (
-            <tr className="border-b">
-                <td className="p-2">
-                    <DatePicker
-                        customInput={
-                            <CustomDateInput
-                                value={entry.start_date ? new Date(entry.start_date).toLocaleDateString() : ''}
-                            />
-                        }
-                        selected={entry.start_date ? new Date(entry.start_date) : null}
-                        onChange={(date) => handleDateChange('start_date', date)}
-                        showYearDropdown
-                        dateFormat="MM-dd-yyyy"
-                        disabled={isDisabled}
-                    />
-                </td>
-                <td className="p-2">
-                    <DatePicker
-                        customInput={
-                            <CustomDateInput
-                                value={entry.end_date ? new Date(entry.end_date).toLocaleDateString() : ''}
-                            />
-                        }
-                        selected={entry.end_date ? new Date(entry.end_date) : null}
-                        onChange={(date) => handleDateChange('end_date', date)}
-                        selectsEnd
-                        startDate={entry.start_date ? new Date(entry.start_date) : null}
-                        endDate={entry.end_date ? new Date(entry.end_date) : null}
-                        minDate={entry.start_date ? new Date(entry.start_date) : null}
-                        showYearDropdown
-                        dateFormat="MM-dd-yyyy"
-                        className="w-full"
-                        disabled={isDisabled}
-                    />
-                </td>
-                <td className="p-2 text-center">
-                    {calculateDayDifference()}
-                </td>
-                <td className="p-2 text-center">
-                    <input
-                        type="checkbox"
-                        checked={entry.is_billed}
-                        onChange={handleCheckboxChange}
-                    />
-                </td>
-                <td className="p-2 text-center">
-                    <button
-                        onClick={() => deleteEntry(entry.id)}
-                        className={`px-2 py-1 bg-red-500 text-white rounded shadow ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={isDisabled}
-                    >
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        );
-    };
+        });
+    }, [entries, railcar_id, work_order]);
 
     return (
         <div>
@@ -209,7 +204,7 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                     </thead>
                     <tbody>
                     {entries.map(entry => (
-                        <EntryRow key={entry.id || Math.random()} entry={entry} />
+                        <EntryRow key={entry.id || Math.random()} entry={entry} onChange={updateEntry} onDelete={deleteEntry} />
                     ))}
                     </tbody>
                 </table>
@@ -224,8 +219,8 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                 </div>
             </div>
         </div>
+
     );
 };
 
 export default StorageComponent;
-

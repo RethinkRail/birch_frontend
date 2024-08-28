@@ -87,14 +87,16 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         {
             name: 'TEAM MEMBER COMPLETION TIME',
             cell: row => (
-                <DatePicker
-                    selected={datePickers.crewChecked[row.job_id]}
-                    onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
-                    placeholderText="Select date"
-                    dateFormat="MM-dd-yyyy"
-                    isClearable
-                    disabled={isDatePickerDisabled}
-                />
+                <span className="w-full items-start align-top">
+                    <DatePicker
+                        selected={datePickers.crewChecked[row.job_id]}
+                        onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
+                        placeholderText="Select date"
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        disabled={isDatePickerDisabled}
+                    />
+                </span>
             ),
             width: "10%",
         },

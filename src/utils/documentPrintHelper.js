@@ -4,7 +4,37 @@
  * @created : 8/2/2024, Friday
  * Description:
  **/
+import {addDays, convertSqlWithTZToFormattedDate} from "./DateTimeHelper";
 
+const getUniqueParts = (jobs) => {
+    const partsMap = new Map();
+
+    jobs.forEach(job => {
+        job.jobparts.forEach(part => {
+
+            const { code, title, price,part_condition } = part.parts;
+            const { quantity, purchase_cost, availability } = part;
+
+            if (partsMap.has(code)) {
+                const existingPart = partsMap.get(code);
+                existingPart.quantity += quantity;
+
+            } else {
+                partsMap.set(code, {
+                    code,
+                    title,
+                    purchase_cost,
+                    price,
+                    quantity,
+                    part_condition,
+                    availability
+                });
+            }
+        });
+    });
+
+    return Array.from(partsMap.values());
+};
 const json_item = {
     "id": 1484,
     "work_order": "WO_01432",
@@ -645,16 +675,16 @@ const parts_for_bill = [
     }
 ]
 
-export function printATask(joke) {
+export function printATask(workOrder) {
     console.log("Print a task called")
     var p = 0.7;
-    var my_new_order = json_item;
-    var rfid = my_new_order.railcar.rfid;
-    var car_type = my_new_order.railcar.car_type.short_name + " : " + my_new_order.railcar.car_type.name;
-    var w_order = my_new_order.work_order;
-    var owner = my_new_order.railcar.owner.name;
-    var lessee = my_new_order.railcar.lessee.name;
-    var arr_date = dateToString(my_new_order.arrival_date);
+    //var my_new_order = json_item;
+    var rfid = workOrder.railcar_id;
+    var car_type = workOrder.railcar.railcartype.short_name + " : " + workOrder.railcar.railcartype.name;
+    var w_order = workOrder.work_order;
+    var owner = workOrder.railcar.owner_railcar_owner_idToowner.name;
+    var lessee = workOrder.railcar.owner_railcar_lessee_idToowner.name;
+    var arr_date = convertSqlWithTZToFormattedDate(workOrder.arrival_date);
 
     var totalhours = 0;
     var task_table = '<table class="mytable forjobs">';
@@ -664,27 +694,27 @@ export function printATask(joke) {
         "</td><td style='width: 80px; text-align: center';'>" + inital_cols.join("</td><td style='width: 80px; text-align: center'>") +
         "</td></tr>";
     task_table += n_row;
-    my_new_order.joblist.forEach((myjob, i) => {
+    workOrder.joblist.forEach((myjob, i) => {
         console.log(myjob)
-        var tech_date = myjob.crew_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.crew_checked_time).split(" ")[0];
-        var qa_date = myjob.qa_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.qa_checked_time).split(" ")[0];
-        var manager_checked_time = myjob.manager_checked_time == null ? "" : UTCtoLocaleDateTime(myjob.manager_checked_time).split(" ")[0];
+        var tech_date = myjob.crew_checked_time == null ? "" : convertSqlWithTZToFormattedDate(myjob.crew_checked_time);
+        var qa_date = myjob.qa_checked_time == null ? "" : convertSqlWithTZToFormattedDate(myjob.qa_checked_time);
+        var manager_checked_time = myjob.manager_checked_time == null ? "" : convertSqlWithTZToFormattedDate(myjob.manager_checked_time);
 
 
-        var hour = p * parseFloat(myjob.qty) * parseFloat(myjob.labor_time);
-        var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.ln + "</td><td style='width: 20px'>" + myjob.loc.code + "</td>";
-        row_html += "<td>" + myjob.des + "</td>";
-        row_html += "<td>" + myjob.qty + "</td>";
-        row_html += "<td>" + ('0' + myjob.wmc.code).slice(-2) + "</td>";
+        var hour = p * parseFloat(myjob.quantity) * parseFloat(myjob.labor_time);
+        var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.line_number + "</td><td style='width: 20px'>" + myjob.locationcode.code + "</td>";
+        row_html += "<td>" + myjob.job_description + "</td>";
+        row_html += "<td>" + myjob.quantity + "</td>";
+        row_html += "<td>" + ('0' + myjob.whymadecode.code) + "</td>";
         row_html += "<td>" + hour.toFixed(2) + "</td>";
-        row_html += "<td>" + tech_date + "</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId() + "</td><td style='font-size: 10px;font-weight: bold'>" + getInitialsByNameId() + '<br>' + manager_checked_time + "   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId() + '<br>' + qa_date + "</td><tr>";
+        row_html += "<td>" + tech_date + "</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.crews?.name) + "</td><td style='font-size: 10px;font-weight: bold'>" + getInitialsByNameId(myjob.user_joblist_manager_checked_byTouser?.name) + '<br>' + manager_checked_time + "   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.user_joblist_qa_checked_byTouser?.name) + '<br>' + qa_date + "</td><tr>";
         row_html += "<tr><td style='border:0'></td><td style='border:0'>Qty</td><td style='border:0;padding-left: 10px'>Part #</td>";
-        myjob.parts.forEach((part_item, p_i) => {
+        myjob.jobparts.forEach((part_item, p_i) => {
             var additional_info = part_item.additional_info ? ":" + part_item.additional_info : ""
             row_html += `<tr>
                             <td style='border:0'></td>
                             <td style='border:0'>${round2Dec(part_item.quantity)}</td>
-                            <td style='border:0;padding-left: 10px'><strong>${part_item.code}</strong>: ${part_item.name}${additional_info}</td>
+                            <td style='border:0;padding-left: 10px'><strong>${part_item.parts.code}</strong>: ${part_item.parts.title}${additional_info}</td>
                          </tr>`
         });
         row_html += "<tr></tr>";
@@ -710,30 +740,33 @@ export function printATask(joke) {
         '</td></tr>' +
         '<tr>' + task_table + '</tr></table>';
 
-    var tbl_title = "Workorder for " + my_new_order.railcar.rfid;
-    var tbl_name = "WO - " + my_new_order.railcar.rfid + "[" + my_new_order.work_order + "].pdf";
+    var tbl_title = "Workorder for " + workOrder.railcar_id;
+    var tbl_name = "WO - " +workOrder.railcar_id+ "[" + w_order + "].pdf";
     saveDivII(woTable, tbl_title, tbl_name, true);
 }
 
-export function printBRC() {
+/**
+ *  This method will generate BRC
+ * @param workOrder  the work order
+ * @param forWhom 1 - combined , 2 for owner , 3 lessee
+ */
+export function printBRC(workOrder,forWhom) {
     console.log("Print BRC Clicked")
-    var my_new_order = json_item;
+    //var my_new_order = json_item;
+    var yard = workOrder.yard.name + " - " + workOrder.yard.address;
+    var rfid = workOrder.railcar_id;
+    var car_type = workOrder.railcar.railcartype.short_name + " : " + workOrder.railcar.railcartype.name;
+    var w_order = workOrder.work_order;
+    var owner = workOrder.railcar.owner_railcar_owner_idToowner.name;
+    var lessee = workOrder.railcar.owner_railcar_lessee_idToowner.name;
+    var arr_date = convertSqlWithTZToFormattedDate(workOrder.arrival_date);
 
-    var rfid = my_new_order.railcar.rfid;
-    var yard = my_new_order.spot.track.yard.name + " - " + my_new_order.spot.track.yard.address;
 
-    var car_type = my_new_order.railcar.car_type.short_name + " : " + my_new_order.railcar.car_type.name;
-
-    var w_order = my_new_order.work_order;
-    var owner = my_new_order.railcar.owner.name;
-    var lessee = my_new_order.railcar.lessee.name;
-
-    var splc = my_new_order.spot.track.yard.splc;
-    var arr_date = dateToString(my_new_order.arrival_date);
-    var rep_date = dateToString(my_new_order.repair_date);
+    var splc = workOrder.yard.splc;
+    var rep_date = convertSqlWithTZToFormattedDate(workOrder.repair_date);
     var app_by = "";
-    var facility_type = my_new_order.spot.track.yard.facility_type;
-    var detail_source = my_new_order.spot.track.yard.detail_source;
+    var facility_type = workOrder.yard.facility_type;
+    var detail_source = workOrder.yard.detail_source;
     var sTable = '<table class="mytable"><tr>' +
         '<td>Work Order:    ' +
         w_order +
@@ -783,40 +816,113 @@ export function printBRC() {
     var netCost = 0.0;
     var laborCost = 0.0;
     var materialCost = 0.0;
-    my_new_order.joblist.forEach((myjob, i) => {
+    workOrder.joblist.forEach((myjob, i) => {
 
-        var aq = myjob.aq.hasOwnProperty('code') ? myjob.aq.code : "";
-        var rq = myjob.rq.hasOwnProperty('code') ? myjob.rq.code : "";
-        aq = aq == null ? "" : aq;
-        rq = rq == null ? "" : rq;
-        var row_html = "<tr><td>" + myjob.ln + "</td>";
-        row_html += "<td>" + myjob.loc.code + "</td>";
-        row_html += "<td>" + myjob.qty + "</td>";
-        row_html += "<td>" + myjob.cc.code + "</td>";
-        row_html += "<td>" + myjob.jc.code + "</td>";
-        row_html += "<td>" + aq + "</td>";
-        row_html += "<td>" + myjob.des + "</td>";
-        row_html += "<td class='no-print'>" + myjob.jc.revenue_category_primary + "</td>";
-        row_html += "<td>" + ('0' + myjob.wmc.code).slice(-2) + "</td>";
-        row_html += "<td>" + myjob.jcr.code + "</td>";
-        row_html += "<td>" + rq + "</td>";
-        row_html += "<td>" + myjob.rc.code + "</td>";
-        row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+        if(forWhom==3){
+            if(myjob.secondary_bill_to_id != null){
+                var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
+                var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
+                aq = aq == null ? "" : aq;
+                rq = rq == null ? "" : rq;
+                var row_html = "<tr><td>" + myjob.line_number + "</td>";
+                row_html += "<td>" + myjob.locationcode.code + "</td>";
+                row_html += "<td>" + myjob.quantity + "</td>";
+                row_html += "<td>" + myjob.conditioncode.code + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
+                row_html += "<td>" + aq + "</td>";
+                row_html += "<td>" + myjob.job_description + "</td>";
+                row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
+                row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
+                row_html += "<td>" + rq + "</td>";
+                row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
+                row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
 
-        //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
-        var mat_cost_single_job = 0.0;
-        myjob.parts.forEach(function (part) {
-            var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
-            mat_cost_single_job += Number(round2Dec(single_part_cost))
-        });
+                //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
+                var mat_cost_single_job = 0.0;
+                myjob.jobparts.forEach(function (part) {
+                    var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                    mat_cost_single_job += Number(round2Dec(single_part_cost))
+                });
 
-        row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
-        row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
-        netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
-        laborCost += myjob.labor_cost
-        //var rounded_mat_cost = round2Dec(mat_cost_single_job)
-        materialCost += Number(mat_cost_single_job)
-        job_table += row_html;
+                row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
+                row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
+                netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
+                laborCost += myjob.labor_cost
+                //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+                materialCost += Number(mat_cost_single_job)
+                job_table += row_html;
+            }
+        }else if (forWhom==2){
+            if(myjob.secondary_bill_to_id == null){
+                var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
+                var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
+                aq = aq == null ? "" : aq;
+                rq = rq == null ? "" : rq;
+                var row_html = "<tr><td>" + myjob.line_number + "</td>";
+                row_html += "<td>" + myjob.locationcode.code + "</td>";
+                row_html += "<td>" + myjob.quantity + "</td>";
+                row_html += "<td>" + myjob.conditioncode.code + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
+                row_html += "<td>" + aq + "</td>";
+                row_html += "<td>" + myjob.job_description + "</td>";
+                row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
+                row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
+                row_html += "<td>" + rq + "</td>";
+                row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
+                row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+
+                //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
+                var mat_cost_single_job = 0.0;
+                myjob.jobparts.forEach(function (part) {
+                    var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                    mat_cost_single_job += Number(round2Dec(single_part_cost))
+                });
+
+                row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
+                row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
+                netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
+                laborCost += myjob.labor_cost
+                //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+                materialCost += Number(mat_cost_single_job)
+                job_table += row_html;
+            }
+        }else {
+            var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
+            var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
+            aq = aq == null ? "" : aq;
+            rq = rq == null ? "" : rq;
+            var row_html = "<tr><td>" + myjob.line_number + "</td>";
+            row_html += "<td>" + myjob.locationcode.code + "</td>";
+            row_html += "<td>" + myjob.quantity + "</td>";
+            row_html += "<td>" + myjob.conditioncode.code + "</td>";
+            row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
+            row_html += "<td>" + aq + "</td>";
+            row_html += "<td>" + myjob.job_description + "</td>";
+            row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
+            row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
+            row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
+            row_html += "<td>" + rq + "</td>";
+            row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
+            row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+
+            //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
+            var mat_cost_single_job = 0.0;
+            myjob.jobparts.forEach(function (part) {
+                var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                mat_cost_single_job += Number(round2Dec(single_part_cost))
+            });
+
+            row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
+            row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
+            netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
+            laborCost += myjob.labor_cost
+            //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+            materialCost += Number(mat_cost_single_job)
+            job_table += row_html;
+        }
+
 
     });
     var total_labor_cost = round2Dec(laborCost);
@@ -839,55 +945,134 @@ export function printBRC() {
         '</table></tr>' +
         '</table>';
 
-    var tbl_title = "Estimate report for " + my_new_order.railcar.rfid;
-    var tbl_name = "BRC - " + my_new_order.railcar.rfid + "[" + my_new_order.work_order + "].pdf";
+    var tbl_title = "Estimate report for " + workOrder.railcar_id;
+    var tbl_name = "BRC - " + workOrder.railcar_id + "[" + workOrder.work_order + "].pdf";
     saveDivII(sTable, tbl_title, tbl_name, true);
 }
 
+/**
+ *  This method will generate invoice
+ * @param item  the work order
+ * @param forWhom 1 - combined , 2 for owner , 3 lessee
+ */
 export function printInvoice(workorder, forWhom) {
 
-    console.log("Print invoice clicked")
+    console.log("Print invoice clicked" + forWhom)
 
-    var my_new_order = json_item;
-    var revenuewMap = new Map();
+    //var my_new_order = json_item;
+    let revenuewMap = new Map();
+    let labor_cost= 0
+    let material_cost= 0
+    let net_cost= 0
+    let total_hour= 0
+    workorder.joblist.forEach((job)=>{
+        if(forWhom ==3){
+            if(job.secondary_bill_to_id != null){
+                labor_cost+= job.labor_cost;
+                material_cost+= job.material_cost;
+                net_cost+= (labor_cost+material_cost)
+                total_hour+= job.labor_time
+            }
+        }else if(forWhom==2){
+            if(job.secondary_bill_to_id == null){
+                labor_cost+= job.labor_cost;
+                material_cost+= job.material_cost;
+                net_cost+= (labor_cost+material_cost)
+                total_hour+= job.labor_time
+            }
+        }else {
+            labor_cost+= job.labor_cost;
+            material_cost+= job.material_cost;
+            net_cost+= (labor_cost+material_cost)
+            total_hour+= job.labor_time
+        }
+
+    })
     var costs = {
-        "labor_cost": 135,
-        "material_cost": 3511,
-        "net_cost": 3646,
-        "total_hour": 3
+        "labor_cost": labor_cost,
+        "material_cost": material_cost,
+        "net_cost": net_cost,
+        "total_hour": total_hour
     };
     console.log(costs)
 
     var total_labor_cost = costs.labor_cost;
     var total_material_cost = costs.material_cost;
     var total_net_cost = costs.net_cost;
-    var rfid = my_new_order.railcar.rfid;
-    var yard_address;
-    var yard = my_new_order.spot.track.yard.name;
+    var rfid = workorder.railcar_id;
+    var yard_billing_address;
+    var yard = workorder.yard;
+    var yard_name = workorder.yard.name;
     if (yard != null) {
-        yard_address = my_new_order.spot.track.yard.address;
-        yard_address = yard_address.replace('.', '\n');
+        yard_billing_address = yard.billing_address;
+        yard_billing_address = yard_billing_address.replace('.', '\n');
     } else {
-        yard_address = "IRON HORSE RAIL SERVICES"
+        yard_billing_address = ""
+    }
+    let purchase_order
+    let owner_obj
+    let yardAddress = workorder.yard.address
+    let  net_days
+    let due_date
+    let inv_date
+    let invoice_number
+    if(forWhom==3){
+        purchase_order =workorder.secondary_owner_info.purchase_order
+        owner_obj = [{
+            name:workorder.railcar.owner_railcar_lessee_idToowner.name,
+            contact_name:workorder.railcar.owner_railcar_lessee_idToowner.contact_name,
+            address_line1: workorder.railcar.owner_railcar_lessee_idToowner.address_line1,
+            address_line2: workorder.railcar.owner_railcar_lessee_idToowner.address_line2,
+            city: workorder.railcar.owner_railcar_lessee_idToowner.city,
+            state: workorder.railcar.owner_railcar_lessee_idToowner.state,
+            zip_code: workorder.railcar.owner_railcar_lessee_idToowner.zip_code
+        }]
+        invoice_number= workorder.secondary_owner_info.invoice_number
+        inv_date= workorder.secondary_owner_info.invoice_date != null ?convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date ):""
+        //ownerName=workorder.railcar.owner_railcar_lessee_idToowner.name
+        net_days = workorder.secondary_owner_info.invoice_net_days
+        due_date = workorder.secondary_owner_info.invoice_date != null ?  convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date,net_days):""
+    }else {
+
+        purchase_order = workorder.purchase_order
+        owner_obj = [{
+            name:workorder.railcar.owner_railcar_owner_idToowner.name,
+            contact_name:workorder.railcar.owner_railcar_owner_idToowner.contact_name,
+            address_line1: workorder.railcar.owner_railcar_owner_idToowner.address_line1,
+            address_line2: workorder.railcar.owner_railcar_owner_idToowner.address_line2,
+            city: workorder.railcar.owner_railcar_owner_idToowner.city,
+            state: workorder.railcar.owner_railcar_owner_idToowner.state,
+            zip_code: workorder.railcar.owner_railcar_owner_idToowner.zip_code
+        }]
+        invoice_number= workorder.invoice_number
+        inv_date= workorder.invoice_date != process.env.REACT_APP_DEFAULT_DATE ?convertSqlWithTZToFormattedDate(workorder.invoice_date ):""
+
+        //ownerName=workorder.railcar.owner_railcar_owner_idToowner.name
+        net_days = workorder.invoice_net_days
+        console.log(workorder.invoice_date)
+        console.log(net_days)
+        console.log(addDays(workorder.invoice_date+net_days))
+        console.log(convertSqlWithTZToFormattedDate(workorder.invoice_date))
+        due_date = workorder.invoice_date != process.env.REACT_APP_DEFAULT_DATE  ?  convertSqlWithTZToFormattedDate(workorder.invoice_date,net_days):""
+        console.log(due_date)
     }
 
-    var purchase_order = my_new_order.purchase_order;
-    var car_type = my_new_order.railcar.car_type.short_name + " : " + my_new_order.railcar.car_type.name;
-    var w_order = my_new_order.work_order;
-    var owner = my_new_order.railcar.owner.name;
+    var car_type = workorder.railcar.railcartype.short_name + " : " + workorder.railcar.railcartype.name;
+    var w_order = workorder.work_order;
+    // var ownerName = my_new_order.railcar.owner.name;
     // var owner_obj = $.grep(myyarddata.owners, function (obj) {
     //     return obj.id == my_new_order.railcar.owner.id
     // });
-    var owner_obj = [
-        {
-            contact_name: "Demo Contact Name",
-            address_line1: "Demo Address line1",
-            address_line2: "Owner Address line2",
-            city: "CityA",
-            state: "StateA",
-            zip_code: "ZipCodeA"
-        }
-    ]
+    // var owner_obj = [
+    //     {
+    //         contact_name: "Demo Contact Name",
+    //         address_line1: "Demo Address line1",
+    //         address_line2: "Owner Address line2",
+    //         city: "CityA",
+    //         state: "StateA",
+    //         zip_code: "ZipCodeA"
+    //     }
+    // ]
     var owner_address = '';
     if (owner_obj != null && owner_obj.length > 0) {
         owner_obj = owner_obj[0];
@@ -897,32 +1082,59 @@ export function printInvoice(workorder, forWhom) {
         owner_address += owner_obj.address_line1 + '\n' + owner_obj.address_line2 + '\n';
         owner_address += owner_obj.city + ', ' + owner_obj.state + ' ' + owner_obj.zip_code;
     }
-    var lessee = my_new_order.railcar.lessee.name;
-    var splc = my_new_order.spot.track.yard.splc;
-    var arr_date = dateToString(my_new_order.arrival_date);
-    var rep_date = dateToString(my_new_order.repair_date);
-    var net_days = my_new_order.invoice_net_days;
-    var inv_date = dateToString(my_new_order.invoice_date);
+    var lessee = workorder.railcar.owner_railcar_lessee_idToowner.name
+    var splc = workorder.yard.splc;
+    var arr_date = convertSqlWithTZToFormattedDate(workorder.arrival_date);
+    var rep_date = convertSqlWithTZToFormattedDate(workorder.repair_date);
 
-    var due_date = my_new_order.invoice_date != null ? dateToString(new Date()) : ""; //due date
-    var yard_bank_info = my_new_order.spot.track.yard.billing_address;
 
-    my_new_order.joblist.forEach((job, i) => {
-        if (job.labor_cost > 0) {
-            if (revenuewMap.get(job.jc.revenue_category_primary)) {
-                var new_val = revenuewMap.get(job.jc.revenue_category_primary) + job.labor_cost;
-                revenuewMap.set(job.jc.revenue_category_primary, new_val)
-            } else {
-                revenuewMap.set(job.jc.revenue_category_primary, job.labor_cost)
+
+    let yard_bank_info = workorder.yard.billing_address;
+
+    workorder.joblist.forEach((myjob, i) => {
+
+        if(forWhom==3){
+            if(myjob.secondary_bill_to_id != null){
+                if (myjob.labor_cost > 0) {
+                    if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
+                    } else {
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                    }
+                }
+            }
+        }else if(forWhom ==2){
+            if(myjob.secondary_bill_to_id ==null){
+                if (myjob.labor_cost > 0) {
+                    if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
+                    } else {
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                    }
+                }
+            }
+        }else {
+            if (myjob.labor_cost > 0) {
+                if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
+                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
+                } else {
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                }
             }
         }
+
     })
-    var labor_category = "";
+    console.log(revenuewMap)
+    let labor_category = "";
     for (let [key, value] of revenuewMap) {
         //console.log(key + " = " + value);
         labor_category += key + " - " + value + "( " + ((value * 100) / total_labor_cost).toFixed(2) + "% )<br/>"
     }
 
+    console.log(labor_category)
 
     var showHideDetails = "document.getElementById(\'detailed_table_for_invoice\').style.display = this.checked?'':'none';";
     var showHideCheckbox = '<span class="no-print" style="font: 0.8rem Calibri;color:gray;">' +
@@ -937,15 +1149,38 @@ export function printInvoice(workorder, forWhom) {
     var rate_per_line = 0;
     var total_job_line = 0;
     var all_parts_for_sort = [];
-    my_new_order.joblist.forEach((myjob, i) => {
-        myjob.parts.forEach(function (item) {
-            rate_per_line += myjob.labor_rate;
-            total_job_line++;
-            all_parts_for_sort.push(item)
-        });
+    workorder.joblist.forEach((myjob, i) => {
+        if(forWhom==3){
+            if(myjob.secondary_bill_to_id != null){
+                myjob.jobparts.forEach(function (item) {
+                    rate_per_line += myjob.labor_rate;
+                    total_job_line++;
+                    item.rev_primary = myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
+                    all_parts_for_sort.push(item)
+                });
+            }
+        }else if(forWhom ==2){
+            if(myjob.secondary_bill_to_id ==null){
+                myjob.jobparts.forEach(function (item) {
+                    rate_per_line += myjob.labor_rate;
+                    total_job_line++;
+                    item.rev_primary = myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
+                    all_parts_for_sort.push(item)
+                });
+            }
+        }else {
+            myjob.jobparts.forEach(function (item) {
+                rate_per_line += myjob.labor_rate;
+                total_job_line++;
+                item.rev_primary = myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
+                all_parts_for_sort.push(item)
+            });
+        }
+
     });
+    console.log(all_parts_for_sort)
     console.log(all_parts_for_sort.sort(function (a, b) {
-        return (a.code > b.code) ? 1 : ((b.code > a.code) ? -1 : 0);
+        return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
     //sorting
 
@@ -953,12 +1188,14 @@ export function printInvoice(workorder, forWhom) {
 
     // mat_cost_for_job += Number(round2Dec(single_mat_cost))
 
+    console.log(all_parts_for_sort)
     all_parts_for_sort.forEach(function (item) {
+        console.log(item)
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         total_material_cost += Number(round2Dec(single_mat_cost))
-        detailedTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' +
-            item.name + '</td><td style="text-align: right;">' +
+        detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
+            item.parts.title + '</td><td style="text-align: right;">' +
             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
@@ -1014,7 +1251,7 @@ export function printInvoice(workorder, forWhom) {
 
     var invTable = '<table class="mytable" style="border-collapse: collapse;"><tr>' +
         '<td>' +
-        yard_address.replace('\n', '<br>') +
+        yardAddress +
         '<td style="width:20px;"></td></td><td>' +
         '<table style="float: right; min-width: 200px; width:200px; border-collapse: collapse;">' +
         '<tr><td style="border: 1px solid black;">Date</td>' +
@@ -1022,17 +1259,17 @@ export function printInvoice(workorder, forWhom) {
         '<tr><td style="border: 1px solid black;">' +
         inv_date +
         '</td><td style="border: 1px solid black;">' +
-        my_new_order.invoice_number +
+        invoice_number+
         '</td></tr></table></td></tr>' +
         '<tr><td></td></tr>' +
         '<tr><td style="border: 1px solid black;">Bill To:</td><td></td>' +
         '<td style="border: 1px solid black;">Remit Payment To:</td>' +
         '</tr><tr><td style="border: 1px solid black;">' +
         '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
-        owner + '\n' + owner_address + '</textarea>' +
+        owner_obj.name + '\n' + owner_address + '</textarea>' +
         '</td><td></td><td style="border: 1px solid black;">' +
         '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
-        yard + '\n' + yard_address + '\n\n' + yard_bank_info + ' </textarea>' +
+        yard_name + '\n' + yardAddress + '\n\n' + yard_bank_info + ' </textarea>' +
         '</td></tr>' +
         '<tr><td></td></tr>' +
         '<tr><table style="border-collapse: collapse; min-width:100px;">' +
@@ -1055,7 +1292,7 @@ export function printInvoice(workorder, forWhom) {
 
     var invTableWithPurchase = '<table class="mytable" style="border-collapse: collapse;"><tr>' +
         '<td>' +
-        yard_address.replace('\n', '<br>') +
+        yardAddress+
         '<td style="width:20px;"></td></td><td>' +
         '<table style="float: right; min-width: 300px; width:300px; border-collapse: collapse;">' +
         '<tr><td style="border: 1px solid black;">Date</td>' +
@@ -1063,17 +1300,17 @@ export function printInvoice(workorder, forWhom) {
         '<tr><td style="border: 1px solid black;">' +
         inv_date +
         '</td><td style="border: 1px solid black;">' +
-        my_new_order.invoice_number +
+        invoice_number +
         '</td><td style="border: 1px solid black;">' + purchase_order + '</tr></table></td></tr>' +
         '<tr><td></td></tr>' +
         '<tr><td style="border: 1px solid black;">Bill To:</td><td></td>' +
         '<td style="border: 1px solid black;">Remit Payment To:</td>' +
         '</tr><tr><td style="border: 1px solid black;">' +
         '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
-        owner + '\n' + owner_address + '</textarea>' +
+        owner_obj.name + '\n' + owner_address + '</textarea>' +
         '</td><td></td><td style="border: 1px solid black;">' +
         '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
-        yard + '\n' + yard_address + '\n\n' + yard_bank_info + ' </textarea>' +
+        yard_name + '\n' + yard_billing_address + '\n\n' + yard_bank_info + ' </textarea>' +
         '</td></tr>' +
         '<tr><td></td></tr>' +
         '<tr><table style="border-collapse: collapse; min-width:100px;">' +
@@ -1095,8 +1332,8 @@ export function printInvoice(workorder, forWhom) {
         '</table>';
 
 
-    var tbl_title = "Invoice " + my_new_order.invoice_number;
-    var tbl_name = "Invoice " + my_new_order.invoice_number + ".pdf";
+    var tbl_title = "Invoice " + invoice_number;
+    var tbl_name = "Invoice " + invoice_number+ ".pdf";
     if (purchase_order == null || purchase_order === "") {
         saveDivII(invTable, tbl_title, tbl_name, true);
     } else {
@@ -1105,14 +1342,18 @@ export function printInvoice(workorder, forWhom) {
 }
 
 
-export function printBBOM() {
+export function printBBOM(workOrder) {
 
+    console.log(workOrder)
+
+    const parts_for_bill = getUniqueParts(workOrder.joblist)
+    console.log(parts_for_bill)
     // var parts_for_bill = parts_for_bill;
 
     var bomTable = '<table class="mytable forjobs"><thead><tr style="background: lightgray;"><td>Code</td><td>Title</td><td>Quantity</td><td>Condition</td><td>Availability</td><td>Additional Info</td></tr></thead><tbody>';
     parts_for_bill.forEach((item, i) => {
         var additional_info= item.additional_info?item.additional_info:""
-        bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.name + '</td><td>' + round2Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
+        bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.title + '</td><td>' + round2Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
     });
     bomTable += '</tbody></table>';
 
@@ -1202,6 +1443,16 @@ function dateToString(lols) {
     return "August 4 2024"
 }
 
-function getInitialsByNameId() {
-    return "AZ"
+function getInitialsByNameId(name) {
+    if (!name) return '';
+
+    // // Split the name by space and filter out empty strings
+    // const nameParts = name.trim().split(' ').filter(part => part !== '');
+    //
+    // // Extract the first letter of each part and convert it to uppercase
+    // const initials = nameParts.map(part => part.charAt(0).toUpperCase());
+    //
+    // // Join the initials and return as a string
+    // return initials.join('');
+    return name
 }

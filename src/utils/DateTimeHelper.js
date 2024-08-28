@@ -30,6 +30,7 @@ export function differenceBetweenTwoTimeStamp(latestTimeStamp, earlierTimeStamp)
  * @returns {string}
  */
 export function convertSqlToFormattedDate(sqlDateTime) {
+    console.log(sqlDateTime)
     const sqlDate = new Date(sqlDateTime);
     const localDateString = format(sqlDate, 'yyyy-MM-dd HH:mm:ss', {timeZone: 'America/Chicago'});
     const localDateTime = new Date(localDateString)
@@ -39,6 +40,26 @@ export function convertSqlToFormattedDate(sqlDateTime) {
     var year = localDateTime.getFullYear();
     // Formatted date with two-digit month and day
     var formattedDate = month + '-' + day + '-' + year;
+    return formattedDate;
+}
+
+
+export function convertSqlWithTZToFormattedDate(sqlDateTime, daysToAdd = 0) {
+    const sqlDate = new Date(sqlDateTime);
+
+    // Add the specified number of days
+    sqlDate.setDate(sqlDate.getDate() + daysToAdd);
+
+    // Convert the date to the desired time zone (America/Chicago)
+    const options = { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' };
+    const localDateString = sqlDate.toLocaleDateString('en-US', options);
+
+    // The date will be in the format "MM/DD/YYYY"
+    const [month, day, year] = localDateString.split('/');
+
+    // Reformat the date to "MM-DD-YYYY"
+    const formattedDate = `${month}-${day}-${year}`;
+
     return formattedDate;
 }
 
@@ -92,7 +113,7 @@ export function addDays(sqlDateTime, daysToAdd) {
     // Formatted date with two-digit month and day
     var formattedDate = month + '-' + day + '-' + year + ' ' + hour + ':' + minute + ':' + second;
 
-
+    console.log(formattedDate)
     return formattedDate;
 }
 

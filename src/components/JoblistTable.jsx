@@ -64,7 +64,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            is_billed_to_lessee: job.secondary_bill_to_id==null?false:true
+            is_billed_to_lessee: job.secondary_bill_to_id
         }));
         console.log("SSS")
         console.log(is_billed_to_lessee)
@@ -221,18 +221,18 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             { accessorKey: 'net', header: 'Net Cost', size: 2 },
             { accessorKey: 'rev', header: 'Revenue', size: 2  },
             {
-                accessorKey: 'secondary_bill_to_id',
+                accessorKey: 'is_billed_to_lessee',
                 header: 'Bill to Lessee',
                 size: 2,
                 Cell: ({ row }) => {
-                    const isBilledToLessee = row.getValue('secondary_bill_to_id');
-
+                    const isBilledToLessee = row.getValue('is_billed_to_lessee');
+                    console.log(isBilledToLessee)
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <input
                                 type="checkbox"
-                                checked={isBilledToLessee }
-                                disabled={isBilledToLessee}
+                                checked={isBilledToLessee != null }
+
                                 onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
                                 className="checkbox checkbox-primary"
                             />

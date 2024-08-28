@@ -7,7 +7,7 @@ import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_lessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
         jobs.sort((a, b) => a.line_number - b.line_number)
@@ -44,8 +44,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
         id:false
     });
     useEffect(() => {
-        setColumnVisibility({ id:false,secondary_bill_to_id: is_billed_to_lessee }); //programmatically show firstName column
-    }, [is_billed_to_lessee]);
+        setColumnVisibility({ id:false,secondary_bill_to_id: isBilledToLessee }); //programmatically show firstName column
+    }, [isBilledToLessee]);
 
     useEffect(() => {
         const jobListData = jobs.map((job) => ({
@@ -67,7 +67,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             is_billed_to_lessee: job.secondary_bill_to_id
         }));
         console.log("SSS")
-        console.log(is_billed_to_lessee)
+        console.log(isBilledToLessee)
 
         setTableData(jobListData);
     }, [jobs]);
@@ -221,7 +221,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, is_billed_to_l
             { accessorKey: 'net', header: 'Net Cost', size: 2 },
             { accessorKey: 'rev', header: 'Revenue', size: 2  },
             {
-                accessorKey: 'is_billed_to_lessee',
+                accessorKey: 'secondary_bill_to_id',
                 header: 'Bill to Lessee',
                 size: 2,
                 Cell: ({ row }) => {

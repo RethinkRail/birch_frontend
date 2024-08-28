@@ -804,11 +804,12 @@ const OrderDetails = ({
     };
 
     const handleDialogClose = () => {
-        setDocToDownload('')
+        setDocToDownload("")
         setOpenDialog(false);
     };
 
     const handleButtonClick = (option) => {
+        console.log(docToDownload)
         if (option === 'owner') {
             if(docToDownload==='aar'){
                 printAAR(workOrder, false, 2);
@@ -825,7 +826,6 @@ const OrderDetails = ({
             }else if(docToDownload==='invoice'){
                 printInvoice(workOrder,3)
             }
-            printAAR(workOrder, false, 2);
         } else if (option === 'combined') {
             if(docToDownload==='aar'){
                 printAAR(workOrder, false, 1);

@@ -51,7 +51,7 @@ const Navbar = () => {
                 {
                     title: 'Purchasing',
                     children: [
-                        { title: 'Revenue Recognition - Inventory', path: '/revenue_recognition_inventory' },
+                        { title: 'Revenue By Inventory', path: '/revenue_recognition_inventory' },
                         { title: 'Allocated Inventory', path: '/allocated_inventory' }
                     ]
                 },

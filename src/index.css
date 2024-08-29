@@ -76,14 +76,15 @@
 /* Default styles for menu items */
 .nav-item.menu-item a {
     color: white; /* Default text color for menu items */
-    font-weight: normal;
-    font-size: 14px;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: Roboto, sans-serif;
 }
 
 /* Hover effect for selected menu item */
 .nav-item.menu-item:hover {
     background-color: #f5f3f3 !important; /* Light background color on hover */
-    border-radius: 6px; /* Rounded corners */
+
 }
 
 .nav-item.menu-item:hover > a {

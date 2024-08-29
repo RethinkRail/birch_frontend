@@ -1,8 +1,9 @@
 
 import {Collapse, Item, Items, Navbar as BaseNavbar} from "ultimate-react-multilevel-menu";
 import 'ultimate-react-multilevel-menu/dist/esm/index.css'
-import { auth } from "../../firebase";
+
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
+import {auth} from "../../firebase";
 
 const Navbar = () => {
     // const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
@@ -77,7 +78,7 @@ const Navbar = () => {
     const renderNavItems = (items, selectedPath) => {
         return items.map((navItem) => {
             const isSelected = navItem.path === selectedPath;
-            const itemClassName = isSelected ? "menu-item menu-item-selected" : "menu-item";
+            const itemClassName = isSelected ? "menu-item  menu-item-selected" : "menu-item";
 
             if (navItem.children) {
                 return (
@@ -105,11 +106,6 @@ const Navbar = () => {
     };
 
 
-    // <BaseNavbar className ={classnames('bg-[#002E54]')}>
-    //     <Collapse>
-    //         {renderNavItems(navItems)}
-    //     </Collapse>
-    // </BaseNavbar>
 
     return (
         <div className={`w-full p-0 mx-auto`}>

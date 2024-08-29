@@ -73,52 +73,33 @@
 }
 
 /* Styles for the selected menu item */
-.menu-item-selected {
-    background-color: #f5f3f3; /* bg-white */
-    border-radius: 6px; /* rounded-[6px] */
-}
-
-.menu-item-selected >a {
-    color: #000203 !important; /* text-[#002E54] */
-    font-weight: bold;
+/* Default styles for menu items */
+.nav-item.menu-item a {
+    color: white; /* Default text color for menu items */
+    font-weight: normal;
     font-size: 14px;
 }
 
-
 /* Hover effect for selected menu item */
 .nav-item.menu-item:hover {
-    background-color: #f5f3f3 !important; /* Light black background on hover */
-
-    border-radius: 6px; /* rounded-[6px] */
+    background-color: #f5f3f3 !important; /* Light background color on hover */
+    border-radius: 6px; /* Rounded corners */
 }
 
-.nav-item.menu-item a:hover {
-
-    color: #230000 !important; /* White text on hover */
-}
-
-
-/* Background color for submenu containers */
-.nav-item > .nav-items {
-    background-color: #002E54; /* Background color for submenu */
-}
-
-/* Alternatively, using `!important` to override other styles */
-.nav-items {
-    /*background-color: #002E54 !important; !* Force background color for submenu *!*/
-}
-
-/* Styles for submenu links */
-.nav-item .nav-items .menu-item .item {
-    padding: 8px 16px; /* Padding inside submenu items */
-    color: white; /* Text color for submenu items */
+.nav-item.menu-item:hover > a {
+    color: #000203 !important; /* Change text color on hover */
 }
 
 /* Hover effect for submenu items */
 .nav-item .nav-items .menu-item:not(.menu-item-selected):hover {
-    background-color: #f5f3f3; /* Light black background on hover */
-    color: #ffffff; /* White text on hover */
+    background-color: #f5f3f3; /* Light background color for hovered submenu items */
+    color: #000203; /* Text color for hovered submenu items */
     font-weight: lighter;
+}
+
+/* Background color for submenu containers */
+.nav-item > .nav-items {
+    background-color: #002E54; /* Background color for submenu */
 }
 
 

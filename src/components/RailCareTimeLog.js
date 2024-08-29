@@ -15,17 +15,29 @@ import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
-    // const [datePickers, setDatePickers] = useState({
-    //     crewChecked: {},
-    //     managerChecked: {},
-    //     qaChecked: {}
-    // });
-     console.log(railcarLog)
+
+    const [datePickers, setDatePickers] = useState({
+        crewChecked: {},
+        managerChecked: {},
+        qaChecked: {}
+    });
+    const [isDatePickerDisabled,setIsDatePickerDisabled]= useState(locked_for_time_clockinhg== 1?true:false)
     const [totalHoursEstimated, setTotalHoursEstimated] = useState(0);
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
     const [difference, setDifference] = useState(0);
     useEffect(() => {
+
+        // Initialize datePickers state based on railcarLog data
+        const initDatePickers = railcarLog.reduce((acc, entry) => {
+            acc.crewChecked[entry.job_id] = entry.crew_checked_time ? new Date(entry.crew_checked_time) : null;
+            acc.managerChecked[entry.job_id] = entry.manager_checked_time ? new Date(entry.manager_checked_time) : null;
+            acc.qaChecked[entry.job_id] = entry.qa_checked_time ? new Date(entry.qa_checked_time) : null;
+            return acc;
+        }, { crewChecked: {}, managerChecked: {}, qaChecked: {} });
+
+        setDatePickers(initDatePickers);
+
         const estimated = railcarLog.reduce((sum, entry) => sum + entry.labor_time, 0);
         const applied = railcarLog.reduce((sum, entry) => sum + parseFloat(entry.hours_applied), 0);
         const rework = railcarLog.reduce((sum, entry) => sum + parseFloat(entry.hours_applied_rework), 0);
@@ -35,25 +47,179 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         setTotalHoursApplied(applied);
         setTotalRework(rework);
         setDifference(diff);
-    }, [railcarLog]);
+        console.log(datePickers)
+    }, [railcarLog,locked_for_time_clockinhg]);
+    console.log(isDatePickerDisabled)
+    // const handleDateChange = async (type, jobId, date) => {
+    //
+    //     if (date == null && type == 'crewChecked') {
+    //         const userConfirmed = window.confirm("Are you sure you want to mark this job as not done?");
+    //
+    //         if (!userConfirmed) {
+    //             // If the user pressed "Cancel", exit the function
+    //             return;
+    //         }
+    //
+    //         // Create a copy of the current state
+    //         const previousState = { ...datePickers };
+    //
+    //         // Update the state to set 'crewChecked', 'managerChecked', and 'qaChecked' to null
+    //         setDatePickers(prevState => ({
+    //             ...prevState,
+    //             crewChecked: {
+    //                 ...prevState.crewChecked,
+    //                 [jobId]: null
+    //             },
+    //             managerChecked: {
+    //                 ...prevState.managerChecked,
+    //                 [jobId]: null
+    //             },
+    //             qaChecked: {
+    //                 ...prevState.qaChecked,
+    //                 [jobId]: null
+    //             }
+    //         }));
+    //
+    //         try {
+    //             const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
+    //                 job_id: jobId,
+    //                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+    //                 field: 'all',  // Specify that all fields are being updated
+    //                 updated_date: null,
+    //             });
+    //
+    //             if (response.status !== 200) {
+    //                 // Rollback state if API response status is not 200
+    //                 setDatePickers(previousState);
+    //             }
+    //         } catch (error) {
+    //             // Rollback state if an error occurs
+    //             setDatePickers(previousState);
+    //             console.error('Error updating job check log:', error.response ? error.response.data : error.message);
+    //         }
+    //
+    //         return; // Exit function after processing
+    //     }
+    //
+    //     // If the date is not null or the type is not 'crewChecked'
+    //     const previousState = { ...datePickers };
+    //
+    //     // Update the date in the state
+    //     setDatePickers(prevState => ({
+    //         ...prevState,
+    //         [type]: {
+    //             ...prevState[type],
+    //             [jobId]: date
+    //         }
+    //     }));
+    //
+    //     try {
+    //         const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
+    //             job_id: jobId,
+    //             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+    //             field: type,
+    //             updated_date: date,
+    //         });
+    //
+    //         if (response.status !== 200) {
+    //             // Rollback state if API response status is not 200
+    //             setDatePickers(previousState);
+    //         }
+    //     } catch (error) {
+    //         // Rollback state if an error occurs
+    //         setDatePickers(previousState);
+    //         console.error('Error updating job check log:', error.response ? error.response.data : error.message);
+    //     }
+    // };
 
-    const handleDateChange = (type, jobId, date) => {
-        // setDatePickers(prevState => ({
-        //     ...prevState,
-        //     [type]: {
-        //         ...prevState[type],
-        //         [jobId]: date
-        //     }
-        // }));
+    const handleDateChange = async (type, jobId, date) => {
+
+        if (date == null && type == 'crewChecked') {
+            const userConfirmed = window.confirm("Are you sure you want to mark this job as not done?");
+
+            if (!userConfirmed) {
+                // If the user pressed "Cancel", exit the function
+                return;
+            }
+
+            // Create a copy of the current state
+            const previousState = { ...datePickers };
+
+            // Update the state to set 'crewChecked', 'managerChecked', and 'qaChecked' to null
+            setDatePickers(prevState => ({
+                ...prevState,
+                crewChecked: {
+                    ...prevState.crewChecked,
+                    [jobId]: null
+                },
+                managerChecked: {
+                    ...prevState.managerChecked,
+                    [jobId]: null
+                },
+                qaChecked: {
+                    ...prevState.qaChecked,
+                    [jobId]: null
+                }
+            }));
+
+            try {
+                const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
+                    job_id: jobId,
+                    user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+                    field: type,  // Specify that all fields are being updated
+                    updated_date: date,
+                });
+
+                if (response.status !== 200) {
+                    // Rollback state if API response status is not 200
+                    setDatePickers(previousState);
+                }
+            } catch (error) {
+                // Rollback state if an error occurs
+                setDatePickers(previousState);
+                console.error('Error updating job check log:', error.response ? error.response.data : error.message);
+            }
+
+            return; // Exit function after processing
+        }else {
+            // If the date is not null or the type is not 'crewChecked'
+            const previousState = { ...datePickers };
+
+            // Update the date in the state
+            setDatePickers(prevState => ({
+                ...prevState,
+                [type]: {
+                    ...prevState[type],
+                    [jobId]: date
+                }
+            }));
+
+            try {
+                const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
+                    job_id: jobId,
+                    user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+                    field: type,
+                    updated_date: date,
+                });
+
+                if (response.status !== 200) {
+                    // Rollback state if API response status is not 200
+                    setDatePickers(previousState);
+                }
+            } catch (error) {
+                // Rollback state if an error occurs
+                setDatePickers(previousState);
+                console.error('Error updating job check log:', error.response ? error.response.data : error.message);
+            }
+        }
+
+
     };
 
-    const isDatePickerDisabled = locked_for_time_clockinhg=== 1;
 
+
+    //setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
     // Check if the date picker should be disabled based on team member completion time
-    const isProcessAndQaDisabled = (jobId) => {
-        // return !datePickers.crewChecked[jobId];
-    };
-
     const columns = [
         {
             name: 'JOB DESCRIPTION',
@@ -92,16 +258,15 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
                 <span className="w-full items-start align-top p-2">
                     <DatePicker
                         customInput={<CustomDateInputFullWidth
-                            value={row.crew_checked_time !== null? new Date(row.crew_checked_time).toLocaleDateString() : null}/>}
-                        selected={row.crew_checked_time !== null? new Date(row.crew_checked_time): null}
+                            value={datePickers.crewChecked[row.job_id] ?
+                                datePickers.crewChecked[row.job_id].toLocaleDateString() : null}/>}
+                        selected={datePickers.crewChecked[row.job_id] || null}
                         onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
                         placeholderText="Select date"
                         dateFormat="MM-dd-yyyy"
-                        isClearable={row.crew_checked_time !== null}
-                        disabled={isDatePickerDisabled || row.crew_checked_time == null}
+                        isClearable={!isDatePickerDisabled ||  datePickers.crewChecked[row.job_id]!==null}
+                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
                     />
-
-
                 </span>
             ),
             width: "10%",
@@ -109,32 +274,38 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         {
             name: 'IN PROCESS TIME',
             cell: row => (
-                <DatePicker
-                    customInput={<CustomDateInputFullWidth
-                        value={row.manager_checked_time !== null? new Date(row.manager_checked_time).toLocaleDateString() : null}/>}
-                    selected={row.manager_checked_time !== null? new Date(row.manager_checked_time): null}
-                    onChange={(date) => handleDateChange('managerChecked', row.job_id, date)}
-                    placeholderText="Select date"
-                    dateFormat="MM-dd-yyyy"
-                    isClearable
-                    disabled={isDatePickerDisabled || row.crew_checked_time == null}
-                />
+                <span className="w-full items-start align-top p-2">
+                    <DatePicker
+                        customInput={<CustomDateInputFullWidth
+                            value={datePickers.managerChecked[row.job_id] ?
+                                datePickers.managerChecked[row.job_id].toLocaleDateString() : null}/>}
+                        selected={datePickers.managerChecked[row.job_id] || null}
+                        onChange={(date) => handleDateChange('managerChecked', row.job_id, date)}
+                        placeholderText="Select date"
+                        dateFormat="MM-dd-yyyy"
+                        isClearable={!isDatePickerDisabled}
+                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
+                    />
+                </span>
             ),
             width: "10%",
         },
         {
             name: 'QA TIME',
             cell: row => (
-                <DatePicker
-                    customInput={<CustomDateInputFullWidth
-                        value={row.qa_checked_time !== null? new Date(row.qa_checked_time).toLocaleDateString() : null}/>}
-                    selected={row.qa_checked_time !== null? new Date(row.qa_checked_time): null}
-                    onChange={(date) => handleDateChange('qaChecked', row.job_id, date)}
-                    placeholderText="Select date"
-                    dateFormat="MM-dd-yyyy"
-                    isClearable
-                    disabled={isDatePickerDisabled || row.crew_checked_time == null}
-                />
+                <span className="w-full items-start align-top p-2">
+                    <DatePicker
+                        customInput={<CustomDateInputFullWidth
+                            value={datePickers.qaChecked[row.job_id] ?
+                                datePickers.qaChecked[row.job_id].toLocaleDateString() : null}/>}
+                        selected={datePickers.qaChecked[row.job_id] || null}
+                        onChange={(date) => handleDateChange('qaChecked', row.job_id, date)}
+                        placeholderText="Select date"
+                        dateFormat="MM-dd-yyyy"
+                        isClearable ={!isDatePickerDisabled}
+                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
+                    />
+                </span>
             ),
             width: "10%",
         }
@@ -163,6 +334,9 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
 
     return (
         <div>
+            {
+                console.log(datePickers)
+            }
             <div className="flex justify-between mb-5 items-center">
                 <h6 className='font-semibold'>Railcar time log</h6>
             </div>

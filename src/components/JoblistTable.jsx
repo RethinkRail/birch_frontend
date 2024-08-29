@@ -179,7 +179,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
                 Cell: ({ row }) => {
                     return (
-                        <div class="flex justify-between items-center cursor-pointer tooltip tooltip-open tooltip-right" data-tip="COPY">
+                        <div class="flex justify-between items-center cursor-pointer tooltip  tooltip-right" data-tip="COPY">
 
                             <span onClick={() => {
                                 handleCopyJob(row.getValue("id"))

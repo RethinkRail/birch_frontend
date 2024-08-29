@@ -1291,7 +1291,7 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Special Process</p>
                                                 <span>
                                                 <input type="text"
-                                                       className="flex items-center justify-between  border w-[148px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
+                                                       className="flex items-center justify-between  border w-[124px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="sp_in_details" ref={spRef} onChange={handleSP}
                                                        value={sp} onKeyUp={postSPUpdate}/>
                                                 </span>
@@ -1301,7 +1301,7 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Tank QUAlification</p>
                                                 <span>
                                                 <input type="text"
-                                                       className="flex items-center justify-between  border w-[148px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
+                                                       className="flex items-center justify-between  border w-[124px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="tq_in_details" ref={tqRef} onChange={handleTQ}
                                                        value={tq} onKeyUp={postTQUpdate}/>
                                                 </span>
@@ -1312,7 +1312,7 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>RELINE</p>
                                                 <span>
                                                 <input type="text"
-                                                       className="flex items-center justify-between  border w-[148px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
+                                                       className="flex items-center justify-between  border w-[124px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="re_in_details" ref={reRef} onChange={handleRE}
                                                        value={re} onKeyUp={postREUpdate}/>
                                                 </span>
@@ -1323,7 +1323,7 @@ const OrderDetails = ({
                                                 <p className='text-xs font-normal '>Ex Paint Element </p>
                                                 <span>
                                                 <input type="text"
-                                                       className="flex items-center justify-between  border w-[148px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
+                                                       className="flex items-center justify-between  border w-[124px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="ep_in_details" ref={epRef} onChange={handleEP}
                                                        value={ep} onKeyUp={postEPUpdate}/>
                                                 </span>

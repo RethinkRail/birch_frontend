@@ -20,7 +20,9 @@ module.exports = {
                 'theme-blue':"#002E54"
             }
         },
-
+        fontSize: {
+            xs:'0.6rem'
+        },
         fontFamily: {
             'custom': ['Inter', 'Inter', 'sans'],
         },

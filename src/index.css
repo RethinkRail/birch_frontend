@@ -61,6 +61,21 @@
 
 
 /* Styles for individual menu items */
+
+ .menu-item-selected{
+    background-color: #f8f8f8 !important; /* Light black background on hover */
+
+}
+
+
+
+
+.menu-item-selected > a{
+
+    color: #070202 !important; /* White text on hover */
+}
+
+
 .nav-item .item {
     padding: 10px 20px; /* Padding inside each menu item */
     color: white; /* Default text color */

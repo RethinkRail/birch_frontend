@@ -10,7 +10,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CustomDateInput from "./CustomDateInput";
 
-const API_BASE_URL = process.env.REACT_APP_BIRCH_API_URL;
+
 
 const EntryRow = ({ entry, onChange, onDelete }) => {
     if (!entry) {
@@ -18,8 +18,6 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
     }
 
     const handleDateChange = (key, date) => {
-        console.log(key)
-        console.log(date)
         const updatedEntry = { ...entry, [key]: date };
         onChange(updatedEntry);
     };
@@ -38,9 +36,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
     };
 
     const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this entry?')) {
-            onDelete(entry.id);
-        }
+        onDelete(entry.id); // Trigger deletion without alert
     };
 
     const isDisabled = entry.is_billed;
@@ -117,17 +113,13 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     }, [initialEntries]);
 
     const callWebService = async (url, method, body) => {
-        console.log(`Calling ${method} ${API_BASE_URL}${url}`);
-        console.log('Request Body:', body);
-
         try {
-            const response = await fetch(`${API_BASE_URL}${url}`, {
+            const response = await fetch(`${process.env.REACT_APP_BIRCH_API_URL}${url}`, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
 
-            console.log('Response Status:', response.status);
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Error response:', errorText);
@@ -135,7 +127,6 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
             }
 
             const result = await response.json();
-            console.log('Response Data:', result);
             return result;
         } catch (error) {
             console.error('Error calling web service:', error);
@@ -174,15 +165,13 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     };
 
     useEffect(() => {
-        const newEntries = entries.filter(entry => !entry.id);
+        const newEntries = entries.filter(entry => !entry.id && entry.start_date && entry.end_date);
         newEntries.forEach(async (entry) => {
-            if (entry.start_date) {
-                await callWebService('create_storage_info/', 'POST', {
-                    ...entry,
-                    railcar_id,
-                    work_order
-                });
-            }
+            await callWebService('create_storage_info/', 'POST', {
+                ...entry,
+                railcar_id,
+                work_order
+            });
         });
     }, [entries, railcar_id, work_order]);
 
@@ -219,8 +208,8 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                 </div>
             </div>
         </div>
-
     );
 };
 
 export default StorageComponent;
+

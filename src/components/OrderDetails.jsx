@@ -126,6 +126,7 @@ const OrderDetails = ({
     const [tq, setTQ] = useState(null);
     const [re, setRE] = useState(null);
     const [ep, setEP] = useState(null);
+    const [storageInformation,setStorageInformation ]= useState([])
 
     const [isBilledToLessee, setIsBilledToLessee] = useState(false)
 
@@ -284,6 +285,7 @@ const OrderDetails = ({
         calculateJobCosts(workOrder.joblist)
         workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
         getRailCarTimeLog()
+        setStorageInformation(workOrder.storage_information)
 
     }, [workOrder]);
 
@@ -1363,7 +1365,7 @@ const OrderDetails = ({
                                                     <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>Is
                                                         Storage Cars</p>
                                                     <input
-                                                        disabled={workOrder.storage_information.length > 0}
+                                                        disabled={storageInformation.length > 0}
                                                         type="checkbox"
                                                         checked={workOrder.is_storage ==1}
                                                         onChange={(e) => updateStorage(e.target.checked)}
@@ -1373,7 +1375,7 @@ const OrderDetails = ({
                                             </div>
 
                                             <div className='mt-[8px] '>
-                                                <p>{workOrder.storage_information.length > 0 && sumOfDayDifferences(workOrder.storage_information) > 0 ? "Car is in storage and not billed for " + sumOfDayDifferences(workOrder.storage_information) + "  days" : ""}</p>
+                                                <p>{storageInformation.length > 0 && sumOfDayDifferences(storageInformation) > 0 ? "Car is in storage and not billed for " + sumOfDayDifferences(storageInformation) + "  days" : ""}</p>
                                             </div>
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
@@ -1934,7 +1936,7 @@ const OrderDetails = ({
                         {/*Storage information*/}
                         {workOrder.is_storage ==1 &&(
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20">
-                                <StorageComponent initialEntries={workOrder.storage_information} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
+                                <StorageComponent initialEntries={storageInformation} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
                             </div>
                         )}
 

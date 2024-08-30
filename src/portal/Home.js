@@ -795,6 +795,8 @@ const Home = () => {
             .then((response) => {
                 console.log("calling done");
                 console.log(response);
+                const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
+                setWorkOrders(updatedWO)
                 return true;
             })
             .catch((error) => {

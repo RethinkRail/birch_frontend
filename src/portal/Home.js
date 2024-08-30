@@ -36,6 +36,7 @@ const Home = () => {
 
         axios.request(config)
             .then((response) => {
+                console.log(response.data)
                 setActiveTask(response.data);
             })
             .catch((error) => {
@@ -963,7 +964,7 @@ const Home = () => {
                 console.log(response.data);
                 setcompletingTask(null)
                 setIsCommentModalOpen(false)
-                getActiveTasks()
+
                 showToastMessage("Task updated successful", 1)
             })
             .catch((error) => {
@@ -1107,6 +1108,7 @@ const Home = () => {
 
     useEffect(() => {
         localStorage.setItem("jobsToBePasted", null)
+        console.log("calling active task")
         getActiveTasks();
     }, []);
     useEffect(() => {

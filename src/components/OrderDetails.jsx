@@ -604,6 +604,8 @@ const OrderDetails = ({
     }
 
     function sumOfDayDifferences(storageInformation) {
+        console.log("sss")
+        console.log(storageInformation)
         const today = new Date();
 
         const sum = storageInformation.reduce((acc, item) => {

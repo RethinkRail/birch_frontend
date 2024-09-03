@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CustomDateInput from "./CustomDateInput";
+import axios from "axios";
 
 
 
@@ -47,7 +48,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
                 <DatePicker
                     customInput={
                         <CustomDateInput
-                            value={entry.start_date ? new Date(entry.start_date).toLocaleDateString() : ''}
+                            value={entry.start_date ? new Date(entry.start_date): ''}
                         />
                     }
                     selected={entry.start_date ? new Date(entry.start_date) : null}
@@ -61,7 +62,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
                 <DatePicker
                     customInput={
                         <CustomDateInput
-                            value={entry.end_date ? new Date(entry.end_date).toLocaleDateString() : ''}
+                            value={entry.end_date ? new Date(entry.end_date) : ''}
                         />
                     }
                     selected={entry.end_date ? new Date(entry.end_date) : null}
@@ -113,35 +114,75 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     }, [initialEntries]);
 
     const callWebService = async (url, method, body) => {
+
+        if (!body.hasOwnProperty('user_id')) {
+            // Add user_id property with value from localStorage
+            const userToken = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE));
+            body.user_id = userToken['id'];
+        }
         try {
-            const response = await fetch(`${process.env.REACT_APP_BIRCH_API_URL}${url}`, {
+            const response = await axios({
                 method: method,
+                url: `${process.env.REACT_APP_BIRCH_API_URL}${url}`,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                data: body,
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            return result;
+            //
+            return response.data;
         } catch (error) {
-            console.error('Error calling web service:', error);
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.error('Error response:', error.response.data);
+                throw new Error(`HTTP error! status: ${error.response.status}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('Error request:', error.request);
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.error('Error calling web service:', error.message);
+            }
         }
     };
 
     const addNewEntry = async () => {
+
         const newEntry = {
-            start_date: null,
+            start_date: new Date(),
             end_date: null,
             is_billed: false,
             railcar_id: railcar_id,
-            work_order: work_order
+            work_order: work_order,
+            user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
         };
-        setEntries([...entries, newEntry]);
+        //setEntries([...entries, newEntry]);
+
+        try {
+            const response = await axios({
+                method: 'post',
+                url: `${process.env.REACT_APP_BIRCH_API_URL}${'create_storage_info'}`,
+                headers: { 'Content-Type': 'application/json' },
+                data: newEntry,
+            });
+            console.log(response.data)
+            //
+            setEntries([...entries, response.data]);
+            //return response.data;
+        } catch (error) {
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.error('Error response:', error.response.data);
+                throw new Error(`HTTP error! status: ${error.response.status}`);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('Error request:', error.request);
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.error('Error calling web service:', error.message);
+            }
+        }
+
     };
 
     const updateEntry = async (updatedEntry) => {
@@ -164,16 +205,16 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
         }
     };
 
-    useEffect(() => {
-        const newEntries = entries.filter(entry => !entry.id && entry.start_date && entry.end_date);
-        newEntries.forEach(async (entry) => {
-            await callWebService('create_storage_info/', 'POST', {
-                ...entry,
-                railcar_id,
-                work_order
-            });
-        });
-    }, [entries, railcar_id, work_order]);
+    // useEffect(() => {
+    //     const newEntries = entries.filter(entry => !entry.id && entry.start_date);
+    //     newEntries.forEach(async (entry) => {
+    //         await callWebService('create_storage_info/', 'POST', {
+    //             ...entry,
+    //             railcar_id,
+    //             work_order
+    //         });
+    //     });
+    // }, [entries, railcar_id, work_order]);
 
     return (
         <div>
@@ -193,7 +234,7 @@ const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
                     </thead>
                     <tbody>
                     {entries.map(entry => (
-                        <EntryRow key={entry.id || Math.random()} entry={entry} onChange={updateEntry} onDelete={deleteEntry} />
+                        <EntryRow key={entry.id } entry={entry} onChange={updateEntry} onDelete={deleteEntry} />
                     ))}
                     </tbody>
                 </table>

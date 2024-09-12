@@ -327,7 +327,7 @@ const WorkOrderDataTable = ({
             width: "8%",
         },
         {
-            name: "FINALIZED",
+            name: "INVOICED",
             selector: row => row.finalized,
             width: "8%",
             sortable: true,

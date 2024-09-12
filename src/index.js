@@ -9,6 +9,8 @@ import Auth from "./auth/Auth";
 import Login from "./auth/login/Login";
 import Home from "./portal/Home";
 import Database from "./portal/database/Database";
+import DepartmentReport from "./portal/report/DepartmentReport";
+import TableComponent from "./components/TableComponent";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -29,6 +31,12 @@ root.render(
                 <Route path="/database" element={
                     <ProtectedRoute>
                         <Database/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+                <Route path="/department_report" element={
+                    <ProtectedRoute>
+                        <DepartmentReport/>
                     </ProtectedRoute>
                 }>
                 </Route>

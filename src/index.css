@@ -129,3 +129,20 @@
 /*}*/
 
 /*Nav styling */
+
+.rdt_TableCol:first-child,
+.rdt_TableCell:first-child,
+.rdt_TableCol:nth-child(1),
+.rdt_TableCell:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: inherit;
+}
+
+.rdt_TableCol:nth-child(1),
+.rdt_TableCell:nth-child(1) {
+    left: 0;
+}
+
+

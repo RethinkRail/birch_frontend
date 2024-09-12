@@ -1,0 +1,214 @@
+/*!* Striping the rows *!*/
+/*.custom-table .MuiTableBody-root .MuiTableRow-root:nth-of-type(odd) {*/
+/*    background-color: #f9f9f9; !* Light gray color for striped rows *!*/
+/*}*/
+
+
+/*.Mui-TableHeadCell-Content-Wrapper {*/
+/*    font-size: small;*/
+/*    font-size: 8px;*/
+/*}*/
+
+/*!* Reducing font size of the table header *!*/
+/*.custom-table .MuiTableHead-root .MuiTableCell-root {*/
+/*    font-size: 12px; !* Smaller font size for header *!*/
+/*    padding: 8px;    !* Reduce padding to decrease spacing *!*/
+/*}*/
+
+/*!* Reducing the spacing between table columns *!*/
+/*.custom-table .MuiTableBody-root .MuiTableCell-root {*/
+/*    padding: 6px 12px; !* Adjust the padding to reduce space between columns *!*/
+/*}*/
+
+/*!* Optional: Style adjustments for the whole table *!*/
+/*.custom-table .MuiTable-root {*/
+/*    font-size: 14px; !* Slightly smaller font size for the whole table *!*/
+/*}*/
+
+/*.datepicker-wrapper {*/
+/*    position: relative;*/
+/*    width: 100%;*/
+/*    height: auto; !* Ensure the container has enough height *!*/
+/*}*/
+
+/*.react-datepicker {*/
+/*    position: absolute; !* Make sure it is positioned absolutely *!*/
+/*    z-index: 9999; !* Ensure it appears above other content *!*/
+/*}*/
+
+/*.table-container {*/
+/*    overflow-x: auto;*/
+/*    overflow-y: auto;*/
+/*    max-height: 600px; !* Adjust this based on your preference *!*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 8px;*/
+/*}*/
+
+/*table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*    font-family: Arial, sans-serif;*/
+/*}*/
+
+/*thead th {*/
+/*    background-color: #f1f1f1;*/
+/*    position: sticky;*/
+/*    top: 0;*/
+/*    z-index: 2;*/
+/*    padding: 12px;*/
+/*    font-size: 0.85rem; !* Reduced font size for the header *!*/
+/*    color: #333;*/
+/*    text-align: left;*/
+/*    border-bottom: 2px solid #ddd;*/
+/*}*/
+
+/*tbody td, thead th {*/
+/*    padding: 10px;*/
+/*    border-bottom: 1px solid #eee;*/
+/*    white-space: nowrap; !* Prevent text wrapping *!*/
+/*    text-align: left;*/
+/*}*/
+
+/*tbody td input, .react-datepicker-wrapper {*/
+/*    width: 100%; !* Ensures all datepickers and text inputs are equal in size *!*/
+/*    box-sizing: border-box;*/
+/*    padding: 8px;*/
+/*    font-size: 0.9rem;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 4px;*/
+/*    background-color: #fff;*/
+/*}*/
+
+/*tbody td input[type="text"] {*/
+/*    padding: 8px;*/
+/*}*/
+
+/*.sticky-header {*/
+/*    position: sticky;*/
+/*    top: 0;*/
+/*    background-color: white;*/
+/*    z-index: 2;*/
+/*    border-bottom: 2px solid #ccc;*/
+/*}*/
+
+/*.sticky-column {*/
+/*    position: sticky;*/
+/*    left: 0;*/
+/*    background-color: #f9f9f9;*/
+/*    z-index: 3;*/
+/*    border-right: 2px solid #ddd;*/
+/*}*/
+
+/*.sticky-header.sticky-column {*/
+/*    z-index: 4;*/
+/*    background-color: #f1f1f1;*/
+/*}*/
+
+/*tbody tr:nth-child(even) {*/
+/*    background-color: #f9f9f9;*/
+/*}*/
+
+/*tbody tr:hover {*/
+/*    background-color: #f1f1f1; !* Highlight row on hover *!*/
+/*}*/
+
+/*input {*/
+/*    padding: 8px;*/
+/*    font-size: 0.9rem;*/
+/*}*/
+
+/*.react-datepicker-wrapper, .react-datepicker__input-container input {*/
+/*    width: 100%;*/
+/*}*/
+
+/*.react-datepicker__input-container input {*/
+/*    padding: 8px;*/
+/*    font-size: 0.9rem;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 4px;*/
+
+
+.table-container {
+    overflow-x: auto;
+    overflow-y: auto;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Inter, sans-serif;
+}
+
+thead th {
+    background-color: #DCE5FF;
+    font-size: 10px;
+    padding: 1px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    text-align: left;
+}
+
+tbody td, thead th {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+    text-align: left;
+}
+
+tbody td input, .react-datepicker-wrapper {
+
+    box-sizing: border-box;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 2;
+    border-bottom: 2px solid #ccc;
+}
+
+.sticky-column {
+    position: sticky;
+    left: 0;
+    background-color: #f8f8f8;
+    z-index: 3;
+    border-right: 2px solid #ddd;
+}
+
+.sticky-header.sticky-column {
+    z-index: 4;
+    background-color: #DCE5FF;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #F7F9FF;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F7F9FF;
+}
+
+ input.text-input {
+    width: 100%;
+    padding: 8px;
+    font-size: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input.text-input {
+    text-align: left;
+}

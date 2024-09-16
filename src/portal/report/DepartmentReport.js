@@ -265,6 +265,34 @@ const DepartmentReport = () => {
         )
     );
 
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortDirection, setSortDirection] = useState('asc');
+
+    const handleSort = (column) => {
+        const direction = sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
+        setSortColumn(column);
+        setSortDirection(direction);
+    };
+
+    const sortedReport = [...filteredReport].sort((a, b) => {
+        if (sortColumn) {
+            const aValue = a[sortColumn] || '';
+            const bValue = b[sortColumn] || '';
+            if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        }
+        return 0;
+    });
+
+    const getSortArrow = (column) => {
+        if (sortColumn === column) {
+            return sortDirection === 'asc' ? '🔼' : '🔽';
+        }
+        return '🔼';
+    };
+
+
     const exportToCSV = () => {
         if (filteredReport.length === 0) return;
 
@@ -368,19 +396,32 @@ const DepartmentReport = () => {
                         <table>
                             <thead>
                             <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
-                                <th className="sticky-header sticky-column">RAILCAR ID</th>
+                                <th
+                                    className="sticky-header sticky-column"
+                                    onClick={() => handleSort('railcar_id')}
+                                    style={{ cursor: 'pointer', position: 'relative' }}
+                                >
+                                    RAILCAR
+                                    <span >{getSortArrow('railcar_id')}</span>
+                                </th>
                                 {Object.keys(processedReport[0]).map((key) =>
                                     key !== 'id' && key !== 'railcar_id' ? (
-                                        <th key={key} className="sticky-header" style={{ paddingLeft: '10px', paddingRight: '2px' }}>
+                                        <th
+                                            key={key}
+                                            className="sticky-header"
+                                            style={{ paddingLeft: '10px', paddingRight: '2px', cursor: 'pointer', position: 'relative' }}
+                                            onClick={() => handleSort(key)}
+                                        >
                                             {formatField(key)}
+                                            <span >{getSortArrow(key)}</span>
                                         </th>
                                     ) : null
                                 )}
                             </tr>
                             </thead>
                             <tbody>
-                            {filteredReport.map((row, index) => (
-                                <tr key={row.id} >
+                            {sortedReport.map((row) => (
+                                <tr key={row.id}>
                                     <td className="sticky-column">{row.railcar_id}</td>
                                     {Object.keys(row).map((key) =>
                                         key !== 'id' && key !== 'railcar_id' ? (
@@ -394,35 +435,29 @@ const DepartmentReport = () => {
                                                         onBlur={(e) => updateTextField(e, row.id, key)}
                                                         className="text-input w-40"
                                                     />
-                                                ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key  ==='month_to_invoice'? (
-
-                                                    <span  >
-                                                          <DatePicker
-                                                              value={ row[key]!== null ? new Date(row[key]).toLocaleDateString() : null}
-                                                              selected={ row[key]!== null ? new Date(row[key]) : null}
-                                                              onChange={
-                                                                  (newDate) => handleDateChange(newDate, row.id, key)
-                                                              }
-                                                              isClearable
-                                                              showYearDropdown
-                                                              dateFormat="MM-dd-yyyy"
-                                                              style={{ width: '100%' }}
-                                                          />
-                                                    </span>
-
+                                                ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key === 'month_to_invoice' ? (
+                                                    <span>
+                                            <DatePicker
+                                                value={row[key] !== null ? new Date(row[key]).toLocaleDateString() : null}
+                                                selected={row[key] !== null ? new Date(row[key]) : null}
+                                                onChange={(newDate) => handleDateChange(newDate, row.id, key)}
+                                                isClearable
+                                                showYearDropdown
+                                                dateFormat="MM-dd-yyyy"
+                                                style={{ width: '100%' }}
+                                            />
+                                        </span>
                                                 ) : key === 'status_code' ? (
-                                                        <select onChange={(e)=>handleDropdownChangeInDetails(e,row.id)}>
-                                                            {statusCodes.map((status) => (
-                                                                <option  key={status.code}
-                                                                         selected={row[key] === status.code}>
-                                                                    {status.code + ":" + status.title}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    ) :
-                                                    (
-                                                        <span>{row[key]}</span>
-                                                    )}
+                                                    <select onChange={(e) => handleDropdownChangeInDetails(e, row.id)}>
+                                                        {statusCodes.map((status) => (
+                                                            <option key={status.code} value={status.code} selected={row[key] === status.code}>
+                                                                {status.code + ":" + status.title}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <span>{row[key]}</span>
+                                                )}
                                             </td>
                                         ) : null
                                     )}

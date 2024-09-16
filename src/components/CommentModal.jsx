@@ -39,6 +39,7 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
                 'work_id': work_id,
                 'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
                 'status_id': Object.values(groupedItems)[0].status_id,
+                'source': "home_page",
                 'comment': newComment
             });
 

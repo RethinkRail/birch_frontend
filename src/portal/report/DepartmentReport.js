@@ -9,26 +9,29 @@ import React, {useState, useEffect, useMemo, useRef} from 'react';
 import axios from 'axios';
 import { MaterialReactTable } from "material-react-table";
 import DatePicker from "react-datepicker";
-import CustomDateInputFullWidth from "../../components/CustomDateInputFullWidth";
-import DataTable from "react-data-table-component"; // Make sure you import the CSS file here
 import '../../DepartmentReport.css';
 import {round2Dec} from "../../utils/NumberHelper";
 import {differenceBetweenTwoTimeStamp} from "../../utils/DateTimeHelper";
 import {FaCloudDownloadAlt, FaDownload, FaFileDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
+import Modal from "react-modal";
+import qs from "qs";
 
 
 const DepartmentReport = () => {
     const toastId = useRef(null)
-    const [loading, setLoading] = useState(true);
     const [jobCategories, setJobCategories] = useState([]);
     const [statusCodes, setStatusCodes] = useState([]);
     const [departmentReport, setDepartmentReport] = useState([]);
     const [processedReport, setProcessedReport] = useState([]);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState(""); // Add search query state
+    const [isStatusDropDownModalOpenInDetails, setIsStatusDropDownModalOpenInDetails] = useState(null);
 
+    const [updatedStatusCode, setupdatedStatusCode] = useState(null)
+    const [workOrderToUpdateStatus, setWorkOrdeToUpdateStatus] = useState(null)
     useEffect(() => {
+        setIsStatusDropDownModalOpenInDetails(false)
         const fetchData = async () => {
             try {
                 const jobCategoryResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_all_job_category/');
@@ -43,7 +46,6 @@ const DepartmentReport = () => {
                 let data = processRailcarData(departmentReportResponse.data, jobCategoryResponse.data);
                 console.log(data)
                 setProcessedReport(data);
-                setLoading(false);
                 toast.update(toastId.current, {
                     render: "All data loaded",
                     autoClose: 1000,
@@ -53,12 +55,83 @@ const DepartmentReport = () => {
                 });
             } catch (err) {
                 setError('Failed to load data. Please try again.');
-                setLoading(false);
+
             }
         };
         toastId.current = toast.loading("Loading...")
         fetchData();
     }, []);
+
+    const handleDropdownChangeInDetails = (e, workId) => {
+        setupdatedStatusCode(e.target.value)
+        setWorkOrdeToUpdateStatus(workId)
+        setIsStatusDropDownModalOpenInDetails(true)
+    }
+
+    const customStylesForCommentModal = {
+        content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            width: '400px',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+        },
+    };
+    const orderDetailsModal = document.getElementById('orderDetailsModal');
+    //const statusTextArea = useRef(null);
+
+    const closeModal = () => {
+        if (orderDetailsModal) {
+            orderDetailsModal.close();
+        } else {
+        }
+    }
+    const statusCommentDropDownInDetails = useRef(null);
+    const getValueByIdStatusCommentDropDown = (id) => {
+        const element = statusCommentDropDownInDetails.current;
+        if (element && element.id === id) {
+            return element.value;
+        }
+        return null;
+    };
+    const postStatusFromDetails = () => {
+        var comment = getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDownInDetails");
+        if (comment == null || comment.length === 0) {
+            return
+        }
+        let data = qs.stringify({
+            'work_id': workOrderToUpdateStatus,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+            'status_id': updatedStatusCode,
+            'source': "department_report",
+            'comment': comment
+        });
+        console.log(data)
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'post_work_updates',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                console.log(response)
+                setIsStatusDropDownModalOpenInDetails(false);
+                setupdatedStatusCode("")
+            })
+            .catch((error) => {
+                console.log(error);
+                setIsStatusDropDownModalOpenInDetails(false);
+                setupdatedStatusCode("")
+                toast.error("Something went wrong")
+            });
+    }
 
     function processRailcarData(dataArray, departmentMap) {
         return dataArray.map(railcarData => {
@@ -144,8 +217,6 @@ const DepartmentReport = () => {
         });
     }
 
-
-
     const handleDateChange = async (date, id, field) => {
         setProcessedReport(prevReport => {
             const updatedData = prevReport.map(item => {
@@ -223,9 +294,6 @@ const DepartmentReport = () => {
         link.click();
     };
 
-
-
-
     const updateTextField =async (e, id, key) =>{
         const val= e.target.value.toString(); // Get the value from the input field
         try {
@@ -246,7 +314,28 @@ const DepartmentReport = () => {
         <React.Fragment>
         {processedReport.length > 0 ? (
 
-                <div>
+                <div id="departMentReport">
+                    <Modal
+                        isOpen={isStatusDropDownModalOpenInDetails}
+                        onRequestClose={() => {
+                            if (getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDown") !== '') {
+                                postStatusFromDetails()
+                            }
+                        }
+                        }
+                        parentSelector={() => document.querySelector('#departMentReport')}
+                        id="theIdHere"
+                        contentLabel="POST COMMENT"
+                        style={customStylesForCommentModal}
+                    >
+                        <textarea id="statusUpdateMessageFromDropDownInDetails" rows="2"
+                                  ref={statusCommentDropDownInDetails}
+                                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"
+                                  placeholder="Write your comments here..."></textarea>
+                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                onClick={postStatusFromDetails}>SUBMIT
+                        </button>
+                    </Modal>
                     <div className="flex justify-between">
                         <h1 className="flex justify-start flex-row py-3">Department wise report</h1>
                         <div className="flex justify-end flex-row p-2 ">
@@ -322,7 +411,7 @@ const DepartmentReport = () => {
                                                     </span>
 
                                                 ) : key === 'status_code' ? (
-                                                        <select>
+                                                        <select onChange={(e)=>handleDropdownChangeInDetails(e,row.id)}>
                                                             {statusCodes.map((status) => (
                                                                 <option  key={status.code}
                                                                          selected={row[key] === status.code}>
@@ -344,6 +433,7 @@ const DepartmentReport = () => {
                     </div>
                 </div>
             ) : null}
+
         </React.Fragment>
     );
 };

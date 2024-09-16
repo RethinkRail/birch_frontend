@@ -192,6 +192,7 @@ const WorkOrderDataTable = ({
             'work_id': railcarToChangeStaus,
             'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
             'status_id': updatedStatusCode.split(":")[0],
+            'source': "home_page",
             'comment': comment
         });
 

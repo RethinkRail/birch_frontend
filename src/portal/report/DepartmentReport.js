@@ -5,7 +5,7 @@
  * Description:
  **/
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import axios from 'axios';
 import { MaterialReactTable } from "material-react-table";
 import DatePicker from "react-datepicker";
@@ -13,10 +13,13 @@ import CustomDateInputFullWidth from "../../components/CustomDateInputFullWidth"
 import DataTable from "react-data-table-component"; // Make sure you import the CSS file here
 import '../../DepartmentReport.css';
 import {round2Dec} from "../../utils/NumberHelper";
-import {differenceBetweenTwoTimeStamp} from "../../utils/DateTimeHelper";  // You'll add the styles in this CSS file
+import {differenceBetweenTwoTimeStamp} from "../../utils/DateTimeHelper";
+import {FaCloudDownloadAlt, FaDownload, FaFileDownload} from "react-icons/fa";
+import {toast} from "react-toastify";
 
 
 const DepartmentReport = () => {
+    const toastId = useRef(null)
     const [loading, setLoading] = useState(true);
     const [jobCategories, setJobCategories] = useState([]);
     const [statusCodes, setStatusCodes] = useState([]);
@@ -32,7 +35,6 @@ const DepartmentReport = () => {
                 setJobCategories(jobCategoryResponse.data);
 
                 const statusCodeResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_all_status/');
-                console.log(statusCodeResponse)
                 setStatusCodes(statusCodeResponse.data);
 
                 const departmentReportResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_department_report/');
@@ -42,12 +44,19 @@ const DepartmentReport = () => {
                 console.log(data)
                 setProcessedReport(data);
                 setLoading(false);
+                toast.update(toastId.current, {
+                    render: "All data loaded",
+                    autoClose: 1000,
+                    type: "success",
+                    hideProgressBar: true,
+                    isLoading: false
+                });
             } catch (err) {
                 setError('Failed to load data. Please try again.');
                 setLoading(false);
             }
         };
-
+        toastId.current = toast.loading("Loading...")
         fetchData();
     }, []);
 
@@ -95,22 +104,22 @@ const DepartmentReport = () => {
                 lessee,
                 products,
                 status_code: statusCode,
-                inspected_date: railcarData.inspected_date,
-                material_eta: railcarData.material_eta,
-                clean_date: railcarData.clean_date,
+                inspected_date: railcarData.inspected_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.inspected_date).toLocaleDateString() : null,
+                material_eta: railcarData.material_eta  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.material_eta).toLocaleDateString() : null,
+                clean_date: railcarData.clean_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.clean_date).toLocaleDateString() : null,
                 clean_man_hour_estimated: round2Dec(result.clean_man_hour_estimated),
                 clean_man_hour_applied: round2Dec(result.clean_man_hour_applied),
-                repair_schedule_date: railcarData.repair_schedule_date,
+                repair_schedule_date: railcarData.repair_schedule_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.repair_schedule_date).toLocaleDateString() : null,
                 repair_man_hour_estimated: round2Dec(result.repair_man_hour_estimated),
                 repair_man_hour_applied: round2Dec(result.repair_man_hour_applied),
-                paint_date: railcarData.paint_date,
-                exterior_paint: railcarData.exterior_paint,
+                paint_date: railcarData.paint_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.paint_date).toLocaleDateString() : null,
+                exterior_paint: railcarData.exterior_paint !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.exterior_paint).toLocaleDateString() : null,
                 paint_man_hour_estimated:round2Dec( result.paint_man_hour_estimated),
                 paint_man_hour_applied: round2Dec(result.paint_man_hour_applied),
-                valve_date: railcarData.valve_date,
+                valve_date: railcarData.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.valve_date).toLocaleDateString() : null,
                 valve_man_hour_estimated:round2Dec( result.valve_man_hour_estimated),
                 valve_man_hour_applied: round2Dec(result.valve_man_hour_applied),
-                pd_date: railcarData.pd_date,
+                pd_date: railcarData.pd_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.pd_date).toLocaleDateString() : null,
                 pd_man_hour_estimated:round2Dec( result.pd_man_hour_estimated),
                 pd_man_hour_applied: round2Dec(result.pd_man_hour_applied),
                 indirect_labor_man_hour_estimated: round2Dec(result.indirect_labor_man_hour_estimated),
@@ -121,10 +130,10 @@ const DepartmentReport = () => {
                 maintenance_man_hour_applied: round2Dec(result.maintenance_man_hour_applied),
                 admin_man_hour_estimated: round2Dec(result.admin_man_hour_estimated),
                 admin_man_hour_applied:round2Dec( result.admin_man_hour_applied),
-                final_date: railcarData.final_date,
-                qa_date: railcarData.qa_date,
-                projected_out_date: railcarData.projected_out_date,
-                month_to_invoice: railcarData.month_to_invoice,
+                final_date: railcarData.final_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.final_date).toLocaleDateString() : null,
+                qa_date: railcarData.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.qa_date).toLocaleDateString() : null,
+                projected_out_date: railcarData.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.projected_out_date).toLocaleDateString() : null,
+                month_to_invoice: railcarData.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.month_to_invoice).toLocaleDateString() : null,
                 total_cost: round2Dec(result.total_cost),
                 mo_wk: railcarData.mo_wk || "",
                 sp: railcarData.sp || "",
@@ -136,39 +145,48 @@ const DepartmentReport = () => {
     }
 
 
-    const handleDateChange = (date, id, field) => {
-        const updatedData = processedReport.map(item => {
-            if (item.id === id) {
-                return { ...item, [field]: date ? new Date(date).toDateString() : "1900-01-01T00:00:00.000Z" };
-            }
-            return item;
+
+    const handleDateChange = async (date, id, field) => {
+        setProcessedReport(prevReport => {
+            const updatedData = prevReport.map(item => {
+                if (item.id === id) {
+                    return {...item, [field]: date ? new Date(date).toLocaleDateString() : null};
+                }
+                return item;
+            });
+            return updatedData;
         });
-        setProcessedReport(updatedData);
-        // Call your web service here
+
+
+        try {
+            const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_date_field', {
+                workorder_id: id,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
+                date_field: field, // Replace with the field you want to update
+                date_value: date// Replace with the desired date
+            });
+
+            console.log('Response:', response.data); // Handle successful response
+        } catch (error) {
+            console.error('Error:', error.response?.data || error.message); // Handle error response
+        }
     };
 
-    const handleTextChange = (e, id, field) => {
-        const { value } = e.target;
-        const updatedData = processedReport.map(item => {
-            if (item.id === id) {
-                return { ...item, [field]: value };
-            }
-            return item;
+    const handleTextChange = async (e, id, field) => {
+        const {value} = e.target;
+        setProcessedReport(prevReport => {
+            const updatedData = prevReport.map(item => {
+                if (item.id === id) {
+                    return {...item, [field]: value};
+                }
+                return item;
+            });
+            return updatedData;
         });
-        setProcessedReport(updatedData);
-        // Call your web service here
-
-        console.log(e.target)
-        console.log(id)
-        console.log(field)
     };
+
 
     const formatField = (key) => key.replace(/_/g, ' ').toUpperCase();
-
-    const conditionalRowStyles = (index) => ({
-        backgroundColor: index % 2 === 1 ? '#F7F9FF' : '#F7F9FF',
-        className: "py-1 whitespace-nowrap font-bold text-xs px-2",
-    });
 
     const filteredReport = processedReport.filter(row =>
         Object.values(row).some(value =>
@@ -207,112 +225,126 @@ const DepartmentReport = () => {
 
 
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
 
-    if (error) {
-        return <div>{error}</div>;
+    const updateTextField =async (e, id, key) =>{
+        const val= e.target.value.toString(); // Get the value from the input field
+        try {
+            const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_text_field', {
+                workorder_id: id,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
+                text_field: key, // Field you're updating
+                text_value: val // Correct value to send
+            });
+
+            console.log('Response:', response.data); // Handle successful response
+        } catch (error) {
+            console.error('Error:', error.response?.data || error.message); // Handle error response
+        }
     }
 
     return (
-        <div className="table-container max-h-screen">
-            {/* Flex container for the search bar */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', margin: '5px' }}>
-                {/* Search Bar on the right */}
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ padding: '10px', fontSize: '14px', width: '200px' }}
-                />
-            </div>
+        <React.Fragment>
+        {processedReport.length > 0 ? (
 
-            {/* Export Button fixed at bottom-right */}
-            <button
-                onClick={exportToCSV}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '5px',
-                    padding: '10px 10px',
-                    fontSize: '14px',
-                    backgroundColor: '#007BFF',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '4px',
-                    zIndex: '1000' // Ensure it's on top of other elements
-                }}
-            >
-                Export
-            </button>
+                <div>
+                    <div className="flex justify-between">
+                        <h1 className="flex justify-start flex-row py-3">Department wise report</h1>
+                        <div className="flex justify-end flex-row p-2 ">
+                            {/* Search Bar on the right */}
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
 
-            <table>
-                <thead>
-                <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
-                    <th className="sticky-header sticky-column">RAILCAR ID</th>
-                    {Object.keys(processedReport[0]).map((key) =>
-                        key !== 'id' && key !== 'railcar_id' ? (
-                            <th key={key} className="sticky-header" style={{ paddingLeft: '10px', paddingRight: '2px' }}>
-                                {formatField(key)}
-                            </th>
-                        ) : null
-                    )}
-                </tr>
-                </thead>
-                <tbody>
-                {filteredReport.map((row, index) => (
-                    <tr key={row.id} >
-                        <td className="sticky-column">{row.railcar_id}</td>
-                        {Object.keys(row).map((key) =>
-                            key !== 'id' && key !== 'railcar_id' ? (
-                                <td key={key} className="text-xs py-1" style={{ paddingLeft: '5px', fontFamily: 'Inter', fontWeight: '400' }}>
-                                    {["mo_wk", "sp", "tq", "re", "ep"].includes(key) ? (
-                                        <input
-                                            type="text"
-                                            style={{ width: '160px' }}
-                                            value={row[key]}
-                                            onChange={(e) => handleTextChange(e, row.id, key)}
-                                            className="text-input w-40"
-                                        />
-                                    ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key  ==='month_to_invoice'? (
-                                        <span  >
-                                              <DatePicker
-                                                  value={row[key] !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row[key]).toLocaleDateString() : null}
-                                                  selected={row[key]!== process.env.REACT_APP_DEFAULT_DATE ? new Date(row[key]) : null}
-                                                  onChange={
-                                                      (newDate) => handleDateChange(newDate, row.id, key)
-                                                  }
-                                                  isClearable
-                                                  showYearDropdown
-                                                  dateFormat="MM-dd-yyyy"
-                                                  style={{ width: '100%' }}
-                                              />
-                                        </span>
+                                style={{ padding: '10px', fontSize: '14px', width: '200px' }}
+                            />
+                        </div>
+                    </div>
 
-                                    ) : key === 'status_code' ? (
-                                            <select>
-                                                {statusCodes.map((status) => (
-                                                    <option  key={status.code}
-                                                    selected={row[key] === status.code}>
-                                                {status.code + ":" + status.title}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        ) :
-                                        (
-                                        <span>{row[key]}</span>
+                    <div className="table-container max-h-screen">
+                        {/* Flex container for the search bar */}
+
+
+                        <FaCloudDownloadAlt onClick={exportToCSV} style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '15px',
+                            height:'50px',
+                            width:'50px',
+                            color:'#002E54',
+                            cursor:'pointer',
+                            zIndex: '1000' // Ensure it's on top of other elements
+                        }}/>
+                        <table>
+                            <thead>
+                            <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
+                                <th className="sticky-header sticky-column">RAILCAR ID</th>
+                                {Object.keys(processedReport[0]).map((key) =>
+                                    key !== 'id' && key !== 'railcar_id' ? (
+                                        <th key={key} className="sticky-header" style={{ paddingLeft: '10px', paddingRight: '2px' }}>
+                                            {formatField(key)}
+                                        </th>
+                                    ) : null
+                                )}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {filteredReport.map((row, index) => (
+                                <tr key={row.id} >
+                                    <td className="sticky-column">{row.railcar_id}</td>
+                                    {Object.keys(row).map((key) =>
+                                        key !== 'id' && key !== 'railcar_id' ? (
+                                            <td key={key} className="text-xs py-1" style={{ paddingLeft: '5px', fontFamily: 'Inter', fontWeight: '400' }}>
+                                                {["mo_wk", "sp", "tq", "re", "ep"].includes(key) ? (
+                                                    <input
+                                                        type="text"
+                                                        style={{ width: '160px' }}
+                                                        value={row[key]}
+                                                        onChange={(e) => handleTextChange(e, row.id, key)}
+                                                        onBlur={(e) => updateTextField(e, row.id, key)}
+                                                        className="text-input w-40"
+                                                    />
+                                                ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key  ==='month_to_invoice'? (
+
+                                                    <span  >
+                                                          <DatePicker
+                                                              value={ row[key]!== null ? new Date(row[key]).toLocaleDateString() : null}
+                                                              selected={ row[key]!== null ? new Date(row[key]) : null}
+                                                              onChange={
+                                                                  (newDate) => handleDateChange(newDate, row.id, key)
+                                                              }
+                                                              isClearable
+                                                              showYearDropdown
+                                                              dateFormat="MM-dd-yyyy"
+                                                              style={{ width: '100%' }}
+                                                          />
+                                                    </span>
+
+                                                ) : key === 'status_code' ? (
+                                                        <select>
+                                                            {statusCodes.map((status) => (
+                                                                <option  key={status.code}
+                                                                         selected={row[key] === status.code}>
+                                                                    {status.code + ":" + status.title}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    ) :
+                                                    (
+                                                        <span>{row[key]}</span>
+                                                    )}
+                                            </td>
+                                        ) : null
                                     )}
-                                </td>
-                            ) : null
-                        )}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
-
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : null}
+        </React.Fragment>
     );
 };
 

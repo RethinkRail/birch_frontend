@@ -289,7 +289,6 @@ const DepartmentReport = () => {
         if (sortColumn === column) {
             return sortDirection === 'asc' ? '🔼' : '🔽';
         }
-        return '🔼';
     };
 
 

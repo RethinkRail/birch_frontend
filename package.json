@@ -16,7 +16,7 @@
     "axios": "^1.6.0",
     "datatables.net": "^2.1.5",
     "datatables.net-dt": "^2.1.5",
-    "firebase": "^10.12.4",
+    "firebase": "^10.13.1",
     "flowbite": "^2.2.0",
     "flowbite-react": "^0.7.0",
     "material-react-table": "^2.13.1",

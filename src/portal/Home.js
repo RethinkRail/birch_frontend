@@ -12,6 +12,8 @@ import Modal from "react-modal";
 import {toast} from "react-toastify";
 import WorkOrderModal from "../components/WorkOrderModal";
 import Plus from "../components/Plus";
+import {getToken, onMessage} from "firebase/messaging";
+import {messaging} from "../firebase";
 
 
 const qs = require('qs');
@@ -26,6 +28,31 @@ const Home = () => {
     const routingStatusTextArea = useRef(null);
     const toastId = useRef(null)
     const [workOrderModalShowing, setWorkOrderModalShowing] = useState(false)
+
+
+    //CLoud messaging
+    onMessage(messaging, (payload) => {
+        console.log(payload)
+        if(payload.data.type === 'new_order'){
+            getActiveTasks()
+            getWorkOrderById(parseInt(payload.data.value))
+        }else if(payload.data.type === 'routing'){
+            getActiveTasks()
+        }
+    })
+
+
+
+
+
+
+
+
+    //CLoud messaging
+
+
+
+
     const getActiveTasks = () => {
         let config = {
             method: 'get',
@@ -37,12 +64,16 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 console.log(response.data)
+                if(activeTasks.length!= 0 && response.data.length > activeTasks.length){
+                    toast.success(
+                      "A new task is assigned, check your task"
+                    );
+                }
                 setActiveTask(response.data);
             })
             .catch((error) => {
                 console.log(error);
             });
-
     }
 
     const getWorkOrderById = async (work_id) => {
@@ -50,20 +81,32 @@ const Home = () => {
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
-            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + work_id,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(work_id),
             headers: {}
         };
 
         await axios.request(config)
             .then((response) => {
                 console.log(response.data)
-                console.log(workOrders)
 
                 // const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
                 // setWorkOrders(updatedWorkOrders)
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
-                console.log(new_work_orders)
-                setWorkOrders(new_work_orders)
+                if(new_work_orders != null){
+                    setWorkOrders(new_work_orders)
+                }else {
+                    const  newLyAdded = workOrders.concat(response.data)
+                    setWorkOrders(newLyAdded)
+                    toast.success(
+                        <>
+                            {response.data.railcar_id}
+                            <br />
+                            Order created
+                        </>
+                    );
+
+                }
+
             })
             .catch((error) => {
                 console.log(error);

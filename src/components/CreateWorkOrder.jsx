@@ -12,6 +12,8 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
     const [inputValues, setInputValues] = useState({});
     const [relatedData, setRelatedData] = useState()
     const [rm, setRM] = useState('')
+    console.log("create word")
+    console.log(routingMatrix)
     //console.log(routingMatrix)
     const fields = [{Field: "rfid", Type: "string"}, {Field: "type_id", Type: "int"}, {
         Field: "owner_id",
@@ -223,7 +225,7 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
                                     --Select an option--
                                 </option>
                                 {routingMatrix.map((option) => (
-                                    <option key={option.id} value={option.name}>
+                                    <option key={option.id} value={option.id}>
                                         {option.name}
                                     </option>
                                 ))}

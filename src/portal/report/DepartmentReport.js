@@ -392,7 +392,7 @@ const DepartmentReport = () => {
                             cursor:'pointer',
                             zIndex: '1000' // Ensure it's on top of other elements
                         }}/>
-                        <table>
+                        <table id="department_report">
                             <thead>
                             <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
                                 <th

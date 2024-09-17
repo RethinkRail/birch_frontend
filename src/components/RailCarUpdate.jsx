@@ -9,14 +9,14 @@ const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, 
     // Setting the initial value of the input field when the modal appears
     useEffect(() => {
         if (editRowData) {
-            console.log(editRowData, "This is the edit row data")
-            console.log(tableSchema, "Table Schema")
-            console.log(relatedData, "Related Data")
-            console.log(fields, "These are the fields")
+            // console.log(editRowData, "This is the edit row data")
+            // console.log(tableSchema, "Table Schema")
+            // console.log(relatedData, "Related Data")
+            // console.log(fields, "These are the fields")
 
             const inputValueCopy = {...editRowData}
             if(relatedData) {
-                console.log("Related Data dey")
+//                console.log("Related Data dey")
                 for(const key in inputValueCopy) {
                     const field = fields.find(field => field.Field.toLowerCase() === key);
                     if (field && tableSchema.some(schema => schema.name === field.Field && schema.isForeignKey) && inputValueCopy[key] !== null) {
@@ -24,7 +24,7 @@ const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, 
                     }
                 }
             }
-            console.log(inputValueCopy, "This is the input value copy")
+          //  console.log(inputValueCopy, "This is the input value copy")
             setInputValues(inputValueCopy);
         } else {
             const initialState = {};
@@ -52,7 +52,7 @@ const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, 
                 });
 
             const relatedDataResults = await Promise.all(relatedDataPromises);
-            console.log(relatedDataResults, "This is the related data results")
+            //console.log(relatedDataResults, "This is the related data results")
             const relatedDataMap = relatedDataResults.reduce((acc, { field, data }) => {
                 acc[field] = data;
                 return acc;
@@ -123,10 +123,10 @@ const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, 
                             className="basic-single"
                             classNamePrefix="select"
                             defaultValue={inputValues[field.Field] !== null && relatedData[field.Field] ? relatedData[field.Field]?.map((option) => {
-                                console.log(option, "This is the option")
-                                console.log("Recent value is", inputValues[field.Field.toLowerCase()])
+                                //console.log(option, "This is the option")
+                                //console.log("Recent value is", inputValues[field.Field.toLowerCase()])
                                 const foreignKeyField = tableSchema.find(schema => schema.name === field.Field).foreignKeyInfo.referencedColumn;
-                                console.log("Referenced field is", foreignKeyField)
+                                //console.log("Referenced field is", foreignKeyField)
                                 return ({
                                     value: option[foreignKeyField],
                                     label: foreignKeyField === "id" ? option?.name : option[foreignKeyField]
@@ -136,10 +136,10 @@ const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, 
                             name="loc"
                             onChange={(selectedOption) => handleInputChange(selectedOption?.value, field.Field.toLowerCase(), getInputType(field.Type))}
                             options={relatedData[field.Field] ? relatedData[field.Field]?.map((option) => {
-                                console.log(option, "This is the option")
-                                console.log("Recent value is", inputValues[field.Field.toLowerCase()])
+                                //console.log(option, "This is the option")
+                                //console.log("Recent value is", inputValues[field.Field.toLowerCase()])
                                 const foreignKeyField = tableSchema.find(schema => schema.name === field.Field).foreignKeyInfo.referencedColumn;
-                                console.log("Referenced field is", foreignKeyField)
+                                //console.log("Referenced field is", foreignKeyField)
                                 return ({
                                     value: option[foreignKeyField],
                                     label: foreignKeyField === "id" ? option?.name : option[foreignKeyField]

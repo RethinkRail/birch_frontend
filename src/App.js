@@ -2,82 +2,16 @@ import React, {useEffect, useState} from 'react';
 import {Outlet} from "react-router-dom";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {auth} from "./firebase";
+import {auth, messaging} from "./firebase";
 import axios from "axios";
 import qs from "qs";
 import Navbar from "./portal/navbar/Navbar";
+import {getToken} from "firebase/messaging";
 
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // const menuItems = {
-    //     "Work Order": "/",
-    //     "Database": "/database",
-    //     "Report": {
-    //         "Summary Report": "/summary_report",
-    //         "Emission Report": "/emission_report",
-    //         "Time Compare": "/time_compare",
-    //         "Scheduler": "/scheduler",
-    //         "Department Report": "/department_report"
-    //     },
-    //     "Management": {
-    //         "Birch User Management": "/user_management",
-    //         "Team Member Management": "/team_member_management",
-    //         "Routing Matrix": "/routing_matrix"
-    //     },
-    //     "Time Operation": "/time_operation"
-    // }
-
-
-    // const menuItems = {
-    //     "Work Order": "/",
-    //     "Database": "/database",
-    //     "Report": [
-    //         {
-    //             "Common": [
-    //                 {"Summary Report": "/summary_report"},
-    //                 {"Emission Report": "/emission_report"},
-    //                 {"Time Compare": "/time_compare"},
-    //                 {"Scheduler": "/scheduler"},
-    //                 {"Department Report": "/department_report"}
-    //             ]
-    //         },
-    //         {"Management Reports": [
-    //                 {"Revenue by Customer": "/revenue_by_customer"},
-    //                 {"Revenue by Department": "/revenue_by_department"},
-    //                 {"Revenue Recognition": "/revenue_recognition"},
-    //                 {"Billed Cars": "/billed_cars"}
-    //             ]
-    //         },
-    //         {"Operations Reports": [
-    //                 {"Shop Summary Report": "/shop_summary_report"},
-    //                 {"Manhours": "/manhours"},
-    //                 {"Billing Efficiency": "/billing_efficiency"},
-    //                 {"Utilization": "/utilization"},
-    //                 {"POD Accuracy": "/pod_accuracy"},
-    //                 {"Days in Status": "/days_in_status"}
-    //             ]
-    //         },
-    //         {"Purchasing": [
-    //                 {"Revenue Recognition - Inventory": "/revenue_recognition_inventory"},
-    //                 {"Allocated Inventory": "/allocated_inventory"}
-    //             ]
-    //         },
-    //         {"Misc. Reports": [
-    //                 {"User Activity": "/user_activity"},
-    //                 {"Emissions": "/emissions"},
-    //                 {"QB Time Compare": "/qb_time_compare"}
-    //             ]
-    //         }
-    //     ],
-    //     "Management": [
-    //         {"Birch User Management": "/user_management"},
-    //         {"Team Member Management": "/team_member_management"},
-    //         {"Routing Matrix": "/routing_matrix"}
-    //     ],
-    //     "Time Operation": "/time_operation"
-    // }
     useEffect(() => {
         handleGetUser();
     }, [isLoggedIn]);
@@ -98,10 +32,14 @@ function App() {
             if (user == null) {
                 setIsLoggedIn(false)
             } else {
+                const token = await requestPermissionAndGetToken();
+                console.log(token)
+                await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
                 let data = qs.stringify({
                     'name': user.displayName,
                     'email': user.email,
-                    'access_token': user.accessToken
+                    'access_token': user.accessToken,
+                    'cloud_message_token': token
                 });
 
                 let config = {
@@ -137,6 +75,29 @@ function App() {
             console.error(error);
             setIsLoggedIn(false)
         })
+    };
+
+    const requestPermissionAndGetToken = async () => {
+        try {
+            // Request notification permission from the user
+            return await getToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_VAP_ID_KEY })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        console.log('FCM Token:', currentToken);
+                        return currentToken;
+                    } else {
+                        console.log('No registration token available. Request permission to generate one.');
+                        return null;
+                    }
+                })
+                .catch((err) => {
+                    console.error('An error occurred while retrieving token. ', err);
+                    return null;
+                });
+        } catch (error) {
+            console.error("Error getting FCM token:", error.message);
+            return null;
+        }
     };
 
     return (

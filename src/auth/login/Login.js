@@ -3,7 +3,8 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
 import {GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
-import {auth} from "../../firebase";
+import {auth, messaging} from "../../firebase";
+import {getToken} from "firebase/messaging";
 
 
 const qs = require('qs');
@@ -17,11 +18,11 @@ const Login = () => {
     });
     const navigate = useNavigate()
     const toastId = useRef(null)
-
+    let token
     const submitLoginForm = (event) => {
         event.preventDefault();
         toastId.current = toast.loading("Loading...")
-        signInWithPopup(auth, provider).then((user) => {
+        signInWithPopup(auth, provider).then(async (user) => {
 
             const domain = (user.user.email || "").split("@").pop();
             const isValid = domain === process.env.REACT_APP_WORKSPACE_DOMAIN;
@@ -37,11 +38,14 @@ const Login = () => {
                 return
             }
 
-
+            token    = await requestPermissionAndGetToken();
+            console.log(token)
+            await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
             let data = qs.stringify({
                 'name': user.user.displayName,
                 'email': user.user.email,
-                'access_token': user.user.accessToken
+                'access_token': user.user.accessToken,
+                'cloud_message_token': token
             });
 
             let config = {
@@ -55,11 +59,9 @@ const Login = () => {
             };
 
             axios.request(config)
-                .then((response) => {
-                    console.log(response.status)
+                .then(async (response) => {
                     if (response.status === 200) {
 
-                        console.log(response)
 
                         if (response.data.is_active == 0) {
 
@@ -122,6 +124,30 @@ const Login = () => {
             });
         });
     }
+
+    const requestPermissionAndGetToken = async () => {
+        try {
+            // Request notification permission from the user
+            return await getToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_VAP_ID_KEY })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        console.log('FCM Token:', currentToken);
+                        return currentToken;
+                    } else {
+                        console.log('No registration token available. Request permission to generate one.');
+                        return null;
+                    }
+                })
+                .catch((err) => {
+                    console.error('An error occurred while retrieving token. ', err);
+                    return null;
+                });
+        } catch (error) {
+            console.error("Error getting FCM token:", error.message);
+            return null;
+        }
+    };
+
 
     return (
         <React.Fragment>

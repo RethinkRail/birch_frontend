@@ -1,12 +1,14 @@
 import {useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import {auth} from "../firebase";
+import {auth, messaging} from "../firebase";
 import qs from "qs";
 import axios from "axios";
+import {getToken} from "firebase/messaging";
 
 const ProtectedRoute = (props) => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    let token
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {
 
@@ -14,10 +16,14 @@ const ProtectedRoute = (props) => {
                 setIsLoggedIn(false)
                 return navigate('/auth/login');
             } else {
+                token    = await requestPermissionAndGetToken();
+                console.log(token)
+                await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
                 let data = qs.stringify({
                     'name': user.displayName,
                     'email': user.email,
-                    'access_token': user.accessToken
+                    'access_token': user.accessToken,
+                    'cloud_message_token': token
                 });
 
                 let config = {
@@ -35,6 +41,7 @@ const ProtectedRoute = (props) => {
                         if (response.status === 200) {
                             if (response.data.is_active == 1) {
                                 setIsLoggedIn(true)
+                                localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
                             } else {
 
                                 setIsLoggedIn(false)
@@ -60,6 +67,29 @@ const ProtectedRoute = (props) => {
             return navigate('/auth/login');
             setIsLoggedIn(false)
         })
+    };
+
+    const requestPermissionAndGetToken = async () => {
+        try {
+            // Request notification permission from the user
+            return await getToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_VAP_ID_KEY })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        console.log('FCM Token:', currentToken);
+                        return currentToken;
+                    } else {
+                        console.log('No registration token available. Request permission to generate one.');
+                        return null;
+                    }
+                })
+                .catch((err) => {
+                    console.error('An error occurred while retrieving token. ', err);
+                    return null;
+                });
+        } catch (error) {
+            console.error("Error getting FCM token:", error.message);
+            return null;
+        }
     };
 
 

@@ -41,6 +41,16 @@ const Home = () => {
         }
     })
 
+    messaging.setBackgroundMessageHandler((payload) => {
+        console.log(payload)
+        if(payload.data.type === 'new_order'){
+            getActiveTasks()
+            getWorkOrderById(parseInt(payload.data.value))
+        }else if(payload.data.type === 'routing'){
+            getActiveTasks()
+        }
+    });
+
 
 
 

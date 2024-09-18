@@ -1150,7 +1150,7 @@ const Home = () => {
     }
 
     useEffect(() => {
-        localStorage.setItem("jobsToBePasted", null)
+        localStorage.removeItem("jobsToBePasted", null)
         console.log("calling active task")
         getActiveTasks();
     }, []);

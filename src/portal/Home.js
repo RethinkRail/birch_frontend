@@ -32,7 +32,7 @@ const Home = () => {
 
 
     //CLoud messaging
-    // eslint-disable-next-line no-undef
+
     onMessage(messaging, (payload) => {
         console.log(payload)
         if(payload.data.type === 'new_order'){

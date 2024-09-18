@@ -12,13 +12,14 @@ import Modal from "react-modal";
 import {toast} from "react-toastify";
 import WorkOrderModal from "../components/WorkOrderModal";
 import Plus from "../components/Plus";
-import {onMessage} from "firebase/messaging";
-import {messaging} from "../firebase";
+import {onMessage,getMessaging} from "firebase/messaging";
+
 
 
 
 const qs = require('qs');
 const Home = () => {
+    const messaging = getMessaging();
     const forceUpdate = React.useReducer(() => ({}), {})[1];
     const [workOrders, setWorkOrders] = useState([]);
     const [activeTasks, setActiveTask] = useState([])

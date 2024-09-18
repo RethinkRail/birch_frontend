@@ -1,7 +1,7 @@
 import {initializeApp} from 'firebase/app';
 
 import {getAuth, GoogleAuthProvider} from "firebase/auth";
-import {getToken,getMessaging} from "firebase/messaging";
+import {getToken, getMessaging, onMessage} from "firebase/messaging";
 import qs from "qs";
 import axios from "axios";
 
@@ -21,7 +21,12 @@ export const app = initializeApp(config);
 export const auth = getAuth(app);
 export const messaging = getMessaging(app);
 
-
+export const onMessageListener = () =>
+    new Promise((resolve) => {
+        onMessage(messaging, (payload) => {
+            resolve(payload);
+        });
+    });
 
 
 

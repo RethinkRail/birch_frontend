@@ -12,8 +12,9 @@ import Modal from "react-modal";
 import {toast} from "react-toastify";
 import WorkOrderModal from "../components/WorkOrderModal";
 import Plus from "../components/Plus";
-import {getToken, onMessage} from "firebase/messaging";
+import {onMessage} from "firebase/messaging";
 import {messaging} from "../firebase";
+
 
 
 const qs = require('qs');
@@ -41,15 +42,7 @@ const Home = () => {
         }
     })
 
-    messaging.setBackgroundMessageHandler((payload) => {
-        console.log(payload)
-        if(payload.data.type === 'new_order'){
-            getActiveTasks()
-            getWorkOrderById(parseInt(payload.data.value))
-        }else if(payload.data.type === 'routing'){
-            getActiveTasks()
-        }
-    });
+
 
 
 

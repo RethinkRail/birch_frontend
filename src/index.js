@@ -11,6 +11,7 @@ import Home from "./portal/Home";
 import Database from "./portal/database/Database";
 import DepartmentReport from "./portal/report/DepartmentReport";
 import TableComponent from "./components/TableComponent";
+import RoutingMatrixEditor from "./portal/management/RoutingMatrixEditor";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -51,7 +52,12 @@ root.render(
                     </ProtectedRoute>
                 }>
                 </Route>
-
+                <Route path="/routing_matrix" element={
+                    <ProtectedRoute>
+                        <RoutingMatrixEditor/>
+                    </ProtectedRoute>
+                }>
+                </Route>
             </Route>
 
         </Routes>

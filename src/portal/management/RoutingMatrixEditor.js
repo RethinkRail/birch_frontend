@@ -139,8 +139,18 @@ const RoutingMatrixEditor = () => {
     const handleDeleteMatrix = () => {
         axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}routingmatrix/${selectedMatrixId}`)
             .then(response => {
-                setRoutingMatrices(routingMatrices.filter(matrix => matrix.id !== selectedMatrixId));
+                setRoutingMatrices(prevMatrices => {
+                    const updatedMatrices = prevMatrices.filter(matrix => matrix.id !== selectedMatrixId);
+                    console.log(updatedMatrices); // Log the updated state
+                    return updatedMatrices;
+                });
+                console.log(selectedMatrixId)
                 setSelectedMatrixId(null);
+                // Trigger the change event correctly
+                const rmSelector = document.getElementById("rmSelector");
+                if (rmSelector) {
+                    rmSelector.dispatchEvent(new Event('change'));  // Properly trigger the change event
+                }
                 toast.success('Routing matrix and its steps deleted successfully.');
             })
             .catch(error => toast.error('Error deleting routing matrix.'));
@@ -184,11 +194,13 @@ const RoutingMatrixEditor = () => {
 
                 {/* Select Routing Matrix */}
                 <div className="mb-6 flex items-center">
-                    <select
-                        onChange={(e) => setSelectedMatrixId(e.target.value)}
-                        className="border p-2 rounded-l-lg"
+                    <select id="rmSelector"
+                            value={selectedMatrixId || ""}
+                            onChange={(e) => setSelectedMatrixId(e.target.value)}
+
+                            className="border p-2 rounded-l-lg"
                     >
-                        <option value="">Select Routing Matrix</option>
+                        <option >Select Routing Matrix</option>
                         {routingMatrices.map(matrix => (
                             <option key={matrix.id} value={matrix.id}>{matrix.name}</option>
                         ))}

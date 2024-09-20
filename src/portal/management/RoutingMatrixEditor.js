@@ -100,8 +100,9 @@ const RoutingMatrixEditor = () => {
 
     // Handle Deleting a Step
     const handleDeleteStep = (stepId) => {
-        axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}routingmatrix/${selectedMatrixId}/steps/${stepId}`)
+        axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}routingmatrix/steps/${stepId}`)
             .then(response => {
+                console.log(response)
                 const updatedSteps = steps.filter(step => step.id !== stepId);
                 setSteps(updatedSteps);
             })
@@ -127,7 +128,10 @@ const RoutingMatrixEditor = () => {
 
         console.log(updatedStep)
         axios.put(`${process.env.REACT_APP_BIRCH_API_URL}routingmatrix/${selectedMatrixId}/steps/${step.id}`, updatedStep)
-            .then(response => toast.success('Step updated successfully!'))
+            .then((response)=>{
+                const updatedSteps = steps.map(s => s.id === step.id ? { ...s, ...updatedStep, id: response.data.id } : s);
+                setSteps(updatedSteps);
+            })
             .catch(error => toast.error('Error updating step.'));
     };
 
@@ -190,7 +194,7 @@ const RoutingMatrixEditor = () => {
                         ))}
                     </select>
                     <button
-                        onClick={() => setShowDeleteDialog(true)}
+                        onClick={handleDeleteMatrix}
                         className="bg-red-500 text-white px-4 py-2 rounded-r-lg ml-2"
                     >
                         Delete
@@ -203,21 +207,21 @@ const RoutingMatrixEditor = () => {
                         <table className="w-full min-w-[600px] mx-auto text-sm font-medium bg-white border rounded-lg shadow-md">
                             <thead className="bg-gray-100 text-left">
                             <tr className="border-b">
-                                <th className="py-2 px-4 w-24">Step Code</th>
-                                <th className="py-2 px-4 w-20">Pre-Step 1</th>
-                                <th className="py-2 px-4 w-20">Pre-Step 2</th>
-                                <th className="py-2 px-4 w-20">Pre-Step 3</th>
-                                <th className="py-2 px-4 w-20">Pre-Step 4</th>
+                                <th className="py-2 px-4 w-12">Step Code</th>
+                                <th className="py-2 px-4 w-12">Pre-Step 1</th>
+                                <th className="py-2 px-4 w-12">Pre-Step 2</th>
+                                <th className="py-2 px-4 w-12">Pre-Step 3</th>
+                                <th className="py-2 px-4 w-12">Pre-Step 4</th>
                                 <th className="py-2 px-4 w-32">Role</th>
                                 <th className="py-2 px-4 w-32">Status Code</th>
-                                <th className="py-2 px-4 w-72">Task Description</th>
+                                <th className="py-2 px-4 w-80">Task Description</th>
                                 <th className="py-2 px-4 text-right w-40">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {steps.map((step, index) => (
                                 <tr key={step.id} className="border-b">
-                                    <td className="py-2 px-4 w-24">
+                                    <td className="py-2 px-4 w-12">
                                         <input
                                             type="number"
                                             value={step.step_code || ''}
@@ -225,7 +229,7 @@ const RoutingMatrixEditor = () => {
                                             className="border p-1 rounded w-full"
                                         />
                                     </td>
-                                    <td className="py-2 px-4 w-20">
+                                    <td className="py-2 px-4 w-12">
                                         <input
                                             type="number"
                                             value={step.pre_step_1 || ''}
@@ -233,7 +237,7 @@ const RoutingMatrixEditor = () => {
                                             className="border p-1 rounded w-full"
                                         />
                                     </td>
-                                    <td className="py-2 px-4 w-20">
+                                    <td className="py-2 px-4 w-12">
                                         <input
                                             type="number"
                                             value={step.pre_step_2 || ''}
@@ -241,7 +245,7 @@ const RoutingMatrixEditor = () => {
                                             className="border p-1 rounded w-full"
                                         />
                                     </td>
-                                    <td className="py-2 px-4 w-20">
+                                    <td className="py-2 px-4 w-12">
                                         <input
                                             type="number"
                                             value={step.pre_step_3 || ''}
@@ -249,7 +253,7 @@ const RoutingMatrixEditor = () => {
                                             className="border p-1 rounded w-full"
                                         />
                                     </td>
-                                    <td className="py-2 px-4 w-20">
+                                    <td className="py-2 px-4 w-12">
                                         <input
                                             type="text"
                                             value={step.pre_step_4 || ''}
@@ -281,7 +285,7 @@ const RoutingMatrixEditor = () => {
                                             ))}
                                         </select>
                                     </td>
-                                    <td className="py-2 px-4 w-72">
+                                    <td className="py-2 px-4 w-80">
                                         <input
                                             type="text"
                                             value={step.task_description || ''}
@@ -290,19 +294,44 @@ const RoutingMatrixEditor = () => {
                                         />
                                     </td>
                                     <td className="py-2 px-4 text-right w-40">
-                                        <button
-                                            onClick={() => handleUpdateStep(step)}
-                                            className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-                                        >
-                                            Update
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteStep(step.id)}
-                                            className="bg-red-500 text-white px-4 py-2 rounded"
-                                        >
-                                            Delete
-                                        </button>
+                                        {step.id !== undefined ? (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        console.log(`Step ID: ${step.id}`); // Log step.id at the beginning
+                                                        console.log(`Updating step: ${step.id}`);
+                                                        handleUpdateStep(step);
+                                                    }}
+                                                    className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                                                >
+                                                    Update
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        console.log(`Step ID: ${step.id}`); // Log step.id at the beginning
+                                                        console.log(`Deleting step: ${step.id}`);
+                                                        handleDeleteStep(step.id);
+                                                    }}
+                                                    className="bg-red-500 text-white px-4 py-2 rounded"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => {
+                                                    console.log(`Step ID: ${step.id}`); // Log step.id at the beginning (it may be null for new steps)
+                                                    console.log("Saving new step");
+                                                    handleUpdateStep(step);
+                                                }}
+                                                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                                            >
+                                                Save
+                                            </button>
+                                        )}
                                     </td>
+
+
                                 </tr>
                             ))}
                             <tr>

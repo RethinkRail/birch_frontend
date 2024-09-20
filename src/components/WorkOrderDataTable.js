@@ -226,7 +226,7 @@ const WorkOrderDataTable = ({
             name: "LHR",
             selector: row => row.lhr,
             sortable: true,
-            width: '6%',
+            width: '5%',
             cell: (row) => (
                 <span
                     className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
@@ -246,7 +246,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '8%'
+            width: '7%'
         },
         {
             name: "LAST CONTENT",
@@ -255,7 +255,7 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span className="whitespace-pre-line ">{row.last_content}</span>
             ),
-            width: "10%"
+            width: "8%"
         },
         {
             name: "STATUS",
@@ -278,7 +278,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "15%",
+            width: "24%",
 
             cell: (row) => (
                 <span onClick={() => {
@@ -294,7 +294,7 @@ const WorkOrderDataTable = ({
         {
             name: "MATERIAL ETA",
             selector: row => row.material_eta,
-            width: "9%",
+            width: "8%",
             cell: (row) => (
                 <span>
                     <DatePicker
@@ -348,7 +348,7 @@ const WorkOrderDataTable = ({
         {
             name: "SHIPPED",
             selector: row => row.shipped,
-            width: "9%",
+            width: "8%",
             sortable: true,
             cell: (row) => (
                 <span>

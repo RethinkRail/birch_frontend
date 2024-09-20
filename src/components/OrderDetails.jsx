@@ -1029,6 +1029,91 @@ const OrderDetails = ({
                         </div>
                         {/*End Side menu*/}
                         <div className=" w-full">
+                            {/*Car information */}
+                            <div className="w-full bg-white p-4  mt-[24px]">
+                                <h6 className='font-semibold'>Car Information</h6>
+                                <div className="mt-[5px]  grid grid-cols-6 gap-10">
+                                    <div className="">
+                                        <p className='font-normal '>Equipment</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar_id}</p>
+                                    </div>
+                                    <div className="">
+                                        <p className='font-normal '>Car type</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.railcartype.name}</p>
+                                    </div>
+                                    <div className="">
+                                        <p className='font-normal '>Last Product</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.products.name}</p>
+                                    </div>
+                                    <div className="">
+                                        <p className='font-normal '>El Index</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.el_index}</p>
+                                    </div>
+                                    <div className="">
+                                        <p className='font-normal '>Owner</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_owner_idToowner.name}</p>
+                                    </div>
+                                    <div className="">
+                                        <p className='font-normal '>Lesse</p>
+                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_lessee_idToowner.name}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/*End Car information */}
+                            {/*Job list */}
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                <JoblistTable
+                                    handlePaste={pasteJobs}
+                                    jobs={workOrder.joblist}
+                                    workOrder={workOrder}
+                                    commonData = {commonData}
+                                    isBilledToLessee={isBilledToLessee}
+                                    createAjob={createAjob}
+                                    updateAJob={updateAJob}
+                                    deleteJob={deleteJob}
+                                    updateBillToLesseForAJob={updateBillToLesseForAJob}/>
+
+                            </div>
+
+                            {/*end job list */}
+
+
+                            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
+                                <div className="">
+                                    <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
+                                </div>
+                                <div className="">
+                                    <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
+                                </div>
+                                <div className="">
+                                    <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
+                                </div>
+                                <div className="]">
+                                    <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
+                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {/*Parts information*/}
+                        <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                            <PartsTable jobs={workOrder.joblist}/>
+                        </div>
+                        {/*End Parts information*/}
+
+                        {/*Railcar log*/}
+
+                        {railCarLog.length>0 &&(
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                                <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
+                            </div>
+                        )}
+
+
+                        {/*Railcar log*/}
+
                             {/*Order information */}
                             <div className="w-full bg-white p-2">
                                 <h6 className='font-semibold'>Order Information</h6>
@@ -1382,7 +1467,7 @@ const OrderDetails = ({
 
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
-                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>Is
+                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
                                                         Storage Cars</p>
                                                     <input
                                                         disabled={storageInformation.length > 0}
@@ -1399,7 +1484,7 @@ const OrderDetails = ({
                                             </div>
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
-                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>Is
+                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
                                                         Locked for Time clocking</p>
                                                     <input
                                                         disabled={workOrder.locked_by != null}
@@ -1413,7 +1498,7 @@ const OrderDetails = ({
 
                                             <div className='mt-[8px] '>
                                                 <div className='p-1 align-middle  inline-block'>
-                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>Is
+                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
                                                         BILL TO LESSEE </p>
                                                     <input
                                                         disabled={workOrder.locked_by != null}
@@ -1461,40 +1546,10 @@ const OrderDetails = ({
                             </div>
                             {/*End Order information */}
 
-                            {/*Car information */}
-                            <div className="w-full bg-white p-4  mt-[24px]">
-                                <h6 className='font-semibold'>Car Information</h6>
-                                <div className="mt-[5px]  grid grid-cols-6 gap-10">
-                                    <div className="">
-                                        <p className='font-normal '>Equipment</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar_id}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Car type</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.railcartype.name}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Last Product</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.products.name}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>El Index</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.el_index}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Owner</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_owner_idToowner.name}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Lesse</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_lessee_idToowner.name}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {/*End Car information */}
+
 
                             {/*Order information Owner */}
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                            <div className="w-full bg-white p-4  mb-10 mt-[24px] rounded-none">
 
                                 <h6 className='font-semibold '>Billing Information(Owner)</h6>
                                 <div className="grid grid-cols-3 gap-x-0.5">
@@ -1696,7 +1751,7 @@ const OrderDetails = ({
 
                             {/*Order information Lessee */}
                             {workOrder.secondary_owner_info  != null && (
-                                <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                <div className="w-full bg-white p-4 mb-10 mt-[24px] rounded-none">
 
                                     <h6 className='font-semibold '>Billing Information(Lessee)</h6>
                                     <div className="grid grid-cols-3 gap-x-0.5">
@@ -1898,59 +1953,12 @@ const OrderDetails = ({
                             )}
                             {/*End Order information Lessee */}
 
-                            {/*Job list */}
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                                <JoblistTable
-                                    handlePaste={pasteJobs}
-                                    jobs={workOrder.joblist}
-                                    workOrder={workOrder}
-                                    commonData = {commonData}
-                                    isBilledToLessee={isBilledToLessee}
-                                    createAjob={createAjob}
-                                    updateAJob={updateAJob}
-                                    deleteJob={deleteJob}
-                                    updateBillToLesseForAJob={updateBillToLesseForAJob}/>
-
-                            </div>
-
-                            {/*end job list */}
-
-                            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
-                                </div>
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
-                                </div>
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
-                                </div>
-                                <div className="]">
-                                    <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
-                                </div>
-                            </div>
-                            </div>
-                        {/*Parts information*/}
-                        <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                            <PartsTable jobs={workOrder.joblist}/>
-                        </div>
-
-                        {/*End Parts information*/}
-
-                        {/*Railcar log*/}
-
-                        {railCarLog.length>0 &&(
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
-                                <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
-                            </div>
-                        )}
 
 
-                        {/*Railcar log*/}
+
+
+
+
 
 
                         {/*Storage information*/}

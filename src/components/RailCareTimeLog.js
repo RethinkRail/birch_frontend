@@ -47,9 +47,9 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         setTotalHoursApplied(applied);
         setTotalRework(rework);
         setDifference(diff);
-        console.log(datePickers)
+
     }, [railcarLog,locked_for_time_clockinhg]);
-    console.log(isDatePickerDisabled)
+
     // const handleDateChange = async (type, jobId, date) => {
     //
     //     if (date == null && type == 'crewChecked') {
@@ -334,9 +334,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
 
     return (
         <div>
-            {
-                console.log(datePickers)
-            }
+
             <div className="flex justify-between mb-5 items-center">
                 <h6 className='font-semibold'>Railcar time log</h6>
             </div>

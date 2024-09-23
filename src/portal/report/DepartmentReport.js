@@ -41,6 +41,7 @@ const DepartmentReport = () => {
                 setStatusCodes(statusCodeResponse.data);
 
                 const departmentReportResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_department_report/');
+
                 setDepartmentReport(departmentReportResponse.data);
 
                 let data = processRailcarData(departmentReportResponse.data, jobCategoryResponse.data);
@@ -134,41 +135,70 @@ const DepartmentReport = () => {
     }
 
     function processRailcarData(dataArray, departmentMap) {
-        return dataArray.map(railcarData => {
+        console.log('Data Array:', dataArray);
+        console.log('Department Map:', departmentMap);
+
+        if (!dataArray.length || !departmentMap.length) {
+            console.error('Empty dataArray or departmentMap');
+            return [];
+        }
+
+        const departmentMapById = departmentMap.reduce((acc, dept) => {
+            acc[dept.id] = dept.name.toLowerCase().replace(/-/g, '_');
+            return acc;
+        }, {});
+
+        const results = new Array(dataArray.length);
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const railcarData = dataArray[i];
             const result = {};
 
-            // Initialize man-hour and applied hour fields for each department
-            departmentMap.forEach(dept => {
-                result[`${dept.name.toLowerCase().replace(/-/g, '_')}_man_hour_estimated`] = 0;
-                result[`${dept.name.toLowerCase().replace(/-/g, '_')}_man_hour_applied`] = 0;
-            });
+            // Initialize man-hour fields
+            for (const deptId in departmentMapById) {
+                result[`${departmentMapById[deptId]}_man_hour_estimated`] = 0;
+                result[`${departmentMapById[deptId]}_man_hour_applied`] = 0;
+            }
 
-            // Process joblist for each railcar
-            railcarData.joblist.forEach(job => {
+
+
+            if (!railcarData.joblist || !Array.isArray(railcarData.joblist)) {
+                console.error('Invalid joblist:', railcarData.joblist);
+                continue;
+            }
+
+            railcarData.joblist.forEach((job)=>{
+
                 const jobCategoryId = job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.id;
-                const department = departmentMap.find(dept => dept.id === jobCategoryId);
+                const departmentName = departmentMapById[jobCategoryId];
 
-                if (department) {
+
+                if (departmentName) {
+
                     const manHourEstimated = job.labor_time * job.quantity;
-                    const manHourApplied = job.time_log.reduce((sum, log) => sum + log.logged_time_in_seconds, 0) / 3600;
+                    const manHourApplied = job.time_log ? job.time_log.reduce((sum, log) => sum + (log.logged_time_in_seconds || 0), 0) / 3600 : 0;
 
-                    result[`${department.name.toLowerCase().replace(/-/g, '_')}_man_hour_estimated`] += manHourEstimated;
-                    result[`${department.name.toLowerCase().replace(/-/g, '_')}_man_hour_applied`] += manHourApplied;
+                    result[`${departmentName}_man_hour_estimated`] += manHourEstimated;
+                    result[`${departmentName}_man_hour_applied`] += manHourApplied;
+
                 }
 
-                const totalCost = job.labor_cost + job.material_cost;
+                const totalCost = (job.labor_cost || 0) + (job.material_cost || 0);
                 result.total_cost = (result.total_cost || 0) + totalCost;
-            });
+            })
 
-            const statusCode = railcarData.workupdates[0]?.statuscode?.code || null;
+
+            const statusCode = railcarData.workupdates?.[0]?.statuscode?.code || null;
             const owner = railcarData.railcar?.owner_railcar_owner_idToowner?.name || null;
             const lessee = railcarData.railcar?.owner_railcar_lessee_idToowner?.name || null;
             const products = railcarData.railcar?.products?.name || null;
-            const type = railcarData.railcar.railcartype?.name || null;
-            const railcar_id = railcarData.railcar.rfid;
+            const type = railcarData.railcar?.railcartype?.name || null;
+            const railcar_id = railcarData.railcar?.rfid || null;
+            console.log(railcar_id)
+            // Use a helper function to format dates
+            const formatDate = (dateStr) => dateStr !== process.env.REACT_APP_DEFAULT_DATE ? new Date(dateStr).toLocaleDateString() : null;
 
-            // Return the object in the desired field order
-            return {
+            results[i] = {
                 id: railcarData.id,
                 railcar_id,
                 dis: railcarData.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), railcarData.arrival_date)["days"],
@@ -177,36 +207,36 @@ const DepartmentReport = () => {
                 lessee,
                 products,
                 status_code: statusCode,
-                inspected_date: railcarData.inspected_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.inspected_date).toLocaleDateString() : null,
-                material_eta: railcarData.material_eta  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.material_eta).toLocaleDateString() : null,
-                clean_date: railcarData.clean_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.clean_date).toLocaleDateString() : null,
+                inspected_date: formatDate(railcarData.inspected_date),
+                material_eta: formatDate(railcarData.material_eta),
+                clean_date: formatDate(railcarData.clean_date),
                 clean_man_hour_estimated: round2Dec(result.clean_man_hour_estimated),
                 clean_man_hour_applied: round2Dec(result.clean_man_hour_applied),
-                repair_schedule_date: railcarData.repair_schedule_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.repair_schedule_date).toLocaleDateString() : null,
+                repair_schedule_date: formatDate(railcarData.repair_schedule_date),
                 repair_man_hour_estimated: round2Dec(result.repair_man_hour_estimated),
                 repair_man_hour_applied: round2Dec(result.repair_man_hour_applied),
-                paint_date: railcarData.paint_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.paint_date).toLocaleDateString() : null,
-                exterior_paint: railcarData.exterior_paint !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.exterior_paint).toLocaleDateString() : null,
-                paint_man_hour_estimated:round2Dec( result.paint_man_hour_estimated),
+                paint_date: formatDate(railcarData.paint_date),
+                exterior_paint: formatDate(railcarData.exterior_paint),
+                paint_man_hour_estimated: round2Dec(result.paint_man_hour_estimated),
                 paint_man_hour_applied: round2Dec(result.paint_man_hour_applied),
-                valve_date: railcarData.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.valve_date).toLocaleDateString() : null,
-                valve_man_hour_estimated:round2Dec( result.valve_man_hour_estimated),
+                valve_date: formatDate(railcarData.valve_date),
+                valve_man_hour_estimated: round2Dec(result.valve_man_hour_estimated),
                 valve_man_hour_applied: round2Dec(result.valve_man_hour_applied),
-                pd_date: railcarData.pd_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.pd_date).toLocaleDateString() : null,
-                pd_man_hour_estimated:round2Dec( result.pd_man_hour_estimated),
+                pd_date: formatDate(railcarData.pd_date),
+                pd_man_hour_estimated: round2Dec(result.pd_man_hour_estimated),
                 pd_man_hour_applied: round2Dec(result.pd_man_hour_applied),
                 indirect_labor_man_hour_estimated: round2Dec(result.indirect_labor_man_hour_estimated),
                 indirect_labor_man_hour_applied: round2Dec(result.indirect_labor_man_hour_applied),
                 indirect_switching_man_hour_estimated: round2Dec(result.indirect_switching_man_hour_estimated),
                 indirect_switching_man_hour_applied: round2Dec(result.indirect_switching_man_hour_applied),
-                maintenance_man_hour_estimated:round2Dec( result.maintenance_man_hour_estimated),
+                maintenance_man_hour_estimated: round2Dec(result.maintenance_man_hour_estimated),
                 maintenance_man_hour_applied: round2Dec(result.maintenance_man_hour_applied),
                 admin_man_hour_estimated: round2Dec(result.admin_man_hour_estimated),
-                admin_man_hour_applied:round2Dec( result.admin_man_hour_applied),
-                final_date: railcarData.final_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.final_date).toLocaleDateString() : null,
-                qa_date: railcarData.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.qa_date).toLocaleDateString() : null,
-                projected_out_date: railcarData.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.projected_out_date).toLocaleDateString() : null,
-                month_to_invoice: railcarData.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.month_to_invoice).toLocaleDateString() : null,
+                admin_man_hour_applied: round2Dec(result.admin_man_hour_applied),
+                final_date: formatDate(railcarData.final_date),
+                qa_date: formatDate(railcarData.qa_date),
+                projected_out_date: formatDate(railcarData.projected_out_date),
+                month_to_invoice: formatDate(railcarData.month_to_invoice),
                 total_cost: round2Dec(result.total_cost),
                 mo_wk: railcarData.mo_wk || "",
                 sp: railcarData.sp || "",
@@ -214,8 +244,102 @@ const DepartmentReport = () => {
                 re: railcarData.re || "",
                 ep: railcarData.ep || ""
             };
-        });
+            console.log(result[i])
+        }
+
+        return results;
     }
+
+
+
+
+    // function processRailcarData(dataArray, departmentMap) {
+    //     console.log(dataArray)
+    //     console.log(departmentMap)
+    //     return dataArray.map(railcarData => {
+    //         const result = {};
+    //
+    //         // Initialize man-hour and applied hour fields for each department
+    //         departmentMap.forEach(dept => {
+    //             result[`${dept.name.toLowerCase().replace(/-/g, '_')}_man_hour_estimated`] = 0;
+    //             result[`${dept.name.toLowerCase().replace(/-/g, '_')}_man_hour_applied`] = 0;
+    //         });
+    //         console.log(departmentMap)
+    //         console.log(railcarData.joblist)
+    //
+    //         // Process joblist for each railcar
+    //         railcarData.joblist.forEach(job => {
+    //             const jobCategoryId = job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.id;
+    //             const department = departmentMap.find(dept => dept.id === jobCategoryId);
+    //
+    //             if (department) {
+    //                 const manHourEstimated = job.labor_time * job.quantity;
+    //                 const manHourApplied = job.time_log.reduce((sum, log) => sum + log.logged_time_in_seconds, 0) / 3600;
+    //
+    //                 result[`${department.name.toLowerCase().replace(/-/g, '_')}_man_hour_estimated`] += manHourEstimated;
+    //                 result[`${department.name.toLowerCase().replace(/-/g, '_')}_man_hour_applied`] += manHourApplied;
+    //             }
+    //
+    //             const totalCost = job.labor_cost + job.material_cost;
+    //             result.total_cost = (result.total_cost || 0) + totalCost;
+    //         });
+    //
+    //         const statusCode = railcarData.workupdates[0]?.statuscode?.code || null;
+    //         const owner = railcarData.railcar?.owner_railcar_owner_idToowner?.name || null;
+    //         const lessee = railcarData.railcar?.owner_railcar_lessee_idToowner?.name || null;
+    //         const products = railcarData.railcar?.products?.name || null;
+    //         const type = railcarData.railcar.railcartype?.name || null;
+    //         const railcar_id = railcarData.railcar.rfid;
+    //
+    //         // Return the object in the desired field order
+    //         return {
+    //             id: railcarData.id,
+    //             railcar_id,
+    //             dis: railcarData.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), railcarData.arrival_date)["days"],
+    //             type,
+    //             owner,
+    //             lessee,
+    //             products,
+    //             status_code: statusCode,
+    //             inspected_date: railcarData.inspected_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.inspected_date).toLocaleDateString() : null,
+    //             material_eta: railcarData.material_eta  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.material_eta).toLocaleDateString() : null,
+    //             clean_date: railcarData.clean_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.clean_date).toLocaleDateString() : null,
+    //             clean_man_hour_estimated: round2Dec(result.clean_man_hour_estimated),
+    //             clean_man_hour_applied: round2Dec(result.clean_man_hour_applied),
+    //             repair_schedule_date: railcarData.repair_schedule_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.repair_schedule_date).toLocaleDateString() : null,
+    //             repair_man_hour_estimated: round2Dec(result.repair_man_hour_estimated),
+    //             repair_man_hour_applied: round2Dec(result.repair_man_hour_applied),
+    //             paint_date: railcarData.paint_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.paint_date).toLocaleDateString() : null,
+    //             exterior_paint: railcarData.exterior_paint !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.exterior_paint).toLocaleDateString() : null,
+    //             paint_man_hour_estimated:round2Dec( result.paint_man_hour_estimated),
+    //             paint_man_hour_applied: round2Dec(result.paint_man_hour_applied),
+    //             valve_date: railcarData.valve_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.valve_date).toLocaleDateString() : null,
+    //             valve_man_hour_estimated:round2Dec( result.valve_man_hour_estimated),
+    //             valve_man_hour_applied: round2Dec(result.valve_man_hour_applied),
+    //             pd_date: railcarData.pd_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.pd_date).toLocaleDateString() : null,
+    //             pd_man_hour_estimated:round2Dec( result.pd_man_hour_estimated),
+    //             pd_man_hour_applied: round2Dec(result.pd_man_hour_applied),
+    //             indirect_labor_man_hour_estimated: round2Dec(result.indirect_labor_man_hour_estimated),
+    //             indirect_labor_man_hour_applied: round2Dec(result.indirect_labor_man_hour_applied),
+    //             indirect_switching_man_hour_estimated: round2Dec(result.indirect_switching_man_hour_estimated),
+    //             indirect_switching_man_hour_applied: round2Dec(result.indirect_switching_man_hour_applied),
+    //             maintenance_man_hour_estimated:round2Dec( result.maintenance_man_hour_estimated),
+    //             maintenance_man_hour_applied: round2Dec(result.maintenance_man_hour_applied),
+    //             admin_man_hour_estimated: round2Dec(result.admin_man_hour_estimated),
+    //             admin_man_hour_applied:round2Dec( result.admin_man_hour_applied),
+    //             final_date: railcarData.final_date  !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.final_date).toLocaleDateString() : null,
+    //             qa_date: railcarData.qa_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.qa_date).toLocaleDateString() : null,
+    //             projected_out_date: railcarData.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.projected_out_date).toLocaleDateString() : null,
+    //             month_to_invoice: railcarData.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? new Date(railcarData.month_to_invoice).toLocaleDateString() : null,
+    //             total_cost: round2Dec(result.total_cost),
+    //             mo_wk: railcarData.mo_wk || "",
+    //             sp: railcarData.sp || "",
+    //             tq: railcarData.tq || "",
+    //             re: railcarData.re || "",
+    //             ep: railcarData.ep || ""
+    //         };
+    //     });
+    // }
 
     const handleDateChange = async (date, id, field) => {
         setProcessedReport(prevReport => {

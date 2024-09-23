@@ -13,7 +13,7 @@ const getUniqueParts = (jobs) => {
         job.jobparts.forEach(part => {
 
             const { code, title, price,part_condition } = part.parts;
-            const { quantity, purchase_cost, availability } = part;
+            const { quantity, purchase_cost, availability,additional_info } = part;
 
             if (partsMap.has(code)) {
                 const existingPart = partsMap.get(code);
@@ -27,7 +27,8 @@ const getUniqueParts = (jobs) => {
                     price,
                     quantity,
                     part_condition,
-                    availability
+                    availability,
+                    additional_info
                 });
             }
         });
@@ -1352,6 +1353,7 @@ export function printBBOM(workOrder) {
 
     var bomTable = '<table class="mytable forjobs"><thead><tr style="background: lightgray;"><td>Code</td><td>Title</td><td>Quantity</td><td>Condition</td><td>Availability</td><td>Additional Info</td></tr></thead><tbody>';
     parts_for_bill.forEach((item, i) => {
+        console.log(item)
         var additional_info= item.additional_info?item.additional_info:""
         bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.title + '</td><td>' + round2Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
     });

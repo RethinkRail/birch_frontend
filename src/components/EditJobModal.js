@@ -397,7 +397,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             setModalShowing((prev) => (!prev))
             setEditData()
         }}>
-            <div className="bg-white drop-shadow-md rounded-md w-[95%] max-w-[1600px] p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white drop-shadow-md rounded-md w-[95%] overflow-y-auto max-w-[1600px] p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
                 {editData ? "Edit line number: "+editData.line_number : "ADD A JOB"}
                 <div className="grid grid-cols-3 gap-5">
                     <div className="col-span-1 flex flex-col gap-1.5">

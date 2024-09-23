@@ -127,6 +127,7 @@ const WorkOrderDataTable = ({
         }
 //        console.log("in action")
     }, [workOrders])
+
     workOrders.forEach((workOrder, index) => {
         const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);

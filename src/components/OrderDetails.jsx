@@ -205,6 +205,7 @@ const OrderDetails = ({
     useEffect(() => {
         console.log("use effect in orderdetails")
         setReasonToCome(workOrder.reason_to_come);
+        console.log(workOrder)
         console.log(workOrder.joblist)
         setJobs(workOrder.joblist)
         setIsStatusDropDownModalOpenInDetails(false);

@@ -97,6 +97,8 @@ const Home = () => {
                 // setWorkOrders(updatedWorkOrders)
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
                 if(new_work_orders != null){
+                    console.log("replace")
+                    console.log(new_work_orders)
                     setWorkOrders(new_work_orders)
                 }else {
                     const  newLyAdded = workOrders.concat(response.data)
@@ -876,13 +878,14 @@ const Home = () => {
             .then((response) => {
                 console.log("calling done")
                 console.log(response.data)
-                if (is_billed_to_lessee) {
-                    const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
-                    setWorkOrders(updatedWorkOrders)
-                } else {
-                    const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
-                    setWorkOrders(updatedWorkOrders)
-                }
+                getWorkOrderById(work_id)
+                // if (is_billed_to_lessee) {
+                //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
+                //     setWorkOrders(updatedWorkOrders)
+                // } else {
+                //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
+                //     setWorkOrders(updatedWorkOrders)
+                // }
             })
             .catch((error) => {
                 console.log(error);

@@ -50,9 +50,9 @@ const Home = () => {
 
             if (isDeleted) {
                 setWorkOrders(updatedArray)
-                toast.info(
-                    "A order has been deleted"
-                );
+                // toast.info(
+                //     "A order has been deleted"
+                // );
             } else {
                 console.log("No items were deleted.");
             }

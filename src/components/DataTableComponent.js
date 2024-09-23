@@ -8,11 +8,6 @@
 import React, {useMemo, useState} from 'react';
 import {MaterialReactTable, useMaterialReactTable} from "material-react-table";
 
-
-
-
-
-
 const DataTableComponent = ({ tableData }) => {
     const [columnVisibility, setColumnVisibility] = useState({
         id:false

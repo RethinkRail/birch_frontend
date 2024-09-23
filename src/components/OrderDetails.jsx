@@ -54,9 +54,10 @@ const OrderDetails = ({
                           deleteJob,
                           handleStorageUpdate,
                           handIsLockedForTimeClocking,
-                          updateBillToLesseForAJob
+                          updateBillToLesseForAJob,
+                          orderDetailsModalRef
                       }) => {
-    console.log(workOrder)
+    //console.log(workOrder)
     // console.log(workOrder.reason_to_come)
     // console.log(commonData)
 
@@ -203,92 +204,82 @@ const OrderDetails = ({
     };
 
     useEffect(() => {
-        console.log("use effect in orderdetails")
-        setReasonToCome(workOrder.reason_to_come);
-        console.log(workOrder)
-        console.log(workOrder.joblist)
-        setJobs(workOrder.joblist)
+        if (!workOrder) {
+            console.warn("workOrder is null or undefined");
+            return;
+        }
+
+        console.log("use effect in orderdetails");
+        setReasonToCome(workOrder.reason_to_come ?? "");
+        console.log(workOrder);
+        console.log(workOrder.joblist);
+        setJobs(workOrder.joblist ?? []);
         setIsStatusDropDownModalOpenInDetails(false);
 
+        setupdatedStatusCode("");
+        setIsReasonToComeChanged(false);
 
-        setupdatedStatusCode("")
-        setIsReasonToComeChanged(false)
+        setIsBillingInformationChangedForOwner(false);
+        setIsBillingInformationChangedForLessee(false);
 
+        setOwnerPurchaseOrder(workOrder.purchase_order ?? "");
+        setOwnerPurchaseOrderOriginal(workOrder.purchase_order ?? "");
+        setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? "");
+        setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? "");
+        setPurchaseOrderChangedForOwner(false);
+        setPurchaseOrderChangedForLessee(false);
 
-        setIsBillingInformationChangedForOwner(false)
-        setIsBillingInformationChangedForLessee(false)
+        setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+        setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? "");
+        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? "");
+        setInvoiceChangedForOwner(false);
+        setInvoiceChangedForLessee(false);
 
-        setOwnerPurchaseOrder(workOrder.purchase_order)
-        // This is for the button displayer function
-        setOwnerPurchaseOrderOriginal(workOrder.purchase_order)
-        setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? '')
-        setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? '')
-        setPurchaseOrderChangedForOwner(false)
-        setPurchaseOrderChangedForLessee(false)
+        setOwnerInvoiceNetDays(workOrder.invoice_net_days ?? 0);
+        setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days ?? 0);
+        setLesseeInvoiceNetDays(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+        setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+        setInvoiceNetDaysChangedForOwner(false);
+        setInvoiceNetDaysChangedForLessee(false);
 
-        setOwnerInvoiceNumber(workOrder.invoice_number)
-        // This is for the button displayer function
-        setOwnerInvoiceNumberOriginal(workOrder.invoice_number)
-        setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? '')
-        // this is for lessee button displayer
-        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? '')
-        setInvoiceChangedForOwner(false)
-        setInvoiceChangedForLessee(false)
+        console.log(workOrder.secondary_owner_info);
+        setOwnerInvoiceDate(workOrder.invoice_date ?? null);
+        setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
 
+        setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0)));
 
-        setOwnerInvoiceNetDays(workOrder.invoice_net_days)
-        // This is for the button displayer function
-        setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days)
-        setLesseeInvoiceNetDays(workOrder.secondary_owner_info ? workOrder.secondary_owner_info.invoice_net_days : 0)
-        // this is for the lessee button displayer function
-        setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info ? workOrder.secondary_owner_info.invoice_net_days : 0)
-        setInvoiceNetDaysChangedForOwner(false)
-        setInvoiceNetDaysChangedForLessee(false)
+        const secondaryOwnerInfo = workOrder.secondary_owner_info ?? {};
+        setLesseeInvoiceDate(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+        setLesseeInvoiceDateOriginal(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
 
-        console.log(workOrder.secondary_owner_info)
-        setOwnerInvoiceDate(workOrder.invoice_date)
-        // This is for the button displayer function
-        setOwnerInvoiceDateOriginal(workOrder.invoice_date)
+        const invDateLessee = secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
+        const invNetDateLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
 
-        // This is for the button displayer function
-        setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date, workOrder.invoice_net_days)))
-        if (workOrder.secondary_owner_info != null) {
-            console.log(workOrder.secondary_owner_info.invoice_date == process.env.REACT_APP_DEFAULT_DATE)
-        }
+        setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null);
 
-        if (workOrder.secondary_owner_info != null) {
-            console.log(workOrder.secondary_owner_info.invoice_date == process.env.REACT_APP_DEFAULT_DATE)
-        }
+        setInvoiceDateChangedForOwner(false);
+        setInvoiceDateChangedForLessee(false);
 
-        setLesseeInvoiceDate(workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date)
-        // this is for the lessee button displayer function
-        setLesseeInvoiceDateOriginal(workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date)
+        console.log(lesseeInvoiceDate);
+        setMo_wk(workOrder.mo_wk ?? 0);
+        setSP(workOrder.sp ?? 0);
+        setTQ(workOrder.tq ?? 0);
+        setRE(workOrder.re ?? 0);
+        setEP(workOrder.ep ?? 0);
+        setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+        setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
+        setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
+        setIsBilledToLessee(secondaryOwnerInfo ? true : false);
 
-        const invDateLessee = workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_date
-        const invNetDateLessee = workOrder.secondary_owner_info == null ? process.env.REACT_APP_DEFAULT_DATE : workOrder.secondary_owner_info.invoice_net_days
-
-        setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null)
-
-        setInvoiceDateChangedForOwner(false)
-        setInvoiceDateChangedForLessee(false)
-
-        console.log(lesseeInvoiceDate)
-        setMo_wk(workOrder.mo_wk);
-        setSP(workOrder.sp);
-        setTQ(workOrder.tq);
-        setRE(workOrder.re);
-        setEP(workOrder.ep);
-        setOwnerInvoiceNumber(workOrder.invoice_number);
-        setOwnerInvoiceNumberOriginal(workOrder.invoice_number)
-        setLesseeInvoiceNumber(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
-        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info != null?workOrder.secondary_owner_info.invoice_number:"");
-        setIsBilledToLessee(workOrder.secondary_owner_info == null ? false : true)
-        calculateJobCosts(workOrder.joblist)
-        workOrder.joblist.sort((a, b) => a.line_number - b.line_number)
-        getRailCarTimeLog()
-        setStorageInformation(workOrder.storage_information)
+        calculateJobCosts(workOrder.joblist ?? []);
+        workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
+        getRailCarTimeLog();
+        setStorageInformation(workOrder.storage_information ?? {});
 
     }, [workOrder]);
+
 
     const getRailCarTimeLog =async () => {
         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
@@ -317,13 +308,12 @@ const OrderDetails = ({
             transform: 'translate(-50%, -50%)',
         },
     };
-    const orderDetailsModal = document.getElementById('orderDetailsModal');
+
     //const statusTextArea = useRef(null);
 
     const closeModal = () => {
-        if (orderDetailsModal) {
-            orderDetailsModal.close();
-        } else {
+        if (orderDetailsModalRef.current) {
+            orderDetailsModalRef.current.close();
         }
     }
     function scrollToTop() {
@@ -361,6 +351,24 @@ const OrderDetails = ({
             setIsBilledToLessee(false)
             setJobs(workOrder.joblist)
         }
+    }
+
+    const deleteWorkOrder = (id,work_order) =>{
+        const requestData = {
+            work_order: work_order,
+            id: id,
+            user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+        };
+        axios.post(process.env.REACT_APP_BIRCH_API_URL+'delete_workorder/', requestData)
+            .then(response => {
+                console.log('Success:', response.data);
+                if(response.status==200){
+                    closeModal()
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.response ? error.response.data : error.message);
+            });
     }
 
     const changeNetDays = (isForOwner, days,) => {
@@ -906,31 +914,32 @@ const OrderDetails = ({
     }
 
     return (
-        <div ref={containerRef} >
-            <dialog id="orderDetailsModal" className="modal rounded-md h-full ">
-                <div className="w-full bg-white">
-                    <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
-                        <div className="w-full fixed  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
+        <div>
+            {workOrder!=null &&
+                <dialog id="orderDetailsModal"  ref={orderDetailsModalRef} className="modal rounded-md h-full ">
+                    <div className="w-full bg-white">
+                        <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
+                            <div className="w-full fixed  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
                             <span
-                                className="float-left">{workOrder.railcar_id != null ? workOrder.railcar_id : ""}</span>
-                            <form method="dialog">
-                                <div className="float-right mr-5">
-                                    <button className="" onClick={closeModal}>
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2"
-                                                  strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </form>
+                                className="float-left">{workOrder?.railcar_id != null ? workOrder.railcar_id : ""}</span>
+                                <form method="dialog">
+                                    <div className="float-right mr-5">
+                                        <button className="" onClick={closeModal}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2"
+                                                      strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                    <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto mb-5">
-                        {/*Side menu*/}
-                        <div className="absolute top-1/3 right-4">
-                            <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
-                                <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>
+                        <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto mb-5">
+                            {/*Side menu*/}
+                            <div className="absolute top-1/3 right-4">
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -941,8 +950,8 @@ const OrderDetails = ({
                                         </svg>
                                         BRC
                                     </span>
-                                </li>
-                                <li className='flex h-fit text-[10px] p-0'  onClick={()=>handleListItemClick('aar')}>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0'  onClick={()=>handleListItemClick('aar')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -953,8 +962,8 @@ const OrderDetails = ({
                                         </svg>
                                         ARR-500B
                                     </span>
-                                </li>
-                                <li className='flex h-fit text-[10px] p-0'  onClick={()=>printBBOM(workOrder)}>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0'  onClick={()=>printBBOM(workOrder)}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -965,8 +974,8 @@ const OrderDetails = ({
                                         </svg>
                                         BBOM
                                     </span>
-                                </li>
-                                <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('invoice')}>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('invoice')}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -977,8 +986,8 @@ const OrderDetails = ({
                                         </svg>
                                         Invoice
                                     </span>
-                                </li>
-                                <li className='flex h-fit text-[10px] p-0' onClick={()=>printATask(workOrder)}>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>printATask(workOrder)}>
                                     <span className="p-1">
                                         <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
@@ -989,12 +998,12 @@ const OrderDetails = ({
                                         </svg>
                                         Work Order
                                     </span>
-                                </li>
+                                    </li>
 
-                                <li
-                                    className={`flex h-fit text-[10px] p-0 ${workOrder.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}
-                                    style={{ pointerEvents: workOrder.joblist.length > 0 ? 'none' : 'auto' } }
-                                >
+                                    <li
+                                        className={`flex h-fit text-[10px] p-0 ${workOrder?.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}
+                                        style={{ pointerEvents: workOrder?.joblist.length > 0 ? 'none' : 'auto' } } onClick={()=>deleteWorkOrder(workOrder.id,workOrder.work_order)}
+                                    >
                                   <span className="p-1">
                                     <svg width="10" height="10" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                       <path
@@ -1004,116 +1013,116 @@ const OrderDetails = ({
                                     </svg>
                                     DELETE
                                   </span>
-                                </li>
+                                    </li>
 
 
-                            </ul>
-                            <Dialog
-                                open={openDialog}
-                                onClose={handleDialogClose}
-                                container={() => document.querySelector('#orderDetailsModal')} // Ensure it appears within the correct component
-                                style={{ zIndex: 1300 }} // Ensure it has a proper zIndex
-                            >
-                                <DialogTitle>Select from the  Options</DialogTitle>
-                                <DialogActions>
-                                    <Button onClick={() => handleButtonClick('owner')} color="primary">
-                                        For Owner
-                                    </Button>
-                                    <Button onClick={() => handleButtonClick('lessee')} color="primary">
-                                        For Lessee
-                                    </Button>
-                                    <Button onClick={() => handleButtonClick('combined')} color="primary">
-                                        Combined
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                        </div>
-                        {/*End Side menu*/}
-                        <div className=" w-full">
-                            {/*Car information */}
-                            <div className="w-full bg-white p-4  mt-[24px]">
-                                <h6 className='font-semibold'>Car Information</h6>
-                                <div className="mt-[5px]  grid grid-cols-6 gap-10">
+                                </ul>
+                                <Dialog
+                                    open={openDialog}
+                                    onClose={handleDialogClose}
+                                    container={() => document.querySelector('#orderDetailsModal')} // Ensure it appears within the correct component
+                                    style={{ zIndex: 1300 }} // Ensure it has a proper zIndex
+                                >
+                                    <DialogTitle>Select from the  Options</DialogTitle>
+                                    <DialogActions>
+                                        <Button onClick={() => handleButtonClick('owner')} color="primary">
+                                            For Owner
+                                        </Button>
+                                        <Button onClick={() => handleButtonClick('lessee')} color="primary">
+                                            For Lessee
+                                        </Button>
+                                        <Button onClick={() => handleButtonClick('combined')} color="primary">
+                                            Combined
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </div>
+                            {/*End Side menu*/}
+                            <div className=" w-full">
+                                {/*Car information */}
+                                <div className="w-full bg-white p-4  mt-[24px]">
+                                    <h6 className='font-semibold'>Car Information</h6>
+                                    <div className="mt-[5px]  grid grid-cols-6 gap-10">
+                                        <div className="">
+                                            <p className='font-normal '>Equipment</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar_id}</p>
+                                        </div>
+                                        <div className="">
+                                            <p className='font-normal '>Car type</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.railcartype.name}</p>
+                                        </div>
+                                        <div className="">
+                                            <p className='font-normal '>Last Product</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.products.name}</p>
+                                        </div>
+                                        <div className="">
+                                            <p className='font-normal '>El Index</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.el_index}</p>
+                                        </div>
+                                        <div className="">
+                                            <p className='font-normal '>Owner</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_owner_idToowner.name}</p>
+                                        </div>
+                                        <div className="">
+                                            <p className='font-normal '>Lesse</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_lessee_idToowner.name}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/*End Car information */}
+                                {/*Job list */}
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                    <JoblistTable
+                                        handlePaste={pasteJobs}
+                                        jobs={workOrder.joblist}
+                                        workOrder={workOrder}
+                                        commonData = {commonData}
+                                        isBilledToLessee={isBilledToLessee}
+                                        createAjob={createAjob}
+                                        updateAJob={updateAJob}
+                                        deleteJob={deleteJob}
+                                        updateBillToLesseForAJob={updateBillToLesseForAJob}/>
+
+                                </div>
+
+                                {/*end job list */}
+
+
+                                <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
                                     <div className="">
-                                        <p className='font-normal '>Equipment</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar_id}</p>
+                                        <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
                                     </div>
                                     <div className="">
-                                        <p className='font-normal '>Car type</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.railcartype.name}</p>
+                                        <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
                                     </div>
                                     <div className="">
-                                        <p className='font-normal '>Last Product</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.products.name}</p>
+                                        <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
                                     </div>
-                                    <div className="">
-                                        <p className='font-normal '>El Index</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.el_index}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Owner</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_owner_idToowner.name}</p>
-                                    </div>
-                                    <div className="">
-                                        <p className='font-normal '>Lesse</p>
-                                        <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_lessee_idToowner.name}</p>
+                                    <div className="]">
+                                        <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
                                     </div>
                                 </div>
                             </div>
-                            {/*End Car information */}
-                            {/*Job list */}
+                            {/*Parts information*/}
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                                <JoblistTable
-                                    handlePaste={pasteJobs}
-                                    jobs={workOrder.joblist}
-                                    workOrder={workOrder}
-                                    commonData = {commonData}
-                                    isBilledToLessee={isBilledToLessee}
-                                    createAjob={createAjob}
-                                    updateAJob={updateAJob}
-                                    deleteJob={deleteJob}
-                                    updateBillToLesseForAJob={updateBillToLesseForAJob}/>
-
+                                <PartsTable jobs={workOrder.joblist}/>
                             </div>
+                            {/*End Parts information*/}
 
-                            {/*end job list */}
+                            {/*Railcar log*/}
 
-
-                            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
+                            {railCarLog.length>0 &&(
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
                                 </div>
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
-                                </div>
-                                <div className="">
-                                    <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
-                                </div>
-                                <div className="]">
-                                    <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
-                                    <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {/*Parts information*/}
-                        <div className="w-full bg-white p-4  mt-[24px] rounded-none">
-                            <PartsTable jobs={workOrder.joblist}/>
-                        </div>
-                        {/*End Parts information*/}
-
-                        {/*Railcar log*/}
-
-                        {railCarLog.length>0 &&(
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
-                                <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
-                            </div>
-                        )}
+                            )}
 
 
-                        {/*Railcar log*/}
+                            {/*Railcar log*/}
 
                             {/*Order information */}
                             <div className="w-full bg-white p-2">
@@ -1962,48 +1971,48 @@ const OrderDetails = ({
 
 
 
-                        {/*Storage information*/}
-                        {workOrder.is_storage ==1 &&(
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20">
-                                <StorageComponent initialEntries={storageInformation} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
-                            </div>
-                        )}
+                            {/*Storage information*/}
+                            {workOrder.is_storage ==1 &&(
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20">
+                                    <StorageComponent initialEntries={storageInformation} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
+                                </div>
+                            )}
 
 
-                    </div>
-                    {/*<dialog id="statusModalInDetails" className="modal rounded-md max-h-[100vh]">*/}
-                    {/*    <textarea id="statusUpdateMessageFromDropDown" rows="2" ref={statusCommentDropDown}*/}
-                    {/*              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"*/}
-                    {/*              placeholder="Write your comments here..."></textarea>*/}
-                    {/*    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatusFromDetails}>SUBMIT</button>*/}
-                    {/*</dialog>*/}
+                        </div>
+                        {/*<dialog id="statusModalInDetails" className="modal rounded-md max-h-[100vh]">*/}
+                        {/*    <textarea id="statusUpdateMessageFromDropDown" rows="2" ref={statusCommentDropDown}*/}
+                        {/*              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"*/}
+                        {/*              placeholder="Write your comments here..."></textarea>*/}
+                        {/*    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatusFromDetails}>SUBMIT</button>*/}
+                        {/*</dialog>*/}
 
-                    <Modal
-                        isOpen={isStatusDropDownModalOpenInDetails}
-                        onRequestClose={() => {
-                            if (getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDown") !== '') {
-                                postStatusFromDetails()
+                        <Modal
+                            isOpen={isStatusDropDownModalOpenInDetails}
+                            onRequestClose={() => {
+                                if (getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDown") !== '') {
+                                    postStatusFromDetails()
+                                }
                             }
-                        }
-                        }
-                        parentSelector={() => document.querySelector('#orderDetailsModal')}
-                        id="theIdHere"
-                        contentLabel="POST COMMENT"
-                        style={customStylesForCommentModal}
-                    >
+                            }
+                            parentSelector={() => document.querySelector('#orderDetailsModal')}
+                            id="theIdHere"
+                            contentLabel="POST COMMENT"
+                            style={customStylesForCommentModal}
+                        >
                         <textarea id="statusUpdateMessageFromDropDownInDetails" rows="2"
                                   ref={statusCommentDropDownInDetails}
                                   className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"
                                   placeholder="Write your comments here..."></textarea>
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                onClick={postStatusFromDetails}>SUBMIT
-                        </button>
-                    </Modal>
-                </div>
-            </dialog>
-
-
+                            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                    onClick={postStatusFromDetails}>SUBMIT
+                            </button>
+                        </Modal>
+                    </div>
+                </dialog>
+            }
         </div>
+
     );
 
 };

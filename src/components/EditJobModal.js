@@ -308,7 +308,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             if(response.status == 200){
 
                 setModalShowing(false)
-                toast("Wow so easy!")
+
             }else {
 
             }
@@ -374,7 +374,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             console.log(response)
             if(response.status == 200){
                 setModalShowing(false)
-                toast("Wow so easy!")
+
             }else {
 
             }
@@ -387,7 +387,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         console.log(response)
         if(response.status == 200){
             setModalShowing(false)
-            toast("Wow so easy!")
+
         }else {
 
         }

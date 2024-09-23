@@ -1295,7 +1295,7 @@ export function printInvoice(workorder, forWhom) {
         '<td>' +
         yardAddress+
         '<td style="width:20px;"></td></td><td>' +
-        '<table style="float: right; min-width: 300px; width:300px; border-collapse: collapse;">' +
+        '<table style="float: right; min-width: 350px; width:350px; border-collapse: collapse;">' +
         '<tr><td style="border: 1px solid black;">Date</td>' +
         '<td style="border: 1px solid black;">Invoice Number</td><td style="border: 1px solid black;">Purchase Order</td></tr>' +
         '<tr><td style="border: 1px solid black;">' +

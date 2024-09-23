@@ -58,6 +58,7 @@ const WorkOrderDataTable = ({
                             }) => {
 
     console.log(workOrders)
+    const orderDetailsModalRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     // Debounced function to handle search
@@ -376,7 +377,7 @@ const WorkOrderDataTable = ({
             className: "mt-[10px] cursor-pointer",
             cell: (row) => (
                 <span className='align-middle mt-[10px] cursor-pointer' onClick={() => {
-                    setWorkOrderToView(null)
+
                     setWorkOrderToView(row.workOrder)
                     handleShowOrderDetails(row.workOrder)
                 }}>
@@ -446,8 +447,13 @@ const WorkOrderDataTable = ({
         return null;
     };
     const handleShowOrderDetails = async (row) => {
+        setWorkOrderToView(null)
         await setWorkOrderToView(() => row)
-        document.getElementById('orderDetailsModal').showModal();
+        orderDetailsModalRef.current.showModal();
+    };
+
+    const closeModal = () => {
+        orderDetailsModalRef.current.close();
     };
     return (
         <React.Fragment>
@@ -559,6 +565,7 @@ const WorkOrderDataTable = ({
                         handleStorageUpdate={handleStorageUpdate}
                         handIsLockedForTimeClocking={handIsLockedForTimeClocking}
                         updateBillToLesseForAJob={updateBillToLesseForAJob}
+                        orderDetailsModalRef={orderDetailsModalRef}
                     />
                 ) : null}
                 {/*<OrderDetails*/}

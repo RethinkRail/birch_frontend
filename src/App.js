@@ -77,6 +77,26 @@ function App() {
         })
     };
 
+    const resizeObserverErr = (e) => {
+        console.log("error in app")
+        console.log(e.message.toLowerCase())
+        if (e.message.toLowerCase().includes("resizeobserver")) {
+            e.stopImmediatePropagation();
+            console.log("Matches")
+        }
+    };
+    window.addEventListener("error", resizeObserverErr);
+
+    const originalConsoleError = console.error;
+
+    console.error = function(message, ...args) {
+        if (typeof message === 'string' && message.includes('ResizeObserver.')) {
+            // Suppress this specific error message
+            return;
+        }
+        // Call the original console.error for other errors
+        originalConsoleError.apply(console, [message, ...args]);
+    };
     const requestPermissionAndGetToken = async () => {
         try {
             // Request notification permission from the user

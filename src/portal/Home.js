@@ -40,23 +40,29 @@ const Home = () => {
             getWorkOrderById(parseInt(payload.data.value))
         }else if(payload.data.type === 'routing'){
             getActiveTasks()
+        }else if(payload.data.type ==='deleted_order'){
+            console.log("deleted order")
+            const updatedArray = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
+
+            const originalLength = workOrders.length;
+            const filteredWorkOrders = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
+            const isDeleted = originalLength > filteredWorkOrders.length;
+
+            if (isDeleted) {
+                setWorkOrders(updatedArray)
+                toast.info(
+                    "A order has been deleted"
+                );
+            } else {
+                console.log("No items were deleted.");
+            }
+
+
+
         }
     })
 
-
-
-
-
-
-
-
-
-
     //CLoud messaging
-
-
-
-
     const getActiveTasks = () => {
         let config = {
             method: 'get',
@@ -1055,6 +1061,10 @@ const Home = () => {
                 showToastMessage("Car not found", 2)
                 console.log(error);
             });
+    }
+
+    const deleteWO = async (id) =>{
+
     }
 
     const customStylesForCommentModal = {

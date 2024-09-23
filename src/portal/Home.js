@@ -56,9 +56,6 @@ const Home = () => {
             } else {
                 console.log("No items were deleted.");
             }
-
-
-
         }
     })
 

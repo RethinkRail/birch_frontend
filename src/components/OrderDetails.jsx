@@ -354,21 +354,26 @@ const OrderDetails = ({
     }
 
     const deleteWorkOrder = (id,work_order) =>{
-        const requestData = {
-            work_order: work_order,
-            id: id,
-            user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
-        };
-        axios.post(process.env.REACT_APP_BIRCH_API_URL+'delete_workorder/', requestData)
-            .then(response => {
-                console.log('Success:', response.data);
-                if(response.status==200){
-                    closeModal()
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error.response ? error.response.data : error.message);
-            });
+        const confirmDelete = window.confirm("Are you sure you want to delete this work order?");
+
+        if (confirmDelete) {
+            const requestData = {
+                work_order: work_order,
+                id: id,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+            };
+
+            axios.post(process.env.REACT_APP_BIRCH_API_URL + 'delete_workorder/', requestData)
+                .then(response => {
+                    console.log('Success:', response.data);
+                    if (response.status === 200) {
+                        closeModal();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error.response ? error.response.data : error.message);
+                });
+        }
     }
 
     const changeNetDays = (isForOwner, days,) => {

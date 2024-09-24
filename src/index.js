@@ -14,6 +14,7 @@ import TableComponent from "./components/TableComponent";
 import RoutingMatrixEditor from "./portal/management/RoutingMatrixEditor";
 import DataTableComponent from "./components/DataTableComponent";
 import SummaryReport from "./portal/report/SummaryReport";
+import SummaryReportMaterial from "./portal/report/SummaryReportMaterial";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -57,7 +58,7 @@ root.render(
 
                 <Route path="/summary_report" element={
                     <ProtectedRoute>
-                        <SummaryReport/>
+                        <SummaryReportMaterial/>
                     </ProtectedRoute>
                 }>
                 </Route>

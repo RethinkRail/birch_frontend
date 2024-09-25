@@ -823,7 +823,16 @@ const OrderDetails = ({
             }else if(what_to_download === 'brc'){
                 printBRC(workOrder,1)
             }else if(what_to_download==='invoice'){
-                printInvoice(workOrder,1)
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,1)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,1)
+                }
+
             }
         }
     };
@@ -841,7 +850,15 @@ const OrderDetails = ({
             }else if(docToDownload==='brc'){
                 printBRC(workOrder,2)
             }else if(docToDownload==='invoice'){
-                printInvoice(workOrder,2)
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,2)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,2)
+                }
             }
         } else if (option === 'lessee') {
             if(docToDownload==='aar'){
@@ -849,7 +866,15 @@ const OrderDetails = ({
             }else if(docToDownload==='brc'){
                 printBRC(workOrder,3)
             }else if(docToDownload==='invoice'){
-                printInvoice(workOrder,3)
+                if(workOrder.railcar.owner_railcar_lessee_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,3)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,3)
+                }
             }
         } else if (option === 'combined') {
             if(docToDownload==='aar'){
@@ -857,7 +882,15 @@ const OrderDetails = ({
             }else if(docToDownload==='brc'){
                 printBRC(workOrder,1)
             }else if(docToDownload==='invoice'){
-                printInvoice(workOrder,1)
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,1)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,1)
+                }
             }
         }
         handleDialogClose();

@@ -16,13 +16,14 @@ const getUniqueParts = (jobs) => {
 
     jobs.forEach(job => {
         job.jobparts.forEach(part => {
-            const line_number = job.line_number
+            const line_number = job.line_number+','
             const { code, title, price,part_condition } = part.parts;
             const { quantity, purchase_cost, availability } = part;
 
             if (partsMap.has(code)) {
                 const existingPart = partsMap.get(code);
                 existingPart.quantity += quantity;
+                existingPart.line_number += line_number
 
             } else {
                 partsMap.set(code, {
@@ -41,7 +42,16 @@ const getUniqueParts = (jobs) => {
 
     return Array.from(partsMap.values());
 };
-
+function removeLastComma(str) {
+    if (str.endsWith(',')) {
+        str = str.slice(0, -1);  // Remove the last character (comma)
+    }
+    return str;
+}
+function getFirstValue(str) {
+    // Split the string by comma and trim whitespace, then return the first element
+    return str.split(',')[0].trim();
+}
 // React component to display parts in a table using react-data-table-component
 const PartsTable = ({ jobs }) => {
     const uniqueParts = getUniqueParts(jobs);
@@ -55,10 +65,10 @@ const PartsTable = ({ jobs }) => {
         },
         {
             name: 'LINE',
-            selector: row => row.line_number,
+            selector: row => removeLastComma(row.line_number),
             sortable: true,
             width: '8%',
-            sortFunction: (a, b) => a.line_number.localeCompare(b.line_number) // Sorting by code
+
         },
         {
             name: 'TITLE',

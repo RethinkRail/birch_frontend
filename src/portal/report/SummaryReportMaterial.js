@@ -188,6 +188,7 @@ const  SummaryReportMaterial = () => {
         fieldSeparator: ',',
         decimalSeparator: '.',
         useKeysAsHeaders: true,
+        filename: 'BIRCH Summary Report '+new Date().toLocaleDateString()
     });
 
     const handleExportRows = (table,rows) => {

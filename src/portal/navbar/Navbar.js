@@ -23,29 +23,26 @@ const Navbar = () => {
         {
             title: 'Report',
             children: [
-                { title: 'Summary Report', path: 'report/summary_report' },
-                { title: 'Emission Report', path: '/emission_report' },
-                { title: 'Time Compare', path: '/time_compare' },
-                { title: 'Scheduler', path: '/scheduler' },
-                { title: 'Department Report', path: 'report/department_report' },
+                { title: 'Summary Report', path: '/summary_report' },
+                { title: 'Department Report', path: '/department_report' },
                 {
                     title: 'Management Reports',
                     children: [
-                        { title: 'Revenue by Customer', path: '/revenue_by_customer' },
-                        { title: 'Revenue by Department', path: '/revenue_by_department' },
-                        { title: 'Revenue Recognition', path: '/revenue_recognition' },
-                        { title: 'Billed Cars', path: '/billed_cars' }
+                        { title: 'Revenue by Customer', path: '#' },
+                        { title: 'Revenue by Department', path: '#' },
+                        { title: 'Revenue Recognition', path: '#' },
+                        { title: 'Billed Cars', path: '#' }
                     ]
                 },
                 {
                     title: 'Operations Reports',
                     children: [
-                        { title: 'Shop Summary Report', path: '/shop_summary_report' },
-                        { title: 'Manhours', path: '/manhours' },
-                        { title: 'Billing Efficiency', path: '/billing_efficiency' },
-                        { title: 'Utilization', path: '/utilization' },
-                        { title: 'POD Accuracy', path: '/pod_accuracy' },
-                        { title: 'Days in Status', path: '/days_in_status' }
+                        { title: 'Shop Summary Report', path: '#' },
+                        { title: 'Manhours', path: '#' },
+                        { title: 'Billing Efficiency', path: '#' },
+                        { title: 'Utilization', path: '#' },
+                        { title: 'POD Accuracy', path: '#' },
+                        { title: 'Days in Status', path: '#' }
                     ]
                 },
                 {
@@ -58,8 +55,10 @@ const Navbar = () => {
                 {
                     title: 'Misc. Reports',
                     children: [
-                        { title: 'User Activity', path: '/user_activity' },
+                        { title: 'User Activity', path: '#' },
                         { title: 'Emissions', path: '/emissions' },
+                        { title: 'Part Report', path: '/part_report' },
+                        { title: 'Department Time Report', path: '/department_time_report' },
                         { title: 'QB Time Compare', path: '/qb_time_compare' }
                     ]
                 }

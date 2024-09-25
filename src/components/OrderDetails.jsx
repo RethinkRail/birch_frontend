@@ -1765,7 +1765,7 @@ const OrderDetails = ({
                             {/*End Order information Owner */}
 
                             {/*Order information Lessee */}
-                            {workOrder.secondary_owner_info  != null && (
+                            {isBilledToLessee && (
                                 <div className="w-full bg-white p-4 mb-10 mt-[24px] rounded-none">
 
                                     <h6 className='font-semibold '>Billing Information(Lessee)</h6>

@@ -172,9 +172,22 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     const columns = useMemo(
         () => [
             { accessorKey: 'id', header: 'id', size: 2 },
+            { accessorKey: 'ln', header: 'Line', size: 2 ,
+                Cell: ({ row }) => {
+                    return (
+                        <div onClick={() => {
+                            setEditData(null)
+                            setEditData(jobs.find(job => job.id === row.getValue("id")) || null)
+                            setModalShowing(true)
+                        }} class="flex justify-between items-center cursor-pointer">
+                            { row.getValue('ln')}
+                        </div>
+
+                    );
+                },},
             {
                 accessorKey: 'action',
-                header: 'Action',
+                header: 'Copy',
                 size: 5,
 
                 Cell: ({ row }) => {
@@ -195,19 +208,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     );
                 },
             },
-            { accessorKey: 'ln', header: 'Line', size: 2 ,
-                Cell: ({ row }) => {
-                    return (
-                        <div onClick={() => {
-                            setEditData(null)
-                            setEditData(jobs.find(job => job.id === row.getValue("id")) || null)
-                            setModalShowing(true)
-                        }} class="flex justify-between items-center cursor-pointer">
-                            { row.getValue('ln')}
-                        </div>
-
-                    );
-                },},
             { accessorKey: 'loc', header: 'Loc', size: 2 },
             { accessorKey: 'qty', header: 'Qty', size: 3 },
             { accessorKey: 'cc', header: 'CC', size: 3 },

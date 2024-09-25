@@ -16,6 +16,7 @@ const getUniqueParts = (jobs) => {
 
     jobs.forEach(job => {
         job.jobparts.forEach(part => {
+            const line_number = job.line_number
             const { code, title, price,part_condition } = part.parts;
             const { quantity, purchase_cost, availability } = part;
 
@@ -26,6 +27,7 @@ const getUniqueParts = (jobs) => {
             } else {
                 partsMap.set(code, {
                     code,
+                    line_number,
                     title,
                     purchase_cost,
                     price,
@@ -52,10 +54,17 @@ const PartsTable = ({ jobs }) => {
             sortFunction: (a, b) => a.code.localeCompare(b.code) // Sorting by code
         },
         {
+            name: 'LINE',
+            selector: row => row.line_number,
+            sortable: true,
+            width: '8%',
+            sortFunction: (a, b) => a.line_number.localeCompare(b.line_number) // Sorting by code
+        },
+        {
             name: 'TITLE',
             selector: row => row.title,
             sortable: true,
-            width: '30%',
+            width: '25%',
         },
         {
             name: 'COST',

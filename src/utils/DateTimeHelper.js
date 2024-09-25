@@ -1,3 +1,5 @@
+import moment from "moment";
+
 const {format} = require('date-fns');
 
 /**
@@ -124,6 +126,9 @@ export function formatDateToSQL(date) {
     return `${year}-${month}-${day}`;
 }
 
+export function toUTCDateTime (dateTime) {
+    return moment(dateTime).utc().format("YYYY-MM-DD HH:mm:ss");
+}
 
 export function toSqlDatetime(date) {
     const pad = (number) => (number < 10 ? '0' : '') + number;

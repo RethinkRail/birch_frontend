@@ -1,124 +1,61 @@
 /**
  * @author : Mithun Sarker
  * @mailto : mithun@ihrail.com
- * @created : 9/23/2024, Monday
+ * @created : 9/25/2024, Wednesday
  * Description:
  **/
 
-/**
- * @author : Mithun Sarker
- * @mailto : mithun@ihrail.com
- * @created : 9/24/2024, Tuesday
- * Description:
- **/
-
-import React, {useState, useMemo, useRef, useEffect} from 'react';
-
-
-import {
-    MaterialReactTable,
-    useMaterialReactTable,
-} from 'material-react-table';
-
-import axios from 'axios';
-import {convertSqlToFormattedDate} from "../../utils/DateTimeHelper";
-import {round2Dec} from "../../utils/NumberHelper";
-import { mkConfig, generateCsv, download } from 'export-to-csv'; //or use your library of choice here
-import {FaDownload} from "react-icons/fa";
+import React, {useMemo, useRef, useState} from "react";
+import axios from "axios";
 import {toast} from "react-toastify";
+import {MaterialReactTable} from "material-react-table";
+import {FaDownload} from "react-icons/fa";
+import {download, generateCsv, mkConfig} from "export-to-csv";
+import {round2Dec} from "../../utils/NumberHelper";
+import {toUTCDateTime} from "../../utils/DateTimeHelper";
 
+const TimeCompare = () => {
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
-const  PartReport = () => {
     const toastId = useRef(null)
 
     const initialColumns = useMemo(() => [
-        { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true, size: 50 },
-        { accessorKey: 'status', header: 'Status', enableSorting: true },
-        { accessorKey: 'code', header: 'Code', enableSorting: true },
-        { accessorKey: 'title', header: 'Title', enableSorting: true },
-        { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
-        { accessorKey: 'cost', header: 'Cost', enableSorting: true },
+        { accessorKey: 'employee_name', header: 'Name', enableSorting: true, size: 50 },
+        { accessorKey: 'time_in_birch', header: 'Birch Time', enableSorting: true },
+        { accessorKey: 'time_in_qb', header: 'QB Time', enableSorting: true },
+        { accessorKey: 'difference', header: 'Difference', enableSorting: true },
+        { accessorKey: 'utilization', header: 'Utilization', enableSorting: true }
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
     const [data, setData] = useState([]);
-
-    const formatDate = (sqlDate) => {
-        if (sqlDate === process.env.REACT_APP_DEFAULT_DATE) {
-            return ''; // Return empty string if equal to the default date
-        }
-        return convertSqlToFormattedDate(sqlDate); // Format as needed
+    // Handle change in date inputs
+    const handleStartDateChange = (e) => {
+        setStartDate(e.target.value);
     };
 
+    const handleEndDateChange = (e) => {
+        setEndDate(e.target.value);
+    };
 
+    const handleRetrieve = async () => {
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
+        toastId.current = toast.loading("Fetching data...");
 
+        const start_date_birch = toUTCDateTime(startDate+" 00:00:00"); // Replace with actual start date for Birch
+        const end_date_birch = toUTCDateTime(endDate+" 23:59:59");   // Replace with actual end date for Birch
 
-    useEffect(() => {
-        const fetchData = async () => {
-            toastId.current = toast.loading("Fetching data...");
-            try {
-                const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+'get_part_report');
-                const result = [];
-
-                response.data.forEach(item => {
-                    // Get status from workupdates
-                    const status = `${item.workupdates[0].statuscode.code} ${item.workupdates[0].statuscode.title}`;
-
-                    // Create a map to track unique job parts based on their code
-                    const jobPartsMap = new Map();
-
-                    item.joblist.forEach(job => {
-                        job.jobparts.forEach(part => {
-                            // Ensure part and part.parts exist
-                            if (part && part.parts) {
-                                const { code, title } = part.parts;
-
-
-                                // Ensure quantity and purchase_cost are valid numbers, default to 0 if undefined or invalid
-                                const quantity = !isNaN(parseFloat(part.quantity)) && part.quantity !== null && part.quantity !== undefined
-                                    ? parseFloat(part.quantity)
-                                    : 0;
-                                const purchase_cost = !isNaN(parseFloat(part.purchase_cost)) && part.purchase_cost !== null && part.purchase_cost !== undefined
-                                    ? parseFloat(part.purchase_cost)
-                                    : 0;
-
-                                // Additional logging for invalid quantity or purchase_cost
-                                if (quantity === 0 || purchase_cost === 0) {
-                                    console.warn(`Invalid data for part code ${code}: quantity=${part.quantity}, purchase_cost=${part.purchase_cost}`);
-                                }
-
-                                // If the part code is already in the map, update quantity and cost
-                                if (jobPartsMap.has(code)) {
-                                    const existingPart = jobPartsMap.get(code);
-                                    existingPart.quantity = round2Dec(parseFloat(existingPart.quantity + quantity));  // Increase the quantity
-                                    existingPart.cost = round2Dec(parseFloat(existingPart.cost + (purchase_cost * quantity))); // Update total cost
-                                } else {
-                                    // Add new part to the map
-                                    jobPartsMap.set(code, {
-                                        railcar_id: item.railcar_id,
-                                        status: status,
-                                        code,
-                                        title,
-                                        quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
-                                        cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
-                                    });
-                                }
-                            } else {
-                                console.warn(`Missing part data: ${JSON.stringify(part)}`);
-                            }
-                        });
-                    });
-
-                    // Convert the map back to an array
-                    const jobpartsArray = Array.from(jobPartsMap.values());
-
-                    // Add the consolidated job parts to the result
-                    result.push(...jobpartsArray);
-                });
-
-
-
-                setData(result);
+        const apiUrl = `https://cmp0yxyt50.execute-api.us-east-2.amazonaws.com/default/qb_birch_time_comparison?start_date=${startDate}&end_date=${endDate}&start_date_birch=${start_date_birch}&end_date_birch=${end_date_birch}`;
+        console.log(apiUrl)
+// Make the GET request using Axios
+        axios.get(apiUrl)
+            .then(response => {
+                console.log('Data:', response.data); // Handle the response data
+                const newData = formatData(response.data)
+                console.log(newData)
+                setData(newData)
                 toast.update(toastId.current, {
                     render: "All data loaded",
                     autoClose: 1000,
@@ -126,28 +63,20 @@ const  PartReport = () => {
                     hideProgressBar: true,
                     isLoading: false
                 });
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                toast.update(toastId.current, {
-                    render: "Error loading data",
-                    autoClose: 1000,
-                    type: "error",
-                    hideProgressBar: true,
-                    isLoading: false
-                });
-            }
-        };
+            })
+            .catch(error => {
+                console.error('Error:', error); // Handle any errors
 
-        fetchData();
-    }, []);
+            });
+        //const  formattedData = formatDate(response.data)
 
-
+    };
 
     const csvConfig = mkConfig({
         fieldSeparator: ',',
         decimalSeparator: '.',
         useKeysAsHeaders: true,
-        filename: 'Part Report '+new Date().toLocaleDateString()
+        filename: 'Emission Report  from '+startDate+" to "+endDate
     });
 
     const handleExportRows = (table,rows) => {
@@ -170,12 +99,73 @@ const  PartReport = () => {
         const csv = generateCsv(csvConfig)(rowData);
         download(csvConfig)(csv);
     };
+    function formatData(data) {
+        return data.map(employee => {
+            // Convert time from seconds to hours
+            const timeInBRC = employee.time_in_birch / 3600;
+            const timeInQUICKBOOK = employee.time_in_qb / 3600;
+
+            // Calculate difference
+            const difference = timeInQUICKBOOK - timeInBRC;
+
+            // Calculate utilization
+            const utilization = timeInQUICKBOOK > 0
+                ? `${((timeInBRC * 100) / timeInQUICKBOOK).toFixed(2)}%`
+                : "N/A";
+
+            // Return a new object with the desired properties
+            return {
+                employee_name: employee.employee_name,
+                time_in_birch: round2Dec(timeInBRC),
+                time_in_qb: round2Dec(timeInQUICKBOOK),
+                difference: round2Dec(difference),
+                utilization: utilization
+            };
+        });
+    }
 
 
     return (
-        <div className="p-4">
-            <h1 className='font-bold mb-10'>Part Report on Active Cars</h1>
-            <div className="overflow-x-auto">
+        <div>
+            <h1 className='font-bold mt-10 mb-10'>Time Compare</h1>
+            <div className="flex items-center space-x-6 p-6 bg-white rounded-lg shadow-md">
+                {/* Start Date Picker */}
+                <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={handleStartDateChange}
+                        className="block w-full rounded-md border border-gray-300 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 p-2"
+                    />
+                </div>
+
+                {/* End Date Picker */}
+                <div className="flex flex-col">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={handleEndDateChange}
+                        className="block w-full rounded-md border border-gray-300 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 p-2"
+                    />
+                </div>
+
+                {/* Retrieve Button */}
+                <div className="flex flex-col mt-7">
+                    <button
+                        onClick={handleRetrieve}
+                        className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+                    >
+                        Retrieve
+                    </button>
+                </div>
+
+
+
+            </div>
+
+            <div className= "overflow-x-auto mt-8">
                 {data.length >0?(
                     <MaterialReactTable
                         columns={columns}
@@ -196,7 +186,7 @@ const  PartReport = () => {
                         }}
                         muiTableBodyCellProps={{
                             sx: {
-                                fontSize: '10px',
+                                fontSize: '12px',
                                 padding: '10px',
                             }
                         }}
@@ -265,12 +255,8 @@ const  PartReport = () => {
 
             </div>
         </div>
+
     );
 };
 
-export default PartReport;
-
-
-
-
-
+export default TimeCompare;

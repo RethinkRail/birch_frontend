@@ -16,6 +16,8 @@ import DataTableComponent from "./components/DataTableComponent";
 
 import SummaryReportMaterial from "./portal/report/SummaryReportMaterial";
 import PartReport from "./portal/report/PartReport";
+import EmissionReport from "./portal/report/EmissionReport";
+import TimeCompare from "./portal/report/TimeCompare";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -57,6 +59,13 @@ root.render(
                 }>
                 </Route>
 
+                <Route path="/emission_report" element={
+                    <ProtectedRoute>
+                        <EmissionReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
                 <Route path="/summary_report" element={
                     <ProtectedRoute>
                         <SummaryReportMaterial/>
@@ -66,6 +75,13 @@ root.render(
                 <Route path="/part_report" element={
                     <ProtectedRoute>
                         <PartReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/qb_time_compare" element={
+                    <ProtectedRoute>
+                        <TimeCompare/>
                     </ProtectedRoute>
                 }>
                 </Route>

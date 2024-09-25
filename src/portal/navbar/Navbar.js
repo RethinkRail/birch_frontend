@@ -56,7 +56,7 @@ const Navbar = () => {
                     title: 'Misc. Reports',
                     children: [
                         { title: 'User Activity', path: '#' },
-                        { title: 'Emissions', path: '/emissions' },
+                        { title: 'Emission Report', path: '/emission_report' },
                         { title: 'Part Report', path: '/part_report' },
                         { title: 'Department Time Report', path: '/department_time_report' },
                         { title: 'QB Time Compare', path: '/qb_time_compare' }

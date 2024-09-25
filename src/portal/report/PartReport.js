@@ -61,6 +61,7 @@ const  PartReport = () => {
                 const result = [];
 
                 response.data.forEach(item => {
+                    // Get status from workupdates
                     const status = `${item.workupdates[0].statuscode.code} ${item.workupdates[0].statuscode.title}`;
 
                     // Create a map to track unique job parts based on their code
@@ -68,24 +69,46 @@ const  PartReport = () => {
 
                     item.joblist.forEach(job => {
                         job.jobparts.forEach(part => {
-                            const { code, title } = part.parts;
-                            const { quantity, purchase_cost } = part;
+                            // Ensure part and part.parts exist
+                            if (part && part.parts) {
+                                const { code, title } = part.parts;
 
-                            // If the part code is already in the map, update quantity and cost
-                            if (jobPartsMap.has(code)) {
-                                const existingPart = jobPartsMap.get(code);
-                                existingPart.quantity += quantity;  // Increase the quantity
-                                existingPart.cost += purchase_cost * quantity; // Update total cost
+                                // Special logging for the part with code "80-1800005" to identify issues
+                                if (code === "80-1800005") {
+                                    console.log("Problematic part found:", part);
+                                }
+
+                                // Ensure quantity and purchase_cost are valid numbers, default to 0 if undefined or invalid
+                                const quantity = !isNaN(parseFloat(part.quantity)) && part.quantity !== null && part.quantity !== undefined
+                                    ? parseFloat(part.quantity)
+                                    : 0;
+                                const purchase_cost = !isNaN(parseFloat(part.purchase_cost)) && part.purchase_cost !== null && part.purchase_cost !== undefined
+                                    ? parseFloat(part.purchase_cost)
+                                    : 0;
+
+                                // Additional logging for invalid quantity or purchase_cost
+                                if (quantity === 0 || purchase_cost === 0) {
+                                    console.warn(`Invalid data for part code ${code}: quantity=${part.quantity}, purchase_cost=${part.purchase_cost}`);
+                                }
+
+                                // If the part code is already in the map, update quantity and cost
+                                if (jobPartsMap.has(code)) {
+                                    const existingPart = jobPartsMap.get(code);
+                                    existingPart.quantity = round2Dec(parseFloat(existingPart.quantity + quantity));  // Increase the quantity
+                                    existingPart.cost = round2Dec(parseFloat(existingPart.cost + (purchase_cost * quantity))); // Update total cost
+                                } else {
+                                    // Add new part to the map
+                                    jobPartsMap.set(code, {
+                                        railcar_id: item.railcar_id,
+                                        status: status,
+                                        code,
+                                        title,
+                                        quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
+                                        cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
+                                    });
+                                }
                             } else {
-                                // Add new part to the map
-                                jobPartsMap.set(code, {
-                                    railcar_id: item.railcar_id,
-                                    status: status,
-                                    code,
-                                    title,
-                                    quantity,
-                                    cost: purchase_cost * quantity // Calculate total cost for this part
-                                });
+                                console.warn(`Missing part data: ${JSON.stringify(part)}`);
                             }
                         });
                     });
@@ -96,6 +119,8 @@ const  PartReport = () => {
                     // Add the consolidated job parts to the result
                     result.push(...jobpartsArray);
                 });
+
+
 
                 setData(result);
                 toast.update(toastId.current, {

@@ -9,7 +9,7 @@ import React, {useState, useEffect, useMemo, useRef} from 'react';
 import axios from 'axios';
 import { MaterialReactTable } from "material-react-table";
 import DatePicker from "react-datepicker";
-import '../../DepartmentReport.css';
+import './DepartmentReport.css';
 import {round2Dec} from "../../utils/NumberHelper";
 import {differenceBetweenTwoTimeStamp} from "../../utils/DateTimeHelper";
 import {FaCloudDownloadAlt, FaDownload, FaFileDownload} from "react-icons/fa";

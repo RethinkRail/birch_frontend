@@ -23,11 +23,11 @@ const Navbar = () => {
         {
             title: 'Report',
             children: [
-                { title: 'Summary Report', path: '/summary_report' },
+                { title: 'Summary Report', path: 'report/summary_report' },
                 { title: 'Emission Report', path: '/emission_report' },
                 { title: 'Time Compare', path: '/time_compare' },
                 { title: 'Scheduler', path: '/scheduler' },
-                { title: 'Department Report', path: '/department_report' },
+                { title: 'Department Report', path: 'report/department_report' },
                 {
                     title: 'Management Reports',
                     children: [

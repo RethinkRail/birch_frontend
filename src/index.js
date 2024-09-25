@@ -49,14 +49,14 @@ root.render(
                     </ProtectedRoute>
                 }>
                 </Route>
-                <Route path="/department_report" element={
+                <Route path="report/department_report" element={
                     <ProtectedRoute>
                         <DepartmentReport/>
                     </ProtectedRoute>
                 }>
                 </Route>
 
-                <Route path="/summary_report" element={
+                <Route path="report/summary_report" element={
                     <ProtectedRoute>
                         <SummaryReportMaterial/>
                     </ProtectedRoute>

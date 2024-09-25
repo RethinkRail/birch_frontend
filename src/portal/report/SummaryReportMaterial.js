@@ -261,7 +261,7 @@ const  SummaryReportMaterial = () => {
                         initialState={{
                             pagination: {
                                 pageIndex: 0,
-                                pageSize: 50, // Set default page size to 50
+                                pageSize: 10, // Set default page size to 50
                             },
                         }}
                         muiTableHeadCellProps={{
@@ -277,6 +277,14 @@ const  SummaryReportMaterial = () => {
                                 padding: '10px',
                             }
                         }}
+                        muiTableBodyRowProps={({ row, table }) => ({
+                            sx: {
+                                backgroundColor:
+                                    table.getRowModel().flatRows.indexOf(row) % 2 === 0
+                                        ? "#F9F9F9"
+                                        : "#ffffff", // Use table row index to alternate row colors
+                            },
+                        })}
                         renderTopToolbarCustomActions={({ table }) => (
                             <div
                                 style={{

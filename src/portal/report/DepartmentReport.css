@@ -128,21 +128,111 @@
 /*    border-radius: 4px;*/
 
 
-.table-container {
+
+
+
+/*previous*/
+
+/*.table-container {*/
+/*    overflow-x: auto;*/
+/*    overflow-y: auto;*/
+
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 8px;*/
+/*}*/
+
+/*table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*    font-family: Inter, sans-serif;*/
+/*}*/
+
+/*thead th {*/
+/*    background-color: #DCE5FF;*/
+/*    font-size: 10px;*/
+/*    padding: 1px;*/
+/*    font-family: 'Inter', sans-serif;*/
+/*    font-weight: 500;*/
+/*    position: sticky;*/
+/*    top: 0;*/
+/*    z-index: 2;*/
+/*    text-align: left;*/
+/*}*/
+
+/*tbody td, thead th {*/
+/*    padding: 10px;*/
+/*    border-bottom: 1px solid #eee;*/
+/*    white-space: nowrap;*/
+/*    text-align: left;*/
+/*}*/
+
+/*tbody td input, .react-datepicker-wrapper {*/
+
+/*    box-sizing: border-box;*/
+/*    padding-top: 5px;*/
+/*    padding-bottom: 5px;*/
+
+/*    font-size: 10px;*/
+/*    font-family: 'Inter', sans-serif;*/
+/*    font-weight: 500;*/
+/*}*/
+
+/*.sticky-header {*/
+/*    position: sticky;*/
+/*    top: 0;*/
+/*    background-color: white;*/
+/*    z-index: 2;*/
+/*    border-bottom: 2px solid #ccc;*/
+/*}*/
+
+/*.sticky-column {*/
+/*    position: sticky;*/
+/*    left: 0;*/
+/*    background-color: #f8f8f8;*/
+/*    z-index: 3;*/
+/*    border-right: 2px solid #ddd;*/
+/*}*/
+
+/*.sticky-header.sticky-column {*/
+/*    z-index: 4;*/
+/*    background-color: #DCE5FF;*/
+/*}*/
+
+/*tbody tr:nth-child(odd) {*/
+/*    background-color: #F7F9FF;*/
+/*}*/
+
+/*tbody tr:nth-child(even) {*/
+/*    background-color: #F7F9FF;*/
+/*}*/
+
+/* input.text-input {*/
+/*    width: 100%;*/
+/*    padding: 8px;*/
+/*    font-size: 10px;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 4px;*/
+/*}*/
+
+/*input.text-input {*/
+/*    text-align: left;*/
+/*}*/
+
+
+#departMentReport .table-container {
     overflow-x: auto;
     overflow-y: auto;
-
     border: 1px solid #ccc;
     border-radius: 8px;
 }
 
-table {
+#departMentReport table {
     width: 100%;
     border-collapse: collapse;
     font-family: Inter, sans-serif;
 }
 
-thead th {
+#departMentReport thead th {
     background-color: #DCE5FF;
     font-size: 10px;
     padding: 1px;
@@ -154,25 +244,23 @@ thead th {
     text-align: left;
 }
 
-tbody td, thead th {
+#departMentReport tbody td, #departMentReport thead th {
     padding: 10px;
     border-bottom: 1px solid #eee;
     white-space: nowrap;
     text-align: left;
 }
 
-tbody td input, .react-datepicker-wrapper {
-
+#departMentReport tbody td input, #departMentReport .react-datepicker-wrapper {
     box-sizing: border-box;
     padding-top: 5px;
     padding-bottom: 5px;
-
     font-size: 10px;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
 }
 
-.sticky-header {
+#departMentReport .sticky-header {
     position: sticky;
     top: 0;
     background-color: white;
@@ -180,7 +268,7 @@ tbody td input, .react-datepicker-wrapper {
     border-bottom: 2px solid #ccc;
 }
 
-.sticky-column {
+#departMentReport .sticky-column {
     position: sticky;
     left: 0;
     background-color: #f8f8f8;
@@ -188,27 +276,24 @@ tbody td input, .react-datepicker-wrapper {
     border-right: 2px solid #ddd;
 }
 
-.sticky-header.sticky-column {
+#departMentReport .sticky-header.sticky-column {
     z-index: 4;
     background-color: #DCE5FF;
 }
 
-tbody tr:nth-child(odd) {
+#departMentReport tbody tr:nth-child(odd) {
     background-color: #F7F9FF;
 }
 
-tbody tr:nth-child(even) {
+#departMentReport tbody tr:nth-child(even) {
     background-color: #F7F9FF;
 }
 
- input.text-input {
+#departMentReport input.text-input {
     width: 100%;
     padding: 8px;
     font-size: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-input.text-input {
     text-align: left;
 }

@@ -248,7 +248,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '7%'
+            width: '8%'
         },
         {
             name: "LAST CONTENT",

@@ -18,6 +18,7 @@ import SummaryReportMaterial from "./portal/report/SummaryReportMaterial";
 import PartReport from "./portal/report/PartReport";
 import EmissionReport from "./portal/report/EmissionReport";
 import TimeCompare from "./portal/report/TimeCompare";
+import TimeLogByDepartment from "./portal/report/TimeLogByDepartment";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -88,6 +89,13 @@ root.render(
                 <Route path="/routing_matrix" element={
                     <ProtectedRoute>
                         <RoutingMatrixEditor/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/department_time_report" element={
+                    <ProtectedRoute>
+                        <TimeLogByDepartment/>
                     </ProtectedRoute>
                 }>
                 </Route>

@@ -262,7 +262,7 @@ const WorkOrderDataTable = ({
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "14%",
+            width: "13%",
             cell: (row) => (
                 <select onChange={(e) => handleDropdownChange(e, row.work_id)} disabled={row.finalized > 0}
                         className={`w-full  placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>

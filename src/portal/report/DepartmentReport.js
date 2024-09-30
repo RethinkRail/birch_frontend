@@ -7,7 +7,7 @@
 
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 import axios from 'axios';
-import { MaterialReactTable } from "material-react-table";
+
 import DatePicker from "react-datepicker";
 import './DepartmentReport.css';
 import {round2Dec} from "../../utils/NumberHelper";
@@ -16,7 +16,8 @@ import {FaCloudDownloadAlt, FaDownload, FaFileDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
 import Modal from "react-modal";
 import qs from "qs";
-import CommentModal from "../../components/CommentModal";
+
+import CommentModalDepartMent from "../../components/CommentModalDepartMent";
 
 
 const DepartmentReport = () => {
@@ -83,6 +84,47 @@ const DepartmentReport = () => {
             transform: 'translate(-50%, -50%)',
         },
     };
+
+    function createObject(inputObject,statusTitle,userName) {
+
+
+        // Creating the desired object structure
+        const result = {
+            status_id: inputObject.status_id,
+            update_date: inputObject.update_date,
+            comment: inputObject.comment,
+            user: {
+                name: userName,
+                id: inputObject.user_id
+            },
+            statuscode: {
+                title: statusTitle,
+                code: inputObject.status_id
+            }
+        };
+
+        return result;
+    }
+    const putComments = (id,response,status_id,title)=>{
+        const lastCommentObject = createObject(response,title,JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['name'])
+        console.log(lastCommentObject)
+        console.log(id)
+
+        setProcessedReport((prevRep) =>
+            prevRep.map((rep) => {
+                if (rep.id === id) {
+                    // Prepending the new comment to the comment array
+                    return {
+                        ...rep,
+                        comment: [lastCommentObject, ...rep.comment],
+                    };
+                }
+                return rep;
+            })
+        );
+    }
+
+
     const orderDetailsModal = document.getElementById('orderDetailsModal');
     //const statusTextArea = useRef(null);
 
@@ -404,9 +446,10 @@ const DepartmentReport = () => {
                         </button>
                     </Modal>
 
-                    <CommentModal
+                    <CommentModalDepartMent
                         data={commentObject}
                         work_id={workIdForComment}
+                        updateWorkUpdates={putComments}
                     />
                     <div className="flex justify-between">
                         <h1 className="flex justify-start flex-row py-3">Department wise report</h1>
@@ -504,7 +547,8 @@ const DepartmentReport = () => {
                                                             document.getElementById('commentModal').showModal();
                                                             setCommentObject(row.comment);
                                                             setWorkIdForComment(row.id);
-                                                        }} className="cursor-pointer  whitespace-pre-line  text-ellipsis">{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
+
+                                                        }} style={{ width: '200px' }}  className="cursor-pointer  text-ellipsis w-11" >{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
                                                     )
 
                                                     : (

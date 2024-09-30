@@ -1,14 +1,23 @@
 /**
  * @author : Mithun Sarker
  * @mailto : mithun@ihrail.com
+ * @created : 9/30/2024, Monday
+ * Description:
+ **/
+
+/**
+ * @author : Mithun Sarker
+ * @mailto : mithun@ihrail.com
  * @created : 9/3/2024, Tuesday
  * Description:
  **/
 
 import React, {useState, useEffect, useMemo, useRef} from 'react';
 import axios from 'axios';
-import { MaterialReactTable } from "material-react-table";
-import DatePicker from "react-datepicker";
+import {
+    MaterialReactTable,
+    useMaterialReactTable,
+} from 'material-react-table';
 import './DepartmentReport.css';
 import {round2Dec} from "../../utils/NumberHelper";
 import {differenceBetweenTwoTimeStamp} from "../../utils/DateTimeHelper";
@@ -16,13 +25,16 @@ import {FaCloudDownloadAlt, FaDownload, FaFileDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
 import Modal from "react-modal";
 import qs from "qs";
-import CommentModal from "../../components/CommentModal";
+import {TextField} from "@mui/material";
+import Select from "react-select";
+import MenuItem from "@inovua/reactdatagrid-community/packages/Menu/src/MenuItem";
+import {DatePicker} from "@mui/x-date-pickers/DatePicker";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
+import {LocalizationProvider} from "@mui/x-date-pickers";
 
 
-const DepartmentReport = () => {
+const DPRMat = () => {
     const toastId = useRef(null)
-    const [commentObject, setCommentObject] = useState([])
-    const [workIdForComment, setWorkIdForComment] = useState(null)
     const [jobCategories, setJobCategories] = useState([]);
     const [statusCodes, setStatusCodes] = useState([]);
     const [departmentReport, setDepartmentReport] = useState([]);
@@ -192,7 +204,6 @@ const DepartmentReport = () => {
 
 
             const statusCode = railcarData.workupdates?.[0]?.statuscode?.code || null;
-            const comment = railcarData.workupdates;
             const owner = railcarData.railcar?.owner_railcar_owner_idToowner?.name || null;
             const lessee = railcarData.railcar?.owner_railcar_lessee_idToowner?.name || null;
             const products = railcarData.railcar?.products?.name || null;
@@ -211,7 +222,6 @@ const DepartmentReport = () => {
                 lessee,
                 products,
                 status_code: statusCode,
-                comment: comment,
                 inspected_date: formatDate(railcarData.inspected_date),
                 material_eta: formatDate(railcarData.material_eta),
                 clean_date: formatDate(railcarData.clean_date),
@@ -256,6 +266,323 @@ const DepartmentReport = () => {
     }
 
 
+
+    const columns =useMemo(() => [
+        {
+            accessorKey: 'id',
+            header: 'ID'
+        },
+        {
+            accessorKey: 'railcar_id',
+            header: 'Railcar ID',
+        },
+        {
+            accessorKey: 'dis',
+            header: 'DIS',
+        },
+        {
+            accessorKey: 'type',
+            header: 'Type',
+        },
+        {
+            accessorKey: 'owner',
+            header: 'Owner',
+        },
+        {
+            accessorKey: 'lessee',
+            header: 'Lessee',
+        },
+        {
+            accessorKey: 'products',
+            header: 'Products',
+        },
+        {
+            accessorKey: 'status_code',
+            header: 'Status',
+            Cell: ({ row }) => (
+                <Select
+                    value={row.status_code}
+                    onChange={(e) => handleDropdownChangeInDetails(e, row.original.id)}
+                >
+                    {statusCodes.map((status) => (
+                        <MenuItem key={status.code} value={status.code}>
+                            {status.code}: {status.title}
+                        </MenuItem>
+                    ))}
+                </Select>
+            ),
+        },
+        {
+            accessorKey: 'inspected_date',
+            header: 'Inspected Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.inspected_date ? new Date(row.inspected_date) : null}
+                        onChange={(date) => handleDateChange(date, row.id, 'inspected_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'clean_date',
+            header: 'Clean Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.clean_date ? new Date(row.original.clean_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'clean_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'clean_man_hour_estimated',
+            header: 'Clean Man Hour Estimated',
+        },
+        {
+            accessorKey: 'clean_man_hour_applied',
+            header: 'Clean Man Hour Applied',
+        },
+        {
+            accessorKey: 'repair_schedule_date',
+            header: 'Repair Schedule Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.repair_schedule_date ? new Date(row.original.repair_schedule_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'repair_schedule_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'repair_man_hour_estimated',
+            header: 'Repair Man Hour Estimated',
+        },
+        {
+            accessorKey: 'repair_man_hour_applied',
+            header: 'Repair Man Hour Applied',
+        },
+        {
+            accessorKey: 'paint_date',
+            header: 'Paint Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.paint_date ? new Date(row.original.paint_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'paint_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'exterior_paint',
+            header: 'Exterior Paint',
+        },
+        {
+            accessorKey: 'paint_man_hour_estimated',
+            header: 'Paint Man Hour Estimated',
+        },
+        {
+            accessorKey: 'paint_man_hour_applied',
+            header: 'Paint Man Hour Applied',
+        },
+        {
+            accessorKey: 'valve_date',
+            header: 'Valve Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.valve_date ? new Date(row.original.valve_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'valve_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'valve_man_hour_estimated',
+            header: 'Valve Man Hour Estimated',
+        },
+        {
+            accessorKey: 'valve_man_hour_applied',
+            header: 'Valve Man Hour Applied',
+        },
+        {
+            accessorKey: 'pd_date',
+            header: 'PD Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.pd_date ? new Date(row.original.pd_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'pd_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'pd_man_hour_estimated',
+            header: 'PD Man Hour Estimated',
+        },
+        {
+            accessorKey: 'pd_man_hour_applied',
+            header: 'PD Man Hour Applied',
+        },
+        {
+            accessorKey: 'indirect_labor_man_hour_estimated',
+            header: 'Indirect Labor Man Hour Estimated',
+        },
+        {
+            accessorKey: 'indirect_labor_man_hour_applied',
+            header: 'Indirect Labor Man Hour Applied',
+        },
+        {
+            accessorKey: 'indirect_switching_man_hour_estimated',
+            header: 'Indirect Switching Man Hour Estimated',
+        },
+        {
+            accessorKey: 'indirect_switching_man_hour_applied',
+            header: 'Indirect Switching Man Hour Applied',
+        },
+        {
+            accessorKey: 'maintenance_man_hour_estimated',
+            header: 'Maintenance Man Hour Estimated',
+        },
+        {
+            accessorKey: 'maintenance_man_hour_applied',
+            header: 'Maintenance Man Hour Applied',
+        },
+        {
+            accessorKey: 'admin_man_hour_estimated',
+            header: 'Admin Man Hour Estimated',
+        },
+        {
+            accessorKey: 'admin_man_hour_applied',
+            header: 'Admin Man Hour Applied',
+        },
+        {
+            accessorKey: 'final_date',
+            header: 'Final Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.final_date ? new Date(row.original.final_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'final_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'qa_date',
+            header: 'QA Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.original.qa_date ? new Date(row.original.qa_date) : null}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'qa_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'projected_out_date',
+            header: 'Projected Out Date',
+            Cell: ({ row }) => (
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                        selected={row.projected_out_date ? new Date(row.projected_out_date) : null}
+                        value={new Date(row.projected_out_date)}
+                        onChange={(date) => handleDateChange(date, row.original.id, 'projected_out_date')}
+                        dateFormat="MM-dd-yyyy"
+                        isClearable
+                        withPortal
+                    />
+                </LocalizationProvider>
+            ),
+        },
+        {
+            accessorKey: 'month_to_invoice',
+            header: 'Month to Invoice',
+        },
+        {
+            accessorKey: 'total_cost',
+            header: 'Total Cost',
+        },
+        {
+            accessorKey: 'mo_wk',
+            header: 'Mo Wk',
+            Cell: ({ row }) => (
+                <TextField
+                    value={row.original.mo_wk || ''}
+                    onChange={(e) => handleTextChange(e, row.original.id, 'mo_wk')}
+                />
+            ),
+        },
+        {
+            accessorKey: 'sp',
+            header: 'SP',
+            Cell: ({ row }) => (
+                <TextField
+                    value={row.original.sp || ''}
+                    onChange={(e) => handleTextChange(e, row.original.id, 'sp')}
+                />
+            ),
+        },
+        {
+            accessorKey: 'tq',
+            header: 'TQ',
+            Cell: ({ row }) => (
+                <TextField
+                    value={row.original.tq || ''}
+                    onChange={(e) => handleTextChange(e, row.original.id, 'tq')}
+                />
+            ),
+        },
+        {
+            accessorKey: 're',
+            header: 'RE',
+            Cell: ({ row }) => (
+                <TextField
+                    value={row.original.re || ''}
+                    onChange={(e) => handleTextChange(e, row.original.id, 're')}
+                />
+            ),
+        },
+        {
+            accessorKey: 'ep',
+            header: 'EP',
+            Cell: ({ row }) => (
+                <TextField
+                    value={row.original.ep || ''}
+                    onChange={(e) => handleTextChange(e, row.original.id, 'ep')}
+                />
+            ),
+        },
+    ],[]);
 
     const handleDateChange = async (date, id, field) => {
         setProcessedReport(prevReport => {
@@ -379,153 +706,26 @@ const DepartmentReport = () => {
 
     return (
         <React.Fragment>
-        {processedReport.length > 0 ? (
+            {processedReport.length > 0 ? (
 
-                <div id="departMentReport">
-                    <Modal
-                        isOpen={isStatusDropDownModalOpenInDetails}
-                        onRequestClose={() => {
-                            if (getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDown") !== '') {
-                                postStatusFromDetails()
-                            }
-                        }
-                        }
-                        parentSelector={() => document.querySelector('#departMentReport')}
-                        id="theIdHere"
-                        contentLabel="POST COMMENT"
-                        style={customStylesForCommentModal}
-                    >
-                        <textarea id="statusUpdateMessageFromDropDownInDetails" rows="2"
-                                  ref={statusCommentDropDownInDetails}
-                                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"
-                                  placeholder="Write your comments here..."></textarea>
-                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                onClick={postStatusFromDetails}>SUBMIT
-                        </button>
-                    </Modal>
+                <MaterialReactTable
+                    columns={columns}
+                    data={processedReport}
+                    enableColumnPinning={true}
+                    enableStickyHeader={true}
+                    initialState={{
+                        columnPinning: { left: ['railcar_id'] }, // pin railcar_id column to left by default
+                        columnVisibility: { id: false } // hide the id column
+                    }}
+                />
 
-                    <CommentModal
-                        data={commentObject}
-                        work_id={workIdForComment}
-                    />
-                    <div className="flex justify-between">
-                        <h1 className="flex justify-start flex-row py-3">Department wise report</h1>
-                        <div className="flex justify-end flex-row p-2 ">
-                            {/* Search Bar on the right */}
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-
-                                style={{ padding: '10px', fontSize: '14px', width: '200px' }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="table-container max-h-screen">
-                        {/* Flex container for the search bar */}
-
-
-                        <FaCloudDownloadAlt onClick={exportToCSV} style={{
-                            position: 'fixed',
-                            bottom: '20px',
-                            right: '15px',
-                            height:'50px',
-                            width:'50px',
-                            color:'#002E54',
-                            cursor:'pointer',
-                            zIndex: '1000' // Ensure it's on top of other elements
-                        }}/>
-                        <table id="department_report">
-                            <thead>
-                            <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
-                                <th
-                                    className="sticky-header sticky-column"
-                                    onClick={() => handleSort('railcar_id')}
-                                    style={{ cursor: 'pointer', position: 'relative' }}
-                                >
-                                    RAILCAR
-                                    <span >{getSortArrow('railcar_id')}</span>
-                                </th>
-                                {Object.keys(processedReport[0]).map((key) =>
-                                    key !== 'id' && key !== 'railcar_id' ? (
-                                        <th
-                                            key={key}
-                                            className="sticky-header"
-                                            style={{ paddingLeft: '10px', paddingRight: '2px', cursor: 'pointer', position: 'relative' }}
-                                            onClick={() => handleSort(key)}
-                                        >
-                                            {formatField(key)}
-                                            <span >{getSortArrow(key)}</span>
-                                        </th>
-                                    ) : null
-                                )}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {sortedReport.map((row) => (
-                                <tr key={row.id}>
-                                    <td className="sticky-column">{row.railcar_id}</td>
-                                    {Object.keys(row).map((key) =>
-                                        key !== 'id' && key !== 'railcar_id' ? (
-                                            <td key={key} className="text-xs py-1" style={{ paddingLeft: '5px', fontFamily: 'Inter', fontWeight: '400' }}>
-                                                {["mo_wk", "sp", "tq", "re", "ep"].includes(key) ? (
-                                                    <input
-                                                        type="text"
-                                                        style={{ width: '160px' }}
-                                                        value={row[key]}
-                                                        onChange={(e) => handleTextChange(e, row.id, key)}
-                                                        onBlur={(e) => updateTextField(e, row.id, key)}
-                                                        className="text-input w-40"
-                                                    />
-                                                ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key === 'month_to_invoice' ? (
-                                                    <span>
-                                            <DatePicker
-                                                value={row[key] !== null ? new Date(row[key]).toLocaleDateString() : null}
-                                                selected={row[key] !== null ? new Date(row[key]) : null}
-                                                onChange={(newDate) => handleDateChange(newDate, row.id, key)}
-                                                isClearable
-                                                showYearDropdown
-                                                dateFormat="MM-dd-yyyy"
-                                                style={{ width: '100%' }}
-                                            />
-                                        </span>
-                                                ) : key === 'status_code' ? (
-                                                    <select onChange={(e) => handleDropdownChangeInDetails(e, row.id)}>
-                                                        {statusCodes.map((status) => (
-                                                            <option key={status.code} value={status.code} selected={row[key] === status.code}>
-                                                                {status.code + ":" + status.title}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                ) : key === 'comment' ? (
-                                                        <span onClick={() => {
-                                                            document.getElementById('commentModal').showModal();
-                                                            setCommentObject(row.comment);
-                                                            setWorkIdForComment(row.id);
-                                                        }} className="cursor-pointer  whitespace-pre-line  text-ellipsis">{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
-                                                    )
-
-                                                    : (
-                                                    <span>{row[key]}</span>
-                                                )}
-                                            </td>
-                                        ) : null
-                                    )}
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             ) : null}
 
         </React.Fragment>
     );
 };
 
-export default DepartmentReport;
+export default DPRMat;
 
 
 

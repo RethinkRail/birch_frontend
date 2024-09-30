@@ -232,7 +232,7 @@
     font-family: Inter, sans-serif;
 }
 
-#departMentReport thead th {
+#departMentReport thead  {
     background-color: #DCE5FF;
     font-size: 10px;
     padding: 1px;

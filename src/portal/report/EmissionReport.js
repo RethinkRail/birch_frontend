@@ -11,6 +11,7 @@ import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
+import {round2Dec} from "../../utils/NumberHelper";
 
 const EmissionReport = () => {
     const [startDate, setStartDate] = useState("");
@@ -21,11 +22,12 @@ const EmissionReport = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'f0', header: 'Railcar', enableSorting: true, size: 50 },
         { accessorKey: 'f1', header: 'Clean Date', enableSorting: true },
-        { accessorKey: 'f2', header: 'Name', enableSorting: true },
+        { accessorKey: 'f2', header: 'Control Device', enableSorting: true },
         { accessorKey: 'f3', header: 'Emission Factor', enableSorting: true },
         { accessorKey: 'f4', header: 'Product', enableSorting: true },
         { accessorKey: 'f5', header: 'Molecular Weight', enableSorting: true },
         { accessorKey: 'f6', header: 'Vapor Pressure', enableSorting: true },
+        { accessorKey: 'emission', header: 'Emission LB/HR', enableSorting: true },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -66,20 +68,19 @@ const EmissionReport = () => {
     });
 
     const handleExportRows = (table,rows) => {
-        // const rowData = rows.map((row) => row.original);
-        // const csv = generateCsv(csvConfig)(rowData);
-        // download(csvConfig)(csv);
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
 
-        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible()==true);
-
-        // Map the rows to include only the visible columns
+        // Map the rows to include only the visible columns and use the column headers
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                filteredRow[column.id] = row.original[column.id]; // Adjust as needed based on your data structure
+                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
             });
             return filteredRow;
         });
+
+        console.log(rowData);
 
         // Generate the CSV with the filtered row data
         const csv = generateCsv(csvConfig)(rowData);
@@ -92,7 +93,8 @@ const EmissionReport = () => {
 
             return {
                 ...item,
-                f1: formattedDate
+                f1: formattedDate,
+                emission: round2Dec(item.f6* 33000 * (1 / 7.48) / (10.73 * 560) * item.f5 * (item.f3 / 100))
             };
         });
     }
@@ -132,9 +134,6 @@ const EmissionReport = () => {
                         Retrieve
                     </button>
                 </div>
-
-
-
             </div>
 
             <div className= "overflow-x-auto mt-8">
@@ -218,7 +217,6 @@ const EmissionReport = () => {
                                     <FaDownload style={{ marginRight: '8px' }} />
                                     Export Visible Data
                                 </button>
-
                             </div>
                         )}
                     />

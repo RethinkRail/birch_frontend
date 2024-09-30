@@ -1,12 +1,14 @@
-const DeleteModal = ({handleDelete, setDeleteModalShowing, setRowId, setRowCode}) => {
+const DeleteModal = ({ handleDelete, setDeleteModalShowing, setRowId, setRowCode }) => {
     return (
-        <div className="fixed inset-0 bg-[#2e2b2b40] flex justify-center items-center"
+        <div className="fixed top-0 left-0 w-full h-full bg-[#2e2b2b40] flex justify-center items-center backdrop-blur-sm"
              onClick={() => {
                  setRowId()
                  setRowCode()
                  setDeleteModalShowing((prev) => (!prev))
              }}>
-            <div className="bg-white rounded-md flex flex-col gap-2 shadow-md p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-md flex flex-col gap-2 shadow-md p-4"
+                 onClick={(e) => e.stopPropagation()}
+                 style={{ transform: 'translate(-50%, -50%)', position: 'absolute', top: '50%', left: '50%' }}>
                 <p>Are you sure you want to delete this entry?</p>
                 <div className="flex items-center flex-row gap-2 justify-start">
                     <button className="bg-[#002e54] text-[#ffffff] px-2 py-1.5 rounded-md" onClick={() => {
@@ -22,8 +24,9 @@ const DeleteModal = ({handleDelete, setDeleteModalShowing, setRowId, setRowCode}
                 </div>
             </div>
         </div>
-
     )
 }
+
+
 
 export default DeleteModal

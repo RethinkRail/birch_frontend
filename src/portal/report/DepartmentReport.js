@@ -194,7 +194,7 @@ const DepartmentReport = () => {
             const products = railcarData.railcar?.products?.name || null;
             const type = railcarData.railcar?.railcartype?.name || null;
             const railcar_id = railcarData.railcar?.rfid || null;
-            console.log(railcar_id)
+
             // Use a helper function to format dates
             const formatDate = (dateStr) => dateStr !== process.env.REACT_APP_DEFAULT_DATE ? new Date(dateStr).toLocaleDateString() : null;
 
@@ -244,9 +244,9 @@ const DepartmentReport = () => {
                 re: railcarData.re || "",
                 ep: railcarData.ep || ""
             };
-            console.log(result[i])
-        }
 
+        }
+        console.log(results)
         return results;
     }
 

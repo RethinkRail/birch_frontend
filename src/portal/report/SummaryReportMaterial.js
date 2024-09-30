@@ -28,19 +28,22 @@ const  SummaryReportMaterial = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'dis', header: 'DIS', enableSorting: true, size: 50 },
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
+        { accessorKey: 'status', header: 'Status', enableSorting: true },
+        { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
+        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true },
+        { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
+        { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },
+        { accessorKey: 'mhr_applied', header: 'MHR Applied', enableSorting: true },
+        { accessorKey: 'mhr_estimated', header: 'MHR Estimated', enableSorting: true },
+        { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
+        { accessorKey: 'last_content', header: 'Last Content', enableSorting: true },
+
         { accessorKey: 'owner', header: 'Owner', enableSorting: true },
         { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
         { accessorKey: 'railcar_type', header: 'Railcar Type', enableSorting: true },
-        { accessorKey: 'last_content', header: 'Last Content', enableSorting: true },
-        { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
-        { accessorKey: 'status', header: 'Status', enableSorting: true },
-        { accessorKey: 'mhr_applied', header: 'MHR Applied', enableSorting: true },
-        { accessorKey: 'mhr_estimated', header: 'MHR Estimated', enableSorting: true },
         { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true },
         { accessorKey: 'labor_cost', header: 'Labor Cost', enableSorting: true },
-        { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
         { accessorKey: 'arrival_date', header: 'Arrival Date', enableSorting: true },
-        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true },
         { accessorKey: 'inspected_date', header: 'Inspected Date', enableSorting: true },
         { accessorKey: 'material_eta', header: 'Material ETA', enableSorting: true },
         { accessorKey: 'clean_date', header: 'Clean Date', enableSorting: true },
@@ -51,9 +54,7 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'pd_date', header: 'PD Date', enableSorting: true },
         { accessorKey: 'final_date', header: 'Final Date', enableSorting: true },
         { accessorKey: 'qa_date', header: 'QA Date', enableSorting: true },
-        { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
         { accessorKey: 'shipped_date', header: 'Shipped Date', enableSorting: true },
-        { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },
         { accessorKey: 'sp', header: 'Special Process', enableSorting: true },
         { accessorKey: 'tq', header: 'Tank Qualification', enableSorting: true },
         { accessorKey: 're', header: 'Reline', enableSorting: true },
@@ -192,20 +193,19 @@ const  SummaryReportMaterial = () => {
     });
 
     const handleExportRows = (table,rows) => {
-        // const rowData = rows.map((row) => row.original);
-        // const csv = generateCsv(csvConfig)(rowData);
-        // download(csvConfig)(csv);
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
 
-        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible()==true);
-
-        // Map the rows to include only the visible columns
+        // Map the rows to include only the visible columns and use the column headers
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                filteredRow[column.id] = row.original[column.id]; // Adjust as needed based on your data structure
+                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
             });
             return filteredRow;
         });
+
+        console.log(rowData);
 
         // Generate the CSV with the filtered row data
         const csv = generateCsv(csvConfig)(rowData);

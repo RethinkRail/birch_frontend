@@ -24,7 +24,7 @@ const TimeLogByDepartment = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'f1', header: 'Name', enableSorting: true },
         { accessorKey: 'f2', header: 'Railcar', enableSorting: true },
-        { accessorKey: 'f3', header: 'Job Descriptuon', enableSorting: true },
+        { accessorKey: 'f3', header: 'Job Description', enableSorting: true },
         { accessorKey: 'f4', header: 'Start Time', enableSorting: true },
         { accessorKey: 'f5', header: 'End Time', enableSorting: true },
         { accessorKey: 'f6', header: 'Total Time', enableSorting: true },
@@ -72,21 +72,22 @@ const TimeLogByDepartment = () => {
         fieldSeparator: ',',
         decimalSeparator: '.',
         useKeysAsHeaders: true,
-        filename: 'Depart Wise Time Log for '+jobCategories.find(item => item.id === parseInt(selectedCategory)).name+'_'+startDate+" to "+endDate
+        filename: 'Depart Wise Time Log for '+jobCategories.find(item => item.id === parseInt(selectedCategory))?.name+'_'+startDate+" to "+endDate
     });
 
     const handleExportRows = (table,rows) => {
-
-        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible()==true);
-
-        // Map the rows to include only the visible columns
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
+        // Map the rows to include only the visible columns and use the column headers
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                filteredRow[column.id] = row.original[column.id]; // Adjust as needed based on your data structure
+                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
             });
             return filteredRow;
         });
+
+        console.log(rowData);
 
         // Generate the CSV with the filtered row data
         const csv = generateCsv(csvConfig)(rowData);

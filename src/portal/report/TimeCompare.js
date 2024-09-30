@@ -80,20 +80,19 @@ const TimeCompare = () => {
     });
 
     const handleExportRows = (table,rows) => {
-        // const rowData = rows.map((row) => row.original);
-        // const csv = generateCsv(csvConfig)(rowData);
-        // download(csvConfig)(csv);
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
 
-        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible()==true);
-
-        // Map the rows to include only the visible columns
+        // Map the rows to include only the visible columns and use the column headers
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                filteredRow[column.id] = row.original[column.id]; // Adjust as needed based on your data structure
+                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
             });
             return filteredRow;
         });
+
+        console.log(rowData);
 
         // Generate the CSV with the filtered row data
         const csv = generateCsv(csvConfig)(rowData);

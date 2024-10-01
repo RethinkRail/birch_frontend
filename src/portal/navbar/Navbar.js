@@ -14,12 +14,12 @@ const Navbar = () => {
         {
             title: 'Management',
             children: [
-                { title: 'Birch User Management', path: '/user_management' },
+                { title: 'Birch User Management', path: '#' },
                 { title: 'Team Member Management', path: '/team_member_management' },
                 { title: 'Routing Matrix', path: '/routing_matrix' }
             ]
         },
-        { title: 'Time Operation', path: '/time-operation' },
+        { title: 'Time Operation', path: '/#' },
         {
             title: 'Report',
             children: [
@@ -48,8 +48,8 @@ const Navbar = () => {
                 {
                     title: 'Purchasing',
                     children: [
-                        { title: 'Revenue By Inventory', path: '/revenue_recognition_inventory' },
-                        { title: 'Allocated Inventory', path: '/allocated_inventory' }
+                        { title: 'Revenue By Inventory', path: '#' },
+                        { title: 'Allocated Inventory', path: '#' }
                     ]
                 },
                 {

@@ -529,7 +529,7 @@ const DepartmentReport = () => {
                                                         value={row[key]}
                                                         onChange={(e) => handleTextChange(e, row.id, key)}
                                                         onBlur={(e) => updateTextField(e, row.id, key)}
-                                                        className="text-input w-40"
+                                                        className="text-input w-40 whitespace-pre-line w-12"
                                                     />
                                                 ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key === 'month_to_invoice' ? (
                                                     <span>
@@ -559,7 +559,6 @@ const DepartmentReport = () => {
 
                                                         }} style={{ width: '100px' }}  className="cursor-pointer whitespace-break-spaces" >{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
                                                     )
-
                                                     : (
                                                     <span>{row[key]}</span>
                                                 )}

@@ -157,7 +157,7 @@ const CrewManagement = () => {
                 onClick={() => setShowAddCrewForm(!showAddCrewForm)}
                 className="mb-4 bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
             >
-                {showAddCrewForm ? 'Cancel' : 'Add New Crew'}
+                {showAddCrewForm ? 'Cancel' : 'Add New Team Member'}
             </button>
 
             {showAddCrewForm && (

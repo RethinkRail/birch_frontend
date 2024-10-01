@@ -42,14 +42,15 @@ const DepartmentReport = () => {
                 setJobCategories(jobCategoryResponse.data);
 
                 const statusCodeResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_all_status/');
+
                 setStatusCodes(statusCodeResponse.data);
 
                 const departmentReportResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_department_report/');
-
                 setDepartmentReport(departmentReportResponse.data);
 
                 let data = processRailcarData(departmentReportResponse.data, jobCategoryResponse.data);
-                console.log(data)
+                // console.log(departmentReportResponse.data.length)
+                // console.log(data.length)
                 setProcessedReport(data);
                 toast.update(toastId.current, {
                     render: "All data loaded",
@@ -180,8 +181,7 @@ const DepartmentReport = () => {
     }
 
     function processRailcarData(dataArray, departmentMap) {
-        console.log('Data Array:', dataArray);
-        console.log('Department Map:', departmentMap);
+
 
         if (!dataArray.length || !departmentMap.length) {
             console.error('Empty dataArray or departmentMap');
@@ -293,7 +293,7 @@ const DepartmentReport = () => {
             };
 
         }
-        console.log(results)
+
         return results;
     }
 
@@ -375,33 +375,42 @@ const DepartmentReport = () => {
 
 
     const exportToCSV = () => {
-        if (filteredReport.length === 0) return;
+        const rows = document.querySelectorAll('table tr');
+        const csvData = [];
 
-        // Generate CSV headers from keys
-        const headers = Object.keys(filteredReport[0] || {}).join(',');
+        for (let row of rows) {
+            const rowData = [];
+            const columns = row.querySelectorAll('td, th');
 
-        // Generate CSV rows
-        const rows = filteredReport.map(row =>
-            Object.values(row).map(value => {
-                // Handle empty date picker fields and other null/undefined values
-                if (value === null || value === undefined || value === '1900-01-01T00:00:00.000Z') {
-                    return '""'; // Represent empty values as empty strings in CSV
+            for (let column of columns) {
+                let cellData = '';
+
+                // Check if the column contains an input inside the react-datepicker wrapper
+                const dateInput = column.querySelector('input[type="text"]');
+                if (dateInput) {
+                    cellData = dateInput.value; // Extract the value from the text input
+                } else {
+                    cellData = column.textContent.trim(); // Fallback to text content if no input is found
                 }
-                return `"${value.toString().replace(/"/g, '""')}"`; // Properly escape quotes
-            }).join(',')
-        );
 
-        // Create CSV content
-        const csvContent = `data:text/csv;charset=utf-8,${headers}\n${rows.join('\n')}`;
+                rowData.push(cellData);
+            }
 
-        // Create download link and trigger download
-        const encodedUri = encodeURI(csvContent);
+            csvData.push(rowData.join(','));
+        }
+
+        const csvContent = csvData.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'department_report.csv');
-        document.body.appendChild(link); // Required for Firefox
+        link.setAttribute('href', url);
+        link.setAttribute('download', "Birch Department Wise Report_"+new Date().toLocaleString());
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     };
+
+
 
     const updateTextField =async (e, id, key) =>{
         const val= e.target.value.toString(); // Get the value from the input field
@@ -507,7 +516,7 @@ const DepartmentReport = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {sortedReport.map((row) => (
+                            {sortedReport.map((row,i) => (
                                 <tr key={row.id}>
                                     <td className="sticky-column">{row.railcar_id}</td>
                                     {Object.keys(row).map((key) =>
@@ -548,7 +557,7 @@ const DepartmentReport = () => {
                                                             setCommentObject(row.comment);
                                                             setWorkIdForComment(row.id);
 
-                                                        }} style={{ width: '200px' }}  className="cursor-pointer  text-ellipsis w-11" >{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
+                                                        }} style={{ width: '100px' }}  className="cursor-pointer whitespace-break-spaces" >{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
                                                     )
 
                                                     : (

@@ -14,7 +14,7 @@ const Navbar = () => {
         {
             title: 'Management',
             children: [
-                { title: 'Birch User Management', path: '/user_management' },
+                { title: 'Birch User Management', path: '#' },
                 { title: 'Team Member Management', path: '/team_member_management' },
                 { title: 'Routing Matrix', path: '/routing_matrix' }
             ]

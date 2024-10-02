@@ -216,8 +216,8 @@ const RoutingMatrixEditor = () => {
                 {/* Steps Table */}
                 {selectedMatrixId && (
                     <div className="mt-6 overflow-x-auto">
-                        <table className="w-full min-w-[600px] mx-auto text-sm font-medium bg-white border rounded-lg shadow-md">
-                            <thead className="bg-gray-100 text-left">
+                        <table className="w-full x-auto text-sm font-normal bg-white border rounded-lg shadow-md">
+                            <thead className="bg-light-blue text-left font-normal">
                             <tr className="border-b">
                                 <th className="py-2 px-4 w-12">Step Code</th>
                                 <th className="py-2 px-4 w-12">Pre-Step 1</th>
@@ -226,7 +226,7 @@ const RoutingMatrixEditor = () => {
                                 <th className="py-2 px-4 w-12">Pre-Step 4</th>
                                 <th className="py-2 px-4 w-32">Role</th>
                                 <th className="py-2 px-4 w-32">Status Code</th>
-                                <th className="py-2 px-4 w-80">Task Description</th>
+                                <th className="py-2 px-4 w-30">Task Description</th>
                                 <th className="py-2 px-4 text-right w-40">Actions</th>
                             </tr>
                             </thead>
@@ -285,7 +285,7 @@ const RoutingMatrixEditor = () => {
                                             ))}
                                         </select>
                                     </td>
-                                    <td className="py-2 px-4 w-32">
+                                    <td className="py-2 px-4 w-28">
                                         <select
                                             value={step.brc_status_code || ''}
                                             onChange={(e) => handleStepFieldChange(index, 'brc_status_code', e.target.value)}
@@ -293,16 +293,16 @@ const RoutingMatrixEditor = () => {
                                         >
                                             <option value="">Select Status Code</option>
                                             {statusCodes.map(statusCode => (
-                                                <option key={statusCode.code} value={statusCode.code}>{statusCode.code}</option>
+                                                <option key={statusCode.code} value={statusCode.code}>{statusCode.code}-{statusCode.title}</option>
                                             ))}
                                         </select>
                                     </td>
-                                    <td className="py-2 px-4 w-80">
+                                    <td className="py-2 px-4 w-60">
                                         <input
                                             type="text"
                                             value={step.task_description || ''}
                                             onChange={(e) => handleStepFieldChange(index, 'task_description', e.target.value)}
-                                            className="border p-1 rounded w-full"
+                                            className="border p-1 rounded w-full whitespace-break-spaces"
                                         />
                                     </td>
                                     <td className="py-2 px-4 text-right w-40">

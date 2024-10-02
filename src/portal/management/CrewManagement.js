@@ -126,7 +126,7 @@ const CrewManagement = () => {
                             onClick={() => handleReactivate(crew.id)}
                             className="bg-yellow-500 text-white rounded px-4 py-1 hover:bg-yellow-600"
                         >
-                            Activate
+                            Reactivate
                         </button>
                     )}
                 </td>
@@ -219,7 +219,7 @@ const CrewManagement = () => {
 
             <table className="min-w-full bg-white border border-gray-300 rounded shadow">
                 <thead>
-                <tr className="bg-gray-100">
+                <tr className="bg-light-blue">
                     <th className="py-2 px-4 text-left">Name</th>
                     <th className="py-2 px-4 text-left">Employee ID</th>
                     <th className="py-2 px-4 text-left">Department</th>

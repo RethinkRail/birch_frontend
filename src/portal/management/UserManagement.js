@@ -58,11 +58,13 @@ const UserManagement = () => {
     };
 
     const deactivateUser = async (id) => {
-        try {
-            await axios.put(process.env.REACT_APP_BIRCH_API_URL + `users/${id}/deactivate`);
-            fetchUsers();
-        } catch (error) {
-            console.error('Error deactivating user:', error);
+        if (window.confirm('Are you sure you want to deactivate this crew?')) {
+            try {
+                await axios.put(process.env.REACT_APP_BIRCH_API_URL + `users/${id}/deactivate`);
+                fetchUsers();
+            } catch (error) {
+                console.error('Error deactivating user:', error);
+            }
         }
     };
 
@@ -108,7 +110,7 @@ const UserManagement = () => {
                     <>
                         <h2 className="text-xl font-semibold mb-4">Waiting for Activation</h2>
                         <table className="min-w-full bg-gray-100 border border-gray-300 rounded-lg">
-                            <thead className="bg-gray-200">
+                            <thead className="bg-light-blue">
                             <tr>
                                 <th className="border px-4 py-2">Name</th>
                                 <th className="border px-4 py-2">Email</th>
@@ -144,13 +146,13 @@ const UserManagement = () => {
                 {activeTab === 'active' && (
                     <>
                         <h2 className="text-xl font-semibold mb-4 mt-6">Active Users</h2>
-                        <table className="min-w-full bg-gray-100 border border-gray-300 rounded-lg">
-                            <thead className="bg-gray-200">
+                        <table className="w-full bg-gray-100 border border-gray-300  font-normal font-light">
+                            <thead className="bg-light-blue">
                             <tr>
-                                <th className="border px-4 py-2">Name</th>
-                                <th className="border px-4 py-2">Email</th>
-                                <th className="border px-4 py-2">Roles</th>
-                                <th className="border px-4 py-2">Actions</th>
+                                <th className="border px-4 py-2 w-1/5">Name</th>
+                                <th className="border px-4 py-2 w-1/5">Email</th>
+                                <th className="border px-4 py-2 w-2/5">Roles</th>
+                                <th className="border px-4 py-2 w-1/5">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -161,15 +163,15 @@ const UserManagement = () => {
                                         <td className="border px-4 py-2">{user.name}</td>
                                         <td className="border px-4 py-2">{user.email}</td>
                                         <td className="border px-4 py-2">{user.roles.join(', ')}</td>
-                                        <td className="border px-4 py-2">
+                                        <td className="border px-4 py-2 mr-2">
                                             <button
-                                                className="text-red-600 hover:underline btn"
+                                                className="text-red-600 hover:underline btn-sm bg-gray-200 rounded"
                                                 onClick={() => deactivateUser(user.id)}
                                             >
                                                 Deactivate
                                             </button>
                                             <button
-                                                className="text-blue-600 hover:underline ml-4 btn"
+                                                className="text-blue-600 hover:underline ml-4 btn-sm bg-gray-200 rounded"
                                                 onClick={() => {
                                                     setSelectedUserId(user.id);
                                                     setAssignedRoles(
@@ -194,7 +196,7 @@ const UserManagement = () => {
                     <>
                         <h2 className="text-xl font-semibold mb-4 mt-6">Deactivated Users</h2>
                         <table className="min-w-full bg-gray-100 border border-gray-300 rounded-lg">
-                            <thead className="bg-gray-200">
+                            <thead className="bg-light-blue">
                             <tr>
                                 <th className="border px-4 py-2">Name</th>
                                 <th className="border px-4 py-2">Email</th>
@@ -210,7 +212,7 @@ const UserManagement = () => {
                                         <td className="border px-4 py-2">{user.email}</td>
                                         <td className="border px-4 py-2">
                                             <button
-                                                className="text-blue-600 hover:underline btn-accent p-2 bg-gray-200 rounded"
+                                                className="text-blue-600 hover:underline btn-sm p-2 bg-gray-200 rounded"
                                                 onClick={() => openRoleModalForActivation(user.id)} // Open role modal instead of directly activating
                                             >
                                                 Assign roles and reactivate
@@ -227,7 +229,7 @@ const UserManagement = () => {
             {/* Modal for Changing Roles */}
             {showRoleModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-h-[90vh] overflow-y-auto my-8"> {/* Added max height and vertical margin */}
                         <h2 className="text-lg font-semibold mb-2">{selectedUserId ? 'Assign Roles' : 'Change Roles'}</h2>
                         <div className="space-y-2">
                             {roles.map((role) => (
@@ -257,7 +259,7 @@ const UserManagement = () => {
                                         alert("Please assign at least one role before activation.");
                                     }
                                 }}
-                                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mr-2"
                             >
                                 {selectedUserId ? 'Assign Roles' : 'Activate User'}
                             </button>
@@ -270,6 +272,7 @@ const UserManagement = () => {
                         </div>
                     </div>
                 </div>
+
             )}
         </div>
     );

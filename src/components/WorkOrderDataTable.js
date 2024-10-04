@@ -57,7 +57,7 @@ const WorkOrderDataTable = ({
                                 updateBillToLesseForAJob
                             }) => {
 
-    console.log(workOrders)
+    // console.log(workOrders)
     const orderDetailsModalRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState('');
 

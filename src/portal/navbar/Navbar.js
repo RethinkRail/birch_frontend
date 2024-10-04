@@ -59,7 +59,8 @@ const Navbar = () => {
                         { title: 'Emission Report', path: '/emission_report' },
                         { title: 'Part Report', path: '/part_report' },
                         { title: 'Department Time Report', path: '/department_time_report' },
-                        { title: 'QB Time Compare', path: '/qb_time_compare' }
+                        { title: 'QB Time Compare', path: '/qb_time_compare' },
+                        { title: 'Storage Report', path: '/storage_report' }
                     ]
                 }
             ]

@@ -21,6 +21,7 @@ import TimeCompare from "./portal/report/TimeCompare";
 import TimeLogByDepartment from "./portal/report/TimeLogByDepartment";
 import CrewManagement from "./portal/management/CrewManagement";
 import UserManagement from "./portal/management/UserManagement";
+import StorageReport from "./portal/report/StorageReport";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -85,6 +86,13 @@ root.render(
                 <Route path="/qb_time_compare" element={
                     <ProtectedRoute>
                         <TimeCompare/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/storage_report" element={
+                    <ProtectedRoute>
+                        <StorageReport/>
                     </ProtectedRoute>
                 }>
                 </Route>

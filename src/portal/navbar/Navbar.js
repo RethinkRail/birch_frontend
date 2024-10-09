@@ -19,7 +19,12 @@ const Navbar = () => {
                 { title: 'Routing Matrix', path: '/routing_matrix' }
             ]
         },
-        { title: 'Time Operation', path: '/#' },
+        {
+            title: 'Time Tracking',
+            children: [
+                { title: 'Time Approval', path: '#' }
+            ]
+        },
         {
             title: 'Report',
             children: [

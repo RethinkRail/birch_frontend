@@ -934,9 +934,6 @@ const OrderDetails = ({
         handleCheckForButtonsLessee()
     }, [lesseeInvoiceDate, lesseeInvoiceNetDays, lesseePurchaseOrder, lesseeInvoiceNumber])
 
-
-
-
     const handleCancel = () => {
         setOwnerPurchaseOrder(ownerPurchaseOrderOriginal)
         setOwnerInvoiceNumber(ownerInvoiceNumberOriginal)
@@ -2000,14 +1997,6 @@ const OrderDetails = ({
                                 </div>
                             )}
                             {/*End Order information Lessee */}
-
-
-
-
-
-
-
-
 
                             {/*Storage information*/}
                             {workOrder.is_storage ==1 &&(

@@ -28,6 +28,8 @@ const  SummaryReportMaterial = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'dis', header: 'DIS', enableSorting: true, size: 50 },
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
+        { accessorKey: 'owner', header: 'Owner', enableSorting: true },
+        { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
         { accessorKey: 'status', header: 'Status', enableSorting: true },
         { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
         { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true },
@@ -37,9 +39,6 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'mhr_estimated', header: 'MHR Estimated', enableSorting: true },
         { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
         { accessorKey: 'last_content', header: 'Last Content', enableSorting: true },
-
-        { accessorKey: 'owner', header: 'Owner', enableSorting: true },
-        { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
         { accessorKey: 'railcar_type', header: 'Railcar Type', enableSorting: true },
         { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true },
         { accessorKey: 'labor_cost', header: 'Labor Cost', enableSorting: true },

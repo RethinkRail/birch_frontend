@@ -8,6 +8,17 @@ import {auth} from "../../firebase";
 const Navbar = () => {
     // const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
 
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const currentPath = location.pathname;
+
+    const handleLogout = async () => {
+        await auth.signOut();
+        localStorage.clear();
+        return navigate('/auth/login');
+    };
+
     const navItems = [
         { title: 'Work Order', path: '/' },
         { title: 'Database', path: '/database' },
@@ -71,19 +82,19 @@ const Navbar = () => {
             ]
         }
     ];
-    const navigate = useNavigate();
-    const location = useLocation();
-    const currentPath = location.pathname;
 
-    const handleLogout = async () => {
-        await auth.signOut();
-        localStorage.clear();
-        return navigate('/auth/login');
+    const isItemSelected = (item, selectedPath) => {
+        if (item.path === selectedPath) return true;
+        if (item.children) {
+            return item.children.some(child => isItemSelected(child, selectedPath));
+        }
+        return false;
     };
+
     const renderNavItems = (items, selectedPath) => {
         return items.map((navItem) => {
-            const isSelected = navItem.path === selectedPath;
-            const itemClassName = isSelected ? "menu-item  menu-item-selected" : "menu-item";
+            const isSelected = isItemSelected(navItem, selectedPath);
+            const itemClassName = isSelected ? "menu-item menu-item-selected" : "menu-item";
 
             if (navItem.children) {
                 return (
@@ -110,14 +121,12 @@ const Navbar = () => {
         });
     };
 
-
-
     return (
         <div className={`w-full p-0 mx-auto`}>
             <div className="hidden lg:flex md:flex justify-between bg-[#002E54] text-white w-full items-center px-[20px]">
                 <BaseNavbar style={{ backgroundColor: '#002E54' }}>
                     <Collapse>
-                        {renderNavItems(navItems,currentPath)}
+                        {renderNavItems(navItems, currentPath)}
                     </Collapse>
                 </BaseNavbar>
                 <div className="h-fit flex items-center my-2">
@@ -135,7 +144,8 @@ const Navbar = () => {
                 </div>
             </div>
         </div>
-    )
+    );
+
 };
 
 export default Navbar;

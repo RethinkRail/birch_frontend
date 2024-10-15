@@ -16,6 +16,7 @@ import {round2Dec} from "../utils/NumberHelper";
 import StorageComponent from "./StorageComponent";
 import RailCareTimeLog from "./RailCareTimeLog";
 import {printAAR} from "../utils/aarHelper";
+import TaskTable from "./TaskTable";
 
 const OrderDetails = ({
                           commonData,
@@ -1156,6 +1157,11 @@ const OrderDetails = ({
                                 </div>
                             )}
 
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-10">
+                                <TaskTable
+                                    work_id={workOrder.id}/>
+                            </div>
+
 
                             {/*Railcar log*/}
 
@@ -1507,6 +1513,7 @@ const OrderDetails = ({
                                             <div className='p-1 mt-[10px]'>
                                                 <p className='text-xs font-normal'>Routing Status</p>
                                                 <p>{formatTasks(workOrder.routing_matrix_task_assignment) == "" ? "ALL steps completed" : formatTasks(workOrder.routing_matrix_task_assignment)}</p>
+                                                <p>(Following {workOrder.routingmatrix.name} routing)</p>
                                             </div>
 
 

@@ -226,7 +226,7 @@ const UserManagement = () => {
                 )}
             </div>
 
-            {/* Modal for Changing Roles */}
+            {/* ParentModal for Changing Roles */}
             {showRoleModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-h-[90vh] overflow-y-auto my-8"> {/* Added max height and vertical margin */}

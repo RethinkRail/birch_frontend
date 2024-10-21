@@ -16,8 +16,9 @@ import {round2Dec} from "../../utils/NumberHelper";
 import {fetchAndTransformTimesheets} from "../../utils/qbHelper";
 import {toast} from "react-toastify";
 import DataTable from "react-data-table-component";
-import Modal from "react-modal";
-import LogDetails from "../../components/LogDetails";
+import EditLogModal from "../../components/EditLogModal";
+
+import LogDetailsModal from "../../components/LogDetailsModal";
 
 
 const TimeApproval = () =>{
@@ -27,6 +28,7 @@ const TimeApproval = () =>{
     const [crewsToAddTime, setCrewsToAddTime] = useState([]);
 
     const [activeCarsToRetriveTime,setActiveCarsToRetrieveTime]= useState('')
+    const [activeCarsToEditLog,setActiveCarsToEditLog]= useState('')
     const [activeCarsToAddTime,setActiveCarsToAddTime]= useState('')
 
     const [departmentsForTimeRetrieve, setDepartmentsForTimeRetrieve] = useState([]);
@@ -52,11 +54,35 @@ const TimeApproval = () =>{
 
     const [isTeamMemberRailcarDisabled,setIsTeamMemberRailcarDisabled]= useState(false)
 
-    //Modal related
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedLogs, setSelectedLogs] = useState([]);
+    //ParentModal related
+    const [activeTab, setActiveTab] = useState('unapproved'); // Track active tab
+    const [selectedLog, setSelectedLog] = useState(null);   // Track selected log for modal
+
 
     const [timeLogData,setTimeLogData]= useState([])
+
+    const [approvedTimeLogs,setApprovedTimeLogs]= useState([])
+    const [unApprovedTimeLogs,setUnApprovedTimeLogs]= useState([])
+
+    const [mergedData, setMergedData] = useState([]);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);  // Control modal visibility
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for edit modal
+    const [editedLog, setEditedLog] = useState(null); // State for edited log data
+
+    useEffect(() => {
+        categorizeLogs();
+    }, [mergedData]);
+
+    // Function to categorize logs into approved and unapproved
+    const categorizeLogs = () => {
+        const approvedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 1));
+        const unapprovedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 0));
+
+        setApprovedTimeLogs(approvedLogs);
+        setUnApprovedTimeLogs(unapprovedLogs);
+    };
 
     useEffect(() => {
         // Fetch the data from the web service
@@ -73,8 +99,17 @@ const TimeApproval = () =>{
                         label: item.railcar_id,
                     })),
                 ];
-                setActiveCarsToRetrieveTime(activeCars)
 
+                const activeCarsToEdit= [
+                    { value: 'INDIRECT', label: "INDIRECT" },
+                    ...activeCarResponse.data.map((item) => ({
+                        value: item.id,
+                        label: item.railcar_id,
+                    })),
+                ];
+                console.log(activeCarsToEdit)
+                setActiveCarsToRetrieveTime(activeCars)
+                setActiveCarsToEditLog(activeCarsToEdit)
                 const activeCarsToAddT = [
                     { value: 'INDIRECT', label: 'INDIRECT' },
                     ...activeCarResponse.data.map((item) => ({
@@ -223,40 +258,18 @@ const TimeApproval = () =>{
                 birchResponse =  responseBirch.data
                 console.log(birchResponse);
 
-                const employeeMap = {};
 
-                // Step 2: Populate the map with employee data
-                qbResponse.forEach(employee => {
-                    employeeMap[employee.employee_number] = {
-                        employee_name: employee.employee_name,
-                        employee_number: employee.employee_number,
-                        time_in_qb: employee.time_in_qb,
-                        total_logged_time_in_seconds: 0,
-                        logs: []
-                    };
-                });
+                setMergedData( combineData(qbResponse, birchResponse));
 
-                // Step 3: Merge time logs into the map based on employee_number
-                birchResponse.forEach(log => {
-                    const empNumber = log.employee_number;
-                    if (employeeMap[empNumber]) {
-                        employeeMap[empNumber].logs.push(log);
-                        employeeMap[empNumber].total_logged_time_in_seconds += log.logged_time_in_seconds;
-                    }
-                });
-
-                const data = Object.values(employeeMap).map((employee) => ({
-                    name: employee.employee_name,
-                    birchTime: (employee.total_logged_time_in_seconds / 3600).toFixed(2),
-                    qbTime: (employee.time_in_qb / 3600).toFixed(2),
-                    utilization: (
-                        (employee.total_logged_time_in_seconds * 100) /
-                        employee.time_in_qb
-                    ).toFixed(2) + "%",
-                    logs: employee.logs,
-                }));
-
-                setTimeLogData(data)
+                // Separate Approved and Unapproved Logs
+                // const approvedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 1));
+                // const unapprovedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 0));
+                //
+                // setUnApprovedTimeLogs(unapprovedLogs)
+                // setApprovedTimeLogs(approvedLogs)
+                // console.log(approvedLogs)
+                // console.log(unapprovedLogs)
+                //setTimeLogData(data)
 
                 toast.update(toastId.current, {
                     render: "All data loaded",
@@ -266,7 +279,6 @@ const TimeApproval = () =>{
                     isLoading: false
                 });
 
-                console.log(employeeMap)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -294,7 +306,6 @@ const TimeApproval = () =>{
             alert('Failed to clock out the whole department. Please try again.');
         }
     }
-
 
     async function addTime() {
         if (selectedCrewsToAddTime !== '' && selectedCarToAddTimeLog !== '' && outTimeToAddJob !== '' && inTimeToAddJob !== '' && jobToAddTime !== '' && totalSecondToAddTime > 0) {
@@ -339,8 +350,30 @@ const TimeApproval = () =>{
             alert("All fields are reqired")
         }
     }
+    const combineData = (qbData, birchData) => {
+        const groupedData = birchData.reduce((acc, entry) => {
+            const key = entry.employee_number;
+            if (!acc[key]) {
+                acc[key] = { logs: [], total_logged_time: 0 };
+            }
+            acc[key].logs.push(entry);
+            acc[key].total_logged_time += entry.logged_time_in_seconds;
+            return acc;
+        }, {});
 
-    //Modal.setAppElement("#timeApproval");
+        return qbData.map(qb => {
+            const employeeLogs = groupedData[qb.employee_number] || { logs: [], total_logged_time: 0 };
+            return {
+                employee_name: qb.employee_name,
+                employee_number: qb.employee_number,
+                time_in_qb: qb.time_in_qb,
+                total_logged_time: employeeLogs.total_logged_time,
+                logs: employeeLogs.logs
+            };
+        });
+    };
+
+    //ParentModal.setAppElement("#timeApproval");
     const customStyles = {
         content: {
             top: "50%",
@@ -354,27 +387,43 @@ const TimeApproval = () =>{
 
 
     const columns = [
-        { name: "Name", selector: (row) => row.name, sortable: true },
-        { name: "Birch Time (hrs)", selector: (row) => row.birchTime },
-        { name: "QB Time (hrs)", selector: (row) => row.qbTime },
-        { name: "Utilization (%)", selector: (row) => row.utilization },
+        { name: 'Name', selector: row => row.employee_name, sortable: true },
+        { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
+        { name: 'QB Time (hrs)', selector: row => (row.time_in_qb / 3600).toFixed(2), sortable: true },
         {
-            name: "Actions",
-            cell: (row) => (
+            name: 'Utilization (%)',
+            selector: row => ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),
+            sortable: true
+        },
+        {
+            name: 'Actions',
+            cell: row => (
                 <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                    onClick={() => openModal(row.logs)}
-                >
+                    onClick={() => handleViewDetails(row)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded">
                     View Details
                 </button>
-            ),
-        },
+            )
+        }
     ];
 
-    const openModal = (logs) => {
-        console.log(logs)
-        setSelectedLogs(logs);
+    const handleViewDetails = (row) => {
+        console.log(row)
+        setSelectedLog(row);
         setIsModalOpen(true);
+    };
+
+    // Open log details modal
+    const openLogDetails = (logs, crewName) => {
+        setSelectedLog({ logs, crewName });
+        setIsModalOpen(true);
+    };
+
+    // Open edit log modal
+    const openEditLogModal = (log) => {
+        console.log(log)
+        setEditedLog(log); // Set the log to be edited
+        setIsEditModalOpen(true); // Open edit modal
     };
 
     const closeModal = () => {
@@ -403,9 +452,91 @@ const TimeApproval = () =>{
 
     }
 
+    const handleLogApprove = (log) => {
+        // Call your web service to approve the log here...
+
+        // Simulate updating the log's approval state
+        const updatedLog = { ...log, is_approved: 1 };
+
+        // Update local state
+        const updatedLogs = mergedData.map(data => {
+            return {
+                ...data,
+                logs: data.logs.map(item => item.time_log_entry_id === log.time_log_entry_id ? updatedLog : item)
+            };
+        });
+
+        // Update the merged data state
+        setMergedData(updatedLogs);
+    };
+
+    // Handle deleting a log
+    const handleLogDelete = (logId) => {
+        // Call your web service to delete the log here...
+
+        // Update local state to remove the log
+        const updatedLogs = mergedData.map(data => {
+            return {
+                ...data,
+                logs: data.logs.filter(item => item.time_log_entry_id !== logId)
+            };
+        });
+
+        // Update the merged data state
+        setMergedData(updatedLogs);
+    };
+
+    // Handle editing a log with web service call
+    const handleLogEdit = async (editedData) => {
+        alert("here")
+        try {
+            // Call your web service to update the log here
+            const response = await axios.put(`your-api-endpoint/${editedData.time_log_entry_id}`, editedData);
+
+            // Assume response.data contains the updated log
+            const updatedLog = response.data;
+
+            // Update local state to modify the log
+            const updatedLogs = mergedData.map(data => {
+                return {
+                    ...data,
+                    logs: data.logs.map(item => item.time_log_entry_id === updatedLog.time_log_entry_id ? updatedLog : item)
+                };
+            });
+
+            // Update the merged data state
+            setMergedData(updatedLogs);
+            setIsEditModalOpen(false); // Close the edit modal
+        } catch (error) {
+            console.error('Error updating log:', error);
+            // Handle error (e.g., show notification)
+        }
+    };
+
+    const handleUnapprove = (entryId) => {
+        // Call your API to unapprove the log entry
+        // Assuming you have an API that takes the entry ID and unapproves it
+        axios.post(`/api/unapprove/${entryId}`)
+            .then(response => {
+                // Update the mergedData state to reflect the unapproved status
+                const updatedData = mergedData.map(data => {
+                    const logs = data.logs.map(log =>
+                        log.time_log_entry_id === entryId ? { ...log, is_approved: 0 } : log
+                    );
+                    return { ...data, logs };
+                });
+
+                setMergedData(updatedData);
+            })
+            .catch(error => {
+                console.error('Error unapproving log:', error);
+            });
+    };
+
+
     return (
         <React.Fragment>
-            <div className="font-inter" id='timeApproval'>
+            <div className="font-inter" id='timeApproval '>
                 <h1 className="text-2xl font-bold mb-4 mt-5 flex items-center  justify-center">Time Approval</h1>
 
                 <div className="grid grid-cols-3 gap-10">
@@ -545,21 +676,57 @@ const TimeApproval = () =>{
                     </div>
                 </div>
 
-                <div className='mt-10 mb-10'>
-                    <DataTable
-                        title="Time Log"
-                        columns={columns}
-                        data={timeLogData}
-                        pagination={false}
-                        customStyles={myStyles}
-                    />
+                <div className='mb-10'>
+                    {/* Tabs Navigation */}
+                    <div className="flex border-b mb-4 mt-10">
+                        <button
+                            className={`px-4 py-2 ${activeTab === 'unapproved' ? 'border-b-2 border-blue-500 font-bold' : ''}`}
+                            onClick={() => setActiveTab('unapproved')}>
+                            Unapproved Logs
+                        </button>
+                        <button
+                            className={`px-4 py-2 ${activeTab === 'approved' ? 'border-b-2 border-blue-500 font-bold' : ''}`}
+                            onClick={() => setActiveTab('approved')}>
+                            Approved Logs
+                        </button>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className='mb-10'>
+                        {activeTab === 'unapproved' ? (
+                            <DataTable columns={columns} data={unApprovedTimeLogs} customStyles={myStyles} pagination={false}/>
+                        ) : (
+                            <DataTable columns={columns} data={approvedTimeLogs} customStyles={myStyles} pagination={false} />
+                        )}
+                    </div>
+
                 </div>
 
+                {/* Log Details ParentModal */}
 
-                {/* Modal for Viewing Logs */}
-                <Modal isOpen={isModalOpen} onRequestClose={closeModal} style={customStyles}>
-                    <LogDetails logs={selectedLogs} onClose={closeModal} />
-                </Modal>
+                {isModalOpen && (
+                    <>
+                        <LogDetailsModal
+                            log={selectedLog}
+
+                            onApprove={handleLogApprove}
+                            onDelete={handleLogDelete}
+                            onEditClick={openEditLogModal}
+                            onClose={() => setIsModalOpen(false)}
+                        />
+                    </>
+
+                )}
+
+                {/* Edit Log ParentModal */}
+                {isEditModalOpen && editedLog && (
+                    <EditLogModal
+                        entry={editedLog}
+                        carsToEdit={activeCarsToEditLog}
+                        onSave={handleLogEdit}
+                        onClose={() => setIsEditModalOpen(false)}
+                    />
+                )}
 
             </div>
         </React.Fragment>

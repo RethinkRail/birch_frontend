@@ -38,7 +38,7 @@ const WorkOrderModal = ({setWorkOrderModalShowing, routingMatrix, createWO}) => 
                             onClick={() => setWorkOrderModalShowing(false)}>
                         &times;
                     </button>
-                    {/* Modal Content */}
+                    {/* ParentModal Content */}
                     <CreateWorkOrder
                         setWorkOrderModalShowing={setWorkOrderModalShowing}
                         routingMatrix={routingMatrix}

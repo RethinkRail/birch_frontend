@@ -125,6 +125,29 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
     margin-right: 5px;
 }
 
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+
 /*ul.nav > .nav-item .menu-item :hover {*/
 /*    color: yellow !important;*/
 /*    background-color: #61dafb;*/
@@ -132,19 +155,19 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
 
 /*Nav styling */
 
-.rdt_TableCol:first-child,
-.rdt_TableCell:first-child,
-.rdt_TableCol:nth-child(1),
-.rdt_TableCell:nth-child(1) {
-    position: sticky;
-    left: 0;
-    z-index: 1;
-    background: inherit;
-}
+/*.rdt_TableCol:first-child,*/
+/*.rdt_TableCell:first-child,*/
+/*.rdt_TableCol:nth-child(1),*/
+/*.rdt_TableCell:nth-child(1) {*/
+/*    position: sticky;*/
+/*    left: 0;*/
+/*    z-index: 1;*/
+/*    background: inherit;*/
+/*}*/
 
-.rdt_TableCol:nth-child(1),
-.rdt_TableCell:nth-child(1) {
-    left: 0;
-}
+/*.rdt_TableCol:nth-child(1),*/
+/*.rdt_TableCell:nth-child(1) {*/
+/*    left: 0;*/
+/*}*/
 
 

@@ -34,7 +34,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         setTableData(jobListData);
     }, [workOrder, jobs]);
 
-    // Modal related stuffs can be found below
+    // ParentModal related stuffs can be found below
     const [modalShowing, setModalShowing] = useState(false)
     const [editData, setEditData] = useState()
 
@@ -342,7 +342,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     <button className='btn btn-secondary btn-sm normal-case' onClick={() => {
                         setEditData(null)
                         setModalShowing(true)
-                        console.log("Modal is now showing")
+                        console.log("ParentModal is now showing")
                     }}>Add Job</button>
                 </div>
 

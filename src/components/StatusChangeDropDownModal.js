@@ -2,7 +2,7 @@
  * @author : Mithun Sarker
  * @mailto : mithun@ihrail.com
  * @created : 2/13/2024, Tuesday
- * Description: Modal to put comment when status is being changed
+ * Description: ParentModal to put comment when status is being changed
  **/
 
 import React from 'react';

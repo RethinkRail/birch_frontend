@@ -25,6 +25,7 @@ const TimeApproval = () =>{
 
     const toastId = useRef(null)
     const [crewsForTimeRetrieve, setCrewsForTimeRetrieve] = useState([]);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     const [crewsToAddTime, setCrewsToAddTime] = useState([]);
 
     const [activeCarsToRetriveTime,setActiveCarsToRetrieveTime]= useState('')
@@ -72,22 +73,34 @@ const TimeApproval = () =>{
     const [editedLog, setEditedLog] = useState(null); // State for edited log data
 
     useEffect(() => {
-        categorizeLogs();
+        console.log("sas")
+        categorizeLogs(mergedData);
+
     }, [mergedData]);
 
     // Function to categorize logs into approved and unapproved
-    const categorizeLogs = () => {
-        const approvedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 1));
-        const unapprovedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 0));
+    const categorizeLogs = (data) => {
+        console.log(data)
+        const approvedLogs = data.filter(data =>
+            data.logs.every(log => log.is_approved === 1)
+        );
 
-        setApprovedTimeLogs(approvedLogs);
+        const unapprovedLogs = data.filter(data =>
+            data.logs.every(log => log.is_approved === 0)
+        );
+
+        console.log('Approved Logs:', approvedLogs);
+        console.log('Unapproved Logs:', unapprovedLogs);
+
         setUnApprovedTimeLogs(unapprovedLogs);
+        setApprovedTimeLogs(approvedLogs);
     };
 
     useEffect(() => {
         // Fetch the data from the web service
         const fetchData = async () => {
             try {
+                setIsButtonDisabled(true)
                 const crewsResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'crews');
                 const activeCarResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_car_for_time_operation');
                 console.log(activeCarResponse)
@@ -171,6 +184,7 @@ const TimeApproval = () =>{
                     ).values()
                 );
                 setDepartmentsToClockOut(departmentToClockOut);
+                setIsButtonDisabled(false)
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -229,6 +243,7 @@ const TimeApproval = () =>{
         if (fromDateToTimeRetrieve !== '' && toDateToTimeRetrive !== '' && selectedDepartmentToTimeRetrieve!== ''
             && selectedCrewsToTimeRetrieve != '' && selectedCarToRetrieveTimeLog != '') {
             toastId.current = toast.loading("Loading...")
+            setIsButtonDisabled(true)
             const start_date = new Date(fromDateToTimeRetrieve).toISOString().split('T')[0]
             const end_date = new Date(toDateToTimeRetrive).toISOString().split('T')[0]
             let qbResponse;
@@ -258,18 +273,10 @@ const TimeApproval = () =>{
                 birchResponse =  responseBirch.data
                 console.log(birchResponse);
 
+                const combinedData =  combineData(qbResponse, birchResponse)
+                console.log(combinedData)
+                setMergedData(combinedData);
 
-                setMergedData( combineData(qbResponse, birchResponse));
-
-                // Separate Approved and Unapproved Logs
-                // const approvedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 1));
-                // const unapprovedLogs = mergedData.filter(data => data.logs.some(log => log.is_approved === 0));
-                //
-                // setUnApprovedTimeLogs(unapprovedLogs)
-                // setApprovedTimeLogs(approvedLogs)
-                // console.log(approvedLogs)
-                // console.log(unapprovedLogs)
-                //setTimeLogData(data)
 
                 toast.update(toastId.current, {
                     render: "All data loaded",
@@ -278,7 +285,7 @@ const TimeApproval = () =>{
                     hideProgressBar: true,
                     isLoading: false
                 });
-
+                setIsButtonDisabled(false)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -361,30 +368,20 @@ const TimeApproval = () =>{
             return acc;
         }, {});
 
-        return qbData.map(qb => {
-            const employeeLogs = groupedData[qb.employee_number] || { logs: [], total_logged_time: 0 };
-            return {
-                employee_name: qb.employee_name,
-                employee_number: qb.employee_number,
-                time_in_qb: qb.time_in_qb,
-                total_logged_time: employeeLogs.total_logged_time,
-                logs: employeeLogs.logs
-            };
-        });
+        // Filter `qbData` to only include entries where `employee_number` exists in `groupedData`
+        return qbData
+            .filter(qb => groupedData.hasOwnProperty(qb.employee_number))
+            .map(qb => {
+                const employeeLogs = groupedData[qb.employee_number];
+                return {
+                    employee_name: qb.employee_name,
+                    employee_number: qb.employee_number,
+                    time_in_qb: qb.time_in_qb,
+                    total_logged_time: employeeLogs.total_logged_time,
+                    logs: employeeLogs.logs
+                };
+            });
     };
-
-    //ParentModal.setAppElement("#timeApproval");
-    const customStyles = {
-        content: {
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            marginRight: "-50%",
-            transform: "translate(-50%, -50%)",
-        },
-    };
-
 
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
@@ -413,11 +410,7 @@ const TimeApproval = () =>{
         setIsModalOpen(true);
     };
 
-    // Open log details modal
-    const openLogDetails = (logs, crewName) => {
-        setSelectedLog({ logs, crewName });
-        setIsModalOpen(true);
-    };
+
 
     // Open edit log modal
     const openEditLogModal = (log) => {
@@ -471,14 +464,13 @@ const TimeApproval = () =>{
     };
 
     // Handle deleting a log
-    const handleLogDelete = (logId) => {
+    const handleLogDelete = (entry) => {
         // Call your web service to delete the log here...
-
         // Update local state to remove the log
         const updatedLogs = mergedData.map(data => {
             return {
                 ...data,
-                logs: data.logs.filter(item => item.time_log_entry_id !== logId)
+                logs: data.logs.filter(item => item.time_log_entry_id !== entry.time_log_entry_id)
             };
         });
 
@@ -488,25 +480,72 @@ const TimeApproval = () =>{
 
     // Handle editing a log with web service call
     const handleLogEdit = async (editedData) => {
-        alert("here")
         try {
             // Call your web service to update the log here
-            const response = await axios.put(`your-api-endpoint/${editedData.time_log_entry_id}`, editedData);
+            const response = await axios.post(
+                `${process.env.REACT_APP_BIRCH_API_URL}update_a_time_log`,
+                editedData
+            );
 
             // Assume response.data contains the updated log
-            const updatedLog = response.data;
+            const updatedLog = response.data.data; // Use response data for the latest log
+            console.log(updatedLog)
+            // Transform the second object's keys to match the first object’s structure
+            const transformedLog = {
+                time_log_entry_id: updatedLog.id,
+                crew_id: updatedLog.crew,
+                workorder_id: updatedLog.work_id,
+                job_id: updatedLog.job_id,
+                railcar_id: updatedLog.railcar_id,
+                indirect_labor_id: updatedLog.indirect_labor_id,
+                job_description: updatedLog.job_description,
+                start_time: updatedLog.start_time,
+                end_time: updatedLog.end_time,
+                logged_time_in_seconds: updatedLog.logged_time_in_seconds,
+                is_approved: updatedLog.is_approved,
+                approved_time_in_second: updatedLog.approved_time_in_second,
+                notes: updatedLog.notes,
 
-            // Update local state to modify the log
-            const updatedLogs = mergedData.map(data => {
+            };
+            console.log("transformed log")
+            console.log(transformedLog)
+
+            const updatedData = mergedData.map(employee => {
+                const updatedLogs = employee.logs.map(log => {
+                    if (log.time_log_entry_id === transformedLog.time_log_entry_id) {
+                        // Return a new object that merges the original log with the updated values
+                        return {
+                            ...log,
+                            ...Object.keys(transformedLog).reduce((acc, key) => {
+                                if (transformedLog[key] !== null) {
+                                    acc[key] = transformedLog[key];
+                                }
+                                return acc;
+                            }, {})
+                        };
+                    }
+                    return log; // Return unchanged log if ID doesn't match
+                });
+
+                // Calculate the total logged time based on updated logs
+                const totalLoggedTime = updatedLogs.reduce((sum, log) => sum + log.logged_time_in_seconds, 0);
+
                 return {
-                    ...data,
-                    logs: data.logs.map(item => item.time_log_entry_id === updatedLog.time_log_entry_id ? updatedLog : item)
+                    ...employee,
+                    logs: updatedLogs,
+                    total_logged_time: totalLoggedTime // Update the total_logged_time
                 };
             });
 
-            // Update the merged data state
-            setMergedData(updatedLogs);
+            console.log(updatedLog)
+            // Update the state with the modified data
+            setMergedData(updatedData);
+
+
+
+            //setMergedData(newData)
             setIsEditModalOpen(false); // Close the edit modal
+
         } catch (error) {
             console.error('Error updating log:', error);
             // Handle error (e.g., show notification)
@@ -596,6 +635,7 @@ const TimeApproval = () =>{
 
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full mt-4"
+                            disabled={isButtonDisabled}
                             onClick={retrieveTimeLog}
                         >
                             GET TIME LOG
@@ -653,6 +693,7 @@ const TimeApproval = () =>{
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full mt-6"
                             onClick={addTime}
+                            disabled={isButtonDisabled}
                         >
                             ADD TIME
                         </button>
@@ -669,6 +710,7 @@ const TimeApproval = () =>{
                         />
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full mt-4"
+                            disabled={isButtonDisabled}
                             onClick={clockoutByDepartment}
                         >
                             CLOCK OUT
@@ -708,8 +750,8 @@ const TimeApproval = () =>{
                     <>
                         <LogDetailsModal
                             log={selectedLog}
-
                             onApprove={handleLogApprove}
+                            onUnApprove={handleUnapprove}
                             onDelete={handleLogDelete}
                             onEditClick={openEditLogModal}
                             onClose={() => setIsModalOpen(false)}

@@ -8,8 +8,9 @@
 // LogDetailsModal.js
 // LogDetailsModal.js
 import React from 'react';
+import {round2Dec} from "../utils/NumberHelper";
 
-const LogDetailsModal = ({ log, onClose, onApprove,onDelete, onEditClick }) => {
+const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditClick }) => {
     if (!log) return null;
 
     return (
@@ -57,16 +58,19 @@ const LogDetailsModal = ({ log, onClose, onApprove,onDelete, onEditClick }) => {
                                     {new Date(entry.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                 </td>
                                 <td className="border px-4 py-2">
-                                    {(entry.logged_time_in_seconds / 3600).toFixed(1)}
+                                    {round2Dec(entry.logged_time_in_seconds / 3600)}
                                 </td>
                                 <td className="border px-4 py-2">{entry.railcar_id}</td>
                                 <td className="border px-4 py-2">{entry.job_description}</td>
                                 <td className="border px-4 py-2">
-                                    {((entry.mhe - entry.approved_time_in_line) / 3600).toFixed(1)}
+                                    {round2Dec((entry.mhe - entry.approved_time_in_line) / 3600)}
                                 </td>
                                 <td className="border px-4 py-2 flex space-x-2">
-                                    {entry.is_approved === 1 ? (
+                                    {entry.locked_for_time_clocking === 1 ? (
+                                        <p>THE CAR IS LOCKED FOR TIME CLOCKING</p>
+                                    ) : entry.is_approved === 1 ? (
                                         <button
+                                            onClick={() => onUnApprove(entry)}
                                             className="bg-red-500 text-white px-2 py-1 rounded">
                                             Unapprove
                                         </button>
@@ -74,18 +78,24 @@ const LogDetailsModal = ({ log, onClose, onApprove,onDelete, onEditClick }) => {
                                         <>
                                             <button
                                                 onClick={() => onEditClick(entry)}
-                                                className="bg-yellow-500 text-white px-2 py-1 rounded">
+                                                className="bg-yellow-500 text-white px-2 py-1 rounded"
+                                            >
                                                 Edit
                                             </button>
-                                            <button className="bg-green-500 text-white px-2 py-1 rounded mr-2">
+                                            <button
+                                                onClick={() => onApprove(entry)}
+                                                className="bg-green-500 text-white px-2 py-1 rounded mr-2">
                                                 Approve
                                             </button>
-                                            <button className="bg-red-500 text-white px-2 py-1 rounded">
+                                            <button
+                                                onClick={() => onDelete(entry)}
+                                                className="bg-red-500 text-white px-2 py-1 rounded">
                                                 Delete
                                             </button>
                                         </>
                                     )}
                                 </td>
+
                             </tr>
                         ))}
                         </tbody>

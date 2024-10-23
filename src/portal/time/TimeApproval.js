@@ -44,8 +44,6 @@ const TimeApproval = () =>{
     const [selectedCarToAddTimeLog,setSelectedCarToAddTimeLog]= useState('')
 
     const [fromDateToTimeRetrieve, setFromDateToTimeRetrieve] = useState('');
-    const [fromDateToAddTime, setFromDateToAddTime] = useState('');
-
     const [toDateToTimeRetrive, setToDateToTimeRetrive] = useState('');
     const [toDateToAddTime, setToDateToAddTime] = useState('');
     const [joblistForACar,setJoblistForACar]= useState([])
@@ -72,6 +70,22 @@ const TimeApproval = () =>{
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for edit modal
     const [editedLog, setEditedLog] = useState(null); // State for edited log data
+
+    const maxToDate = fromDateToTimeRetrieve ? new Date(new Date(fromDateToTimeRetrieve).getTime() + 4 * 24 * 60 * 60 * 1000) : null;
+
+    const [isToDateDisabled,setIsToDateDisabled]= useState(true)
+    const [addTimeToDateDisable,setAddTimeToDateDisabled]= useState(true)
+
+    useEffect(() => {
+        console.log(fromDateToTimeRetrieve)
+        if(fromDateToTimeRetrieve != ''){
+            setIsToDateDisabled(false)
+        }else {
+            setIsToDateDisabled(true)
+        }
+
+
+    }, [fromDateToTimeRetrieve]);
 
     useEffect(() => {
         console.log("sas")
@@ -698,7 +712,10 @@ const TimeApproval = () =>{
                             onChange={
                                 newDate => setToDateToTimeRetrive(newDate)
                             }
+                            minDate={fromDateToTimeRetrieve ? new Date(fromDateToTimeRetrieve) : null}
+                            maxDate={fromDateToTimeRetrieve ? new Date(new Date(fromDateToTimeRetrieve).getTime() + 4 * 24 * 60 * 60 * 1000) : null}
                             showYearDropdown
+                            disabled ={isToDateDisabled}
                             dateFormat="yyyy-MM-dd"
                         />
 
@@ -778,7 +795,7 @@ const TimeApproval = () =>{
                                 <p className="mt-4 text-left">Select out time</p>
                                 <div className="inline-flex items-center gap-2 mt-2">
                                     <Datetime
-                                        className=""
+                                        className="cursor-not-allowed"
                                         value={outTimeToAddJob?? ""}
                                         defaultValue={null}
                                         onChange={(value) => setOutTimeToAddJob(value)}

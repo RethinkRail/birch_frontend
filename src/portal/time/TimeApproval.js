@@ -77,7 +77,7 @@ const TimeApproval = () =>{
     const [addTimeToDateDisable,setAddTimeToDateDisabled]= useState(true)
 
     useEffect(() => {
-        console.log(fromDateToTimeRetrieve)
+        setToDateToTimeRetrive('')
         if(fromDateToTimeRetrieve != ''){
             setIsToDateDisabled(false)
         }else {

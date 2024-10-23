@@ -29,6 +29,8 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
         time_log_entry_id:entry.time_log_entry_id,
         logged_time_in_seconds:entry.logged_time_in_seconds,
         railcar_id:entry.railcar_id,
+        notes:entry.notes,
+        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
     });
     console.log(formData)
 
@@ -80,6 +82,11 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setFormData((prevState) => ({
+            ...prevState,
+            notes: formData.notes+"##"+'Time edited by '+JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['name'],  // Update only car_id
+        }))
+
         if(formData.logged_time_in_seconds <0){
             alert("Out time can't be greater than in time")
             return

@@ -432,9 +432,6 @@ const TimeApproval = () =>{
         return result;
     };
 
-
-
-
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
         { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
@@ -504,7 +501,8 @@ const TimeApproval = () =>{
             {
                 time_log_entry_id: log.time_log_entry_id,
                 is_approved: 1,
-                logged_time_in_seconds: log.logged_time_in_seconds
+                logged_time_in_seconds: log.logged_time_in_seconds,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
             }
         );
 
@@ -531,21 +529,28 @@ const TimeApproval = () =>{
         const response = await axios.post(
             `${process.env.REACT_APP_BIRCH_API_URL}delete_log`,
             {
-                time_log_entry_id: entry.time_log_entry_id
+                time_log_entry_id: entry.time_log_entry_id,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
             }
         );
 
-        // Update local state to remove the log
-        const updatedLogs = mergedData.map(data => {
-            return {
-                ...data,
-                logs: data.logs.filter(item => item.time_log_entry_id !== entry.time_log_entry_id)
-            };
-        });
+        if(response.status==200){
+            // Update local state to remove the log
+            const updatedLogs = mergedData.map(data => {
+                return {
+                    ...data,
+                    logs: data.logs.filter(item => item.time_log_entry_id !== entry.time_log_entry_id)
+                };
+            });
 
-        // Update the merged data state
-        setMergedData(updatedLogs);
-        setIsModalOpen(false)
+            // Update the merged data state
+            setMergedData(updatedLogs);
+            setIsModalOpen(false)
+        }else {
+            alert("Something went wrong")
+        }
+
+
     };
 
     // Handle editing a log with web service call

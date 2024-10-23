@@ -31,7 +31,7 @@ const Navbar = () => {
             ]
         },
         {
-            title: 'Time',
+            title: 'Time Tracking',
             children: [
                 { title: 'Time Approval', path: '/time_approval' },
             ]

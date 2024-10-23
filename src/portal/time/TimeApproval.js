@@ -19,6 +19,7 @@ import DataTable from "react-data-table-component";
 import EditLogModal from "../../components/EditLogModal";
 
 import LogDetailsModal from "../../components/LogDetailsModal";
+import {set} from "lodash.debounce";
 
 
 const TimeApproval = () =>{
@@ -49,8 +50,8 @@ const TimeApproval = () =>{
     const [toDateToAddTime, setToDateToAddTime] = useState('');
     const [joblistForACar,setJoblistForACar]= useState([])
     const [jobToAddTime,setJobToAddTime]= useState('')
-    const [inTimeToAddJob,setInTimeToAddJob]= useState('')
-    const [outTimeToAddJob,setOutTimeToAddJob]= useState('')
+    const [inTimeToAddJob,setInTimeToAddJob]= useState(null)
+    const [outTimeToAddJob,setOutTimeToAddJob]= useState(null)
     const [totalSecondToAddTime,setTotalSecondToAddTime]= useState(0)
 
     const [isTeamMemberRailcarDisabled,setIsTeamMemberRailcarDisabled]= useState(false)
@@ -80,17 +81,46 @@ const TimeApproval = () =>{
 
     // Function to categorize logs into approved and unapproved
     const categorizeLogs = (data) => {
-        console.log(data)
-        const approvedLogs = data.filter(data =>
-            data.logs.every(log => log.is_approved === 1)
-        );
+        const unapprovedLogs = [];
+        const approvedLogs = [];
 
-        const unapprovedLogs = data.filter(data =>
-            data.logs.every(log => log.is_approved === 0)
-        );
+        // Iterate through the provided data
+        data.forEach(employee => {
+            const employeeApprovedZero = {
+                employee_name: employee.employee_name,
+                employee_number: employee.employee_number,
+                time_in_qb: employee.time_in_qb,
+                total_logged_time: 0, // Initialize total_logged_time
+                logs: []
+            };
 
-        console.log('Approved Logs:', approvedLogs);
-        console.log('Unapproved Logs:', unapprovedLogs);
+            const employeeApprovedOne = {
+                employee_name: employee.employee_name,
+                employee_number: employee.employee_number,
+                time_in_qb: employee.time_in_qb,
+                total_logged_time: 0, // Initialize total_logged_time
+                logs: []
+            };
+
+            // Iterate through the logs of the employee
+            employee.logs.forEach(log => {
+                if (log.is_approved === 0) {
+                    employeeApprovedZero.logs.push(log);
+                    employeeApprovedZero.total_logged_time += log.logged_time_in_seconds; // Sum for approved = 0
+                } else if (log.is_approved === 1) {
+                    employeeApprovedOne.logs.push(log);
+                    employeeApprovedOne.total_logged_time += log.logged_time_in_seconds; // Sum for approved = 1
+                }
+            });
+
+            // Push the constructed objects to their respective arrays if they have logs
+            if (employeeApprovedZero.logs.length > 0) {
+                unapprovedLogs.push(employeeApprovedZero);
+            }
+            if (employeeApprovedOne.logs.length > 0) {
+                approvedLogs.push(employeeApprovedOne);
+            }
+        });
 
         setUnApprovedTimeLogs(unapprovedLogs);
         setApprovedTimeLogs(approvedLogs);
@@ -203,10 +233,10 @@ const TimeApproval = () =>{
 
         // Convert milliseconds to seconds
         //const diffInSeconds = diffInMs / (1000);
-
-        if(diffInMs / (1000)<0){
-            alert("Out time can't be less than in time")
-        }
+        //
+        // if(diffInMs / (1000)<0){
+        //     alert("Out time can't be less than in time")
+        // }
         setTotalSecondToAddTime(diffInMs / (1000))
 
     },[outTimeToAddJob,inTimeToAddJob])
@@ -315,6 +345,12 @@ const TimeApproval = () =>{
     }
 
     async function addTime() {
+        console.log(inTimeToAddJob.date)
+        console.log(outTimeToAddJob)
+        if(totalSecondToAddTime<0){
+            alert("In time can't less than out time")
+            return
+        }
         if (selectedCrewsToAddTime !== '' && selectedCarToAddTimeLog !== '' && outTimeToAddJob !== '' && inTimeToAddJob !== '' && jobToAddTime !== '' && totalSecondToAddTime > 0) {
             const params = {
                 crew: selectedCrewsToAddTime.value,
@@ -323,8 +359,8 @@ const TimeApproval = () =>{
                 railcar_id: selectedCarToAddTimeLog.label,
                 indirect_labor_id: selectedCarToAddTimeLog.value === 'INDIRECT' ? jobToAddTime.value : null,
                 job_description: jobToAddTime.label,
-                start_time: toUTCDateTime(inTimeToAddJob), // Set to current time for demonstration
-                end_time: toUTCDateTime(outTimeToAddJob), // Set to 1 hour later
+                start_time: inTimeToAddJob, // Set to current time for demonstration
+                end_time: outTimeToAddJob, // Set to 1 hour later
                 work_station: 1,
                 logged_out_station: 1,
                 logged_time_in_seconds: totalSecondToAddTime,
@@ -336,20 +372,21 @@ const TimeApproval = () =>{
             try {
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'insert_time_log/', params);
                 console.log('Time log inserted successfully:', response.data);
+                alert("Time added successfully")
                 setSelectedCrewsToAddTime('')
                 setSelectedCarToAddTimeLog('')
                 setJobToAddTime('')
-                setInTimeToAddJob('')
-                setOutTimeToAddJob('')
+                setInTimeToAddJob(new Date())
+                setOutTimeToAddJob(new Date())
                 setTotalSecondToAddTime(0)
-                alert("Time added successfully")
+
 
             } catch (error) {
                 setSelectedCrewsToAddTime('')
                 setSelectedCarToAddTimeLog('')
                 setJobToAddTime('')
-                setInTimeToAddJob('')
-                setOutTimeToAddJob('')
+                setInTimeToAddJob(new Date())
+                setOutTimeToAddJob(new Date())
                 setTotalSecondToAddTime(0)
                 alert("Something went wrong while adding time")
             }
@@ -358,30 +395,45 @@ const TimeApproval = () =>{
         }
     }
     const combineData = (qbData, birchData) => {
+        // Group birchData by employee_number with logs and total logged time
         const groupedData = birchData.reduce((acc, entry) => {
-            const key = entry.employee_number;
+            const key = String(entry.employee_number); // Ensure employee_number is treated as a string
             if (!acc[key]) {
-                acc[key] = { logs: [], total_logged_time: 0 };
+                acc[key] = {
+                    logs: [],
+                    total_logged_time: 0,
+                    employee_name: entry.crew_name // Use crew_name from birchData as the name
+                };
             }
             acc[key].logs.push(entry);
             acc[key].total_logged_time += entry.logged_time_in_seconds;
             return acc;
         }, {});
 
-        // Filter `qbData` to only include entries where `employee_number` exists in `groupedData`
-        return qbData
-            .filter(qb => groupedData.hasOwnProperty(qb.employee_number))
-            .map(qb => {
-                const employeeLogs = groupedData[qb.employee_number];
-                return {
-                    employee_name: qb.employee_name,
-                    employee_number: qb.employee_number,
-                    time_in_qb: qb.time_in_qb,
-                    total_logged_time: employeeLogs.total_logged_time,
-                    logs: employeeLogs.logs
-                };
-            });
+        console.log("Grouped Data:", groupedData);
+
+        // Create a map from qbData, using employee_number as a string
+        const qbDataMap = new Map(
+            qbData.map(qb => [String(qb.employee_number), qb])
+        );
+
+        // Combine data ensuring all birchData employees are included
+        const result = Object.entries(groupedData).map(([employeeNumber, employeeLogs]) => {
+            const qbEntry = qbDataMap.get(employeeNumber) || {}; // Retrieve qbEntry or default to empty object
+            return {
+                employee_name: qbEntry.employee_name || employeeLogs.employee_name, // Prefer qbData name if available
+                employee_number: employeeNumber, // Use the correct variable here
+                time_in_qb: qbEntry.time_in_qb || 0, // Default to 0 if not in qbData
+                total_logged_time: employeeLogs.total_logged_time,
+                logs: employeeLogs.logs
+            };
+        });
+
+        return result;
     };
+
+
+
 
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
@@ -389,7 +441,7 @@ const TimeApproval = () =>{
         { name: 'QB Time (hrs)', selector: row => (row.time_in_qb / 3600).toFixed(2), sortable: true },
         {
             name: 'Utilization (%)',
-            selector: row => ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),
+            selector: row =>   row.time_in_qb==0?'Not in QB' : ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),
             sortable: true
         },
         {
@@ -445,11 +497,20 @@ const TimeApproval = () =>{
 
     }
 
-    const handleLogApprove = (log) => {
+    const handleLogApprove = async (log) => {
         // Call your web service to approve the log here...
+        const response = await axios.post(
+            `${process.env.REACT_APP_BIRCH_API_URL}approve_unapprove`,
+            {
+                time_log_entry_id: log.time_log_entry_id,
+                is_approved: 1,
+                logged_time_in_seconds: log.logged_time_in_seconds
+            }
+        );
 
+        console.log(response)
         // Simulate updating the log's approval state
-        const updatedLog = { ...log, is_approved: 1 };
+        const updatedLog = {...log, is_approved: 1};
 
         // Update local state
         const updatedLogs = mergedData.map(data => {
@@ -461,11 +522,19 @@ const TimeApproval = () =>{
 
         // Update the merged data state
         setMergedData(updatedLogs);
+        setIsModalOpen(false)
     };
 
     // Handle deleting a log
-    const handleLogDelete = (entry) => {
+    const handleLogDelete = async (entry) => {
         // Call your web service to delete the log here...
+        const response = await axios.post(
+            `${process.env.REACT_APP_BIRCH_API_URL}delete_log`,
+            {
+                time_log_entry_id: entry.time_log_entry_id
+            }
+        );
+
         // Update local state to remove the log
         const updatedLogs = mergedData.map(data => {
             return {
@@ -476,6 +545,7 @@ const TimeApproval = () =>{
 
         // Update the merged data state
         setMergedData(updatedLogs);
+        setIsModalOpen(false)
     };
 
     // Handle editing a log with web service call
@@ -509,6 +579,21 @@ const TimeApproval = () =>{
             };
             console.log("transformed log")
             console.log(transformedLog)
+
+            // Updating the edit log modal
+            console.log(selectedLog)
+            const logToUpdate = selectedLog.logs.find(log => log.time_log_entry_id === transformedLog.time_log_entry_id);
+
+            if (logToUpdate) {
+                // Update fields in the log based on the second object
+                for (const key in transformedLog) {
+                    if (logToUpdate.hasOwnProperty(key)) {
+                        logToUpdate[key] = transformedLog[key];
+                    }
+                }
+            }
+            console.log(logToUpdate)
+            setEditedLog(logToUpdate)
 
             const updatedData = mergedData.map(employee => {
                 const updatedLogs = employee.logs.map(log => {
@@ -552,24 +637,31 @@ const TimeApproval = () =>{
         }
     };
 
-    const handleUnapprove = (entryId) => {
+    const handleUnapprove = async (entry) => {
         // Call your API to unapprove the log entry
         // Assuming you have an API that takes the entry ID and unapproves it
-        axios.post(`/api/unapprove/${entryId}`)
-            .then(response => {
-                // Update the mergedData state to reflect the unapproved status
-                const updatedData = mergedData.map(data => {
-                    const logs = data.logs.map(log =>
-                        log.time_log_entry_id === entryId ? { ...log, is_approved: 0 } : log
-                    );
-                    return { ...data, logs };
-                });
 
-                setMergedData(updatedData);
-            })
-            .catch(error => {
-                console.error('Error unapproving log:', error);
+        const response = await axios.post(
+            `${process.env.REACT_APP_BIRCH_API_URL}approve_unapprove`,
+            {
+                time_log_entry_id: entry.time_log_entry_id,
+                is_approved: 0,
+                logged_time_in_seconds: entry.logged_time_in_seconds
+            }
+        );
+
+        if(response.status==200){
+            const updatedData = mergedData.map(data => {
+                const logs = data.logs.map(log =>
+                    log.time_log_entry_id === entry.time_log_entry_id ? {...log, is_approved: 0} : log
+                );
+                return {...data, logs};
             });
+
+            setMergedData(updatedData);
+        }
+
+        setIsModalOpen(false)
     };
 
 
@@ -671,7 +763,10 @@ const TimeApproval = () =>{
                         <div className=" justify-between w-full gap-4">
                             <div className="flex flex-col w-full">
                                 <p className="mt-4">Select in time</p>
-                                <Datetime className="w-full" value={inTimeToAddJob} onChange={(value)=>setInTimeToAddJob(value)}/>
+                                <Datetime className="w-full"
+                                          value={inTimeToAddJob ?? ""}
+                                          defaultValue={null}
+                                          onChange={(value)=>setInTimeToAddJob(value)}/>
                             </div>
 
                             <div className="flex flex-col w-full">
@@ -679,7 +774,8 @@ const TimeApproval = () =>{
                                 <div className="inline-flex items-center gap-2 mt-2">
                                     <Datetime
                                         className=""
-                                        value={outTimeToAddJob}
+                                        value={outTimeToAddJob?? ""}
+                                        defaultValue={null}
                                         onChange={(value) => setOutTimeToAddJob(value)}
                                     />
                                     {totalSecondToAddTime > 0 && (

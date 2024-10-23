@@ -52,6 +52,30 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
         //     [name]: value
         // }));
     };
+    function validateRailCar(input) {
+        // Check if the input length is exactly 10
+        if (input.length !== 10) {
+            return false;
+        }
+
+        // Check if the first 4 characters are letters
+        const firstFourChars = input.slice(0, 4);
+        const lettersRegex = /^[A-Za-z]+$/;
+
+        if (!lettersRegex.test(firstFourChars)) {
+            return false;
+        }
+
+        // Check if the rest of the characters are digits
+        const remainingChars = input.slice(4);
+        const digitsRegex = /^[0-9]+$/;
+
+        if (!digitsRegex.test(remainingChars)) {
+            return false;
+        }
+
+        return true; // Valid string
+    }
 
     const handleLookup = async () => {
         try {
@@ -61,6 +85,10 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
             setInputValues({})
             console.log(rfiD, "This is the cargo number")
             const railcar_id = rfiD.toUpperCase()
+            if(!validateRailCar(railcar_id)){
+                alert("Railcar ID not valid")
+                return
+            }
             const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}lookup?rfid=${railcar_id}`)
             if (response.status === 404) {
                 console.log('There is a 404 error')

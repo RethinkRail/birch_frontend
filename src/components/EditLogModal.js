@@ -43,9 +43,9 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
         // Convert milliseconds to seconds
         //const diffInSeconds = diffInMs / (1000);
 
-        if(diffInMs / (1000)<0){
-            alert("Out time can't be less than in time")
-        }
+        // if(diffInMs / (1000)<0){
+        //     alert("Out time can't be less than in time")
+        // }
         //setTotalSecondToAddTime(diffInMs / (1000))
 
 
@@ -80,6 +80,10 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if(formData.logged_time_in_seconds <0){
+            alert("Out time can't be greater than in time")
+            return
+        }
         // Call the onSave function and pass the updated data
         onSave({ ...entry, ...formData });
         onClose(); // Close the modal after saving

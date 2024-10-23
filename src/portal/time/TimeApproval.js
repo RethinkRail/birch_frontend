@@ -524,6 +524,20 @@ const TimeApproval = () =>{
         // Simulate updating the log's approval state
         const updatedLog = {...log, is_approved: 1};
 
+        const logToUpdate = selectedLog.logs.find(logs => logs.time_log_entry_id === log.time_log_entry_id);
+
+        if (logToUpdate) {
+            // Update fields in the log based on the second object
+            for (const key in log) {
+                if (logToUpdate.hasOwnProperty(key)) {
+                    logToUpdate[key] = updatedLog[key];
+                }
+            }
+        }
+        console.log(logToUpdate)
+        setEditedLog(logToUpdate)
+
+
         // Update local state
         const updatedLogs = mergedData.map(data => {
             return {
@@ -534,9 +548,55 @@ const TimeApproval = () =>{
 
         // Update the merged data state
         setMergedData(updatedLogs);
-        setIsModalOpen(false)
+        //setIsModalOpen(false)
+
+
     };
 
+    const handleUnapprove = async (entry) => {
+        // Call your API to unapprove the log entry
+        // Assuming you have an API that takes the entry ID and unapproves it
+
+        const response = await axios.post(
+            `${process.env.REACT_APP_BIRCH_API_URL}approve_unapprove`,
+            {
+                time_log_entry_id: entry.time_log_entry_id,
+                is_approved: 0,
+                logged_time_in_seconds: entry.logged_time_in_seconds,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+            }
+        );
+
+        if(response.status==200){
+
+            const updatedLog = {...entry, is_approved: 0};
+
+            const logToUpdate = selectedLog.logs.find(logs => logs.time_log_entry_id === entry.time_log_entry_id);
+
+            if (logToUpdate) {
+                // Update fields in the log based on the second object
+                for (const key in entry) {
+                    if (logToUpdate.hasOwnProperty(key)) {
+                        logToUpdate[key] = updatedLog[key];
+                    }
+                }
+            }
+            console.log(logToUpdate)
+            setEditedLog(logToUpdate)
+
+
+            const updatedData = mergedData.map(data => {
+                const logs = data.logs.map(log =>
+                    log.time_log_entry_id === entry.time_log_entry_id ? {...log, is_approved: 0} : log
+                );
+                return {...data, logs};
+            });
+
+            setMergedData(updatedData);
+        }
+
+        //setIsModalOpen(false)
+    };
     // Handle deleting a log
     const handleLogDelete = async (entry) => {
         // Call your web service to delete the log here...
@@ -656,32 +716,7 @@ const TimeApproval = () =>{
         }
     };
 
-    const handleUnapprove = async (entry) => {
-        // Call your API to unapprove the log entry
-        // Assuming you have an API that takes the entry ID and unapproves it
 
-        const response = await axios.post(
-            `${process.env.REACT_APP_BIRCH_API_URL}approve_unapprove`,
-            {
-                time_log_entry_id: entry.time_log_entry_id,
-                is_approved: 0,
-                logged_time_in_seconds: entry.logged_time_in_seconds
-            }
-        );
-
-        if(response.status==200){
-            const updatedData = mergedData.map(data => {
-                const logs = data.logs.map(log =>
-                    log.time_log_entry_id === entry.time_log_entry_id ? {...log, is_approved: 0} : log
-                );
-                return {...data, logs};
-            });
-
-            setMergedData(updatedData);
-        }
-
-        setIsModalOpen(false)
-    };
 
 
     return (

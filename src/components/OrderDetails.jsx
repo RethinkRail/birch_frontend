@@ -1156,11 +1156,11 @@ const OrderDetails = ({
                                     <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
                                 </div>
                             )}
-
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-10">
-                                <TaskTable
-                                    work_id={workOrder.id}/>
-                            </div>
+                            {/*Routing propagation*/}
+                            {/*<div className="w-full bg-white p-4  mt-[24px] rounded-none mb-10">*/}
+                            {/*    <TaskTable*/}
+                            {/*        work_id={workOrder.id}/>*/}
+                            {/*</div>*/}
 
 
                             {/*Railcar log*/}

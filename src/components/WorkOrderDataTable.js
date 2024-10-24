@@ -504,7 +504,7 @@ const WorkOrderDataTable = ({
                     {/*)}*/}
                 </div>
                 <CommentModal
-                    data={commentObject}
+                    data={commentObject.sort((a, b) => new Date(b.update_date) - new Date(a.update_date))}
                     work_id={workIdForComment}
                     updateWorkUpdates={updateWorkUpdates}
                 />

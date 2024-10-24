@@ -47,7 +47,7 @@ const DepartmentReport = () => {
 
                 const departmentReportResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_department_report/');
                 setDepartmentReport(departmentReportResponse.data);
-
+                console.log(departmentReportResponse)
                 let data = processRailcarData(departmentReportResponse.data, jobCategoryResponse.data);
                 // console.log(departmentReportResponse.data.length)
                 // console.log(data.length)
@@ -182,6 +182,8 @@ const DepartmentReport = () => {
 
     function processRailcarData(dataArray, departmentMap) {
 
+        console.log(dataArray)
+        console.log(departmentMap)
 
         if (!dataArray.length || !departmentMap.length) {
             console.error('Empty dataArray or departmentMap');

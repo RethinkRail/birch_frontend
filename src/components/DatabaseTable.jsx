@@ -142,14 +142,14 @@ const DatabaseTable = () => {
             console.log(`row id is ${rowId} and rowCode is ${rowCode}`)
             if (!rowId && rowCode) {
                 console.log("Deleting based on code")
-                const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&code=${rowCode}`)
+                const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&code=${rowCode}&user_id=${JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']}`)
                 console.log(response, "This is the response from the delete request")
                 setTable((prev) => prev.filter((prev) => prev.code !== rowCode))
                 setDeleteModalShowing(false)
                 return
             }
             console.log("Deleting by id")
-            const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&id=${rowId}`)
+            const response = await axios.delete(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&id=${rowId}&user_id=${JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']}`)
             console.log(response, "This is the response from the delete request")
             setTable((prev) => prev.filter((prev) => prev.id !== rowId))
             setDeleteModalShowing(false)

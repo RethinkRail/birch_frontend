@@ -161,10 +161,10 @@ const EditModal = ({setModalShowing, fields, selectedTable, setTable, editRowDat
             let response;
             if (!editRowData) {
                 console.log("Reached the create field");
-                response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}`, transformedValues);
+                response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&user_id=${JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']}`, transformedValues);
 
             } else {
-                response = await axios.patch(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}`, transformedValues);
+                response = await axios.patch(`${process.env.REACT_APP_BIRCH_API_URL}table?table=${selectedTable}&user_id=${JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']}`, transformedValues);
             }
             console.log(response, "This is the response from the data creation/update");
 

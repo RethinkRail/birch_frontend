@@ -15,7 +15,7 @@ import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
-
+    console.log(railcarLog)
     const [datePickers, setDatePickers] = useState({
         crewChecked: {},
         managerChecked: {},
@@ -26,6 +26,45 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
     const [difference, setDifference] = useState(0);
+
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [timeLogs, setTimeLogs] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const showModal = async (row) => {
+        setSelectedRow(row);
+        setIsModalOpen(true);
+        setLoading(true);  // Start loading indicator
+
+        try {
+            const response = await axios.get(
+                process.env.REACT_APP_BIRCH_API_URL+`get_time_log_by_job_id?is_rework=${row.is_rework_in_progress}&job_id=${row.job_id}`
+            );
+            console.log(response)
+            const data = response.data;
+
+            if (data.length === 0) {
+                alert("No data found");
+                setIsModalOpen(false); // Close modal if no data
+            } else {
+                setTimeLogs(data); // Populate time logs into state
+            }
+        } catch (error) {
+            console.error("Error fetching time logs:", error);
+            alert("An error occurred while fetching data");
+        } finally {
+            setLoading(false); // Stop loading indicator
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedRow(null);
+        setTimeLogs([]); // Clear time logs
+    };
+
     useEffect(() => {
 
         // Initialize datePickers state based on railcarLog data
@@ -50,87 +89,6 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
 
     }, [railcarLog,locked_for_time_clockinhg]);
 
-    // const handleDateChange = async (type, jobId, date) => {
-    //
-    //     if (date == null && type == 'crewChecked') {
-    //         const userConfirmed = window.confirm("Are you sure you want to mark this job as not done?");
-    //
-    //         if (!userConfirmed) {
-    //             // If the user pressed "Cancel", exit the function
-    //             return;
-    //         }
-    //
-    //         // Create a copy of the current state
-    //         const previousState = { ...datePickers };
-    //
-    //         // Update the state to set 'crewChecked', 'managerChecked', and 'qaChecked' to null
-    //         setDatePickers(prevState => ({
-    //             ...prevState,
-    //             crewChecked: {
-    //                 ...prevState.crewChecked,
-    //                 [jobId]: null
-    //             },
-    //             managerChecked: {
-    //                 ...prevState.managerChecked,
-    //                 [jobId]: null
-    //             },
-    //             qaChecked: {
-    //                 ...prevState.qaChecked,
-    //                 [jobId]: null
-    //             }
-    //         }));
-    //
-    //         try {
-    //             const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
-    //                 job_id: jobId,
-    //                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
-    //                 field: 'all',  // Specify that all fields are being updated
-    //                 updated_date: null,
-    //             });
-    //
-    //             if (response.status !== 200) {
-    //                 // Rollback state if API response status is not 200
-    //                 setDatePickers(previousState);
-    //             }
-    //         } catch (error) {
-    //             // Rollback state if an error occurs
-    //             setDatePickers(previousState);
-    //             console.error('Error updating job check log:', error.response ? error.response.data : error.message);
-    //         }
-    //
-    //         return; // Exit function after processing
-    //     }
-    //
-    //     // If the date is not null or the type is not 'crewChecked'
-    //     const previousState = { ...datePickers };
-    //
-    //     // Update the date in the state
-    //     setDatePickers(prevState => ({
-    //         ...prevState,
-    //         [type]: {
-    //             ...prevState[type],
-    //             [jobId]: date
-    //         }
-    //     }));
-    //
-    //     try {
-    //         const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
-    //             job_id: jobId,
-    //             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
-    //             field: type,
-    //             updated_date: date,
-    //         });
-    //
-    //         if (response.status !== 200) {
-    //             // Rollback state if API response status is not 200
-    //             setDatePickers(previousState);
-    //         }
-    //     } catch (error) {
-    //         // Rollback state if an error occurs
-    //         setDatePickers(previousState);
-    //         console.error('Error updating job check log:', error.response ? error.response.data : error.message);
-    //     }
-    // };
 
     const handleDateChange = async (type, jobId, date) => {
 
@@ -214,9 +172,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
         }
 
 
-    };
-
-
+    }
 
     //setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
     // Check if the date picker should be disabled based on team member completion time
@@ -245,12 +201,28 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
             selector: row => round2Dec(row.hours_applied),
             sortable: true,
             width: "10%",
+            cell: row => (
+                <button
+                    className="hover:underline"
+                    onClick={() => showModal(row)}
+                >
+                    {round2Dec(row.hours_applied)}
+                </button>
+            )
         },
         {
             name: 'HOURS APPLIED (RE WORK)',
             selector: row => round2Dec(row.hours_applied_rework),
             sortable: true,
             width: "10%",
+            cell: row => (
+                <button
+                    className="hover:underline"
+                    onClick={() => showModal(row)}
+                >
+                    {round2Dec(row.hours_applied_rework)}
+                </button>
+            )
         },
         {
             name: 'TEAM MEMBER COMPLETION TIME',
@@ -371,6 +343,53 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(difference)}</p>
                 </div>
             </div>
+
+
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-2/3">
+                        <h2 className="text-lg font-semibold mb-4">Hours Applied Details</h2>
+
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : (
+                            <table className="w-full border-collapse border border-gray-300">
+                                <thead>
+                                <tr className="bg-gray-200">
+
+                                    <th className="border p-2">Name</th>
+                                    <th className="border p-2">Description</th>
+                                    <th className="border p-2">Start Time</th>
+                                    <th className="border p-2">End Time</th>
+                                    <th className="border p-2">Logged Time</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {timeLogs.map(log => (
+                                    <tr key={log.id}>
+
+                                        <td className="border p-2">{log.name}</td>
+                                        <td className="border p-2">{log.job_description}</td>
+                                        <td className="border p-2">{new Date(log.start_time).toLocaleString()}</td>
+                                        <td className="border p-2">{new Date(log.end_time).toLocaleString()}</td>
+                                        <td className="border p-2">{round2Dec(log.logged_time_in_seconds/3600)+ 'HRS'}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
+
+                        <div className="flex justify-end mt-4">
+                            <button
+                                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+                                onClick={closeModal}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

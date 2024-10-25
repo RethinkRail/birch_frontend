@@ -954,23 +954,76 @@ const OrderDetails = ({
             {workOrder!=null &&
                 <dialog id="orderDetailsModal"  ref={orderDetailsModalRef} className="modal rounded-md h-full ">
                     <div className="w-full bg-white">
-                        <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
-                            <div className="w-full fixed  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
-                            <span
-                                className="float-left">{workOrder?.railcar_id != null ? workOrder.railcar_id : ""}</span>
-                                <form method="dialog">
-                                    <div className="float-right mr-5">
+                        <div className="bg-white h-[60px] w-full pb-5 rounded-md overflow-auto">
+                            <div className="w-full fixed bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold">
+                                <div className="flex items-center justify-between">
+                                    <span className="float-left">{workOrder?.railcar_id != null ? workOrder.railcar_id : ""}</span>
+                                    <div className=" float-left">
+                                        <ul className="flex space-x-6">
+                                            <li>
+                                                <a href="#car_info" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Car Information
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#job_list" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Job List
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#part_list" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Part List
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#railcar_log" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Railcar Time Log
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#order_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Order Information
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#billing_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Billing Information
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#storage_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                    Storage Information
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                    <form method="dialog">
                                         <button className="" onClick={closeModal}>
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                 xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2"
-                                                      strokeLinecap="round" strokeLinejoin="round"/>
+                                            <svg
+                                                width="24"
+                                                height="24"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    d="M18 6L6 18M6 6L18 18"
+                                                    stroke="#464646"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                             </svg>
                                         </button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
+
                             </div>
+
+
                         </div>
+
                         <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto mb-5">
                             {/*Side menu*/}
                             <div className="absolute top-1/3 right-4">
@@ -1076,7 +1129,7 @@ const OrderDetails = ({
                             {/*End Side menu*/}
                             <div className=" w-full">
                                 {/*Car information */}
-                                <div className="w-full bg-white p-4  mt-[24px]">
+                                <div className="w-full bg-white p-4  mt-[24px]" id="car_info">
                                     <h6 className='font-semibold'>Car Information</h6>
                                     <div className="mt-[5px]  grid grid-cols-6 gap-10">
                                         <div className="">
@@ -1107,7 +1160,7 @@ const OrderDetails = ({
                                 </div>
                                 {/*End Car information */}
                                 {/*Job list */}
-                                <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="job_list">
                                     <JoblistTable
                                         handlePaste={pasteJobs}
                                         jobs={workOrder.joblist}
@@ -1144,7 +1197,7 @@ const OrderDetails = ({
                                 </div>
                             </div>
                             {/*Parts information*/}
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">
                                 <PartsTable jobs={workOrder.joblist}/>
                             </div>
                             {/*End Parts information*/}
@@ -1152,7 +1205,7 @@ const OrderDetails = ({
                             {/*Railcar log*/}
 
                             {railCarLog.length>0 &&(
-                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5" id="railcar_log">
                                     <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
                                 </div>
                             )}
@@ -1166,7 +1219,7 @@ const OrderDetails = ({
                             {/*Railcar log*/}
 
                             {/*Order information */}
-                            <div className="w-full bg-white p-2">
+                            <div className="w-full bg-white p-2" id="order_information">
                                 <h6 className='font-semibold'>Order Information</h6>
                                 <div className="mt-[8px]  grid grid-cols-2 ">
                                     <div>
@@ -1601,7 +1654,7 @@ const OrderDetails = ({
 
 
                             {/*Order information Owner */}
-                            <div className="w-full bg-white p-4  mb-10 mt-[24px] rounded-none">
+                            <div className="w-full bg-white p-4  mb-10 mt-[24px] rounded-none" id="billing_information">
 
                                 <h6 className='font-semibold '>Billing Information(Owner)</h6>
                                 <div className="grid grid-cols-3 gap-x-0.5">
@@ -2007,7 +2060,7 @@ const OrderDetails = ({
 
                             {/*Storage information*/}
                             {workOrder.is_storage ==1 &&(
-                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20">
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20" id="storage_information">
                                     <StorageComponent initialEntries={storageInformation} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
                                 </div>
                             )}

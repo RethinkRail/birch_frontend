@@ -1,0 +1,1172 @@
+import React, {useEffect, useRef, useState} from 'react';
+import Modal from "react-modal";
+import qs from "qs";
+import {toast} from "react-toastify";
+import CustomDateInput from "./CustomDateInput";
+import axios from "axios";
+import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
+import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
+import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../utils/DateTimeHelper";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import DatePicker from "react-datepicker";
+import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
+import JoblistTable from "./JoblistTable";
+import PartsTable from "./PartsTable";
+import {round2Dec} from "../utils/NumberHelper";
+import StorageComponent from "./StorageComponent";
+import RailCareTimeLog from "./RailCareTimeLog";
+import {printAAR} from "../utils/aarHelper";
+import TaskTable from "./TaskTable";
+
+const OrderDetails2 = ({
+                          commonData,
+                          workOrder,
+                          handlePaste,
+                          statusCode,
+                          updateWorkUpdates,
+                          updateArrivalDate,
+                          updateInspectedDate,
+                          updateCleanDate,
+                          updateRepairScheduleDate,
+                          updateValveTearDownDate,
+                          updateValveAssemblyDate,
+                          updatePaintDate,
+                          updateExteriorPaintDate,
+                          updatePDDate,
+                          updateRepairDate,
+                          updateFinalDate,
+                          updateQADate,
+                          updatePOD,
+                          updateMTI,
+                          updateMOWK,
+                          updateMarkAsShipped,
+                          updateReasonToCome,
+                          updateSP,
+                          updateTQ,
+                          updateRE,
+                          updateEP,
+                          updateBilling,
+                          updateBillToLessee,
+                          getActiveWorkOrders,
+                          handleBillingInformationChanged,
+                          createAjob,
+                          pasteJobs,
+                          updateAJob,
+                          deleteJob,
+                          handleStorageUpdate,
+                          handIsLockedForTimeClocking,
+                          updateBillToLesseForAJob,
+                          orderDetailsModalRef
+                      }) => {
+    //console.log(workOrder)
+    // console.log(workOrder.reason_to_come)
+    // console.log(commonData)
+
+
+    // Method to show update and cancel button when purchase order, invoice number, invoice date, due date changes
+
+    const [ownerPurchaseOrderOriginal, setOwnerPurchaseOrderOriginal] = useState()
+    const [ownerInvoiceNumberOriginal, setOwnerInvoiceNumberOriginal] = useState()
+    const [ownerInvoiceDateOriginal, setOwnerInvoiceDateOriginal] = useState()
+    const [ownerDueDateOriginal, setOwnerDueDateOriginal] = useState()
+    const [ownerInvoiceNetDaysOriginal, setOwnerInvoiceNetDaysOriginal] = useState()
+    const [showButtonsOwner, setShowButtonsOwner] = useState(false)
+
+    // method to show update and cancel button when for lessee
+    const [lesseePurchaseOrderOriginal, setLesseePurchaseOrderOriginal] = useState()
+    const [lesseeInvoiceNumberOriginal, setLesseeInvoiceNumberOriginal] = useState()
+    const [lesseeInvoiceDateOriginal, setLesseeInvoiceDateOriginal] = useState()
+    const [lesseeDueDateOriginal, setLesseeDueDateOriginal] = useState()
+    const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
+    const [showButtonsLessee, setShowButtonsLessee] = useState(false)
+
+
+
+    const containerRef = useRef();
+
+
+    const [jobs, setJobs] = useState([])
+    const statusCommentDropDownInDetails = useRef(null);
+
+
+    const [reasonToCome, setReasonToCome] = useState(null);
+
+    const [isStatusDropDownModalOpenInDetails, setIsStatusDropDownModalOpenInDetails] = useState(null);
+
+    const [updatedStatusCode, setupdatedStatusCode] = useState(null)
+    const [isReasonToComeChanged, setIsReasonToComeChanged] = useState(false)
+
+
+    const [isBillingInformationChangedForOwner, setIsBillingInformationChangedForOwner] = useState(false)
+    const [isBillingInformationChangedForLessee, setIsBillingInformationChangedForLessee] = useState(false)
+
+    const [ownerPurchaseOrder, setOwnerPurchaseOrder] = useState(null)
+    const [lesseePurchaseOrder, setLesseePurchaseOrder] = useState(null)
+    const [purchaseorderChangedForOwner, setPurchaseOrderChangedForOwner] = useState(false)
+    const [purchaseorderChangedForLessee, setPurchaseOrderChangedForLessee] = useState(false)
+
+    const [ownerInvoiceNumber, setOwnerInvoiceNumber] = useState(null)
+    const [lesseeInvoiceNumber, setLesseeInvoiceNumber] = useState(null)
+    const [invoiceChangedForOwner, setInvoiceChangedForOwner] = useState(false)
+    const [invoiceChangedForLessee, setInvoiceChangedForLessee] = useState(false)
+
+
+    const [ownerInvoiceNetDays, setOwnerInvoiceNetDays] = useState(null)
+    const [lesseeInvoiceNetDays, setLesseeInvoiceNetDays] = useState(null)
+    const [invoiceNetDaysChangedForOwner, setInvoiceNetDaysChangedForOwner] = useState(false)
+    const [invoiceNetDaysChangedForLessee, setInvoiceNetDaysChangedForLessee] = useState(false)
+
+
+    const [ownerInvoiceDate, setOwnerInvoiceDate] = useState(null)
+    const [lesseeInvoiceDate, setLesseeInvoiceDate] = useState(null)
+    const [invoiceDateChangedForOwner, setInvoiceDateChangedForOwner] = useState(false)
+    const [invoiceDateChangedForLessee, setInvoiceDateChangedForLessee] = useState(false)
+
+
+    const [mo_wk, setMo_wk] = useState(null);
+    const [sp, setSP] = useState(null);
+    const [tq, setTQ] = useState(null);
+    const [re, setRE] = useState(null);
+    const [ep, setEP] = useState(null);
+    const [storageInformation,setStorageInformation ]= useState([])
+
+    const [isBilledToLessee, setIsBilledToLessee] = useState(false)
+
+
+
+    const checkBillingInformationChangedForOwner = () => {
+        console.log("called")
+        console.log(purchaseorderChangedForOwner + "purchse order")
+        console.log(invoiceChangedForOwner)
+        console.log(invoiceNetDaysChangedForOwner)
+        console.log(invoiceDateChangedForOwner)
+        console.log(purchaseorderChangedForOwner || invoiceChangedForOwner || invoiceNetDaysChangedForOwner || invoiceDateChangedForOwner)
+        if (purchaseorderChangedForOwner || invoiceChangedForOwner || invoiceNetDaysChangedForOwner || invoiceDateChangedForOwner) {
+            setIsBillingInformationChangedForOwner(true)
+        } else {
+            setIsBillingInformationChangedForOwner(false)
+        }
+    }
+
+    const checkBillingInformationChangedForLessee = () => {
+        if (purchaseorderChangedForLessee || invoiceChangedForLessee || invoiceNetDaysChangedForLessee || invoiceDateChangedForLessee) {
+            setIsBillingInformationChangedForLessee(true)
+        } else {
+            setIsBillingInformationChangedForLessee(false)
+        }
+    }
+
+
+    const reasonToComeRef = useRef(null);
+    const mowkRef = useRef(null);
+    const spRef = useRef(null);
+    const tqRef = useRef(null);
+    const reRef = useRef(null);
+    const epRef = useRef(null);
+    const ownerPurchaseOrderRef = useRef(null);
+    const lesseePurchaseOrderRef = useRef(null);
+    const ownerInvoiceNumberRef = useRef(null);
+    const ownerInvoiceDaterRef = useRef(null);
+    const ownerInvoiceNetDaysrRef = useRef(null);
+    //const debouncedMOWK = useDebounce(workOrder.mo_wk, 300);
+
+    const [railCarLog,setRailcarLog]=useState([])
+
+    const [totalLaborHours,setTotalLaborHours]= useState()
+    const [totalLaborCost,setTotalLaborCost]= useState()
+    const [totalMatCost,setTotalMatCost]= useState()
+
+    const calculateJobCosts = (jobs) => {
+        let totalLaborCost = 0;
+        let totalLaborHours = 0;
+        let totalMaterialCost = 0;
+
+        jobs.forEach(job => {
+            // Calculate labor cost
+            const laborCost = job.labor_rate * job.labor_time * job.quantity;
+            totalLaborCost += laborCost;
+
+            // Calculate labor hours
+            const laborHours = job.labor_time * job.quantity;
+            totalLaborHours += laborHours;
+
+            // Calculate material cost
+            job.jobparts.forEach(part => {
+                const purchaseCost = part.purchase_cost * part.quantity;
+                const markup = purchaseCost * part.markup_percent;
+                const materialCost = purchaseCost + markup;
+                totalMaterialCost += materialCost;
+            });
+        });
+        setTotalLaborHours(totalLaborHours)
+        setTotalLaborCost(totalLaborCost)
+        setTotalMatCost(totalMaterialCost)
+
+    };
+
+    useEffect(() => {
+        if (!workOrder) {
+            console.warn("workOrder is null or undefined");
+            return;
+        }
+
+        console.log("use effect in orderdetails");
+        setReasonToCome(workOrder.reason_to_come ?? "");
+        console.log(workOrder);
+        console.log(workOrder.joblist);
+        setJobs(workOrder.joblist ?? []);
+        setIsStatusDropDownModalOpenInDetails(false);
+
+        setupdatedStatusCode("");
+        setIsReasonToComeChanged(false);
+
+        setIsBillingInformationChangedForOwner(false);
+        setIsBillingInformationChangedForLessee(false);
+
+        setOwnerPurchaseOrder(workOrder.purchase_order ?? "");
+        setOwnerPurchaseOrderOriginal(workOrder.purchase_order ?? "");
+        setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? "");
+        setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? "");
+        setPurchaseOrderChangedForOwner(false);
+        setPurchaseOrderChangedForLessee(false);
+
+        setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+        setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? "");
+        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? "");
+        setInvoiceChangedForOwner(false);
+        setInvoiceChangedForLessee(false);
+
+        setOwnerInvoiceNetDays(workOrder.invoice_net_days ?? 0);
+        setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days ?? 0);
+        setLesseeInvoiceNetDays(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+        setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+        setInvoiceNetDaysChangedForOwner(false);
+        setInvoiceNetDaysChangedForLessee(false);
+
+        console.log(workOrder.secondary_owner_info);
+        setOwnerInvoiceDate(workOrder.invoice_date ?? null);
+        setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
+
+        setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0)));
+
+        const secondaryOwnerInfo = workOrder.secondary_owner_info ?? {};
+        setLesseeInvoiceDate(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+        setLesseeInvoiceDateOriginal(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+
+        const invDateLessee = secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
+        const invNetDateLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
+
+        setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null);
+
+        setInvoiceDateChangedForOwner(false);
+        setInvoiceDateChangedForLessee(false);
+
+        console.log(lesseeInvoiceDate);
+        setMo_wk(workOrder.mo_wk ?? 0);
+        setSP(workOrder.sp ?? 0);
+        setTQ(workOrder.tq ?? 0);
+        setRE(workOrder.re ?? 0);
+        setEP(workOrder.ep ?? 0);
+        setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+        setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+        setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
+        setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
+        setIsBilledToLessee(secondaryOwnerInfo ? true : false);
+
+        calculateJobCosts(workOrder.joblist ?? []);
+        workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
+        getRailCarTimeLog();
+        setStorageInformation(workOrder.storage_information ?? {});
+
+    }, [workOrder]);
+
+
+    const getRailCarTimeLog =async () => {
+        const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
+        console.log(response)
+        setRailcarLog(response.data)
+    }
+    const formatDateToSQL = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    const handleDropdownChangeInDetails = (e, workId) => {
+        setupdatedStatusCode(e.target.value)
+        setIsStatusDropDownModalOpenInDetails(true)
+    }
+
+    const customStylesForCommentModal = {
+        content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            width: '400px',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+        },
+    };
+
+    //const statusTextArea = useRef(null);
+
+    const closeModal = () => {
+        if (orderDetailsModalRef.current) {
+            orderDetailsModalRef.current.close();
+        }
+    }
+    function scrollToTop() {
+        const modalContent = document.getElementById('orderDetailsModal');
+        if (modalContent) {
+            modalContent.scrollTop = 0; // Scroll to the top
+        }
+    }
+    const postMOWKUpdate = () => {
+        updateMOWK(workOrder.id, mo_wk)
+    }
+    const postSPUpdate = () => {
+        updateSP(workOrder.id, sp)
+    }
+    const postTQUpdate = () => {
+        updateTQ(workOrder.id, tq)
+    }
+
+    const postREUpdate = () => {
+        updateRE(workOrder.id, re)
+    }
+
+    const postEPUpdate = () => {
+        updateEP(workOrder.id, ep)
+    }
+
+    const handleIsBilledToLessee = (e) => {
+        const is_checked = e.target.checked
+        if (is_checked) {
+            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
+            setIsBilledToLessee(true)
+            setJobs(workOrder.joblist)
+        } else {
+            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
+            setIsBilledToLessee(false)
+            setJobs(workOrder.joblist)
+        }
+    }
+
+    const deleteWorkOrder = (id,work_order) =>{
+        const confirmDelete = window.confirm("Are you sure you want to delete this work order?");
+
+        if (confirmDelete) {
+            const requestData = {
+                work_order: work_order,
+                id: id,
+                user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+            };
+
+            axios.post(process.env.REACT_APP_BIRCH_API_URL + 'delete_workorder/', requestData)
+                .then(response => {
+                    console.log('Success:', response.data);
+                    if (response.status === 200) {
+                        closeModal();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error.response ? error.response.data : error.message);
+                });
+        }
+    }
+
+    const changeNetDays = (isForOwner, days,) => {
+        if (isForOwner) {
+            if (days != ownerInvoiceNetDays) {
+                console.log(days)
+                setOwnerInvoiceNetDays(days)
+                // setInvoiceNetDaysChangedForOwner(true)
+                checkBillingInformationChangedForOwner()
+            }
+
+        } else {
+            if (days != lesseeInvoiceNetDays) {
+                setLesseeInvoiceNetDays(days)
+                setLesseeInvoiceNetDays(days)
+                setInvoiceNetDaysChangedForLessee(true)
+                //checkBillingInformationChangedForOwner()
+            }
+        }
+    }
+
+    const handleArrivalDate = (newDate) => {
+        updateArrivalDate(workOrder.id, newDate)
+        newDate == null ? workOrder.arrival_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.arrival_date = new Date(newDate)
+    }
+
+    const handleInspectionDate = (newDate) => {
+        updateInspectedDate(workOrder.id, newDate)
+        newDate == null ? workOrder.inspected_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.inspected_date = new Date(newDate)
+    }
+
+    const handleCleanDate = (newDate) => {
+        updateCleanDate(workOrder.id, newDate)
+        newDate == null ? workOrder.clean_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.clean_date = new Date(newDate)
+    }
+    const handleRepairScheduleDate = (newDate) => {
+        updateRepairScheduleDate(workOrder.id, newDate)
+        newDate == null ? workOrder.repair_schedule_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.repair_schedule_date = new Date(newDate)
+    }
+    const handlePaintDate = (newDate) => {
+        updatePaintDate(workOrder.id, newDate)
+        newDate == null ? workOrder.paint_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.paint_date = new Date(newDate)
+    }
+
+    const handleExteriorPaintDate = (newDate) => {
+        updateExteriorPaintDate(workOrder.id, newDate)
+        newDate == null ? workOrder.exterior_paint = process.env.REACT_APP_DEFAULT_DATE : workOrder.exterior_paint = new Date(newDate)
+    }
+
+
+    const handlePDDate = (newDate) => {
+        updatePDDate(workOrder.id, newDate)
+        newDate == null ? workOrder.pd_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.pd_date = new Date(newDate)
+    }
+
+    const handleValveTearDownDate = (newDate) => {
+        updateValveTearDownDate(workOrder.id, newDate)
+        newDate == null ? workOrder.valve_tear_down = process.env.REACT_APP_DEFAULT_DATE : workOrder.valve_tear_down = new Date(newDate)
+    }
+
+    const handleValveAssemblyDate = (newDate) => {
+        updateValveAssemblyDate(workOrder.id, newDate)
+        newDate == null ? workOrder.valve_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.valve_date = new Date(newDate)
+    }
+
+    const handleRepairDate = (newDate) => {
+        updateRepairDate(workOrder.id, newDate)
+        newDate == null ? workOrder.repair_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.repair_date = new Date(newDate)
+    }
+    const handleFinalDate = (newDate) => {
+        updateFinalDate(workOrder.id, newDate)
+        newDate == null ? workOrder.final_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.final_date = new Date(newDate)
+    }
+
+    const handleQADate = (newDate) => {
+        console.log(newDate)
+        updateQADate(workOrder.id, newDate)
+        newDate == null ? workOrder.qa_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.qa_date = new Date(newDate)
+    }
+
+    const handlePOD = (newDate) => {
+        console.log(newDate)
+        updatePOD(workOrder.id, newDate)
+        newDate == null ? workOrder.projected_out_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.projected_out_date = new Date(newDate)
+    }
+
+    const handleMTI = (newDate) => {
+        updateMTI(workOrder.id, newDate)
+        newDate == null ? workOrder.month_to_invoice = process.env.REACT_APP_DEFAULT_DATE : workOrder.month_to_invoice = new Date(newDate)
+    }
+
+    const handleMOWK = (event) => {
+        setMo_wk(event.target.value)
+    }
+
+    const handleSP = (event) => {
+        setSP(event.target.value)
+    }
+
+    const handleTQ = (event) => {
+        setTQ(event.target.value)
+    }
+
+    const handleRE = (event) => {
+        setRE(event.target.value)
+    }
+
+    const handleEP = (event) => {
+        setEP(event.target.value)
+    }
+
+
+    //handleShipped
+    const handleShipped = (newDate) => {
+        updateMarkAsShipped(workOrder.id, newDate)
+        newDate == null ? workOrder.shipped_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.shipped_date = new Date(newDate)
+    }
+
+    const handleUpdateReasonToCome = () => {
+        updateReasonToCome(workOrder.id, reasonToCome)
+        setIsReasonToComeChanged(false)
+        setReasonToCome(reasonToCome)
+    }
+
+    const handleCancelReasonToCome = () => {
+        setIsReasonToComeChanged(false)
+        setReasonToCome(workOrder.reason_to_come)
+    }
+
+    const handleInvoiceClickOwner = () => {
+        if (ownerInvoiceNumber == "") {
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: process.env.REACT_APP_BIRCH_API_URL + 'get_last_invoice',
+                headers: {}
+            };
+
+            axios.request(config)
+                .then((response) => {
+                    setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(response.data[0].f0))
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else {
+            setOwnerInvoiceNumber(invoiceGeneratorFromLastInvoce(ownerInvoiceNumber))
+        }
+    }
+    //handleInvoiceNumberChangeOwner
+
+    const handleInvoiceClickLessee = () => {
+        if (lesseeInvoiceNumber == null || lesseeInvoiceNumber == "") {
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: process.env.REACT_APP_BIRCH_API_URL + 'get_last_invoice',
+                headers: {}
+            };
+
+            axios.request(config)
+                .then((response) => {
+                    console.log(response.data[0].f0)
+                    setLesseeInvoiceNumber(invoiceGeneratorFromLastInvoce(response.data[0].f0))
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else {
+            setLesseeInvoiceNumber(invoiceGeneratorFromLastInvoce(lesseeInvoiceNumber))
+        }
+    }
+
+
+    const invoiceGeneratorFromLastInvoce = (last_invoice_number) => {
+        let lastFour = last_invoice_number.slice(-4)
+        return workOrder.yard.invoice_identifier + new Date().getFullYear().toString() + (parseInt(lastFour) + 1).toString().padStart(4, '0')
+    }
+
+
+    const getValueByIdStatusCommentDropDown = (id) => {
+        const element = statusCommentDropDownInDetails.current;
+        if (element && element.id === id) {
+            return element.value;
+        }
+        return null;
+    };
+
+    const getValueByIdReasonToCome = (id) => {
+        const element = reasonToComeRef.current;
+        if (element && element.id === id) {
+            return element.value;
+        }
+        return null;
+    };
+
+    const getValueByIdMOWK = (id) => {
+        const element = mowkRef.current;
+        console.log(element)
+        if (element && element.id === id) {
+            setMo_wk(element.value)
+            return element.value;
+        }
+        return null;
+    };
+
+    const postStatusFromDetails = () => {
+        var comment = getValueByIdStatusCommentDropDown("statusUpdateMessageFromDropDownInDetails");
+        if (comment == null || comment.length === 0) {
+            return
+        }
+        let data = qs.stringify({
+            'work_id': workOrder.id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
+            'status_id': updatedStatusCode.split(":")[0],
+            'source': "order_details",
+            'comment': comment
+        });
+        console.log(data)
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'post_work_updates',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                console.log(response)
+                updateWorkUpdates(workOrder.id, response.data, updatedStatusCode.split(":")[1])
+                setIsStatusDropDownModalOpenInDetails(false);
+                setupdatedStatusCode("")
+            })
+            .catch((error) => {
+                console.log(error);
+                setIsStatusDropDownModalOpenInDetails(false);
+                setupdatedStatusCode("")
+                toast.error("Something went wrong")
+            });
+    }
+
+    function sumOfDayDifferences(storageInformation) {
+        console.log("sss")
+        console.log(storageInformation)
+        const today = new Date();
+
+        const sum = storageInformation.reduce((acc, item) => {
+            if (item.is_billed === 0) {
+                const startDate = new Date(item.start_date);
+                let endDate = item.end_date ? new Date(item.end_date) : today;
+
+                // Calculate the difference in milliseconds
+                const diffInMs = endDate - startDate;
+
+                // Convert milliseconds to days
+                const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+                return acc + diffInDays;
+            }
+            return acc;
+        }, 0);
+        console.log(sum)
+        return (sum % 1 > 0.5) ? Math.ceil(sum) : 0;
+    }
+
+    const handleReasonToComeChange = (event) => {
+        const value = event.target.value.toString()
+
+        if (value.toLowerCase() !== workOrder.reason_to_come.toString().toLowerCase()) {
+            console.log("changed")
+            setIsReasonToComeChanged(true)
+            setReasonToCome(value)
+        } else {
+            console.log("not changed")
+            setIsReasonToComeChanged(false)
+            setReasonToCome(workOrder.reason_to_come)
+        }
+    }
+
+
+    const handleOwnerPurchaseOrderChange = (event) => {
+        const value = event.target.value.toString()
+        setOwnerPurchaseOrder(() => value)
+
+        // console.log(value)
+        // console.log(workOrder.purchase_order)
+        // if (value !==  workOrder.purchase_order.toString().toLowerCase()) {
+        //     console.log("Here called")
+        //     setTimeout(() => {
+        //         setOwnerPurchaseOrder(()=>value)
+        //         console.log(ownerPurchaseOrder)
+        //         setPurchaseOrderChangedForOwner(() => true)// This will log the updated state value
+        //         console.log(purchaseorderChangedForOwner)
+        //     }, 100);
+        //
+        // } else {
+        //     console.log("Here called no change")
+        //     setTimeout(() => {
+        //         setOwnerPurchaseOrder(()=>workOrder.purchase_order)
+        //         setPurchaseOrderChangedForOwner(() => false) // This will log the updated state value
+        //     }, 100);
+        //
+        //
+        //     console.log(purchaseorderChangedForOwner)
+        // }
+        checkBillingInformationChangedForOwner()
+    }
+    const handleLesseePurchaseOrderChange = (event) => {
+        const value = event.target.value.toString()
+        setLesseePurchaseOrder(() => value)
+    }
+
+    const handleInvoiceNumberChangeOwner = (event) => {
+        const value = event.target.value.toString().trim()
+        setOwnerInvoiceNumber(() => value)
+    }
+
+    const handleInvoiceNumberChangeLessee = (event) => {
+        const value = event.target.value.toString().trim()
+        setLesseeInvoiceNumber(value)
+    }
+
+    const handleOwnerInvoiceDateChanged = (value) => {
+        setOwnerInvoiceDate(toSqlDatetime(value))
+    }
+
+    function toSqlDatetime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    const handleLesseeInvoiceDateChanged = (value) => {
+        console.log("lessee invoice date changed")
+        setLesseeInvoiceDate(toSqlDatetime(value))
+    }
+
+
+    const handleDueDateChanged = (isFowOwner, date) => {
+        console.log("due date is changed")
+        const date1 = date;
+        const date2 = new Date(isFowOwner ? ownerInvoiceDate : lesseeInvoiceDate);
+        const timeDifference = date1.getTime() - date2.getTime();
+        const dayDifference = timeDifference / (1000 * 3600 * 24);
+        console.log(dayDifference)
+        if (isFowOwner) {
+            setOwnerInvoiceNetDays(dayDifference)
+        } else {
+            setLesseeInvoiceNetDays(dayDifference)
+        }
+    }
+
+
+    const cancelOwnerBillingInformationChange = () => {
+        setOwnerInvoiceDate(convertSqlToFormattedDate(workOrder.invoice_date))
+        setOwnerInvoiceNumber(workOrder.invoice_number)
+        setOwnerInvoiceNetDays(workOrder.invoice_net_days)
+        setOwnerPurchaseOrder(workOrder.purchase_order)
+        setIsBillingInformationChangedForOwner(false)
+    }
+
+    const updateBillingInformation = async (isForOwner) => {
+        if (isForOwner) {
+            const result =  await updateBilling(true, workOrder.id, ownerPurchaseOrder, ownerInvoiceNumber, ownerInvoiceDate, ownerInvoiceNetDays)
+            if(result){
+                setOwnerPurchaseOrderOriginal(ownerPurchaseOrder)
+                setOwnerInvoiceNumberOriginal(ownerInvoiceNumber)
+                setOwnerInvoiceDateOriginal(ownerInvoiceDate)
+                setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays)
+                setShowButtonsOwner(false)
+            }
+        } else {
+            const result = await updateBilling(false, workOrder.id, lesseePurchaseOrder, lesseeInvoiceNumber, lesseeInvoiceDate, lesseeInvoiceNetDays)
+            if(result){
+                setLesseePurchaseOrder(lesseePurchaseOrder)
+                setLesseeInvoiceNumber(lesseeInvoiceNumber)
+                setLesseeInvoiceDate(lesseeInvoiceDate)
+                setLesseeInvoiceNetDays(lesseeInvoiceNetDays)
+                setShowButtonsLessee(false)
+            }
+        }
+    }
+
+    const formatTasks = (tasks) => {
+        const taskMap = new Map();
+        // Populate hashmap
+        tasks.forEach(task => {
+            const {task_description, user_routing_matrix_task_assignment_assigneeTouser} = task;
+            const {name} = user_routing_matrix_task_assignment_assigneeTouser;
+
+            if (!taskMap.has(task_description)) {
+                taskMap.set(task_description, []);
+            }
+            taskMap.get(task_description).push(name);
+        });
+
+        // Generate formatted string
+        let result = "";
+        taskMap.forEach((users, description) => {
+            const userList = users.join('/');
+            result += `${description}: ${userList}\n`;
+        });
+
+        return result.trim(); // Remove trailing newline
+    }
+
+    const updateStorage = async (is_checked) =>{
+
+        workOrder.is_storage = is_checked?1:0
+        const result = await handleStorageUpdate(workOrder.id,is_checked)
+        if(result!==200){
+            workOrder.is_storage = !is_checked?1:0
+        }
+    }
+
+    const updateLockForTimeClocking = async (is_checked) =>{
+
+        workOrder.locked_for_time_clocking = is_checked?1:0
+        const result = await handIsLockedForTimeClocking(workOrder.id,is_checked)
+        if(result!==200){
+            workOrder.locked_for_time_clocking = !is_checked?1:0
+        }
+    }
+
+    const [openDialog, setOpenDialog] = useState(false);
+    const [docToDownload, setDocToDownload] = useState('');
+
+
+    const handleListItemClick = (what_to_download) => {
+
+        if (isBilledToLessee) {
+            if(what_to_download==='aar'){
+                setDocToDownload("aar")
+            }else if(what_to_download === 'brc'){
+                setDocToDownload("brc")
+            }else if(what_to_download==='invoice'){
+                setDocToDownload("invoice")
+            }
+            setOpenDialog(true);
+        } else {
+            if(what_to_download==='aar'){
+                printAAR(workOrder, false, 1);
+            }else if(what_to_download === 'brc'){
+                printBRC(workOrder,1)
+            }else if(what_to_download==='invoice'){
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,1)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,1)
+                }
+
+            }
+        }
+    };
+
+    const handleDialogClose = () => {
+        setDocToDownload("")
+        setOpenDialog(false);
+    };
+
+    const handleButtonClick = (option) => {
+        console.log(docToDownload)
+        if (option === 'owner') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 2);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,2)
+            }else if(docToDownload==='invoice'){
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,2)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,2)
+                }
+            }
+        } else if (option === 'lessee') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 3);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,3)
+            }else if(docToDownload==='invoice'){
+                if(workOrder.railcar.owner_railcar_lessee_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,3)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,3)
+                }
+            }
+        } else if (option === 'combined') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 1);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,1)
+            }else if(docToDownload==='invoice'){
+                if(workOrder.railcar.owner_railcar_owner_idToowner.is_po == 1){
+                    if(workOrder.purchase_order != ''){
+                        printInvoice(workOrder,1)
+                    }else {
+                        alert("Purchase order required")
+                    }
+                }else {
+                    printInvoice(workOrder,1)
+                }
+            }
+        }
+        handleDialogClose();
+    };
+
+    // This is for the...
+    useEffect(() => {
+        const handleCheckForButtonsOwner = () => {
+            if (ownerPurchaseOrder !== ownerPurchaseOrderOriginal || ownerInvoiceNumber !== ownerInvoiceNumberOriginal || ownerInvoiceDate !== ownerInvoiceDateOriginal || String(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== String(ownerDueDateOriginal)) {
+                console.log("Show buttons will be set to true")
+                ownerPurchaseOrder !== ownerPurchaseOrderOriginal ? console.log(`owner purchase order failed`) : console.log(`owner purchase order pass`)
+                ownerInvoiceNumber !== ownerInvoiceNumberOriginal ? console.log(`owner invoice number failed`) : console.log(`owner invoice number pass`)
+                ownerInvoiceDate !== ownerInvoiceDateOriginal ? console.log(`owner invoice date failed`) : console.log(`owner invoice date pass`)
+                console.log(addDays(ownerInvoiceDate, ownerInvoiceNetDays), "changed")
+                console.log(ownerDueDateOriginal, "original")
+                new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) !== ownerDueDateOriginal ? console.log(`owner due date failed`) : console.log(`owner due date pass`)
+                setShowButtonsOwner(true)
+            } else {
+                setShowButtonsOwner(false)
+            }
+        }
+        handleCheckForButtonsOwner()
+    }, [ownerInvoiceDate, ownerInvoiceNetDays, ownerPurchaseOrder, ownerInvoiceNumber])
+
+    useEffect(() => {
+        const handleCheckForButtonsLessee = () => {
+            let calc = lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null
+            if (lesseePurchaseOrder !== lesseePurchaseOrderOriginal || lesseeInvoiceNumber !== lesseeInvoiceNumberOriginal || lesseeInvoiceDate !== lesseeInvoiceDateOriginal || (calc !== null && String(calc) !== String(lesseeDueDateOriginal))) {
+                console.log("Show buttons will be set to true")
+                lesseePurchaseOrder !== lesseePurchaseOrderOriginal ? console.log(`lessee purchase order failed`) : console.log(`lessee purchase order pass`)
+                lesseeInvoiceNumber !== lesseeInvoiceNumberOriginal ? console.log(`lessee invoice number failed`) : console.log(`lessee invoice number pass`)
+                lesseeInvoiceDate !== lesseeInvoiceDateOriginal ? console.log(`lessee invoice date failed`) : console.log(`lessee invoice date pass`)
+                console.log(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays), "changed")
+                console.log(lesseeDueDateOriginal, "original")
+                calc !== lesseeDueDateOriginal ? console.log(`lessee due date failed`) : console.log(`lessee due date pass`)
+                setShowButtonsLessee(true)
+            } else {
+                setShowButtonsLessee(false)
+            }
+        }
+        handleCheckForButtonsLessee()
+    }, [lesseeInvoiceDate, lesseeInvoiceNetDays, lesseePurchaseOrder, lesseeInvoiceNumber])
+
+    const handleCancel = () => {
+        setOwnerPurchaseOrder(ownerPurchaseOrderOriginal)
+        setOwnerInvoiceNumber(ownerInvoiceNumberOriginal)
+        setOwnerInvoiceDate(ownerInvoiceDateOriginal)
+        setOwnerInvoiceNetDays(ownerInvoiceNetDaysOriginal)
+    }
+
+    const handleLesseeCancel = () => {
+        setLesseePurchaseOrder(lesseePurchaseOrderOriginal)
+        setLesseeInvoiceNumber(lesseeInvoiceNumberOriginal)
+        setLesseeInvoiceDate(lesseeInvoiceDateOriginal)
+        setLesseeInvoiceNetDays(lesseeInvoiceNetDaysOriginal)
+    }
+
+    return (
+        <div>
+            {workOrder!=null &&
+                <dialog id="orderDetailsModal"  ref={orderDetailsModalRef} className="modal rounded-md h-full ">
+                    <div className="w-full bg-white">
+                        <div className="bg-white  h-[60px] w-full pb-5 rounded-md overflow-auto">
+                            <div className="w-full fixed  bg-[#DCE5FF] px-6 py-[18px] text-lg font-semibold  ">
+                            <span
+                                className="float-left">{workOrder?.railcar_id != null ? workOrder.railcar_id : ""}</span>
+                                <form method="dialog">
+                                    <div className="float-right mr-5">
+                                        <button className="" onClick={closeModal}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2"
+                                                      strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto mb-5">
+                            {/*Side menu*/}
+                            <div className="absolute top-1/3 right-4">
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        BRC
+                                    </span>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0'  onClick={()=>handleListItemClick('aar')}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        ARR-500B
+                                    </span>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0'  onClick={()=>printBBOM(workOrder)}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        BBOM
+                                    </span>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('invoice')}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        Invoice
+                                    </span>
+                                    </li>
+                                    <li className='flex h-fit text-[10px] p-0' onClick={()=>printATask(workOrder)}>
+                                    <span className="p-1">
+                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"
+                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
+                                                stroke-linejoin="round"/>
+                                        </svg>
+                                        Work Order
+                                    </span>
+                                    </li>
+
+                                    <li
+                                        className={`flex h-fit text-[10px] p-0 ${workOrder?.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}
+                                        style={{ pointerEvents: workOrder?.joblist.length > 0 ? 'none' : 'auto' } } onClick={()=>deleteWorkOrder(workOrder.id,workOrder.work_order)}
+                                    >
+                                  <span className="p-1">
+                                    <svg width="10" height="10" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path
+                                          d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"
+                                          stroke="#23393D" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                    DELETE
+                                  </span>
+                                    </li>
+
+
+                                </ul>
+                                <Dialog
+                                    open={openDialog}
+                                    onClose={handleDialogClose}
+                                    container={() => document.querySelector('#orderDetailsModal')} // Ensure it appears within the correct component
+                                    style={{ zIndex: 1300 }} // Ensure it has a proper zIndex
+                                >
+                                    <DialogTitle>Select from the  Options</DialogTitle>
+                                    <DialogActions>
+                                        <Button onClick={() => handleButtonClick('owner')} color="primary">
+                                            For Owner
+                                        </Button>
+                                        <Button onClick={() => handleButtonClick('lessee')} color="primary">
+                                            For Lessee
+                                        </Button>
+                                        <Button onClick={() => handleButtonClick('combined')} color="primary">
+                                            Combined
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </div>
+                            {/*End Side menu*/}
+                            <div className=" w-full">
+                                {/*Car information */}
+                                <div className="w-full bg-white p-4  mt-[24px]">
+                                    <h6 className='font-semibold'>Car Information</h6>
+                                </div>
+                                {/*End Car information */}
+                                {/*Job list */}
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                    <JoblistTable
+                                        handlePaste={pasteJobs}
+                                        jobs={workOrder.joblist}
+                                        workOrder={workOrder}
+                                        commonData = {commonData}
+                                        isBilledToLessee={isBilledToLessee}
+                                        createAjob={createAjob}
+                                        updateAJob={updateAJob}
+                                        deleteJob={deleteJob}
+                                        updateBillToLesseForAJob={updateBillToLesseForAJob}/>
+
+                                </div>
+
+                                {/*end job list */}
+                                <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
+                                    <div className="">
+                                        <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
+                                    </div>
+                                    <div className="">
+                                        <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
+                                    </div>
+                                    <div className="">
+                                        <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
+                                    </div>
+                                    <div className="]">
+                                        <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/*Parts information*/}
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none">
+                                <PartsTable jobs={workOrder.joblist}/>
+                            </div>
+                            {/*End Parts information*/}
+
+                            {/*Railcar log*/}
+
+                            {railCarLog.length>0 &&(
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5">
+                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
+                                </div>
+                            )}
+                            {/*Railcar log*/}
+
+                            {/*Order information */}
+                            <div className="w-full bg-white p-2">
+                                <h6 className='font-semibold'>Order Information</h6>
+                            </div>
+                            {/*End Order information */}
+
+                            {/*Order information Owner */}
+                            <div className="w-full bg-white p-4  mb-10 mt-[24px] rounded-none">
+
+                                <h6 className='font-semibold '>Billing Information(Owner)</h6>
+                            </div>
+                            {/*End Order information Owner */}
+
+                            {/*Order information Lessee */}
+                            {isBilledToLessee && (
+                                <div className="w-full bg-white p-4 mb-10 mt-[24px] rounded-none">
+
+                                    <h6 className='font-semibold '>Billing Information(Lessee)</h6>
+                                </div>
+                            )}
+                            {/*End Order information Lessee */}
+
+                            {/*Storage information*/}
+                            {workOrder.is_storage ==1 &&(
+                                <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-20">
+                                    <StorageComponent initialEntries={storageInformation} railcar_id={workOrder.railcar_id} work_order={workOrder.work_order}/>
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+                </dialog>
+            }
+        </div>
+
+    );
+
+};
+
+export default OrderDetails2;

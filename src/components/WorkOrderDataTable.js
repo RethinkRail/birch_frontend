@@ -295,13 +295,13 @@ const WorkOrderDataTable = ({
         },
         {
             name: "MATERIAL ETA",
-            selector: row => row.material_eta,
+            selector: row => row.material_eta || '',
             width: "8%",
             cell: (row) => (
                 <span>
                     <DatePicker
                         customInput={<CustomDateInput value={row.material_eta}/>}
-                        selected={row.material_eta ? new Date(row.material_eta) : null}
+                        selected={row.material_eta ? new Date(row.material_eta) : ''}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
                         isClearable
@@ -310,16 +310,21 @@ const WorkOrderDataTable = ({
                     />
                 </span>
             ),
+            sortFunction: (a, b) => {
+                const dateA = a.material_eta ? new Date(a.material_eta) : new Date(0); // Default to epoch for nulls
+                const dateB = b.material_eta ? new Date(b.material_eta) : new Date(0);
+                return dateA - dateB;
+            },
             sortable: true,
 
         },
         {
             name: "POD",
-            selector: row => row.projected_out_date,
+            selector: row => row.projected_out_date || '', // Ensure selector always returns a string or date
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={row.projected_out_date}/>}
-                    selected={row.projected_out_date ? new Date(row.projected_out_date) : null}
+                    customInput={<CustomDateInput value={row.projected_out_date} />}
+                    selected={row.projected_out_date ? new Date(row.projected_out_date) : ''}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
@@ -327,8 +332,14 @@ const WorkOrderDataTable = ({
                 />
             ),
             sortable: true,
+            sortFunction: (a, b) => {
+                const dateA = a.projected_out_date ? new Date(a.projected_out_date) : new Date(0); // Default to epoch for nulls
+                const dateB = b.projected_out_date ? new Date(b.projected_out_date) : new Date(0);
+                return dateA - dateB;
+            },
             width: "8%",
-        },
+        }
+        ,
         {
             name: "INVOICED",
             selector: row => row.finalized,

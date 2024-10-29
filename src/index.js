@@ -24,6 +24,7 @@ import UserManagement from "./portal/management/UserManagement";
 import StorageReport from "./portal/report/StorageReport";
 import WorkStationManager from "./portal/time/WorkStationManager";
 import TimeApproval from "./portal/time/TimeApproval";
+import RailcarTable from "./portal/report/RailcarTable";
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/firebase-messaging-sw.js')

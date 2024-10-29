@@ -18,6 +18,8 @@ import Modal from "react-modal";
 import qs from "qs";
 
 import CommentModalDepartMent from "../../components/CommentModalDepartMent";
+import {MaterialReactTable} from "material-react-table";
+import {download, generateCsv, mkConfig} from "export-to-csv";
 
 
 const DepartmentReport = () => {
@@ -42,7 +44,7 @@ const DepartmentReport = () => {
                 setJobCategories(jobCategoryResponse.data);
 
                 const statusCodeResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_all_status/');
-
+//                console.log(statusCodeResponse)
                 setStatusCodes(statusCodeResponse.data);
 
                 const departmentReportResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_department_report/');
@@ -50,7 +52,7 @@ const DepartmentReport = () => {
                 //console.log(departmentReportResponse)
                 let data = processRailcarData(departmentReportResponse.data, jobCategoryResponse.data);
                 // console.log(departmentReportResponse.data.length)
-                // console.log(data.length)
+                //console.log(data)
                 setProcessedReport(data);
                 toast.update(toastId.current, {
                     render: "All data loaded",
@@ -61,7 +63,13 @@ const DepartmentReport = () => {
                 });
             } catch (err) {
                 setError('Failed to load data. Please try again.');
-
+                toast.update(toastId.current, {
+                    render: "Something went wrong",
+                    autoClose: 1000,
+                    type: "error",
+                    hideProgressBar: true,
+                    isLoading: false
+                });
             }
         };
         toastId.current = toast.loading("Loading...")
@@ -69,6 +77,7 @@ const DepartmentReport = () => {
     }, []);
 
     const handleDropdownChangeInDetails = (e, workId) => {
+        console.log(workId)
         setupdatedStatusCode(e.target.value)
         setWorkOrdeToUpdateStatus(workId)
         setIsStatusDropDownModalOpenInDetails(true)
@@ -129,12 +138,7 @@ const DepartmentReport = () => {
     const orderDetailsModal = document.getElementById('orderDetailsModal');
     //const statusTextArea = useRef(null);
 
-    const closeModal = () => {
-        if (orderDetailsModal) {
-            orderDetailsModal.close();
-        } else {
-        }
-    }
+
     const statusCommentDropDownInDetails = useRef(null);
     const getValueByIdStatusCommentDropDown = (id) => {
         const element = statusCommentDropDownInDetails.current;
@@ -171,6 +175,21 @@ const DepartmentReport = () => {
                 console.log(response)
                 setIsStatusDropDownModalOpenInDetails(false);
                 setupdatedStatusCode("")
+
+                setProcessedReport((prevRep) =>
+                    prevRep.map((rep) => {
+                        if (rep.id === workOrderToUpdateStatus) {
+                            // Ensure comment is an array before prepending
+                            const existingComments = Array.isArray(rep.comment) ? rep.comment : [];
+                            return {
+                                ...rep,
+                                comment: [response.data, ...existingComments],
+                            };
+                        }
+                        return rep;
+                    })
+                );
+
             })
             .catch((error) => {
                 console.log(error);
@@ -181,10 +200,7 @@ const DepartmentReport = () => {
     }
 
     function processRailcarData(dataArray, departmentMap) {
-
-
-
-        if (!dataArray.length || !departmentMap.length) {
+        if (!dataArray ) {
             console.error('Empty dataArray or departmentMap');
             return [];
         }
@@ -298,13 +314,14 @@ const DepartmentReport = () => {
         return results;
     }
 
-
-
     const handleDateChange = async (date, id, field) => {
+        console.log(date)
+        console.log(id)
+        console.log(field)
         setProcessedReport(prevReport => {
             const updatedData = prevReport.map(item => {
-                if (item.id === id) {
-                    return {...item, [field]: date ? new Date(date).toLocaleDateString() : null};
+                if (item.id === id.original.id) {
+                    return {...item, [field.id]: date ? new Date(date).toLocaleDateString() : null};
                 }
                 return item;
             });
@@ -314,9 +331,9 @@ const DepartmentReport = () => {
 
         try {
             const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_date_field', {
-                workorder_id: id,
+                workorder_id: id.original.id,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
-                date_field: field, // Replace with the field you want to update
+                date_field: field.id, // Replace with the field you want to update
                 date_value: date// Replace with the desired date
             });
 
@@ -331,7 +348,7 @@ const DepartmentReport = () => {
         setProcessedReport(prevReport => {
             const updatedData = prevReport.map(item => {
                 if (item.id === id) {
-                    return {...item, [field]: value};
+                    return {...item, [field.id]: value};
                 }
                 return item;
             });
@@ -373,8 +390,6 @@ const DepartmentReport = () => {
             return sortDirection === 'asc' ? '🔼' : '🔽';
         }
     };
-
-
     const exportToCSV = () => {
         const rows = document.querySelectorAll('table tr');
         const csvData = [];
@@ -411,6 +426,386 @@ const DepartmentReport = () => {
         document.body.removeChild(link);
     };
 
+    const csvConfig = mkConfig({
+        fieldSeparator: ',',
+        decimalSeparator: '.',
+        useKeysAsHeaders: true,
+        filename: 'BIRCH Summary Report '+new Date().toLocaleDateString()
+    });
+
+    const handleExportRows = (table,rows) => {
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
+        //console.log(visibleColumns)
+        // Map the rows to include only the visible columns and use the column headers
+        const rowData = rows.map((row) => {
+            const filteredRow = {};
+            visibleColumns.forEach((column) => {
+                //console.log(column)
+                if(column.id =='comment'){
+                    filteredRow[column.columnDef.header] = row.original[column.id].comment;
+                }else {
+                    filteredRow[column.columnDef.header] = row.original[column.id];
+                }
+                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                 // or column.columnDef.accessorKey if needed
+            });
+            return filteredRow;
+        });
+
+        console.log(rowData);
+
+        // Generate the CSV with the filtered row data
+        const csv = generateCsv(csvConfig)(rowData);
+        download(csvConfig)(csv);
+    };
+    const EditableCell = ({ value, row, column }) => {
+        const handleChange = (e) => {
+            const newData = [...processedReport];
+            newData[row.index][column.id] = e.target.value;
+            setProcessedReport(newData);
+        };
+
+        return (
+            <input
+                type="text"
+                value={value || ""}
+                onChange={handleTextChange}
+                className="border p-1 rounded w-full"
+            />
+        );
+    };
+
+    const columns = React.useMemo(
+        () => [
+            { accessorKey: "id", header: "ID" },
+            { accessorKey: "type", header: "Type" },
+            { accessorKey: "dis", header: "DIS",size: 20 },
+            { accessorKey: "railcar_id", header: "Railcar",size: 20 },
+            {
+                accessorKey: "status_code",
+                header: "Status",
+                size:50,
+                Cell: ({ row, column }) => (
+                    <select onChange={(e) => handleDropdownChangeInDetails(e, row.original.id)} className="w-[200px]">
+                        {statusCodes.map((status) => (
+                            <option key={status.code} value={status.code} selected={row.original.status_code === status.code}>
+                                {status.code + ":" + status.title}
+                            </option>
+                        ))}
+                    </select>
+                ),
+            },
+            {
+                accessorKey: "comment",
+                header: "Comment",
+                size: 250, // Optionally constrain width
+                Cell: ({ row }) => (
+                    <div
+                        className="truncate w-60 whitespace-nowrap overflow-hidden whitespace-pre-wrap cursor-pointer"
+                        onClick={() => {
+                            document.getElementById('commentModal').showModal();
+                            setCommentObject(row.original.comment);
+                            setWorkIdForComment(row.original.id);
+
+                        }}
+                        title={row.original.comment[0]?.comment}
+                    >
+                        {row.original.comment[0]?.comment}
+                    </div>
+                ),
+            },
+            {
+                accessorKey: "clean_date",
+                header: "Clean Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.clean_date ? new Date(row.original.clean_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+
+                    />
+                ),
+            },
+            {
+                accessorKey: "repair_schedule_date",
+                header: "Repair Schedule Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.repair_schedule_date
+                                ? new Date(row.original.repair_schedule_date)
+                                : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "paint_date",
+                header: "Paint Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.paint_date ? new Date(row.original.paint_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "pd_date",
+                header: "PD Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.pd_date ? new Date(row.original.pd_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "qa_date",
+                header: "QA Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.qa_date ? new Date(row.original.qa_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "projected_out_date",
+                header: "POD",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.projected_out_date ? new Date(row.original.projected_out_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "total_cost",
+                header: "Total Cost",
+                Cell: ({ row, column  }) => {
+                    const value = row.original.total_cost;
+                    return value ==='NaN' ? 0 : value;
+                },
+            },
+            {
+                accessorKey: "month_to_invoice",
+                header: "Month to Invoice",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.month_to_invoice ? new Date(row.original.month_to_invoice) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "mo_wk",
+                header: "MO/WK",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.mo_wk || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+
+                ),
+            },
+            { accessorKey: "admin_man_hour_estimated", header: "ADMIN MHE" },
+            { accessorKey: "admin_man_hour_applied", header: "ADMIN MHA" },
+            { accessorKey: "owner", header: "Owner" },
+            { accessorKey: "lessee", header: "Lessee" },
+            { accessorKey: "products", header: "Products" },
+            {
+                accessorKey: "inspected_date",
+                header: "Inspected Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={new Date(row.original.inspected_date)}
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "material_eta",
+                header: "Material ETA",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.material_eta ? new Date(row.original.material_eta) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "clean_man_hour_estimated", header: "CLEAN MHE" },
+            { accessorKey: "clean_man_hour_applied", header: "CLEAN MHA" },
+            { accessorKey: "repair_man_hour_estimated", header: "REPAIR MHE" },
+            { accessorKey: "repair_man_hour_applied", header: "REPAIR MHA" },
+            {
+                accessorKey: "exterior_paint",
+                header: "Exterior Paint",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.exterior_paint ? new Date(row.original.exterior_paint) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "paint_man_hour_estimated", header: "PAINT MHE" },
+            { accessorKey: "paint_man_hour_applied", header: "PAINT MHA" },
+            {
+                accessorKey: "valve_date",
+                header: "Valve Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.valve_date ? new Date(row.original.valve_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "valve_man_hour_estimated", header: "VALVE MHE" },
+            { accessorKey: "valve_man_hour_applied", header: "VALVE MHA" },
+            { accessorKey: "pd_man_hour_estimated", header: "PD MHE" },
+            { accessorKey: "pd_man_hour_applied", header: "PD MHA" },
+            { accessorKey: "indirect_labor_man_hour_estimated", header: "INDIRECT MHE" },
+            { accessorKey: "indirect_labor_man_hour_applied", header: "INDIRECT MHA" },
+            { accessorKey: "indirect_switching_man_hour_estimated", header: "INDIRECT SWITCHING MHE" },
+            { accessorKey: "indirect_switching_man_hour_applied", header: "INDIRECT SWITCHING MHA" },
+            { accessorKey: "maintenance_man_hour_estimated", header: "MAINTENANCE MHE" },
+            { accessorKey: "maintenance_man_hour_applied", header: "MAINTENANCE MHA" },
+            {
+                accessorKey: "final_date",
+                header: "Final Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.final_date ? new Date(row.original.final_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "sp",
+                header: "SP",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.sp || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "tq",
+                header: "TQ",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.tq || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "re",
+                header: "RE",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.re || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "ep",
+                header: "EP",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.ep || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            // Date fields with Date Picker
+        ],
+        [processedReport]
+    );
 
 
     const updateTextField =async (e, id, key) =>{
@@ -419,11 +814,21 @@ const DepartmentReport = () => {
             const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_text_field', {
                 workorder_id: id,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
-                text_field: key, // Field you're updating
+                text_field: key.id, // Field you're updating
                 text_value: val // Correct value to send
             });
 
             console.log('Response:', response.data); // Handle successful response
+
+            // setProcessedReport(prevReport => {
+            //     const updatedData = prevReport.map(item => {
+            //         if (item.id === id) {
+            //             return {...item, [id]: val};
+            //         }
+            //         return item;
+            //     });
+            //     return updatedData;
+            // });
         } catch (error) {
             console.error('Error:', error.response?.data || error.message); // Handle error response
         }
@@ -434,6 +839,7 @@ const DepartmentReport = () => {
         {processedReport.length > 0 ? (
 
                 <div id="departMentReport">
+                    <h1 className="mt-4 mb-4">Department wise report</h1>
                     <Modal
                         isOpen={isStatusDropDownModalOpenInDetails}
                         onRequestClose={() => {
@@ -461,116 +867,75 @@ const DepartmentReport = () => {
                         work_id={workIdForComment}
                         updateWorkUpdates={putComments}
                     />
-                    <div className="flex justify-between">
-                        <h1 className="flex justify-start flex-row py-3">Department wise report</h1>
-                        <div className="flex justify-end flex-row p-2 ">
-                            {/* Search Bar on the right */}
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                    <MaterialReactTable
+                        columns={columns}
+                        data={processedReport}
+                        enablePagination={true}
+                        enableStickyHeader
+                        initialState={{
+                            pagination: {
+                                pageIndex: 0,
+                                pageSize: 50, // Set default page size to 80
+                            },
+                            columnPinning: { left: ['railcar_id'] },
+                            columnVisibility: { id: false,type:false }
+                        }}
+                        muiTableHeadCellProps={{
+                            sx: {
+                                backgroundColor: "#DCE5FF",
+                                fontSize: '10px',
+                                padding: '8px',
+                            }
+                        }}
+                        muiTableBodyCellProps={{
+                            sx: {
+                                fontSize: '10px',
+                                padding: '10px',
+                            }
+                        }}
+                        muiTableBodyRowProps={({ row, table }) => ({
+                            sx: {
+                                backgroundColor:
+                                    table.getRowModel().flatRows.indexOf(row) % 2 === 0
+                                        ? "#F9F9F9"
+                                        : "#ffffff", // Use table row index to alternate row colors
+                            },
+                        })}
+                        renderTopToolbarCustomActions={({ table }) => (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    gap: '16px',
+                                    padding: '8px',
+                                    flexWrap: 'wrap',
+                                }}
+                            >
 
-                                style={{ padding: '10px', fontSize: '14px', width: '200px' }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="table-container max-h-screen">
-                        {/* Flex container for the search bar */}
-
-
-                        <FaCloudDownloadAlt onClick={exportToCSV} style={{
-                            position: 'fixed',
-                            bottom: '20px',
-                            right: '15px',
-                            height:'50px',
-                            width:'50px',
-                            color:'#002E54',
-                            cursor:'pointer',
-                            zIndex: '1000' // Ensure it's on top of other elements
-                        }}/>
-                        <table id="department_report">
-                            <thead>
-                            <tr style={{ backgroundColor: "#DCE5FF", fontSize: '10px', padding: '1px', fontFamily: 'Inter', fontWeight: '500' }}>
-                                <th
-                                    className="sticky-header sticky-column"
-                                    onClick={() => handleSort('railcar_id')}
-                                    style={{ cursor: 'pointer', position: 'relative' }}
+                                <button
+                                    disabled={table.getPrePaginationRowModel().rows.length === 0}
+                                    onClick={() =>
+                                        handleExportRows(table,table.getPrePaginationRowModel().rows)
+                                    }
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '8px 16px',
+                                        backgroundColor: '#1976d2',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        opacity: table.getPrePaginationRowModel().rows.length === 0 ? 0.5 : 1,
+                                    }}
                                 >
-                                    RAILCAR
-                                    <span >{getSortArrow('railcar_id')}</span>
-                                </th>
-                                {Object.keys(processedReport[0]).map((key) =>
-                                    key !== 'id' && key !== 'railcar_id' ? (
-                                        <th
-                                            key={key}
-                                            className="sticky-header"
-                                            style={{ paddingLeft: '10px', paddingRight: '2px', cursor: 'pointer', position: 'relative' }}
-                                            onClick={() => handleSort(key)}
-                                        >
-                                            {formatField(key)}
-                                            <span >{getSortArrow(key)}</span>
-                                        </th>
-                                    ) : null
-                                )}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {sortedReport.map((row,i) => (
-                                <tr key={row.id}>
-                                    <td className="sticky-column">{row.railcar_id}</td>
-                                    {Object.keys(row).map((key) =>
-                                        key !== 'id' && key !== 'railcar_id' ? (
-                                            <td key={key} className="text-xs py-1" style={{ paddingLeft: '5px', fontFamily: 'Inter', fontWeight: '400' }}>
-                                                {["mo_wk", "sp", "tq", "re", "ep"].includes(key) ? (
-                                                    <input
-                                                        type="text"
-                                                        style={{ width: '160px' }}
-                                                        value={row[key]}
-                                                        onChange={(e) => handleTextChange(e, row.id, key)}
-                                                        onBlur={(e) => updateTextField(e, row.id, key)}
-                                                        className="text-input w-40 whitespace-pre-line w-12"
-                                                    />
-                                                ) : key.includes('date') || key === 'material_eta' || key === 'exterior_paint' || key === 'month_to_invoice' ? (
-                                                    <span>
-                                            <DatePicker
-                                                value={row[key] !== null ? new Date(row[key]).toLocaleDateString() : null}
-                                                selected={row[key] !== null ? new Date(row[key]) : null}
-                                                onChange={(newDate) => handleDateChange(newDate, row.id, key)}
-                                                isClearable
-                                                showYearDropdown
-                                                dateFormat="MM-dd-yyyy"
-                                                style={{ width: '100%' }}
-                                            />
-                                        </span>
-                                                ) : key === 'status_code' ? (
-                                                    <select onChange={(e) => handleDropdownChangeInDetails(e, row.id)}>
-                                                        {statusCodes.map((status) => (
-                                                            <option key={status.code} value={status.code} selected={row[key] === status.code}>
-                                                                {status.code + ":" + status.title}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                ) : key === 'comment' ? (
-                                                        <span onClick={() => {
-                                                            document.getElementById('commentModal').showModal();
-                                                            setCommentObject(row.comment);
-                                                            setWorkIdForComment(row.id);
+                                    <FaDownload style={{ marginRight: '8px' }} />
+                                    Export All
+                                </button>
 
-                                                        }} style={{ width: '100px' }}  className="cursor-pointer whitespace-break-spaces" >{row.comment[0].comment+'-'+row.comment[0].user.name}</span>
-                                                    )
-                                                    : (
-                                                    <span>{row[key]}</span>
-                                                )}
-                                            </td>
-                                        ) : null
-                                    )}
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
+
+                            </div>
+                        )}
+                    />
                 </div>
             ) : null}
 

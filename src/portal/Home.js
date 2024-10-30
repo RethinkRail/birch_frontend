@@ -38,7 +38,9 @@ const Home = () => {
         if(payload.data.type === 'new_order'){
             getActiveTasks()
             getWorkOrderById(parseInt(payload.data.value))
-        }else if(payload.data.type === 'routing'){
+        }else if(payload.data.type === 'updated_wo'){
+            getWorkOrderById(parseInt(payload.data.value))
+        } else if(payload.data.type === 'routing'){
             getActiveTasks()
         }else if(payload.data.type ==='deleted_order'){
             console.log("deleted order")
@@ -133,7 +135,6 @@ const Home = () => {
 
         axios.request(config)
             .then((response) => {
-//                console.log(response.data.active_workorder)
                 setWorkOrders(response.data.active_workorder)
                 //console.log(workOrders)
                 return Promise.resolve();

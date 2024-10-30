@@ -168,7 +168,7 @@ const WorkOrderDataTable = ({
             }
             workOrderData.push(workOrderObject)
         })
-        setWorkIdForComment(workOrderData)
+        setWoForDT(workOrderData)
 //        console.log("in action")
     }, [workOrders])
 

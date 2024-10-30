@@ -147,7 +147,7 @@ export function replaceItemInArray(arr, newItem) {
     if (index !== -1) {
         arr[index] = newItem;
     }
-    console.log(arr[index])
+    //console.log(arr[index])
     return arr;
 }
 

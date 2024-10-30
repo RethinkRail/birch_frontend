@@ -97,7 +97,8 @@ const WorkOrderDataTable = ({
     const [workOrderToView, setWorkOrderToView] = useState(null)
     const [railcarToChangeStaus, setRailCarToChangeStatus] = useState("")
     const [updatedStatusCode, setupdatedStatusCode] = useState("")
-    const workOrderData = [];
+    let workOrderData = [];
+    const [woForDT, setWoForDT] = useState([])
     const statusCommentDropDown = useRef(null);
     // const orderDetailsModal = document.getElementById('orderDetailsModal');
     //orderDetailsModal.close()
@@ -129,41 +130,49 @@ const WorkOrderDataTable = ({
 //        console.log("in action")
     }, [workOrders])
 
-    workOrders.forEach((workOrder, index) => {
-        const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
-        const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
-        const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
-        var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
 
-        const workOrderObject = {
-            'workOrder': workOrder,
-            'estimated_time': round2Dec(laborHours),
-            'labor_hours': round2Dec(durationHours),
-            'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
-            'dif': actual_dif,
-            'railcar_id': workOrder.railcar_id,
-            'arrival_date': workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.arrival_date),
-            'inspected_date': workOrder.inspected_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.inspected_date),
-            'clean_date': workOrder.clean_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.clean_date),
-            'repair_schedule_date': workOrder.repair_schedule_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_schedule_date),
-            'paint_date': workOrder.paint_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.paint_date),
-            'repair_date': workOrder.repair_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_date),
-            'final_date': workOrder.final_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.final_date),
-            'qa_date': workOrder.qa_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.qa_date),
-            'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.projected_out_date) : null,
-            'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
-            'last_content': workOrder.railcar.products.name,
-            'status': workOrder.workupdates[0].status_id,
-            'comment': workOrder.workupdates,
-            'material_eta': workOrder.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.material_eta) : null,
-            'finalized': workOrder.locked_by,
-            'shipped': workOrder.shipped_date,
-            'work_id': workOrder.id,
-            'is_storage': workOrder.is_storage,
-            'index': index
-        }
-        workOrderData.push(workOrderObject)
-    })
+    useEffect(() => {
+        workOrderData=[]
+        workOrders.forEach((workOrder, index) => {
+            const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
+            const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
+            const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
+            var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
+
+            const workOrderObject = {
+                'workOrder': workOrder,
+                'estimated_time': round2Dec(laborHours),
+                'labor_hours': round2Dec(durationHours),
+                'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
+                'dif': actual_dif,
+                'railcar_id': workOrder.railcar_id,
+                'arrival_date': workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.arrival_date),
+                'inspected_date': workOrder.inspected_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.inspected_date),
+                'clean_date': workOrder.clean_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.clean_date),
+                'repair_schedule_date': workOrder.repair_schedule_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_schedule_date),
+                'paint_date': workOrder.paint_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.paint_date),
+                'repair_date': workOrder.repair_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_date),
+                'final_date': workOrder.final_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.final_date),
+                'qa_date': workOrder.qa_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.qa_date),
+                'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.projected_out_date) : null,
+                'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
+                'last_content': workOrder.railcar.products.name,
+                'status': workOrder.workupdates[0].status_id,
+                'comment': workOrder.workupdates,
+                'material_eta': workOrder.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.material_eta) : null,
+                'finalized': workOrder.locked_by,
+                'shipped': workOrder.shipped_date,
+                'work_id': workOrder.id,
+                'is_storage': workOrder.is_storage,
+                'index': index
+            }
+            workOrderData.push(workOrderObject)
+        })
+        setWorkIdForComment(workOrderData)
+//        console.log("in action")
+    }, [workOrders])
+
+
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -488,7 +497,7 @@ const WorkOrderDataTable = ({
                     <DataTable
                         title=""
                         columns={workOrdersTableColumn}
-                        data={workOrderData}
+                        data={woForDT}
                         conditionalRowStyles={conditionalRowStyles}
                         striped={false}
                         dense={true}

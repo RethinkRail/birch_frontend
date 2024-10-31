@@ -211,6 +211,9 @@ const OrderDetails = ({
             return;
         }
 
+        const element = document.getElementById('car_info');
+        element?.scrollIntoView({ behavior: 'smooth' });
+        window.scrollBy(0, -50);
         console.log("use effect in orderdetails");
         setReasonToCome(workOrder.reason_to_come ?? "");
         console.log(workOrder);

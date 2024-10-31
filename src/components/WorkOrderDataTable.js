@@ -520,6 +520,7 @@ const WorkOrderDataTable = ({
                         fixedHeader={false}
                         className="display nowrap compact stripe"
                         customStyles={myStyles}
+                        noDataComponent={<div className="no-data-message" style={{ textAlign: 'center', padding: '20px', color: 'gray' }}>Preparing Result</div>}
                     />
 
                     {/*<ReorderableTable*/}

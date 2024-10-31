@@ -409,6 +409,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="loc"
                                 id="loc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling with your class names
                                 value={commonData.location_codes.map((locationcode) => ({
                                     value: locationcode.code,
@@ -424,13 +425,14 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-[12px] capitalize">QUANTITY(QTY)</label>
-                            <input type="number" min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
+                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Condition Code (CC)</label>
                             <Select
                                 name="cc"
                                 id="cc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To apply your custom styles
                                 value={commonData.condition_codes.map((conditioncode) => ({
                                     value: conditioncode.code,
@@ -454,6 +456,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="job"
                                 id="job"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.job_codes.map((jobcode) => ({
                                     value: jobcode.code,
@@ -472,6 +475,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="loc"
                                 id="loc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.qualifier_codes.map((qualifiercode) => ({
                                     value: qualifiercode.id,
@@ -490,6 +494,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="cc"
                                 id="cc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.wmc_codes.map((wmc) => ({
                                     value: wmc.code,
@@ -513,6 +518,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="loc"
                                 id="loc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.job_codes.map((jobcode) => ({
                                     value: jobcode.code,
@@ -531,6 +537,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="loc"
                                 id="loc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.qualifier_codes.map((qcr) => ({
                                     value: qcr.id,
@@ -549,6 +556,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <Select
                                 name="cc"
                                 id="cc"
+                                isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
                                 value={commonData.responsibility_codes.map((rc) => ({
                                     value: rc.code,
@@ -576,6 +584,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         <Select
                             name="loc"
                             id="loc"
+                            isDisabled={workOrder.locked_by != null}
                             classNamePrefix="react-select" // To allow custom styling
                             onChange={(selectedOption) => handlePartChange(selectedOption?.value)}
                             options={commonData.parts.map((part) => ({
@@ -621,16 +630,16 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     <div className="grid grid-cols-5 gap-4 mt-4">
                         <div className="col-span-3 flex flex-col gap-1.5">
                             <label className="capitalize text-[12px]">Description of Repair</label>
-                            <textarea rows={5} className="text-[12px] w-full border-[1px] rounded-md border-[#002e54] p-1 px-2 outline-none" value={inputValues["job_description"]} onChange={(e) => handleChange("job_description", e.target.value)} placeholder="Enter description of repair"></textarea>
+                            <textarea rows={5} disabled={workOrder.locked_by != null} className="text-[12px] w-full border-[1px] rounded-md border-[#002e54] p-1 px-2 outline-none" value={inputValues["job_description"]} onChange={(e) => handleChange("job_description", e.target.value)} placeholder="Enter description of repair"></textarea>
                         </div>
                         <div className="col-span-2 grid grid-cols-3 gap-1">
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">ST. Time (HR)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_time"]} onChange={(e) => handleChange("labor_time",e.target.value)} />
+                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_time"]} onChange={(e) => handleChange("labor_time",e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Rate ($/HR)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_rate"]} onChange={(e) => handleChange("labor_rate", e.target.value)} />
+                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_rate"]} onChange={(e) => handleChange("labor_rate", e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Labor ($)</label>
@@ -642,7 +651,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Markup (%)</label>
-                                <input type="number" name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
+                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Material ($)</label>
@@ -658,10 +667,16 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     </div>
                 </div>
                 <div className="flex flex-row items-center gap-2">
-                    <button className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center' onClick={handleSave}>
-                        {editData ? "UPDATE" : "ADD"}
-                    </button>
-                    {editData && (
+                    {!workOrder.locked_by && (
+                        <button
+                            className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center'
+                            onClick={handleSave}
+                        >
+                            {editData ? "UPDATE" : "ADD"}
+                        </button>
+                    )}
+
+                    {editData && !workOrder.locked_by && (
                         <button
                             className={`text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center 
                             ${editData.time_log.length > 0 ? 'bg-gray-300 tooltip tooltip-top before:whitespace-pre-wrap before:content-[attr(data-tip)]' : 'bg-[#002e54]'}`}
@@ -671,7 +686,6 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         >
                             DELETE
                         </button>
-
 
                     )}
 

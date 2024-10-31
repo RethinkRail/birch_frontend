@@ -14,24 +14,29 @@ import { round2Dec } from "../utils/NumberHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 
-const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
-    console.log(railcarLog)
+const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder }) => {
+
     const [datePickers, setDatePickers] = useState({
         crewChecked: {},
         managerChecked: {},
         qaChecked: {}
     });
-    const [isDatePickerDisabled,setIsDatePickerDisabled]= useState(locked_for_time_clockinhg== 1?true:false)
+    const [isDatePickerDisabled,setIsDatePickerDisabled]= useState(false)
     const [totalHoursEstimated, setTotalHoursEstimated] = useState(0);
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
     const [difference, setDifference] = useState(0);
-
+    const [isInnoiced,setIsInVoiced]= useState(false)
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
     const [timeLogs, setTimeLogs] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(()=>{
+        setIsInVoiced(workOrder.locked_by != null)
+        setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
+    },[workOrder])
 
     const showModal = async (row) => {
         setSelectedRow(row);
@@ -236,7 +241,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg }) => {
                         onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
                         placeholderText="Select date"
                         dateFormat="MM-dd-yyyy"
-                        isClearable={!isDatePickerDisabled ||  datePickers.crewChecked[row.job_id]!==null}
+                        isClearable={!isInnoiced &&  datePickers.crewChecked[row.job_id]!==null}
                         disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
                     />
                 </span>

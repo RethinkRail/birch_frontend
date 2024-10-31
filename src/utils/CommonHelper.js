@@ -151,6 +151,10 @@ export function replaceItemInArray(arr, newItem) {
     return arr;
 }
 
+export function hasRole(user, roleName) {
+    return user.userroles.some(roleObj => roleObj.role.name === roleName);
+}
+
 export const disableButtonsDuringAsync = async (isDisabled, containerRef) => {
     // Find all buttons within the container
     const buttons = containerRef.current.querySelectorAll('button');

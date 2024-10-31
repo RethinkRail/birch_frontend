@@ -840,9 +840,12 @@ const OrderDetails = ({
     };
 
     const handleDialogClose = () => {
-        setDocToDownload("")
+        window.history.pushState(null, null, window.location.pathname); // Removes the hash by setting the URL to the current path
+        setDocToDownload("");
         setOpenDialog(false);
     };
+
+
 
     const handleButtonClick = (option) => {
         console.log(docToDownload)
@@ -962,37 +965,86 @@ const OrderDetails = ({
                                     <div className=" float-left">
                                         <ul className="flex space-x-6">
                                             <li>
-                                                <a href="#car_info" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('car_info');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50); // Adjust scroll by 50px after scrolling into view
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Car Information
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#job_list" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('job_list');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Job List
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#part_list" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('part_list');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Part List
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#railcar_log" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('railcar_log');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Railcar Time Log
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#order_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('order_information');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Order Information
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#billing_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('billing_information');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Billing Information
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="#storage_information" className="text-base font-bold hover:text-blue-500 cursor-pointer">
+                                                <a
+                                                    onClick={() => {
+                                                        const element = document.getElementById('storage_information');
+                                                        element?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.scrollBy(0, -50);
+                                                    }}
+                                                    className="text-base font-bold hover:text-blue-500 cursor-pointer"
+                                                >
                                                     Storage Information
                                                 </a>
                                             </li>
@@ -1091,7 +1143,7 @@ const OrderDetails = ({
                                     </li>
 
                                     <li
-                                        className={`flex h-fit text-[10px] p-0 ${workOrder?.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}
+                                        className={`flex h-fit text-[10px] p-0 ${workOrder.locked_by>0 || workOrder?.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}
                                         style={{ pointerEvents: workOrder?.joblist.length > 0 ? 'none' : 'auto' } } onClick={()=>deleteWorkOrder(workOrder.id,workOrder.work_order)}
                                     >
                                   <span className="p-1">
@@ -1207,7 +1259,7 @@ const OrderDetails = ({
 
                             {railCarLog.length>0 &&(
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5" id="railcar_log">
-                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking}/>
+                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking} workOrder={workOrder}/>
                                 </div>
                             )}
                             {/*Routing propagation*/}
@@ -1257,7 +1309,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handleArrivalDate(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1273,7 +1326,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handleInspectionDate(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1289,8 +1343,8 @@ const OrderDetails = ({
                                                   onChange={
                                                       newDate => handleCleanDate(newDate)
                                                   }
-                                                  disabled={workOrder.finalized > 0}
-                                                  isClearable
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1306,7 +1360,8 @@ const OrderDetails = ({
                                                           onChange={
                                                               newDate => handleValveTearDownDate(newDate)
                                                           }
-                                                          isClearable
+                                                          disabled={workOrder.locked_by!=null}
+                                                          isClearable ={workOrder.locked_by==null}
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1322,7 +1377,8 @@ const OrderDetails = ({
                                                   onChange={
                                                       newDate => handleRepairScheduleDate(newDate)
                                                   }
-                                                  isClearable
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1341,7 +1397,8 @@ const OrderDetails = ({
                                                           onChange={
                                                               newDate => handleValveAssemblyDate(newDate)
                                                           }
-                                                          isClearable
+                                                          disabled={workOrder.locked_by!=null}
+                                                          isClearable ={workOrder.locked_by==null}
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1357,7 +1414,8 @@ const OrderDetails = ({
                                                           onChange={
                                                               newDate => handlePaintDate(newDate)
                                                           }
-                                                          isClearable
+                                                          disabled={workOrder.locked_by!=null}
+                                                          isClearable ={workOrder.locked_by==null}
                                                           showYearDropdown
                                                           dateFormat="MM-dd-yyyy"
                                                       />
@@ -1373,7 +1431,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handleExteriorPaintDate(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1389,7 +1448,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handlePDDate(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1405,7 +1465,8 @@ const OrderDetails = ({
                                                   onChange={
                                                       newDate => handleFinalDate(newDate)
                                                   }
-                                                  isClearable
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1421,7 +1482,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handleQADate(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1437,7 +1499,8 @@ const OrderDetails = ({
                                                   onChange={
                                                       newDate => handlePOD(newDate)
                                                   }
-                                                  isClearable
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
                                               />
@@ -1453,7 +1516,8 @@ const OrderDetails = ({
                                                       onChange={
                                                           newDate => handleMTI(newDate)
                                                       }
-                                                      isClearable
+                                                      disabled={workOrder.locked_by!=null}
+                                                      isClearable ={workOrder.locked_by==null}
                                                       showYearDropdown
                                                       dateFormat="MM-dd-yyyy"
                                                   />
@@ -1462,7 +1526,7 @@ const OrderDetails = ({
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>MO/WK</p>
                                                 <span>
-                                                <input type="text"
+                                                <input type="text" disabled={workOrder.locked_by!=null}
                                                        className="flex items-center justify-between  border  rounded-[4px] w-[90px] whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="mo_wk_in_details" ref={mowkRef} onChange={handleMOWK}
                                                        value={mo_wk} onKeyUp={postMOWKUpdate}/>
@@ -1487,7 +1551,8 @@ const OrderDetails = ({
                                                           ? new Date(workOrder.repair_date)
                                                           : null
                                                   }
-                                                  isClearable
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
                                                   onChange={newDate => handleRepairDate(newDate)}
                                                   showYearDropdown
                                                   dateFormat="MM-dd-yyyy"
@@ -1502,7 +1567,7 @@ const OrderDetails = ({
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Special Process</p>
                                                 <span>
-                                                <input type="text"
+                                                <input type="text" disabled={workOrder.locked_by!=null}
                                                        className="flex items-center justify-between  border w-[124px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="sp_in_details" ref={spRef} onChange={handleSP}
                                                        value={sp} onKeyUp={postSPUpdate}/>
@@ -1512,7 +1577,7 @@ const OrderDetails = ({
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Tank QUAlification</p>
                                                 <span>
-                                                <input type="text"
+                                                <input type="text"  disabled={workOrder.locked_by!=null}
                                                        className="flex items-center justify-between  border w-[124px]  rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="tq_in_details" ref={tqRef} onChange={handleTQ}
                                                        value={tq} onKeyUp={postTQUpdate}/>
@@ -1523,7 +1588,7 @@ const OrderDetails = ({
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>RELINE</p>
                                                 <span>
-                                                <input type="text"
+                                                <input type="text" disabled={workOrder.locked_by!=null}
                                                        className="flex items-center justify-between  border w-[124px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="re_in_details" ref={reRef} onChange={handleRE}
                                                        value={re} onKeyUp={postREUpdate}/>
@@ -1534,7 +1599,7 @@ const OrderDetails = ({
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Ex Paint Element </p>
                                                 <span>
-                                                <input type="text"
+                                                <input type="text" disabled={workOrder.locked_by!=null}
                                                        className="flex items-center justify-between  border w-[124px] rounded-[4px]  whitespace-nowrap overflow-hidden h-[32px] p-1"
                                                        id="ep_in_details" ref={epRef} onChange={handleEP}
                                                        value={ep} onKeyUp={postEPUpdate}/>
@@ -1621,7 +1686,7 @@ const OrderDetails = ({
                                             <div className=''>
                                                 <div className='p-1'>
                                                     <p className='text-xs font-normal'>Reasons to come</p>
-                                                    <textarea rows="2"
+                                                    <textarea rows="2" disabled={workOrder.locked_by!=null}
                                                               className='text-[#979C9E] w-full p-2 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4'
                                                               id="reasonToComeInDetails"
                                                               value={reasonToCome}
@@ -1662,13 +1727,13 @@ const OrderDetails = ({
                                     <div className='p-2'>
                                         <p>Purchase Order</p>
                                         <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                               onChange={handleOwnerPurchaseOrderChange}
+                                               onChange={handleOwnerPurchaseOrderChange} disabled={workOrder.locked_by!=null}
 
                                                id="purchase_order_owner" value={ownerPurchaseOrder}/>
                                         <p className='mt-2'>INVOICE NUMBER</p>
                                         <div className="relative">
 
-                                            <input type="text" id="invoice_number_input" value={ownerInvoiceNumber}
+                                            <input type="text" id="invoice_number_input" value={ownerInvoiceNumber} disabled={workOrder.locked_by!=null}
                                                    className="input input-bordered h-8 mt-2 w-full"
                                                    onChange={handleInvoiceNumberChangeOwner}
                                                    aria-valuemax={ownerInvoiceNumber}
@@ -1728,6 +1793,7 @@ const OrderDetails = ({
                                             selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}
                                             onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
+                                            disabled={workOrder.locked_by != null}
                                             dateFormat="MM-dd-yyyy"
                                         />
 
@@ -1738,16 +1804,17 @@ const OrderDetails = ({
                                             selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
                                             onChange={newDate => handleDueDateChanged(true, newDate)}
                                             showYearDropdown
+                                            disabled={workOrder.locked_by != null}
                                             dateFormat="MM-dd-yyyy"
                                         />
-                                        <div className='mt-4'>
-                                            <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
-                                                  onClick={() => changeNetDays(true, 30)}>Net 30</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                  onClick={() => changeNetDays(true, 60)}>Net 60</span>
-                                            <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                  onClick={() => changeNetDays(true, 90)}>Net 90</span>
-                                        </div>
+                                        {!workOrder.locked_by && (
+                                            <div className='mt-4'>
+                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer' onClick={() => changeNetDays(true, 30)}>Net 30</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays(true, 60)}>Net 60</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays(true, 90)}>Net 90</span>
+                                            </div>
+                                        )}
+
 
                                     </div>
                                     <div className='p-2'>
@@ -1864,12 +1931,12 @@ const OrderDetails = ({
                                         <div className='p-2'>
                                             <p>Purchase Order</p>
                                             <input type="text" className="input input-bordered  h-8 mt-2 w-full"
-                                                   id="purchase_order_lesseer" value={lesseePurchaseOrder}
+                                                   id="purchase_order_lesseer" value={lesseePurchaseOrder} disabled={workOrder.locked_by!=null}
                                                    onChange={handleLesseePurchaseOrderChange}/>
                                             <p className='mt-2'>INVOICE NUMBER</p>
                                             <div className="relative">
 
-                                                <input type="text" id="invoice_number_input_lessee"
+                                                <input type="text" id="invoice_number_input_lessee" disabled={workOrder.locked_by!=null}
                                                        value={lesseeInvoiceNumber}
                                                        className="input input-bordered h-8 mt-2 w-full"
                                                        onChange={handleInvoiceNumberChangeLessee}
@@ -1929,6 +1996,7 @@ const OrderDetails = ({
                                                 selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(lesseeInvoiceDate) : null}
                                                 onChange={newDate => handleLesseeInvoiceDateChanged(newDate)}
                                                 showYearDropdown
+                                                disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
                                             />
 
@@ -1939,16 +2007,19 @@ const OrderDetails = ({
                                                 selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
                                                 onChange={newDate => handleDueDateChanged(false, newDate)}
                                                 showYearDropdown
+                                                disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
                                             />
-                                            <div className='mt-4'>
-                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
-                                                      onClick={() => changeNetDays(false, 30)}>Net 30</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                      onClick={() => changeNetDays(false, 60)}>Net 60</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                      onClick={() => changeNetDays(false, 90)}>Net 90</span>
-                                            </div>
+                                            {!workOrder.locked_by && (
+                                                <div className='mt-4'>
+                                                    <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                          onClick={() => changeNetDays(false, 30)}>Net 30</span>
+                                                    <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                          onClick={() => changeNetDays(false, 60)}>Net 60</span>
+                                                    <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                          onClick={() => changeNetDays(false, 90)}>Net 90</span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className='p-2'>
                                             <div>

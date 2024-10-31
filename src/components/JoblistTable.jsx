@@ -233,7 +233,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                             <input
                                 type="checkbox"
                                 checked={isBilled  != null}
-
+                                disabled={workOrder.locked_by != null}
                                 onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
                                 className="checkbox checkbox-primary"
                             />
@@ -271,7 +271,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         enableExpanding:false,
         enableFullScreenToggle:false,
         enableGrouping:false,
-        enableRowOrdering:true,
+        enableRowOrdering:workOrder.locked_by==null,
         enableTopToolbar:false,
         initialState: { columnVisibility: { id: false } },
         state: { columnVisibility },
@@ -341,11 +341,18 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>
                     )}
 
-                    <button className='btn btn-secondary btn-sm normal-case' onClick={() => {
-                        setEditData(null)
-                        setModalShowing(true)
-                        console.log("ParentModal is now showing")
-                    }}>Add Job</button>
+                    {workOrder.locked_by ==null && (
+                        <button
+                            className='btn btn-secondary btn-sm normal-case'
+                            onClick={() => {
+                                setEditData(null);
+                                setModalShowing(true);
+                                console.log("ParentModal is now showing");
+                            }}
+                        >
+                            Add Job
+                        </button>
+                    )}
                 </div>
 
             </div>

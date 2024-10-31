@@ -13,6 +13,7 @@ import OrderDetails from "./OrderDetails";
 import CustomDateInput from "./CustomDateInput";
 import ReorderableTable from "./ReorderableTable";
 import debounce from 'lodash/debounce';
+import {hasRole} from "../utils/CommonHelper";
 
 const qs = require('qs');
 
@@ -358,7 +359,10 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <input
-                        disabled={row.finalized > 1}
+                        disabled={
+                            hasRole(JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)),'ADMIN') ||
+                            hasRole(JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)),'BILLING')
+                        }
                         type="checkbox"
                         onChange={(event) => updateMarkAsFinalized(row.work_id, event.target.checked)}
                         checked={row.finalized !== null}

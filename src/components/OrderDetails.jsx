@@ -80,6 +80,7 @@ const OrderDetails = ({
     const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
 
+    //const [joblist,setJobList] =useState([])
 
 
     const containerRef = useRef();
@@ -1163,7 +1164,7 @@ const OrderDetails = ({
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="job_list">
                                     <JoblistTable
                                         handlePaste={pasteJobs}
-                                        jobs={workOrder.joblist}
+                                        jobs={jobs}
                                         workOrder={workOrder}
                                         commonData = {commonData}
                                         isBilledToLessee={isBilledToLessee}

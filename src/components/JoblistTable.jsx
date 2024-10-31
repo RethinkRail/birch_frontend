@@ -10,6 +10,7 @@ import axios, {all} from "axios";
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
+        console.log("jon list table")
         jobs.sort((a, b) => a.line_number - b.line_number)
         const jobListData = jobs.map((job) => ({
             id: job.id,
@@ -285,7 +286,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         line_one: draggingRow.original.ln,
                         line_two: hoveredRow.original.ln,
                         work_order: workOrder.work_order,
-                        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
+                        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
+                        work_id:workOrder.id
                     };
                     axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
                         .then(response => {

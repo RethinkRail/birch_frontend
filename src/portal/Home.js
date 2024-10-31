@@ -105,7 +105,8 @@ const Home = () => {
                 if(new_work_orders != null){
                     console.log("replace")
                     console.log(new_work_orders)
-                    setWorkOrders(new_work_orders)
+                    setWorkOrders([...new_work_orders]);
+
                 }else {
                     const  newLyAdded = workOrders.concat(response.data)
                     setWorkOrders(newLyAdded)
@@ -1145,8 +1146,9 @@ const Home = () => {
 
     const updateBillToLesseForAJob = async (secondary_bill_to_id,job_id,workId) =>{
         const requestData = {
-            secondary_bill_to_id: secondary_bill_to_id, // Replace with actual work order ID
-            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] , // Replace with actual user ID
+            secondary_bill_to_id: secondary_bill_to_id,
+            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] ,
+            work_id:workId ,
         };
 
         return axios.patch(process.env.REACT_APP_BIRCH_API_URL+`update_lessee_billing/${job_id}`, requestData)

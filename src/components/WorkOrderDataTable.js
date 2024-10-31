@@ -105,6 +105,17 @@ const WorkOrderDataTable = ({
     //orderDetailsModal.close()
 
     const orderDetailsModal = document.getElementById('orderDetailsModal');
+
+    const [canFinalized, setCanFinalized] = useState(false);
+
+    useEffect(() => {
+        const userToken = localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE);
+        if (userToken) {
+            const user = JSON.parse(userToken);
+            setCanFinalized(hasRole(user, 'ADMIN') || hasRole(user, 'BILLING'));
+        }
+    }, []);
+
     useEffect(() => {
         const handleChanges = () => {
            // console.log("Work orders changed from data table", workOrders)
@@ -359,14 +370,11 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <input
-                        disabled={
-                            hasRole(JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)),'ADMIN') ||
-                            hasRole(JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)),'BILLING')
-                        }
+                        disabled={!canFinalized}
                         type="checkbox"
                         onChange={(event) => updateMarkAsFinalized(row.work_id, event.target.checked)}
                         checked={row.finalized !== null}
-                        className="checkbox checkbox-primary"
+                        className="checkbox checkbox-primary checkbox-accent"
                     />
                 </div>
             )

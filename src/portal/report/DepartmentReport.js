@@ -523,7 +523,7 @@ const DepartmentReport = () => {
                         selected={
                             row.original.clean_date ? new Date(row.original.clean_date) : null
                         }
-                        onChange={(date) => handleDateChange(date, row.original.id, column)}
+                        onChange={(date) => handleDateChange(date, row, column)}
                         className="border p-1 rounded w-full"
                         popperClassName="z-50" // Ensure it has a higher z-index
                         portalId="root-portal"

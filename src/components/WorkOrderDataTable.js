@@ -323,7 +323,7 @@ const WorkOrderDataTable = ({
                 <span>
                     <DatePicker
                         customInput={<CustomDateInput value={row.material_eta}/>}
-                        selected={row.material_eta ? new Date(row.material_eta) : ''}
+                        selected={row.material_eta ? new Date(row.material_eta) : null}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
                         isClearable
@@ -374,7 +374,7 @@ const WorkOrderDataTable = ({
                         type="checkbox"
                         onChange={(event) => updateMarkAsFinalized(row.work_id, event.target.checked)}
                         checked={row.finalized !== null}
-                        className="checkbox checkbox-primary checkbox-accent"
+                        className="checkbox checkbox-primary "
                     />
                 </div>
             )

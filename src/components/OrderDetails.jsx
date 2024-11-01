@@ -17,6 +17,7 @@ import StorageComponent from "./StorageComponent";
 import RailCareTimeLog from "./RailCareTimeLog";
 import {printAAR} from "../utils/aarHelper";
 import TaskTable from "./TaskTable";
+import {hasRole} from "../utils/CommonHelper";
 
 const OrderDetails = ({
                           commonData,
@@ -211,13 +212,13 @@ const OrderDetails = ({
             return;
         }
 
-        const element = document.getElementById('car_info');
-        element?.scrollIntoView({ behavior: 'smooth' });
-        window.scrollBy(0, -50);
+        // const element = document.getElementById('car_info');
+        // element?.scrollIntoView({ behavior: 'smooth' });
+        // window.scrollBy(0, -50);
         console.log("use effect in orderdetails");
         setReasonToCome(workOrder.reason_to_come ?? "");
-        console.log(workOrder);
-        console.log(workOrder.joblist);
+        // console.log(workOrder);
+        // console.log(workOrder.joblist);
         setJobs(workOrder.joblist ?? []);
         setIsStatusDropDownModalOpenInDetails(false);
 
@@ -1260,17 +1261,20 @@ const OrderDetails = ({
 
                             {/*Railcar log*/}
 
-                            {railCarLog.length>0 &&(
+                            {railCarLog.length>0 && (hasRole('ADMIN') || hasRole('TECH') || hasRole('MANAGEMENT')   || hasRole('TIME APPROVAL')) &&(
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5" id="railcar_log">
                                     <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking} workOrder={workOrder}/>
                                 </div>
                             )}
                             {/*Routing propagation*/}
-                            {/*<div className="w-full bg-white p-4  mt-[24px] rounded-none mb-10">*/}
-                            {/*    <TaskTable*/}
-                            {/*        work_id={workOrder.id}/>*/}
-                            {/*</div>*/}
-
+                            {hasRole('TECH') && (
+                                <div className="w-full bg-white p-4 mt-[24px] rounded-none mb-10">
+                                    <TaskTable
+                                        work_id={workOrder.id}
+                                        workOrder={workOrder}
+                                    />
+                                </div>
+                            )}
 
                             {/*Railcar log*/}
 

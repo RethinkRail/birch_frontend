@@ -4,6 +4,7 @@ import 'ultimate-react-multilevel-menu/dist/esm/index.css'
 
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
 import {auth} from "../../firebase";
+import {hasRole} from "../../utils/CommonHelper";
 
 const Navbar = () => {
     // const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
@@ -27,13 +28,14 @@ const Navbar = () => {
             children: [
                 { title: 'Birch User Management', path: '/user_management' },
                 { title: 'Team Member Management', path: '/team_member_management' },
-                { title: 'Routing Matrix', path: '/routing_matrix' }
+                ...(hasRole('ADMIN') ? [{ title: 'Routing Matrix', path: '/routing_matrix' }] : []), // Only for ADMIN
             ]
         },
         {
             title: 'Time Tracking',
             children: [
                 { title: 'Time Approval', path: '/time_approval' },
+                ...(hasRole('TECH') ? [{ title: 'WORK STATION', path: '/work_station' }] : []),
             ]
         },
         {
@@ -81,7 +83,40 @@ const Navbar = () => {
                 }
             ]
         }
-    ];
+    ].filter(item => {
+        if (item.title === 'Management') {
+            // Hide Management if user does not have ADMIN or HR role
+            return hasRole('ADMIN') || hasRole('HR');
+        }
+        if (item.title === 'Time Tracking') {
+            // Hide Time Tracking if user does not have ADMIN, MANAGEMENT, or TIME APPROVAL role
+            return hasRole('ADMIN') || hasRole('MANAGEMENT') || hasRole('TIME APPROVAL');
+        }
+        return true; // Include all other items
+    });
+
+// Conditionally append Management for ADMIN or HR roles
+    if (hasRole('ADMIN') || hasRole('HR')) {
+        // Remove the Management item if it exists and re-add it
+        const managementItem = navItems.find(item => item.title === 'Management');
+        if (managementItem) {
+            managementItem.children = [
+                { title: 'Birch User Management', path: '/user_management' },
+                { title: 'Team Member Management', path: '/team_member_management' },
+                ...(hasRole('ADMIN') ? [{ title: 'Routing Matrix', path: '/routing_matrix' }] : []), // Only for ADMIN
+            ];
+        } else {
+            navItems.push({
+                title: 'Management',
+                children: [
+                    { title: 'Birch User Management', path: '/user_management' },
+                    { title: 'Team Member Management', path: '/team_member_management' },
+                    ...(hasRole('ADMIN') ? [{ title: 'Routing Matrix', path: '/routing_matrix' }] : []), // Only for ADMIN
+                ]
+            });
+        }
+    }
+
 
     const isItemSelected = (item, selectedPath) => {
         if (item.path === selectedPath) return true;

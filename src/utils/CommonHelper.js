@@ -151,8 +151,8 @@ export function replaceItemInArray(arr, newItem) {
     return arr;
 }
 
-export function hasRole(user, roleName) {
-    return user.userroles.some(roleObj => roleObj.role.name === roleName);
+export function hasRole(roleName) {
+    return JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)).userroles.some(roleObj => roleObj.role.name === roleName);
 }
 
 export const disableButtonsDuringAsync = async (isDisabled, containerRef) => {

@@ -111,8 +111,8 @@ const WorkOrderDataTable = ({
     useEffect(() => {
         const userToken = localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE);
         if (userToken) {
-            const user = JSON.parse(userToken);
-            setCanFinalized(hasRole(user, 'ADMIN') || hasRole(user, 'BILLING'));
+
+            setCanFinalized(hasRole( 'ADMIN') || hasRole('BILLING'));
         }
     }, []);
 

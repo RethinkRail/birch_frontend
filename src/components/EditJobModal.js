@@ -273,6 +273,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         if(!editData) {
             console.log(inputValues, "This is the input values")
             let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number( markupPercent), availability: 1}))
+            console.log(populatedJobPart)
             populatedJobPart = processPartsArray(populatedJobPart)
             console.log(populatedJobPart)
             const dataToBackend = {
@@ -321,14 +322,16 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             const jobPartsToDelete = previousPart.filter(part => deleted.includes(part.part_id))
             const jobPartsToUpdate = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id);
-
+                console.log(originalPart)
                 if (!originalPart) return false; // New part, not an update
 
                 // Check if any field has changed
                 return (
                     currentPart.quantity !== originalPart.quantity ||
                     currentPart.total_cost !== originalPart.total_cost ||
-                    currentPart.purchase_cost !== originalPart.purchase_cost || currentPart.additional_info !== originalPart.additional_info
+                    currentPart.purchase_cost !== originalPart.purchase_cost ||
+                    currentPart.additional_info !== originalPart.additional_info ||
+                    currentPart.markup_percent !== originalPart.markup_percent
                 );
             });
 

@@ -706,7 +706,10 @@ const OrderDetails = ({
     }
 
     const handleOwnerInvoiceDateChanged = (value) => {
-        setOwnerInvoiceDate(toSqlDatetime(value))
+        console.log(value)
+        console.log(value.toLocaleString())
+        console.log(toSqlDatetime(value))
+        setOwnerInvoiceDate(value)
     }
 
     function toSqlDatetime(date) {
@@ -718,7 +721,7 @@ const OrderDetails = ({
 
     const handleLesseeInvoiceDateChanged = (value) => {
         console.log("lessee invoice date changed")
-        setLesseeInvoiceDate(toSqlDatetime(value))
+        setLesseeInvoiceDate(value)
     }
 
 
@@ -746,6 +749,7 @@ const OrderDetails = ({
     }
 
     const updateBillingInformation = async (isForOwner) => {
+        console.log(ownerInvoiceDate)
         if (isForOwner) {
             const result =  await updateBilling(true, workOrder.id, ownerPurchaseOrder, ownerInvoiceNumber, ownerInvoiceDate, ownerInvoiceNetDays)
             if(result){
@@ -1263,7 +1267,7 @@ const OrderDetails = ({
 
                             {railCarLog.length>0 && (hasRole('ADMIN') || hasRole('TECH') || hasRole('MANAGEMENT')   || hasRole('TIME APPROVAL')) &&(
                                 <div className="w-full bg-white p-4  mt-[24px] rounded-none mb-5" id="railcar_log">
-                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking} workOrder={workOrder}/>
+                                    <RailCareTimeLog railcarLog={railCarLog} locked_for_time_clockinhg ={workOrder.locked_for_time_clocking} workOrder={workOrder} laboorHRSEST={totalLaborHours}/>
                                 </div>
                             )}
                             {/*Routing propagation*/}

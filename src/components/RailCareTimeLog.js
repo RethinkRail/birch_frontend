@@ -14,7 +14,7 @@ import { round2Dec } from "../utils/NumberHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 
-const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder }) => {
+const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboorHRSEST }) => {
 
     const [datePickers, setDatePickers] = useState({
         crewChecked: {},
@@ -333,7 +333,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder }) => 
             <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64 mb-[24px]" >
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS ESTIMATED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursEstimated)} Hrs</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(laboorHRSEST)} Hrs</p>
                 </div>
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS APPLIED</h2>

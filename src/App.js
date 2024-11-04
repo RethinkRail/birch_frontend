@@ -7,6 +7,7 @@ import axios from "axios";
 import qs from "qs";
 import Navbar from "./portal/navbar/Navbar";
 import {getToken} from "firebase/messaging";
+import firebase from "firebase/compat";
 
 
 function App() {
@@ -32,43 +33,48 @@ function App() {
             if (user == null) {
                 setIsLoggedIn(false)
             } else {
-                const token = await requestPermissionAndGetToken();
-                console.log(token)
-                await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
-                let data = qs.stringify({
-                    'name': user.displayName,
-                    'email': user.email,
-                    'access_token': user.accessToken,
-                    'cloud_message_token': token
-                });
+                if (firebase.messaging.isSupported()){
+                    const token = await requestPermissionAndGetToken();
+                    console.log(token)
+                    await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
+                    let data = qs.stringify({
+                        'name': user.displayName,
+                        'email': user.email,
+                        'access_token': user.accessToken,
+                        'cloud_message_token': token
+                    });
 
-                let config = {
-                    method: 'post',
-                    url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Accept': 'application/json'
-                    },
-                    data: data
-                };
+                    let config = {
+                        method: 'post',
+                        url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json'
+                        },
+                        data: data
+                    };
 
-                axios.request(config)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            if (response.data.is_active == 1) {
-                                setIsLoggedIn(true)
+                    axios.request(config)
+                        .then((response) => {
+                            if (response.status === 200) {
+                                if (response.data.is_active == 1) {
+                                    setIsLoggedIn(true)
+                                } else {
+                                    setIsLoggedIn(false)
+                                }
                             } else {
                                 setIsLoggedIn(false)
                             }
-                        } else {
-                            setIsLoggedIn(false)
-                        }
 
-                    })
-                    .catch((error) => {
-                        setIsLoggedIn(false)
-                        console.log(error);
-                    });
+                        })
+                        .catch((error) => {
+                            setIsLoggedIn(false)
+                            console.log(error);
+                        });
+                }else {
+                    setIsLoggedIn(true)
+                }
+
             }
 
         }, (error) => {

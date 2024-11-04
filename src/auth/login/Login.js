@@ -5,6 +5,7 @@ import {toast, ToastContainer} from "react-toastify";
 import {GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
 import {auth, messaging} from "../../firebase";
 import {getToken} from "firebase/messaging";
+import firebase from "firebase/compat";
 
 
 const qs = require('qs');
@@ -37,61 +38,73 @@ const Login = () => {
                 });
                 return
             }
+            if (firebase.messaging.isSupported()){
+                token    = await requestPermissionAndGetToken();
+                console.log(token)
+                await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
+                let data = qs.stringify({
+                    'name': user.user.displayName,
+                    'email': user.user.email,
+                    'access_token': user.user.accessToken,
+                    'cloud_message_token': token
+                });
 
-            token    = await requestPermissionAndGetToken();
-            console.log(token)
-            await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
-            let data = qs.stringify({
-                'name': user.user.displayName,
-                'email': user.user.email,
-                'access_token': user.user.accessToken,
-                'cloud_message_token': token
-            });
+                let config = {
+                    method: 'post',
+                    url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    data: data
+                };
 
-            let config = {
-                method: 'post',
-                url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json'
-                },
-                data: data
-            };
-
-            axios.request(config)
-                .then(async (response) => {
-                    if (response.status === 200) {
+                axios.request(config)
+                    .then(async (response) => {
+                        if (response.status === 200) {
 
 
-                        if (response.data.is_active == 0) {
+                            if (response.data.is_active == 0) {
 
-                            toast.update(toastId.current, {
-                                render: "Your account is waiting for activation contact HR",
-                                autoClose: 5000,
-                                type: "info",
-                                hideProgressBar: true,
-                                isLoading: false,
-                            });
-                        } else if (response.data.is_active == 1) {
-                            toast.update(toastId.current, {
-                                render: "Login successful",
-                                autoClose: 1000,
-                                type: "success",
-                                hideProgressBar: true,
-                                isLoading: false,
-                            });
-                            localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
-                            navigate("/")
+                                toast.update(toastId.current, {
+                                    render: "Your account is waiting for activation contact HR",
+                                    autoClose: 5000,
+                                    type: "info",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                            } else if (response.data.is_active == 1) {
+                                toast.update(toastId.current, {
+                                    render: "Login successful",
+                                    autoClose: 1000,
+                                    type: "success",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                                localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                                navigate("/")
+                            } else {
+                                toast.update(toastId.current, {
+                                    render: "Your account is deactivated",
+                                    autoClose: 5000,
+                                    type: "error",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                            }
                         } else {
                             toast.update(toastId.current, {
-                                render: "Your account is deactivated",
-                                autoClose: 5000,
+                                render: "Something went wrong",
+                                autoClose: 3000,
                                 type: "error",
                                 hideProgressBar: true,
-                                isLoading: false,
+                                isLoading: false
                             });
                         }
-                    } else {
+
+                    })
+                    .catch((error) => {
+                        console.log(error);
                         toast.update(toastId.current, {
                             render: "Something went wrong",
                             autoClose: 3000,
@@ -99,19 +112,81 @@ const Login = () => {
                             hideProgressBar: true,
                             isLoading: false
                         });
-                    }
-
-                })
-                .catch((error) => {
-                    console.log(error);
-                    toast.update(toastId.current, {
-                        render: "Something went wrong",
-                        autoClose: 3000,
-                        type: "error",
-                        hideProgressBar: true,
-                        isLoading: false
                     });
+            }else {
+                let data = qs.stringify({
+                    'name': user.user.displayName,
+                    'email': user.user.email,
+                    'access_token': user.user.accessToken,
+                    'cloud_message_token': ""
                 });
+
+                let config = {
+                    method: 'post',
+                    url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    data: data
+                };
+
+                axios.request(config)
+                    .then(async (response) => {
+                        if (response.status === 200) {
+
+
+                            if (response.data.is_active == 0) {
+
+                                toast.update(toastId.current, {
+                                    render: "Your account is waiting for activation contact HR",
+                                    autoClose: 5000,
+                                    type: "info",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                            } else if (response.data.is_active == 1) {
+                                toast.update(toastId.current, {
+                                    render: "Login successful",
+                                    autoClose: 1000,
+                                    type: "success",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                                localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                                navigate("/")
+                            } else {
+                                toast.update(toastId.current, {
+                                    render: "Your account is deactivated",
+                                    autoClose: 5000,
+                                    type: "error",
+                                    hideProgressBar: true,
+                                    isLoading: false,
+                                });
+                            }
+                        } else {
+                            toast.update(toastId.current, {
+                                render: "Something went wrong",
+                                autoClose: 3000,
+                                type: "error",
+                                hideProgressBar: true,
+                                isLoading: false
+                            });
+                        }
+
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        toast.update(toastId.current, {
+                            render: "Something went wrong",
+                            autoClose: 3000,
+                            type: "error",
+                            hideProgressBar: true,
+                            isLoading: false
+                        });
+                    });
+            }
+
 
         }).catch((error) => {
             console.log(error)
@@ -139,7 +214,7 @@ const Login = () => {
                     }
                 })
                 .catch((err) => {
-                    console.error('An error occurred while retrieving token. ', err);
+                    console.error('An error occurred while retrieving token . ', err);
                     return null;
                 });
         } catch (error) {

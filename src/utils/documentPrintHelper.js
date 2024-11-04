@@ -982,13 +982,15 @@ export function printInvoice(workorder, forWhom) {
                 total_hour+= job.labor_time
             }
         }else {
+            console.log(job)
             labor_cost+= job.labor_cost;
-            material_cost+= job.material_cost;
+            material_cost+=round2Dec(parseFloat(job.material_cost || 0));
             net_cost+= (labor_cost+material_cost)
             total_hour+= job.labor_time
         }
 
     })
+
     var costs = {
         "labor_cost": labor_cost,
         "material_cost": material_cost,

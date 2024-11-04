@@ -5,7 +5,6 @@ import {toast, ToastContainer} from "react-toastify";
 import {GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
 import {auth, messaging} from "../../firebase";
 import {getToken} from "firebase/messaging";
-import firebase from "firebase/compat";
 
 
 const qs = require('qs');
@@ -38,9 +37,9 @@ const Login = () => {
                 });
                 return
             }
-            if (firebase.messaging.isSupported()){
-                token    = await requestPermissionAndGetToken();
-                console.log(token)
+
+            token    = await requestPermissionAndGetToken();
+            if(token){
                 await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
                 let data = qs.stringify({
                     'name': user.user.displayName,
@@ -214,7 +213,7 @@ const Login = () => {
                     }
                 })
                 .catch((err) => {
-                    console.error('An error occurred while retrieving token . ', err);
+                    console.error('An error occurred while retrieving token. ', err);
                     return null;
                 });
         } catch (error) {

@@ -7,7 +7,6 @@ import axios from "axios";
 import qs from "qs";
 import Navbar from "./portal/navbar/Navbar";
 import {getToken} from "firebase/messaging";
-import firebase from "firebase/compat";
 
 
 function App() {
@@ -33,9 +32,8 @@ function App() {
             if (user == null) {
                 setIsLoggedIn(false)
             } else {
-                if (firebase.messaging.isSupported()){
-                    const token = await requestPermissionAndGetToken();
-                    console.log(token)
+                const token = await requestPermissionAndGetToken();
+                if(token){
                     await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
                     let data = qs.stringify({
                         'name': user.displayName,
@@ -74,7 +72,6 @@ function App() {
                 }else {
                     setIsLoggedIn(true)
                 }
-
             }
 
         }, (error) => {

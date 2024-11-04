@@ -75,8 +75,13 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
     const handleCopyJob = (jobToCopyId) => {
         localStorage.setItem("jobsToBePasted", null)
-        setCopiedJob(jobs.find(job => job.id === jobToCopyId) || null)
-        console.log(copiedJob)
+        console.log(jobToCopyId)
+        console.log(jobs)
+        setCopiedJob(jobs.find(job => job.id == jobToCopyId) || null)
+        if(!copiedJob){
+            return
+        }
+
         let jobToBePasted = []
         const copiedJobFormatted = {
             work_id: workOrder.id,

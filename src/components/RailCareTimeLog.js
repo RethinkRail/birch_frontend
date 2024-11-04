@@ -345,7 +345,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                 </div>
                 <div className="]">
                     <h2 className='text-[12px] font-normal '>Differnece</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(difference)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(round2Dec(laboorHRSEST)-(totalHoursApplied+totalRework))}</p>
                 </div>
             </div>
 

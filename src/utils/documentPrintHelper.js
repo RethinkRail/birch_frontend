@@ -982,15 +982,13 @@ export function printInvoice(workorder, forWhom) {
                 total_hour+= job.labor_time
             }
         }else {
-            console.log(job)
             labor_cost+= job.labor_cost;
-            material_cost+=round2Dec(parseFloat(job.material_cost || 0));
+            material_cost+= job.material_cost;
             net_cost+= (labor_cost+material_cost)
             total_hour+= job.labor_time
         }
 
     })
-
     var costs = {
         "labor_cost": labor_cost,
         "material_cost": material_cost,
@@ -1195,8 +1193,14 @@ export function printInvoice(workorder, forWhom) {
     all_parts_for_sort.forEach(function (item) {
         console.log(item)
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-        var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-        total_material_cost += Number(round2Dec(single_mat_cost))
+        //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
+        const purchaseCost = item.purchase_cost * item.quantity;
+        const markup = purchaseCost * item.markup_percent;
+        const single_mat_cost = purchaseCost + markup;
+
+        console.log(single_mat_cost)
+
+        total_material_cost += Number(single_mat_cost)
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
             item.parts.title + '</td><td style="text-align: right;">' +
             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +

@@ -17,48 +17,91 @@ const ProtectedRoute = (props) => {
                 return navigate('/auth/login');
             } else {
                 token    = await requestPermissionAndGetToken();
-                console.log(token)
-                await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
-                let data = qs.stringify({
-                    'name': user.displayName,
-                    'email': user.email,
-                    'access_token': user.accessToken,
-                    'cloud_message_token': token
-                });
+                if(token){
+                    await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}subscribe_all`, {token});
+                    let data = qs.stringify({
+                        'name': user.displayName,
+                        'email': user.email,
+                        'access_token': user.accessToken,
+                        'cloud_message_token': token
+                    });
 
-                let config = {
-                    method: 'post',
-                    url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Accept': 'application/json'
-                    },
-                    data: data
-                };
+                    let config = {
+                        method: 'post',
+                        url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json'
+                        },
+                        data: data
+                    };
 
-                axios.request(config)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            if (response.data.is_active == 1) {
-                                setIsLoggedIn(true)
-                                localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                    axios.request(config)
+                        .then((response) => {
+                            if (response.status === 200) {
+                                if (response.data.is_active == 1) {
+                                    setIsLoggedIn(true)
+                                    localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                                } else {
+
+                                    setIsLoggedIn(false)
+                                    return navigate('/auth/login');
+                                }
                             } else {
 
                                 setIsLoggedIn(false)
                                 return navigate('/auth/login');
                             }
-                        } else {
 
+                        })
+                        .catch((error) => {
                             setIsLoggedIn(false)
                             return navigate('/auth/login');
-                        }
-
-                    })
-                    .catch((error) => {
-                        setIsLoggedIn(false)
-                        return navigate('/auth/login');
-                        console.log(error);
+                            console.log(error);
+                        });
+                }else {
+                    let data = qs.stringify({
+                        'name': user.displayName,
+                        'email': user.email,
+                        'access_token': user.accessToken,
+                        'cloud_message_token': ""
                     });
+
+                    let config = {
+                        method: 'post',
+                        url: process.env.REACT_APP_BIRCH_API_URL + 'google_login',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json'
+                        },
+                        data: data
+                    };
+
+                    axios.request(config)
+                        .then((response) => {
+                            if (response.status === 200) {
+                                if (response.data.is_active == 1) {
+                                    setIsLoggedIn(true)
+                                    localStorage.setItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE, JSON.stringify(response.data))
+                                } else {
+
+                                    setIsLoggedIn(false)
+                                    return navigate('/auth/login');
+                                }
+                            } else {
+
+                                setIsLoggedIn(false)
+                                return navigate('/auth/login');
+                            }
+
+                        })
+                        .catch((error) => {
+                            setIsLoggedIn(false)
+                            return navigate('/auth/login');
+                            console.log(error);
+                        });
+                }
+
             }
 
 

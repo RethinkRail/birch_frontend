@@ -19,7 +19,7 @@ import {round2Dec} from "../../utils/NumberHelper";
 import { mkConfig, generateCsv, download } from 'export-to-csv'; //or use your library of choice here
 import {FaDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
-
+import * as XLSX from 'xlsx';
 
 const  SummaryReportMaterial = () => {
     const toastId = useRef(null)
@@ -202,7 +202,7 @@ const  SummaryReportMaterial = () => {
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                // Use the header as the key for the CSV, but still fetch the data using accessorKey
+                // Use the header as the key for the Excel, but still fetch the data using accessorKey
                 filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
             });
             return filteredRow;
@@ -210,9 +210,16 @@ const  SummaryReportMaterial = () => {
 
         console.log(rowData);
 
-        // Generate the CSV with the filtered row data
-        const csv = generateCsv(csvConfig)(rowData);
-        download(csvConfig)(csv);
+        // Create a new workbook and add the data
+        const worksheet = XLSX.utils.json_to_sheet(rowData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Summary Report');
+
+        // Define filename with today's date
+        const filename = `BIRCH Summary Report ${new Date().toLocaleDateString()}.xlsx`;
+
+        // Trigger a download of the Excel file
+        XLSX.writeFile(workbook, filename);
     };
 
     const handleExportData = () => {

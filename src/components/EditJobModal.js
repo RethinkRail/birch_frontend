@@ -13,11 +13,12 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
     const [previousPart, setPreviousPart] = useState(null)
     const singleMarkUp = editData && editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
-    const [markupPercent, setMarkupPercent] = useState(singleMarkUp? singleMarkUp:workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || 0)
+    console.log(singleMarkUp)
+    const [markupPercent, setMarkupPercent] = useState(singleMarkUp!=null? singleMarkUp:workOrder.railcar.owner_railcar_owner_idToowner.markup_percent || 0)
     // const [hourlyRate, setHourlyRate] = useState(editData?editData.labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate)
     const [totalCost, setTotalCost] = useState('')
 
-
+    console.log(markupPercent)
     //logic for new part
     const [jobParts, setJobParts] = useState([])
 
@@ -314,6 +315,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
             }
         } else {
+            console.log(editData)
             console.log("here")
             let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number(markupPercent), availability: 1}))
             console.log(populatedJobPart)
@@ -323,15 +325,19 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             const jobPartsToUpdate = populatedJobPart.filter((currentPart) => {
                 const originalPart = previousPart.find(part => part.part_id === currentPart.part_id);
                 console.log(originalPart)
-                if (!originalPart) return false; // New part, not an update
-
+                if (!originalPart){
+                    console.log("No original part")
+                    return false;
+                } // New part, not an update
+                console.log(currentPart)
+                console.log(originalPart)
                 // Check if any field has changed
                 return (
                     currentPart.quantity !== originalPart.quantity ||
                     currentPart.total_cost !== originalPart.total_cost ||
                     currentPart.purchase_cost !== originalPart.purchase_cost ||
                     currentPart.additional_info !== originalPart.additional_info ||
-                    currentPart.markup_percent !== originalPart.markup_percent
+                    currentPart.markup_percent !== editData.jobparts[0].markup_percent
                 );
             });
 
@@ -428,7 +434,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-[12px] capitalize">QUANTITY(QTY)</label>
-                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
+                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"] ? inputValues["quantity"] : 1} onChange={(e) => handleChange("quantity", e.target.value)} />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Condition Code (CC)</label>

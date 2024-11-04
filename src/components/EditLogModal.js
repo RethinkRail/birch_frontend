@@ -162,7 +162,7 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
                         <label className="block mb-1">End Time</label>
                         <Datetime
                             className="w-full border-2 rounded p-1"
-                            value={new Date(formData.end_time)}
+                            value={formData.end_time != null?new Date(formData.end_time):null}
                             onChange={(date) => {
                                 const parsedDate = new Date(date);
                                 // Check if the parsed date is valid
@@ -179,7 +179,7 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
                         />
                     </div>
 
-                    <p>Total time: {round2Dec(formData.logged_time_in_seconds/3600)} Hrs</p>
+                    <p>Total time: {formData.logged_time_in_seconds>0?round2Dec(formData.logged_time_in_seconds/3600):'0'} Hrs</p>
 
                     <div className="flex justify-end mt-4">
                         <button

@@ -81,7 +81,7 @@ const  SummaryReportMaterial = () => {
     };
 
     const transformData = (data) => {
-
+        console.log(data)
 
         return data.map(item => {
             const {
@@ -101,7 +101,11 @@ const  SummaryReportMaterial = () => {
             const dis = isValidArrivalDate ? Math.floor((todayDate - arrivalDateDate) / (1000 * 60 * 60 * 24)) : 0;
 
 
-            const mhr_applied = joblist.reduce((sum, job) => sum + (job.logged_time_inseconds || 0), 0);
+            const mhr_applied = joblist.reduce((sum, job) => {
+                const jobTime = job.time_log.reduce((logSum, log) => logSum + (log.logged_time_in_seconds || 0), 0);
+                return sum + jobTime;
+            }, 0) / 3600;
+
             const mhr_estimated = joblist.reduce((sum, job) => sum + (job.labor_time * job.quantity || 0), 0);
             const material_cost = joblist.reduce((sum, job) => sum + (job.material_cost || 0), 0);
             const labor_cost = joblist.reduce((sum, job) => sum + (job.labor_rate * job.labor_time * job.quantity || 0), 0);

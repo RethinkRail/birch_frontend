@@ -12,7 +12,7 @@ import {round2Dec} from "../utils/NumberHelper";
 
 const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditClick }) => {
     if (!log) return null;
-
+    console.log(log)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded shadow-lg w-full max-h-[80vh] overflow-y-auto m-10">
@@ -55,10 +55,10 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                                     {new Date(entry.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                 </td>
                                 <td className="border px-4 py-2">
-                                    {new Date(entry.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                    { entry.end_time? new Date(entry.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }):'Still working'}
                                 </td>
                                 <td className="border px-4 py-2">
-                                    {round2Dec(entry.logged_time_in_seconds / 3600)}
+                                    {entry.logged_time_in_seconds >0? round2Dec(entry.logged_time_in_seconds / 3600):"--"}
                                 </td>
                                 <td className="border px-4 py-2">{entry.railcar_id}</td>
                                 <td className="border px-4 py-2">{entry.job_description}</td>

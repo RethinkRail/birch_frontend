@@ -59,7 +59,7 @@ const OrderDetails = ({
                           updateBillToLesseForAJob,
                           orderDetailsModalRef
                       }) => {
-    //console.log(workOrder)
+    // console.log(workOrder)
     // console.log(workOrder.reason_to_come)
     // console.log(commonData)
 
@@ -277,7 +277,10 @@ const OrderDetails = ({
         setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
         setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
         setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
-        setIsBilledToLessee(secondaryOwnerInfo ? true : false);
+        setIsBilledToLessee(
+            secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
+        );
+
 
         calculateJobCosts(workOrder.joblist ?? []);
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);

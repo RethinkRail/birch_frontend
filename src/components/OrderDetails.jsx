@@ -189,7 +189,7 @@ const OrderDetails = ({
             totalLaborCost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = job.labor_time * job.quantity;
+            const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
             totalLaborHours += Number(round2Dec(laborHours));
 
             // Calculate material cost

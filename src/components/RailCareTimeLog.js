@@ -126,6 +126,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
             }));
 
             try {
+                console.log(date)
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
                     job_id: jobId,
                     user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
@@ -158,6 +159,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
             }));
 
             try {
+                console.log(date)
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
                     job_id: jobId,
                     user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],

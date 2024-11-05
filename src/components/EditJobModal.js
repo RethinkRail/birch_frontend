@@ -117,7 +117,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
     const [inputValues, setInputValues] = useState({
         location_code: "",
-        quantity: "",
+        quantity: 1,
         condition_code: "",
         job_code: "",
         job_code_removed: "",
@@ -161,7 +161,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     useEffect(() => {
         const handleInputValuesChange = () => {
             console.log(inputValues["labor_rate"], inputValues["labor_time"], inputValues["quantity"])
-            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time"]) * Number(inputValues["quantity"]))
+            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time"]) *  Number(inputValues["quantity"]))
         }
         handleInputValuesChange()
     }, [inputValues])
@@ -434,7 +434,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-[12px] capitalize">QUANTITY(QTY)</label>
-                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"] ? inputValues["quantity"] : 1} onChange={(e) => handleChange("quantity", e.target.value)} />
+                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Condition Code (CC)</label>

@@ -73,6 +73,36 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         setTableData(jobListData);
     }, [jobs]);
 
+    const [jobsToBePasted, setJobsToBePasted] = useState(() => {
+        // Initialize state from localStorage
+        return JSON.parse(localStorage.getItem("jobsToBePasted"));
+    });
+
+
+    useEffect(() => {
+        // Update state if the value in localStorage changes
+        const handleStorageChange = () => {
+            setJobsToBePasted(JSON.parse(localStorage.getItem("jobsToBePasted")));
+        };
+
+        // Listen to storage events (this only works across different tabs)
+        window.addEventListener("storage", handleStorageChange);
+
+        // Cleanup listener on component unmount
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, []);
+
+    // Optional: Watch for changes to jobsToBePasted and sync with localStorage if needed
+    useEffect(() => {
+        if (jobsToBePasted !== null) {
+            localStorage.setItem("jobsToBePasted", JSON.stringify(jobsToBePasted));
+        }
+    }, [jobsToBePasted]);
+
+
+
     const handleCopyJob = (jobToCopyId) => {
         localStorage.setItem("jobsToBePasted", null)
         console.log(jobToCopyId)
@@ -108,6 +138,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         console.log(copiedJobFormatted)
         jobToBePasted.push(copiedJobFormatted)
         setCopiedJob(copiedJobFormatted)
+        setJobsToBePasted(jobToBePasted)
         localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
     }
 
@@ -144,6 +175,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
         console.log(jobToBePasted)
         setCopiedJob(jobToBePasted)
+        setJobsToBePasted(jobToBePasted)
         localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
     }
 
@@ -154,6 +186,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         const response = await  handlePaste(modifiledJobs)
         if(response.status==200){
             localStorage.setItem("jobsToBePasted", null)
+            setJobsToBePasted(null)
         }
     }
 
@@ -343,10 +376,15 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     )}
 
 
-                    {JSON.parse(localStorage.getItem("jobsToBePasted")) != null && (
-                        <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>
-                    )}
+                    {/*{JSON.parse(localStorage.getItem("jobsToBePasted")) != null && (*/}
+                    {/*    <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>*/}
+                    {/*)}*/}
 
+                    {jobsToBePasted != null && (
+                        <button className="btn btn-secondary btn-sm normal-case" onClick={handlePasteJob}>
+                            Paste Job
+                        </button>
+                    )}
                     {workOrder.locked_by ==null && (
                         <button
                             className='btn btn-secondary btn-sm normal-case'

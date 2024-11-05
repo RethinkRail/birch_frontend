@@ -247,6 +247,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                         selected={datePickers.crewChecked[row.job_id] || null}
                         onChange={(date) => handleDateChange('crewChecked', row.job_id, date)}
                         placeholderText="Select date"
+                        portalId="orderDetailsModal"
                         dateFormat="MM-dd-yyyy"
                         isClearable={!isInnoiced &&  datePickers.crewChecked[row.job_id]!==null}
                         disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
@@ -265,11 +266,11 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                                 datePickers.managerChecked[row.job_id].toLocaleDateString() : null}/>}
                         selected={datePickers.managerChecked[row.job_id] || null}
                         onChange={(date) => handleDateChange('managerChecked', row.job_id, date)}
+                        portalId="orderDetailsModal"
                         placeholderText="Select date"
                         dateFormat="MM-dd-yyyy"
                         isClearable={!isDatePickerDisabled}
                         disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
-
                     />
                 </span>
             ),
@@ -286,6 +287,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                         selected={datePickers.qaChecked[row.job_id] || null}
                         onChange={(date) => handleDateChange('qaChecked', row.job_id, date)}
                         placeholderText="Select date"
+                        portalId="orderDetailsModal"
                         dateFormat="MM-dd-yyyy"
                         isClearable ={!isDatePickerDisabled}
                         disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}

@@ -96,7 +96,11 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
 
 
     const handleDateChange = async (type, jobId, date) => {
-
+        if (date) {
+            const now = new Date();
+            // Set the selected date's time to the current time
+            date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+        }
         if (date == null && type == 'crewChecked') {
             const userConfirmed = window.confirm("Are you sure you want to mark this job as not done?");
 

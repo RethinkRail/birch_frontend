@@ -77,34 +77,35 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         localStorage.setItem("jobsToBePasted", null)
         console.log(jobToCopyId)
         console.log(jobs)
+        const jobToCopy = jobs.find(job => job.id == jobToCopyId) || null;
         setCopiedJob(jobs.find(job => job.id == jobToCopyId) || null)
         if(!copiedJob){
             return
         }
-
+        console.log(copiedJob)
         let jobToBePasted = []
         const copiedJobFormatted = {
             work_id: workOrder.id,
             work_order: workOrder.work_order,
             line_number: Number(jobs.line_number),
-            location_code: copiedJob.locationcode.code,
-            quantity: copiedJob.quantity,
-            condition_code: copiedJob.conditioncode.code,
-            job_code_applied: copiedJob.jobcode_joblist_job_code_appliedTojobcode.code,
-            qualifier_applied_id: copiedJob.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: copiedJob.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
-            job_description: copiedJob.job_description,
-            why_made_code: copiedJob.whymadecode.code,
-            job_code_removed: copiedJob.jobcode_joblist_job_code_removedTojobcode.code,
-            qualifier_removed_id: copiedJob.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: copiedJob.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
-            responsibility_code: copiedJob.responsibilitycode?.id,
-            labor_cost: copiedJob.labor_cost,
-            labor_time: copiedJob.labor_time,
-            labor_rate: copiedJob.labor_rate,
-            material_cost: Number(round2Dec(copiedJob.material_cost)),
-            jobPartsData: copiedJob.jobparts.map(({ id, parts, ...rest }) => rest),
+            location_code: jobToCopy.locationcode.code,
+            quantity: jobToCopy.quantity,
+            condition_code: jobToCopy.conditioncode.code,
+            job_code_applied: jobToCopy.jobcode_joblist_job_code_appliedTojobcode.code,
+            qualifier_applied_id: jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
+            job_description: jobToCopy.job_description,
+            why_made_code: jobToCopy.whymadecode.code,
+            job_code_removed: jobToCopy.jobcode_joblist_job_code_removedTojobcode.code,
+            qualifier_removed_id: copiedJob.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
+            responsibility_code: jobToCopy.responsibilitycode?.id,
+            labor_cost: jobToCopy.labor_cost,
+            labor_time: jobToCopy.labor_time,
+            labor_rate: jobToCopy.labor_rate,
+            material_cost: Number(round2Dec(jobToCopy.material_cost)),
+            jobPartsData: jobToCopy.jobparts.map(({ id, parts, ...rest }) => rest),
             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
         }
-
+        console.log(copiedJobFormatted)
         jobToBePasted.push(copiedJobFormatted)
 
         localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))

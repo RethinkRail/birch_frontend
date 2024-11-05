@@ -119,7 +119,12 @@ const WorkOrderDataTable = ({
            // console.log("Work orders changed from data table", workOrders)
             if(workOrderToView !== null) {
                 const updated = workOrders.find(work => work.id == workOrderToView.id)
-                setWorkOrderToView(updated)
+                if(updated){
+                    setWorkOrderToView(updated)
+                }else {
+                    setWorkOrderToView(null)
+                }
+
             }
         }
         handleChanges()

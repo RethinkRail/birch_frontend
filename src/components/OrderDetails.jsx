@@ -184,20 +184,20 @@ const OrderDetails = ({
         let totalMaterialCost = 0;
 
         jobs.forEach(job => {
-            // Calculate labor cost
-            const laborCost = job.labor_rate * job.labor_time * job.quantity;
-            totalLaborCost += laborCost;
+
+            const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+            totalLaborCost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
             const laborHours = job.labor_time * job.quantity;
-            totalLaborHours += laborHours;
+            totalLaborHours += Number(round2Dec(laborHours));
 
             // Calculate material cost
             job.jobparts.forEach(part => {
-                const purchaseCost = part.purchase_cost * part.quantity;
-                const markup = purchaseCost * part.markup_percent;
-                const materialCost = purchaseCost + markup;
-                totalMaterialCost += materialCost;
+                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                const materialCost = Number(round2Dec(purchaseCost + markup));
+                totalMaterialCost += Number(round2Dec(materialCost));
             });
         });
         setTotalLaborHours(totalLaborHours)
@@ -1803,8 +1803,8 @@ const OrderDetails = ({
                                         <DatePicker
                                             style={{width: '100%'}}
                                             customInput={<CustomDateInputFullWidth
-                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(ownerInvoiceDate) : null}
+                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(ownerInvoiceDate) : null}/>}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ? new Date(ownerInvoiceDate) : null}
                                             onChange={newDate => handleOwnerInvoiceDateChanged(newDate)}
                                             showYearDropdown
                                             disabled={workOrder.locked_by != null}
@@ -1814,8 +1814,8 @@ const OrderDetails = ({
                                         <p className='mt-2'>Due Date</p>
                                         <DatePicker
                                             customInput={<CustomDateInputFullWidth
-                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
-                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE || ownerInvoiceDate !== null ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
+                                                value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
+                                            selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
                                             onChange={newDate => handleDueDateChanged(true, newDate)}
                                             showYearDropdown
                                             disabled={workOrder.locked_by != null}

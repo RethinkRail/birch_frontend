@@ -147,9 +147,6 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
     overflow-x: auto;
 }
 
-.react-datepicker-popper {
-    z-index: 9999 !important;
-}
 
 
 /*ul.nav > .nav-item .menu-item :hover {*/

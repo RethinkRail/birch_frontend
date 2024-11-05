@@ -56,6 +56,3 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
         transform: rotate(360deg);
     }
 }
-.react-datepicker-popper {
-    z-index: 9999 !important;
-}

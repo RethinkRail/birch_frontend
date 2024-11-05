@@ -10,7 +10,7 @@ import axios, {all} from "axios";
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
-        console.log("jon list table")
+
         jobs.sort((a, b) => a.line_number - b.line_number)
         const jobListData = jobs.map((job) => ({
             id: job.id,
@@ -380,7 +380,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     {/*    <button className='btn btn-secondary btn-sm normal-case' onClick={handlePasteJob}>Paste Job</button>*/}
                     {/*)}*/}
 
-                    {jobsToBePasted != null && (
+                    {(workOrder.locked_by == null && jobsToBePasted != null) && (
                         <button className="btn btn-secondary btn-sm normal-case" onClick={handlePasteJob}>
                             Paste Job
                         </button>

@@ -10,7 +10,6 @@ import axios, {all} from "axios";
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
-
         jobs.sort((a, b) => a.line_number - b.line_number)
         const jobListData = jobs.map((job) => ({
             id: job.id,

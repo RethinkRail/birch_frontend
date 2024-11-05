@@ -13,7 +13,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { round2Dec } from "../utils/NumberHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
-
+import * as XLSX from 'xlsx';
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboorHRSEST }) => {
 
     const [datePickers, setDatePickers] = useState({
@@ -319,11 +319,53 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         },
     };
 
+    function handleExport() {
+        // Create a new workbook and worksheet
+        // Define the columns you want to export with their corresponding keys and display names
+        const exportColumns = [
+            { header: 'JOB DESCRIPTION', key: 'job_description' },
+            { header: 'HOURS ESTIMATED', key: 'labor_time' },
+            { header: 'HOURS APPLIED', key: 'hours_applied' },
+            { header: 'HOURS APPLIED (RE WORK)', key: 'hours_applied_rework' },
+            { header: 'TEAM MEMBER COMPLETION TIME', key: 'crewChecked' },
+            { header: 'IN PROCESS TIME', key: 'managerChecked' },
+            { header: 'QA TIME', key: 'qaChecked' },
+        ];
+
+        // Map railcarLog to include only the desired fields
+        const filteredData = railcarLog.map(row => ({
+            'JOB DESCRIPTION': row.job_description,
+            'HOURS ESTIMATED': round2Dec(row.labor_time),
+            'HOURS APPLIED': round2Dec(row.hours_applied),
+            'HOURS APPLIED (RE WORK)': round2Dec(row.hours_applied_rework),
+            'TEAM MEMBER COMPLETION TIME': datePickers.crewChecked[row.job_id] ?
+                datePickers.crewChecked[row.job_id].toLocaleString() : '',
+            'IN PROCESS TIME': datePickers.managerChecked[row.job_id] ?
+                datePickers.managerChecked[row.job_id].toLocaleString() : '',
+            'QA TIME': datePickers.qaChecked[row.job_id] ?
+                datePickers.qaChecked[row.job_id].toLocaleString() : '',
+        }));
+
+        // Create a worksheet from the filtered data
+        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'RailcarLog');
+
+        // Write the workbook and trigger the download
+        XLSX.writeFile(workbook, 'Railca Time log_'+workOrder.railcar_id+'.xlsx');
+    }
+
     return (
         <div>
 
             <div className="flex justify-between mb-5 items-center">
-                <h6 className='font-semibold'>Railcar time log</h6>
+                <h6 className="font-semibold">Railcar time log</h6>
+                <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    onClick={handleExport}
+                >
+                    Export
+                </button>
             </div>
             <div className="overflow-x-auto">
                 <DataTable

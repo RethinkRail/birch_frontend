@@ -57,8 +57,6 @@ const WorkOrderDataTable = ({
                                 handIsLockedForTimeClocking,
                                 updateBillToLesseForAJob
                             }) => {
-
-     console.log(workOrders)
     const orderDetailsModalRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -144,7 +142,7 @@ const WorkOrderDataTable = ({
 
 
     useEffect(() => {
-        console.log("hiii")
+
         workOrderData=[]
         workOrders.forEach((workOrder, index) => {
             const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;

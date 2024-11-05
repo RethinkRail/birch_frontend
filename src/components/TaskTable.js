@@ -10,7 +10,7 @@ import axios from 'axios'; // assuming you use axios for fetching data
 
 const TaskTable = ({work_id,workOrder}) => {
     const [tasks, setTasks] = useState([]);
-    console.log(work_id)
+    //console.log(work_id)
     const fetchData = async () => {
         try {
             const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+`get_all_task_by_work_id/`, {
@@ -18,7 +18,7 @@ const TaskTable = ({work_id,workOrder}) => {
                     work_id: work_id, // Pass the work_id dynamically
                 },
             });
-            console.log(response)
+            //console.log(response)
             const data = response.data;
 
             // Modify data according to task_status

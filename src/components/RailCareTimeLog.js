@@ -96,6 +96,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
 
 
     const handleDateChange = async (type, jobId, date) => {
+        console.log(date)
         if (date) {
             const now = new Date();
             // Set the selected date's time to the current time
@@ -268,6 +269,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                         dateFormat="MM-dd-yyyy"
                         isClearable={!isDatePickerDisabled}
                         disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
+
                     />
                 </span>
             ),

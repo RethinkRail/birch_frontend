@@ -79,9 +79,9 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         console.log(jobs)
         const jobToCopy = jobs.find(job => job.id == jobToCopyId) || null;
         setCopiedJob(jobs.find(job => job.id == jobToCopyId) || null)
-        if(!copiedJob){
-            return
-        }
+        // if(!copiedJob){
+        //     return
+        // }
         console.log(copiedJob)
         let jobToBePasted = []
         const copiedJobFormatted = {
@@ -107,7 +107,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         }
         console.log(copiedJobFormatted)
         jobToBePasted.push(copiedJobFormatted)
-
+        setCopiedJob(copiedJobFormatted)
         localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
     }
 
@@ -143,7 +143,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         })
 
         console.log(jobToBePasted)
-
+        setCopiedJob(jobToBePasted)
         localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
     }
 
@@ -173,7 +173,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         console.log(response)
     }
 
-    const [copiedJob, setCopiedJob] = useState(null)
+    const [copiedJob, setCopiedJob] = useState([])
 
 
     const columns = useMemo(

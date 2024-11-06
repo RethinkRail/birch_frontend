@@ -1103,10 +1103,10 @@ export function printInvoice(workorder, forWhom) {
 
         //ownerName=workorder.railcar.owner_railcar_owner_idToowner.name
         net_days = workorder.invoice_net_days
-        console.log(workorder.invoice_date)
-        console.log(net_days)
-        console.log(addDays(workorder.invoice_date+net_days))
-        console.log(convertSqlWithTZToFormattedDate(workorder.invoice_date))
+        // console.log(workorder.invoice_date)
+        // console.log(net_days)
+        // console.log(addDays(workorder.invoice_date+net_days))
+        // console.log(convertSqlWithTZToFormattedDate(workorder.invoice_date))
         due_date = workorder.invoice_date != process.env.REACT_APP_DEFAULT_DATE  ?  convertSqlWithTZToFormattedDate(workorder.invoice_date,net_days):""
         console.log(due_date)
     }

@@ -115,7 +115,7 @@ export function addDays(sqlDateTime, daysToAdd) {
     // Formatted date with two-digit month and day
     var formattedDate = month + '-' + day + '-' + year + ' ' + hour + ':' + minute + ':' + second;
 
-    console.log(formattedDate)
+    //console.log(formattedDate)
     return formattedDate;
 }
 

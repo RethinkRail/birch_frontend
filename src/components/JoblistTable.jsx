@@ -180,7 +180,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
     const handlePasteJob = async () => {
         const copiedJobs=  JSON.parse(localStorage.getItem("jobsToBePasted"))
-        const modifiledJobs = updateArray(copiedJobs,workOrder.id,workOrder.work_order,jobs.length)
+        const modifiledJobs = updateArray(copiedJobs,workOrder.id,workOrder.work_order,jobs.length+1)
         console.log(modifiledJobs)
         const response = await  handlePaste(modifiledJobs)
         if(response.status==200){

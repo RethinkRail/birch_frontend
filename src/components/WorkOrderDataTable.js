@@ -293,7 +293,7 @@ const WorkOrderDataTable = ({
                         className={`w-full  placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
                     {statusCode.map((sc) => (
                         <option className={'w-full whitespace-pre-line '} key={sc.code}
-                                 value={row.status === sc.code}>
+                                selected={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
                         </option>
                     ))}
@@ -325,8 +325,8 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span>
                     <DatePicker
-                        customInput={<CustomDateInput value={new Date()}/>}
-                        selected={new Date()}
+                        customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null}/>}
+                        selected={row.material_eta ? new Date(row.material_eta) : null}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
                         isClearable
@@ -348,8 +348,8 @@ const WorkOrderDataTable = ({
             selector: row => row.projected_out_date || '', // Ensure selector always returns a string or date
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={new Date()} />}
-                    selected={new Date()}
+                    customInput={<CustomDateInput value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
+                    selected={row.projected_out_date ? new Date(row.projected_out_date) : ''}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
@@ -392,8 +392,8 @@ const WorkOrderDataTable = ({
                 <span>
                     <DatePicker
                         customInput={<CustomDateInput
-                            value={new Date()}/>}
-                        selected={new Date()}
+                            value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? row.shipped : null}/>}
+                        selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
                         onChange={newDate => updateMarkAsShipped(row.work_id, newDate)}
                         showYearDropdown
                         isClearable

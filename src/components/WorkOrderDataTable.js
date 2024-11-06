@@ -293,7 +293,7 @@ const WorkOrderDataTable = ({
                         className={`w-full  placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
                     {statusCode.map((sc) => (
                         <option className={'w-full whitespace-pre-line '} key={sc.code}
-                                selected={row.status === sc.code}>
+                                 value={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
                         </option>
                     ))}

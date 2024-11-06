@@ -26,14 +26,30 @@ import WorkStationManager from "./portal/time/WorkStationManager";
 import TimeApproval from "./portal/time/TimeApproval";
 import RailcarTable from "./portal/report/RailcarTable";
 
+//Before
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/firebase-messaging-sw.js')
+//         .then((registration) => {
+//             console.log('Service Worker registered with scope:', registration.scope);
+//         })
+//         .catch((error) => {
+//             console.error('Service Worker registration failed:', error);
+//         });
+// }
+
+//After
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then((registration) => {
-            console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-        });
+    const isChromeOniPad = /CriOS/i.test(navigator.userAgent) && /iPad/i.test(navigator.userAgent);
+
+    if (!isChromeOniPad) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('Service Worker registration failed:', error);
+            });
+    }
 }
 
 

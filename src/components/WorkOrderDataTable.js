@@ -182,8 +182,11 @@ const WorkOrderDataTable = ({
                 'is_storage': workOrder.is_storage,
                 'index': index
             }
+            // console.log(workOrderObject.material_eta)
+            // console.log(workOrderObject.projected_out_date)
             workOrderData.push(workOrderObject)
         })
+        console.log()
         setWoForDT(workOrderData)
 //        console.log("in action")
     }, [workOrders])
@@ -305,7 +308,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "24%",
+            width: "20%",
 
             cell: (row) => (
                 <span onClick={() => {
@@ -326,7 +329,7 @@ const WorkOrderDataTable = ({
                 <span>
                     <DatePicker
                         customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null}/>}
-                        selected={null}
+                        selected={row.material_eta ? new Date(row.material_eta.split("-").reverse().join("-")) : null}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
                         isClearable
@@ -349,7 +352,7 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <DatePicker
                     customInput={<CustomDateInput value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
-                    selected={ null}
+                    selected={ row.projected_out_date ? new Date(row.projected_out_date.split("-").reverse().join("-")) : null}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"

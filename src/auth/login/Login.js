@@ -10,6 +10,7 @@ import {getToken} from "firebase/messaging";
 const qs = require('qs');
 
 const Login = () => {
+    console.log("In login screen")
     const provider = new GoogleAuthProvider();
     provider.addScope("email")
     provider.addScope("profile")

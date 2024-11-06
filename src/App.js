@@ -11,7 +11,7 @@ import {getToken} from "firebase/messaging";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+    console.log("In App screen")
     useEffect(() => {
         handleGetUser();
     }, [isLoggedIn]);

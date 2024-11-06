@@ -1098,8 +1098,8 @@ const OrderDetails = ({
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
+                                                stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"
+                                                strokeLinejoin="round"/>
                                         </svg>
                                         BRC
                                     </span>
@@ -1110,8 +1110,8 @@ const OrderDetails = ({
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
+                                                stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"
+                                                strokeLinejoin="round"/>
                                         </svg>
                                         ARR-500B
                                     </span>
@@ -1122,8 +1122,8 @@ const OrderDetails = ({
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
+                                                stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"
+                                                strokeLinejoin="round"/>
                                         </svg>
                                         BBOM
                                     </span>
@@ -1134,8 +1134,8 @@ const OrderDetails = ({
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
+                                                stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"
+                                                strokeLinejoin="round"/>
                                         </svg>
                                         Invoice
                                     </span>
@@ -1146,8 +1146,8 @@ const OrderDetails = ({
                                              xmlns="http://www.w3.org/2000/svg">
                                             <path
                                                 d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"
-                                                stroke="#23393D" stroke-width="1.3" stroke-linecap="round"
-                                                stroke-linejoin="round"/>
+                                                stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"
+                                                strokeLinejoin="round"/>
                                         </svg>
                                         Work Order
                                     </span>
@@ -1760,40 +1760,40 @@ const OrderDetails = ({
                                                      xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M6.99935 3.00002C7.36754 3.00002 7.66602 2.70154 7.66602 2.33335C7.66602 1.96516 7.36754 1.66669 6.99935 1.66669C6.63116 1.66669 6.33268 1.96516 6.33268 2.33335C6.33268 2.70154 6.63116 3.00002 6.99935 3.00002Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M6.99935 7.66669C7.36754 7.66669 7.66602 7.36821 7.66602 7.00002C7.66602 6.63183 7.36754 6.33335 6.99935 6.33335C6.63116 6.33335 6.33268 6.63183 6.33268 7.00002C6.33268 7.36821 6.63116 7.66669 6.99935 7.66669Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M6.99935 12.3334C7.36754 12.3334 7.66602 12.0349 7.66602 11.6667C7.66602 11.2985 7.36754 11 6.99935 11C6.63116 11 6.33268 11.2985 6.33268 11.6667C6.33268 12.0349 6.63116 12.3334 6.99935 12.3334Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M11.666 3.00002C12.0342 3.00002 12.3327 2.70154 12.3327 2.33335C12.3327 1.96516 12.0342 1.66669 11.666 1.66669C11.2978 1.66669 10.9993 1.96516 10.9993 2.33335C10.9993 2.70154 11.2978 3.00002 11.666 3.00002Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M11.666 7.66669C12.0342 7.66669 12.3327 7.36821 12.3327 7.00002C12.3327 6.63183 12.0342 6.33335 11.666 6.33335C11.2978 6.33335 10.9993 6.63183 10.9993 7.00002C10.9993 7.36821 11.2978 7.66669 11.666 7.66669Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M11.666 12.3334C12.0342 12.3334 12.3327 12.0349 12.3327 11.6667C12.3327 11.2985 12.0342 11 11.666 11C11.2978 11 10.9993 11.2985 10.9993 11.6667C10.9993 12.0349 11.2978 12.3334 11.666 12.3334Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M2.33268 3.00002C2.70087 3.00002 2.99935 2.70154 2.99935 2.33335C2.99935 1.96516 2.70087 1.66669 2.33268 1.66669C1.96449 1.66669 1.66602 1.96516 1.66602 2.33335C1.66602 2.70154 1.96449 3.00002 2.33268 3.00002Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M2.33268 7.66669C2.70087 7.66669 2.99935 7.36821 2.99935 7.00002C2.99935 6.63183 2.70087 6.33335 2.33268 6.33335C1.96449 6.33335 1.66602 6.63183 1.66602 7.00002C1.66602 7.36821 1.96449 7.66669 2.33268 7.66669Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                     <path
                                                         d="M2.33268 12.3334C2.70087 12.3334 2.99935 12.0349 2.99935 11.6667C2.99935 11.2985 2.70087 11 2.33268 11C1.96449 11 1.66602 11.2985 1.66602 11.6667C1.66602 12.0349 1.96449 12.3334 2.33268 12.3334Z"
-                                                        stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round"/>
+                                                        stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                        strokeLinejoin="round"/>
                                                 </svg>
 
                                             </button>
@@ -1963,40 +1963,40 @@ const OrderDetails = ({
                                                          xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M6.99935 3.00002C7.36754 3.00002 7.66602 2.70154 7.66602 2.33335C7.66602 1.96516 7.36754 1.66669 6.99935 1.66669C6.63116 1.66669 6.33268 1.96516 6.33268 2.33335C6.33268 2.70154 6.63116 3.00002 6.99935 3.00002Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M6.99935 7.66669C7.36754 7.66669 7.66602 7.36821 7.66602 7.00002C7.66602 6.63183 7.36754 6.33335 6.99935 6.33335C6.63116 6.33335 6.33268 6.63183 6.33268 7.00002C6.33268 7.36821 6.63116 7.66669 6.99935 7.66669Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M6.99935 12.3334C7.36754 12.3334 7.66602 12.0349 7.66602 11.6667C7.66602 11.2985 7.36754 11 6.99935 11C6.63116 11 6.33268 11.2985 6.33268 11.6667C6.33268 12.0349 6.63116 12.3334 6.99935 12.3334Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M11.666 3.00002C12.0342 3.00002 12.3327 2.70154 12.3327 2.33335C12.3327 1.96516 12.0342 1.66669 11.666 1.66669C11.2978 1.66669 10.9993 1.96516 10.9993 2.33335C10.9993 2.70154 11.2978 3.00002 11.666 3.00002Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M11.666 7.66669C12.0342 7.66669 12.3327 7.36821 12.3327 7.00002C12.3327 6.63183 12.0342 6.33335 11.666 6.33335C11.2978 6.33335 10.9993 6.63183 10.9993 7.00002C10.9993 7.36821 11.2978 7.66669 11.666 7.66669Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M11.666 12.3334C12.0342 12.3334 12.3327 12.0349 12.3327 11.6667C12.3327 11.2985 12.0342 11 11.666 11C11.2978 11 10.9993 11.2985 10.9993 11.6667C10.9993 12.0349 11.2978 12.3334 11.666 12.3334Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M2.33268 3.00002C2.70087 3.00002 2.99935 2.70154 2.99935 2.33335C2.99935 1.96516 2.70087 1.66669 2.33268 1.66669C1.96449 1.66669 1.66602 1.96516 1.66602 2.33335C1.66602 2.70154 1.96449 3.00002 2.33268 3.00002Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M2.33268 7.66669C2.70087 7.66669 2.99935 7.36821 2.99935 7.00002C2.99935 6.63183 2.70087 6.33335 2.33268 6.33335C1.96449 6.33335 1.66602 6.63183 1.66602 7.00002C1.66602 7.36821 1.96449 7.66669 2.33268 7.66669Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                         <path
                                                             d="M2.33268 12.3334C2.70087 12.3334 2.99935 12.0349 2.99935 11.6667C2.99935 11.2985 2.70087 11 2.33268 11C1.96449 11 1.66602 11.2985 1.66602 11.6667C1.66602 12.0349 1.96449 12.3334 2.33268 12.3334Z"
-                                                            stroke="#98A2B3" stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"/>
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
                                                     </svg>
 
                                                 </button>

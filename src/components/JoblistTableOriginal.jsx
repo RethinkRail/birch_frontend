@@ -39,7 +39,7 @@ const JoblistTable = ({jobs}) => {
         <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M17.7197 17.5085L14.797 14.5979M16.8699 9.59362C16.878 13.5056 13.7133 16.6835 9.80129 16.6917C5.88928 16.6998 2.71137 13.5351 2.70322 9.62311C2.69508 5.7111 5.85979 2.53319 9.77179 2.52505C13.6838 2.51691 16.8617 5.68161 16.8699 9.59362Z"
-                stroke="#686868" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                stroke="#686868" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>)
     return (
         <div className="">

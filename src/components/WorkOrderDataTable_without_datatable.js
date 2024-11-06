@@ -196,8 +196,8 @@ const WorkOrderDataTable = ({workOrders, statusCode}) => {
                     <button
                         className='btn text-cetner normal-case  h-[24px] px-[18px] py-[5px] flex items-center justify-center bg-[#002E54] text-white text-[14px] font-medium hover:bg-[#002f54]'>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 4.16663V15.8333M4.16669 9.99996H15.8334" stroke="white" stroke-width="1.66667"
-                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 4.16663V15.8333M4.16669 9.99996H15.8334" stroke="white" strokeWidth="1.66667"
+                                  strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                         <span className='mt-[]'>
                         NEW ORDER
@@ -323,12 +323,12 @@ const WorkOrderDataTable = ({workOrders, statusCode}) => {
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path
                                                     d="M1.42012 8.71318C1.28394 8.49754 1.21584 8.38972 1.17772 8.22342C1.14909 8.0985 1.14909 7.9015 1.17772 7.77658C1.21584 7.61028 1.28394 7.50246 1.42012 7.28682C2.54553 5.50484 5.8954 1 11.0004 1C16.1054 1 19.4553 5.50484 20.5807 7.28682C20.7169 7.50246 20.785 7.61028 20.8231 7.77658C20.8517 7.9015 20.8517 8.0985 20.8231 8.22342C20.785 8.38972 20.7169 8.49754 20.5807 8.71318C19.4553 10.4952 16.1054 15 11.0004 15C5.8954 15 2.54553 10.4952 1.42012 8.71318Z"
-                                                    stroke="#686868" stroke-width="1.5" stroke-linecap="round"
-                                                    stroke-linejoin="round"/>
+                                                    stroke="#686868" strokeWidth="1.5" strokeLinecap="round"
+                                                    strokeLinejoin="round"/>
                                                 <path
                                                     d="M11.0004 11C12.6573 11 14.0004 9.65685 14.0004 8C14.0004 6.34315 12.6573 5 11.0004 5C9.34355 5 8.0004 6.34315 8.0004 8C8.0004 9.65685 9.34355 11 11.0004 11Z"
-                                                    stroke="#686868" stroke-width="1.5" stroke-linecap="round"
-                                                    stroke-linejoin="round"/>
+                                                    stroke="#686868" strokeWidth="1.5" strokeLinecap="round"
+                                                    strokeLinejoin="round"/>
                                             </svg>
                                         </span>
                                     </NavLink>
@@ -364,7 +364,7 @@ const CustomDateInput = ({value, onClick}) => (
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M15.75 7.5H2.25M12 1.5V4.5M6 1.5V4.5M5.85 16.5H12.15C13.4101 16.5 14.0402 16.5 14.5215 16.2548C14.9448 16.039 15.289 15.6948 15.5048 15.2715C15.75 14.7902 15.75 14.1601 15.75 12.9V6.6C15.75 5.33988 15.75 4.70982 15.5048 4.22852C15.289 3.80516 14.9448 3.46095 14.5215 3.24524C14.0402 3 13.4101 3 12.15 3H5.85C4.58988 3 3.95982 3 3.47852 3.24524C3.05516 3.46095 2.71095 3.80516 2.49524 4.22852C2.25 4.70982 2.25 5.33988 2.25 6.6V12.9C2.25 14.1601 2.25 14.7902 2.49524 15.2715C2.71095 15.6948 3.05516 16.039 3.47852 16.2548C3.95982 16.5 4.58988 16.5 5.85 16.5Z"
-                        stroke="#686868" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        stroke="#686868" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
             </button>
         </div>

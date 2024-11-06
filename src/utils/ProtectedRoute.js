@@ -9,6 +9,7 @@ const ProtectedRoute = (props) => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     let token
+    console.log("In protected screen")
     const handleGetUser = async () => {
         auth.onAuthStateChanged(async (user) => {
 

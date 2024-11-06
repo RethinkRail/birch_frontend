@@ -170,12 +170,12 @@ const WorkOrderDataTable = ({
                 'repair_date': workOrder.repair_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_date),
                 'final_date': workOrder.final_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.final_date),
                 'qa_date': workOrder.qa_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.qa_date),
-                'projected_out_date': workOrder.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.projected_out_date) : null,
+                'projected_out_date': workOrder.projected_out_date ,
                 'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
                 'last_content': workOrder.railcar.products.name,
                 'status': workOrder.workupdates[0].status_id,
                 'comment': workOrder.workupdates,
-                'material_eta': workOrder.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.material_eta) : null,
+                'material_eta': workOrder.material_eta,
                 'finalized': workOrder.locked_by,
                 'shipped': workOrder.shipped_date,
                 'work_id': workOrder.id,
@@ -329,7 +329,7 @@ const WorkOrderDataTable = ({
                 <span>
                     <DatePicker
                         customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null}/>}
-                        selected={row.material_eta !=null  ? new Date(row.material_eta) : null}
+                        selected={row.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.material_eta) : null}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
                         isClearable
@@ -352,7 +352,7 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <DatePicker
                     customInput={<CustomDateInput value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
-                    selected={ row.projected_out_date !=null ? new Date(row.projected_out_date) : null}
+                    selected={row.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.projected_out_date) : null}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"

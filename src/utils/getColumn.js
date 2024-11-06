@@ -18,10 +18,15 @@ const handleGetColumn = (tableFields, handleEditRow, setRowId, setRowCode, setDe
             return {
                 name: field.Field.split("_").join(" "),
                 selector: row => row[field.Field],
-                sortable: true,
                 cell: (row) => {
                     return <span className={`max-w-[250px`}>{formatDate(row[field.Field]) || "_"}</span>;
-                }
+                },
+                sortFunction: (a, b) => {
+                    const dateA = a.last_update ? new Date(a.last_update) : new Date(0);
+                    const dateB = b.last_update ? new Date(b.last_update) : new Date(0);
+                    return dateA - dateB;
+                },
+                sortable: true,
             };
         }
 

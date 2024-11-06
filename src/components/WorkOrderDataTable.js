@@ -350,6 +350,7 @@ const WorkOrderDataTable = ({
                 return dateA - dateB;
             },
             sortable: true,
+            className: "hidden sm:block"
         },
         {
             name: "POD",

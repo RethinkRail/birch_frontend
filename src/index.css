@@ -147,6 +147,25 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
     overflow-x: auto;
 }
 
+/* For iPad */
+@media (max-width: 1024px) {
+    .data-table {
+        font-size: 14px; /* Adjust font size */
+    }
+    .data-table td {
+        padding: 8px; /* Adjust padding for small screens */
+    }
+    .data-table th {
+        padding: 10px; /* Adjust padding for small screens */
+    }
+    .tooltip {
+        font-size: 12px; /* Smaller tooltips on mobile */
+    }
+    /* Optionally hide columns on smaller screens */
+    .data-table .hidden-column {
+        display: none;
+    }
+}
 
 
 /*ul.nav > .nav-item .menu-item :hover {*/

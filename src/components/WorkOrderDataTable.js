@@ -325,7 +325,7 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span>
                     <DatePicker
-                        customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null}/>}
+
                         selected={row.material_eta ? new Date(row.material_eta) : null}
                         onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                         showYearDropdown
@@ -348,7 +348,7 @@ const WorkOrderDataTable = ({
             selector: row => row.projected_out_date || '', // Ensure selector always returns a string or date
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
+
                     selected={row.projected_out_date ? new Date(row.projected_out_date) : null}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown
@@ -391,8 +391,7 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span>
                     <DatePicker
-                        customInput={<CustomDateInput
-                            value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}/>}
+
                         selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
                         onChange={newDate => updateMarkAsShipped(row.work_id, newDate)}
                         showYearDropdown

@@ -163,15 +163,15 @@ const UserManagement = () => {
                                         <td className="border px-4 py-2">{user.name}</td>
                                         <td className="border px-4 py-2">{user.email}</td>
                                         <td className="border px-4 py-2">{user.roles.join(', ')}</td>
-                                        <td className="border px-4 py-2 mr-2">
+                                        <td className="border px-4 py-2 mr-2 inline-flex">
                                             <button
-                                                className="text-red-600 hover:underline btn-sm bg-gray-200 rounded"
+                                                className="text-red-600  btn-sm bg-gray-200 rounded text-xs"
                                                 onClick={() => deactivateUser(user.id)}
                                             >
                                                 Deactivate
                                             </button>
                                             <button
-                                                className="text-blue-600 hover:underline ml-4 btn-sm bg-gray-200 rounded"
+                                                className="text-blue-600 ml-2 btn-sm bg-gray-200 rounded text-xs"
                                                 onClick={() => {
                                                     setSelectedUserId(user.id);
                                                     setAssignedRoles(
@@ -181,9 +181,7 @@ const UserManagement = () => {
                                                     ); // Pre-select current roles
                                                     setShowRoleModal(true); // Open modal
                                                 }}
-                                            >
-                                                Change Roles
-                                            </button>
+                                            >Update Roles</button>
                                         </td>
                                     </tr>
                                 ))}

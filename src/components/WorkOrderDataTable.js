@@ -256,11 +256,12 @@ const WorkOrderDataTable = ({
             name: "LHR",
             selector: row => row.lhr,
             sortable: true,
-            width: '5%',
+            width: '4%',
             cell: (row) => (
                 <span
                     className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
-                    data-tip={"Estimated Hour:" + row.estimated_time + "\nHours Applied:" + row.labor_hours + ""}>
+                    data-tip={`Estimated Hour: ${row.estimated_time}\nHours Applied: ${row.labor_hours}`}
+                >
                 {row.lhr}
             </span>
             ),
@@ -271,33 +272,38 @@ const WorkOrderDataTable = ({
             sortable: true,
             width: '4%',
             cell: (row) => (
-                <span className="whitespace-pre-line">{row.dif > 0 ? row.dif : "-"}</span>
+                <span className="whitespace-pre-line text-xs sm:text-sm md:text-base">
+                {row.dif > 0 ? row.dif : "-"}
+            </span>
             ),
         },
         {
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '8%',
+            width: '10%',
         },
         {
             name: "LAST CONTENT",
             selector: row => row.last_content,
             sortable: true,
             cell: (row) => (
-                <span className="whitespace-pre-line">{row.last_content}</span>
+                <span className="whitespace-pre-line text-xs sm:text-sm md:text-base">
+                {row.last_content}
+            </span>
             ),
-            width: "8%",
+            width: "11%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "13%",
+            width: "15%",
             cell: (row) => (
                 <select
                     onChange={(e) => handleDropdownChange(e, row.work_id)}
                     disabled={row.finalized > 0}
-                    className={`w-full placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'} sm:text-sm md:text-base`}>
+                    className={`w-full placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'} sm:text-xs md:text-sm`}
+                >
                     {statusCode.map((sc) => (
                         <option key={sc.code} selected={row.status === sc.code}>
                             {sc.code + ":" + sc.title}
@@ -310,7 +316,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "20%",
+            width: "18%",
             cell: (row) => (
                 <span
                     onClick={() => {
@@ -320,7 +326,8 @@ const WorkOrderDataTable = ({
                             setWorkIdForComment(row.work_id);
                         }
                     }}
-                    className="cursor-pointer whitespace-pre-line text-ellipsis sm:text-sm md:text-base">
+                    className="cursor-pointer whitespace-pre-line text-xs sm:text-sm md:text-base text-ellipsis"
+                >
                 {row.comment[0].comment}
             </span>
             ),
@@ -331,7 +338,6 @@ const WorkOrderDataTable = ({
             selector: row => row.material_eta || '',
             width: "8%",
             cell: (row) => (
-                <span>
                 <DatePicker
                     customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null} />}
                     selected={row.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.material_eta) : null}
@@ -340,9 +346,8 @@ const WorkOrderDataTable = ({
                     isClearable
                     disabled={row.finalized > 0}
                     dateFormat="MM-dd-yyyy"
-                    className="w-full sm:w-auto md:w-auto text-sm"
+                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
                 />
-            </span>
             ),
             sortFunction: (a, b) => {
                 const dateA = a.material_eta ? new Date(a.material_eta) : new Date(0);
@@ -364,7 +369,7 @@ const WorkOrderDataTable = ({
                     showYearDropdown
                     dateFormat="MM-dd-yyyy"
                     disabled={row.finalized > 0}
-                    className="w-full sm:w-auto md:w-auto text-sm"
+                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
                 />
             ),
             sortable: true,
@@ -377,10 +382,10 @@ const WorkOrderDataTable = ({
         {
             name: "INVOICED",
             selector: row => row.finalized,
-            width: "8%",
+            width: "5%",
             sortable: true,
             cell: (row) => (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div className="flex justify-center items-center">
                     <input
                         disabled={!canFinalized}
                         type="checkbox"
@@ -394,10 +399,9 @@ const WorkOrderDataTable = ({
         {
             name: "SHIPPED",
             selector: row => row.shipped,
-            width: "8%",
+            width: "12%",
             sortable: true,
             cell: (row) => (
-                <span>
                 <DatePicker
                     customInput={<CustomDateInput value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null} />}
                     selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
@@ -405,9 +409,8 @@ const WorkOrderDataTable = ({
                     showYearDropdown
                     isClearable
                     dateFormat="MM-dd-yyyy"
-                    className="w-full sm:w-auto md:w-auto text-sm"
+                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
                 />
-            </span>
             ),
         },
         {
@@ -415,25 +418,30 @@ const WorkOrderDataTable = ({
             selector: row => row.workOrder,
             width: "6%",
             sortable: false,
-            className: "mt-[10px] cursor-pointer",
             cell: (row) => (
-                <span className="align-middle mt-[10px] cursor-pointer" onClick={() => {
-                    setWorkOrderToView(row.workOrder);
-                    handleShowOrderDetails(row.workOrder);
-                }}>
+                <span
+                    className="align-middle cursor-pointer mt-[10px]"
+                    onClick={() => {
+                        setWorkOrderToView(row.workOrder);
+                        handleShowOrderDetails(row.workOrder);
+                    }}
+                >
                 {/* Eye Icon SVG */}
                     <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M1.42012 8.71318C1.28394 8.49754 1.21584 8.38972 1.17772 8.22342C1.14909 8.0985 1.14909 7.9015 1.17772 7.77658C1.21584 7.61028 1.28394 7.50246 1.42012 7.28682C2.54553 5.50484 5.8954 1 11.0004 1C16.1054 1 19.4553 5.50484 20.5807 7.28682C20.7169 7.50246 20.785 7.61028 20.8231 7.77658C20.8517 7.9015 20.8517 8.0985 20.8231 8.22342C20.785 8.38972 20.7169 8.49754 20.5807 8.71318C19.4553 10.4952 16.1054 15 11.0004 15C5.8954 15 2.54553 10.4952 1.42012 8.71318Z"
-                        stroke="#686868" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        stroke="#686868" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                    />
                     <path
                         d="M11.0004 11C12.6573 11 14.0004 9.65685 14.0004 8C14.0004 6.34315 12.6573 5 11.0004 5C9.34355 5 8.0004 6.34315 8.0004 8C8.0004 9.65685 9.34355 11 11.0004 11Z"
-                        stroke="#686868" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        stroke="#686868" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                    />
                 </svg>
             </span>
             ),
         },
     ];
+
 
     const conditionalRowStyles = [
         {
@@ -513,9 +521,8 @@ const WorkOrderDataTable = ({
                     </div>
 
                 </div>
-                <div className="mt-[20px] ml-[1px] mx-auto border rounded-[8px] mb-10 m-1.5">
+                <div className="mt-5 ml-1 mx-auto border rounded-lg mb-10 p-2 sm:px-1 sm:py-1 sm:w-full md:w-full lg:w-full xl:w-full">
                     <DataTable
-                        title=""
                         columns={workOrdersTableColumn}
                         data={woForDT}
                         conditionalRowStyles={conditionalRowStyles}
@@ -525,24 +532,14 @@ const WorkOrderDataTable = ({
                         pagination={false}
                         highlightOnHover={true}
                         fixedHeader={false}
-                        className="display nowrap compact stripe sm:w-full md:w-full lg:w-full xl:w-full" //
+                        className="compact stripe"
                         customStyles={myStyles}
-                        noDataComponent={<div className="no-data-message" style={{ textAlign: 'center', padding: '20px', color: 'gray' }}>Preparing Result</div>}
+                        noDataComponent={
+                            <div className="no-data-message text-center py-5 text-gray-500">
+                                Preparing Result
+                            </div>
+                        }
                     />
-
-                    {/*<ReorderableTable*/}
-                    {/*    workOrderData={workOrderData}*/}
-                    {/*    columns={workOrdersTableColumn}*/}
-                    {/*    myStyles={myStyles}*/}
-                    {/*    conditionalRowStyles={conditionalRowStyles} />*/}
-
-
-                    {/*{workOrderToView!==null && (*/}
-                    {/*    <OrderDetails*/}
-                    {/*        workOrder={workOrderToView}*/}
-                    {/*        commonData={commonData}*/}
-                    {/*    />*/}
-                    {/*)}*/}
                 </div>
                 <CommentModal
                     data={commentObject.sort((a, b) => new Date(b.update_date) - new Date(a.update_date))}

@@ -1090,7 +1090,7 @@ const OrderDetails = ({
 
                         <div className="bg-[#F7F9FF] w-full py-10 px-24 max-h-[100vh]  rounded overflow-auto mb-5">
                             {/*Side menu*/}
-                            <div className="absolute top-1/3 lg:right-4 md:right-4 sm:right-0">
+                            <div className="absolute top-1/3 lg:right-4 md:right-0 sm:right-0">
                                 <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
                                     <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>
                                     <span className="p-1">

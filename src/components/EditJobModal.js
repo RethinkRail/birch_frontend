@@ -40,7 +40,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 purchase_cost: part?.price,
                 availability:1,
                 part_id: part.id,
-                unit: part.unit,
+                unit: part.parts_unit.name,
                 quantity: part.quantity,
                 parts:part
             }
@@ -434,7 +434,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-[12px] capitalize">QUANTITY(QTY)</label>
-                            <input type="number"   disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
+                            <input type="number"    disabled={workOrder.locked_by != null} min={1}className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Quantity" value={inputValues["quantity"]} onChange={(e) => handleChange("quantity", e.target.value)} />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Condition Code (CC)</label>
@@ -624,9 +624,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 <div className="col-span-3">{jobPart.parts.code+":"+jobPart.parts.title}</div>
                                 <div className="col-span-2 flex flex-row items-center gap-1">
                                     <input type="text" name="" id="" className="w-[45%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.additional_info || ""} onChange={(e) => handleFieldChange(jobPart.part_id, "additional_info", e.target.value)} />
-                                    <input type="text" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1 " value={jobPart?.parts.unit} disabled={true} />
-                                    <input type="number"  step={0.5} name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", parseFloat(e.target.value))} />
-                                    <input type="number" step={0.5} name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", parseFloat(e.target.value))} />
+                                    <input type="text" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1 " value={jobPart?.parts.parts_unit.name} disabled={true} />
+                                    <input type="number"  step={0.1} name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", parseFloat(e.target.value).toFixed(2))} />
+                                    <input type="number" step={0.1} name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", parseFloat(e.target.value).toFixed(2))} />
                                     <div className="w-[7%]">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => handleRemovePart(jobPart?.part_id)}>
                                             <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -644,11 +644,47 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         <div className="col-span-2 grid grid-cols-3 gap-1">
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">ST. Time (HR)</label>
-                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_time"]} onChange={(e) => handleChange("labor_time",e.target.value)} />
+                                <input
+                                    type="number"
+                                    step={0.01}
+                                    disabled={workOrder.locked_by != null}
+                                    name=""
+                                    id=""
+                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    value={inputValues["labor_time"]}
+                                    onChange={(e) => {
+                                        let value = parseFloat(e.target.value);
+                                        // Check if the value has more than 2 decimal places
+                                        if (value && value.toString().split(".")[1]?.length > 2) {
+                                            // Round to 2 decimal places if necessary
+                                            value = parseFloat(value.toFixed(2));
+                                        }
+                                        handleChange("labor_time", value);
+                                    }}
+                                />
+
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Rate ($/HR)</label>
-                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={inputValues["labor_rate"]} onChange={(e) => handleChange("labor_rate", e.target.value)} />
+                                <input
+                                    type="number"
+                                    step={0.1}
+                                    disabled={workOrder.locked_by != null}
+                                    name=""
+                                    id=""
+                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    value={inputValues["labor_rate"]}
+                                    onChange={(e) => {
+                                        let value = parseFloat(e.target.value);
+                                        // Check if the value has more than 2 decimal places
+                                        if (value && value.toString().split(".")[1]?.length > 2) {
+                                            // If more than 2 decimal places, round it to 2 decimals
+                                            value = parseFloat(value.toFixed(2));
+                                        }
+                                        handleChange("labor_rate", value);
+                                    }}
+                                />
+
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Labor ($)</label>
@@ -656,11 +692,29 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Purchase ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={purchase} onChange={(e) => setPurchase(purchase)} />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(purchase)} onChange={(e) => setPurchase(round2Dec(purchase))} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Markup (%)</label>
-                                <input type="number" disabled={workOrder.locked_by != null} name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={markupPercent} onChange={(e) => setMarkupPercent(e.target.value)} />
+                                <input
+                                    type="number"
+                                    disabled={workOrder.locked_by != null}
+                                    name=""
+                                    id=""
+                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    value={markupPercent}
+                                    onChange={(e) => {
+                                        const value = parseFloat(e.target.value);
+                                        // Check if the value has more than 2 decimal places
+                                        if (value && value.toString().split(".")[1]?.length > 2) {
+                                            // If more than 2 decimal places, round it to 2 decimals
+                                            setMarkupPercent(value.toFixed(2));
+                                        } else {
+                                            setMarkupPercent(e.target.value);
+                                        }
+                                    }}
+                                />
+
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Material ($)</label>

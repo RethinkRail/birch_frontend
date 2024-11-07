@@ -17,7 +17,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
     if (!entry) {
         return null; // Handle undefined entry gracefully
     }
-
+    console.log(entry)
     const handleDateChange = (key, date) => {
         const updatedEntry = { ...entry, [key]: date };
         onChange(updatedEntry);
@@ -46,11 +46,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
         <tr className="border-b">
             <td className="p-2">
                 <DatePicker
-                    customInput={
-                        <CustomDateInput
-                            value={entry.start_date ? new Date(entry.start_date): ''}
-                        />
-                    }
+
                     selected={entry.start_date ? new Date(entry.start_date) : null}
                     onChange={(date) => handleDateChange('start_date', date)}
                     showYearDropdown
@@ -60,11 +56,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
             </td>
             <td className="p-2">
                 <DatePicker
-                    customInput={
-                        <CustomDateInput
-                            value={entry.end_date ? new Date(entry.end_date) : ''}
-                        />
-                    }
+
                     selected={entry.end_date ? new Date(entry.end_date) : null}
                     onChange={(date) => handleDateChange('end_date', date)}
                     selectsEnd

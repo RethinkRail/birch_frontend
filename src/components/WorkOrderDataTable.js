@@ -14,6 +14,7 @@ import CustomDateInput from "./CustomDateInput";
 import ReorderableTable from "./ReorderableTable";
 import debounce from 'lodash/debounce';
 import {hasRole} from "../utils/CommonHelper";
+import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 
 const qs = require('qs');
 
@@ -292,12 +293,12 @@ const WorkOrderDataTable = ({
                 {row.last_content}
             </span>
             ),
-            width: "11%",
+            width: "10%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "15%",
+            width: "14%",
             cell: (row) => (
                 <select
                     onChange={(e) => handleDropdownChange(e, row.work_id)}
@@ -316,7 +317,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "18%",
+            width: "14%",
             cell: (row) => (
                 <span
                     onClick={() => {
@@ -336,17 +337,17 @@ const WorkOrderDataTable = ({
         {
             name: "MATERIAL ETA",
             selector: row => row.material_eta || '',
-            width: "8%",
+            width: "12%",
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={row.material_eta ? new Date(row.material_eta) : null} />}
+                    customInput={<CustomDateInputFullWidth value={row.material_eta ? new Date(row.material_eta) : null} />}
                     selected={row.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.material_eta) : null}
                     onChange={newDate => updateMaterialETA(row.work_id, newDate)}
                     showYearDropdown
                     isClearable
                     disabled={row.finalized > 0}
                     dateFormat="MM-dd-yyyy"
-                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
+                    className=""
                 />
             ),
             sortFunction: (a, b) => {
@@ -360,10 +361,10 @@ const WorkOrderDataTable = ({
         {
             name: "POD",
             selector: row => row.projected_out_date || '',
-            width: "8%",
+            width: "10%",
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
+                    customInput={<CustomDateInputFullWidth value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
                     selected={row.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.projected_out_date) : null}
                     onChange={newDate => updatePOD(row.work_id, newDate)}
                     showYearDropdown

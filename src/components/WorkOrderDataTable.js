@@ -404,7 +404,7 @@ const WorkOrderDataTable = ({
             sortable: true,
             cell: (row) => (
                 <DatePicker
-                    customInput={<CustomDateInput value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null} />}
+                    customInput={<CustomDateInputFullWidth value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null} />}
                     selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
                     onChange={newDate => updateMarkAsShipped(row.work_id, newDate)}
                     showYearDropdown

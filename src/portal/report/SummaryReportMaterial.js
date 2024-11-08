@@ -30,9 +30,10 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
         { accessorKey: 'owner', header: 'Owner', enableSorting: true },
         { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
-        { accessorKey: 'status', header: 'Status', enableSorting: true },
+        { accessorKey: 'status', header: 'Status', enableSorting: true,columnFilterModeOptions: ['between','lessThan', 'greaterThan'] },
         { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
-        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true },
+        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true
+        },
         { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
         { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },
         { accessorKey: 'mhr_applied', header: 'MHR Applied', enableSorting: true },
@@ -65,9 +66,9 @@ const  SummaryReportMaterial = () => {
 
     const formatDate = (sqlDate) => {
         if (sqlDate === process.env.REACT_APP_DEFAULT_DATE) {
-            return ''; // Return empty string if equal to the default date
+            return null; // Return empty string if equal to the default date
         }
-        return convertSqlToFormattedDate(sqlDate); // Format as needed
+        return new Date(sqlDate).toLocaleDateString(); // Format as needed
     };
 
 
@@ -269,10 +270,11 @@ const  SummaryReportMaterial = () => {
                         columns={columns}
                         data={data}
                         enablePagination={true}
+                        enableColumnFilterModes={true}
                         initialState={{
                             pagination: {
                                 pageIndex: 0,
-                                pageSize: 10, // Set default page size to 50
+                                pageSize: 50, // Set default page size to 50
                             },
                         }}
                         muiTableHeadCellProps={{

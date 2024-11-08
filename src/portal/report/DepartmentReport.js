@@ -479,12 +479,13 @@ const DepartmentReport = () => {
         () => [
             { accessorKey: "id", header: "ID" },
             { accessorKey: "type", header: "Type" },
-            { accessorKey: "dis", header: "DIS",size: 20 },
+            { accessorKey: "dis", header: "DIS",size: 20 ,columnFilterModeOptions: ['lessThan', 'greaterThan'],},
             { accessorKey: "railcar_id", header: "Railcar",size: 20 },
             {
                 accessorKey: "status_code",
                 header: "Status",
                 size:50,
+                columnFilterModeOptions: ['between','lessThan', 'greaterThan'],
                 Cell: ({ row, column }) => (
                     <select onChange={(e) => handleDropdownChangeInDetails(e, row.original.id)} className="w-[200px]">
                         {statusCodes.map((status) => (
@@ -870,12 +871,13 @@ const DepartmentReport = () => {
                     <MaterialReactTable
                         columns={columns}
                         data={processedReport}
-                        enablePagination={false}
+                        enablePagination={true}
+                        enableColumnFilterModes={true}
                         enableStickyHeader
                         initialState={{
                             pagination: {
                                 pageIndex: 0,
-                                pageSize: 50, // Set default page size to 80
+                                pageSize: 50, // Set default page size to 50
                             },
                             columnPinning: { left: ['railcar_id'] },
                             columnVisibility: { id: false,type:false }

@@ -870,7 +870,7 @@ const DepartmentReport = () => {
                     <MaterialReactTable
                         columns={columns}
                         data={processedReport}
-                        enablePagination={true}
+                        enablePagination={false}
                         enableStickyHeader
                         initialState={{
                             pagination: {

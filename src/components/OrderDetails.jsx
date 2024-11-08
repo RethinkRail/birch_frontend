@@ -1912,6 +1912,7 @@ const OrderDetails = ({
                                             showYearDropdown
                                             disabled={workOrder.locked_by != null}
                                             dateFormat="MM-dd-yyyy"
+                                            todayButton="Today"
                                         />
 
                                         <p className='mt-2'>Due Date</p>
@@ -2115,6 +2116,7 @@ const OrderDetails = ({
                                                 showYearDropdown
                                                 disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
+                                                todayButton="Today"
                                             />
 
                                             <p className='mt-2'>Due Date</p>

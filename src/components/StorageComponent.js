@@ -10,6 +10,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import CustomDateInput from "./CustomDateInput";
 import axios from "axios";
+import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 
 
 
@@ -46,7 +47,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
         <tr className="border-b">
             <td className="p-2">
                 <DatePicker
-
+                    customInput={<CustomDateInputFullWidth value={entry.start_date != null ? new Date(entry.start_date) : null} />}
                     selected={entry.start_date ? new Date(entry.start_date) : null}
                     onChange={(date) => handleDateChange('start_date', date)}
                     showYearDropdown
@@ -56,8 +57,8 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
             </td>
             <td className="p-2">
                 <DatePicker
-
-                    selected={entry.end_date != process.env ? new Date(entry.end_date) : null}
+                    customInput={<CustomDateInputFullWidth value={entry.end_date != null ? new Date(entry.end_date) : null} />}
+                    selected={entry.end_date != null ? new Date(entry.end_date) : null}
                     onChange={(date) => handleDateChange('end_date', date)}
                     selectsEnd
                     startDate={entry.start_date ? new Date(entry.start_date) : null}
@@ -67,6 +68,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
                     dateFormat="MM-dd-yyyy"
                     className="w-full"
                     disabled={isDisabled}
+                    isClearable
                 />
             </td>
             <td className="p-2 text-center">
@@ -94,11 +96,11 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
 
 const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     const [entries, setEntries] = useState([]);
-
+    console.log(initialEntries)
     useEffect(() => {
         const mappedEntries = initialEntries.map((entry) => ({
             id: entry.id,
-            start_date: entry.start_date ? new Date(entry.start_date) : null,
+            start_date: entry.start_date != null ? new Date(entry.start_date) : null,
             end_date: entry.end_date ? new Date(entry.end_date) : null,
             is_billed: !!entry.is_billed,
         }));

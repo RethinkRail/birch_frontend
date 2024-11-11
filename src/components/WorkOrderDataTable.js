@@ -271,9 +271,9 @@ const WorkOrderDataTable = ({
             name: "DIF",
             selector: row => row.dif,
             sortable: true,
-            width: '4%',
+            width: '5%',
             cell: (row) => (
-                <span className="whitespace-pre-line text-xs sm:text-sm md:text-base">
+                <span className="whitespace-pre-line text-xs ">
                 {row.dif > 0 ? row.dif : "-"}
             </span>
             ),

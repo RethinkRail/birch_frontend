@@ -57,7 +57,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
             <td className="p-2">
                 <DatePicker
 
-                    selected={entry.end_date ? new Date(entry.end_date) : null}
+                    selected={entry.end_date != process.env ? new Date(entry.end_date) : null}
                     onChange={(date) => handleDateChange('end_date', date)}
                     selectsEnd
                     startDate={entry.start_date ? new Date(entry.start_date) : null}

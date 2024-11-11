@@ -404,7 +404,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
 
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-2/3">
+                    <div className="bg-white rounded-lg p-6 w-2/3 max-h-[80vh] overflow-y-auto">
                         <h2 className="text-lg font-semibold mb-4">Hours Applied Details</h2>
 
                         {loading ? (

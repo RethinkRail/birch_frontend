@@ -1082,12 +1082,7 @@ const OrderDetails = ({
                                         </button>
                                     </form>
                                 </div>
-
                             </div>
-
-
-
-
                         </div>
 
                         <div className="w-full flex justify-center lg:hidden">

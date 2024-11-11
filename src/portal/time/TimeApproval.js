@@ -308,11 +308,12 @@ const TimeApproval = () =>{
                     params: {
                         start_time: start_date,
                         end_time: end_date,
-                        railcar_id: selectedCarToRetrieveTimeLog.value,
+                        railcar_id: selectedCarToRetrieveTimeLog.label,
                         crew_id: selectedCrewsToTimeRetrieve.value,
                         department_id: selectedDepartmentToTimeRetrieve.value
                     }
                 });
+
 
                 birchResponse =  responseBirch.data
                 console.log(birchResponse);
@@ -424,7 +425,7 @@ const TimeApproval = () =>{
             return acc;
         }, {});
 
-        console.log("Grouped Data:", groupedData);
+        console.log("Grouped Data in BIRCH:", groupedData);
 
         // Create a map from qbData, using employee_number as a string
         const qbDataMap = new Map(

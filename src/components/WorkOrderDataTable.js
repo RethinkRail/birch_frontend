@@ -293,12 +293,12 @@ const WorkOrderDataTable = ({
                 {row.last_content}
             </span>
             ),
-            width: "10%",
+            width: "11%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "14%",
+            width: "13%",
             cell: (row) => (
                 <select
                     onChange={(e) => handleDropdownChange(e, row.work_id)}
@@ -317,7 +317,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "14%",
+            width: "17%",
             cell: (row) => (
                 <span
                     onClick={() => {
@@ -337,8 +337,9 @@ const WorkOrderDataTable = ({
         {
             name: "MATERIAL ETA",
             selector: row => row.material_eta || '',
-            width: "12%",
+            width: "9%",
             cell: (row) => (
+                <span className="w-full items-start">
                 <DatePicker
                     customInput={<CustomDateInputFullWidth value={row.material_eta ? new Date(row.material_eta) : null} />}
                     selected={row.material_eta !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.material_eta) : null}
@@ -349,6 +350,7 @@ const WorkOrderDataTable = ({
                     dateFormat="MM-dd-yyyy"
                     className=""
                 />
+                </span>
             ),
             sortFunction: (a, b) => {
                 const dateA = a.material_eta ? new Date(a.material_eta) : new Date(0);
@@ -361,17 +363,19 @@ const WorkOrderDataTable = ({
         {
             name: "POD",
             selector: row => row.projected_out_date || '',
-            width: "10%",
+            width: "8%",
             cell: (row) => (
-                <DatePicker
-                    customInput={<CustomDateInputFullWidth value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
-                    selected={row.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.projected_out_date) : null}
-                    onChange={newDate => updatePOD(row.work_id, newDate)}
-                    showYearDropdown
-                    dateFormat="MM-dd-yyyy"
-                    disabled={row.finalized > 0}
-                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
-                />
+                <span className="w-full items-start">
+                    <DatePicker
+                        customInput={<CustomDateInputFullWidth value={row.projected_out_date ? new Date(row.projected_out_date) : null} />}
+                        selected={row.projected_out_date !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.projected_out_date) : null}
+                        onChange={newDate => updatePOD(row.work_id, newDate)}
+                        showYearDropdown
+                        dateFormat="MM-dd-yyyy"
+                        disabled={row.finalized > 0}
+                        className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
+                    />
+                </span>
             ),
             sortable: true,
             sortFunction: (a, b) => {
@@ -400,18 +404,20 @@ const WorkOrderDataTable = ({
         {
             name: "SHIPPED",
             selector: row => row.shipped,
-            width: "12%",
+            width: "9%",
             sortable: true,
             cell: (row) => (
-                <DatePicker
-                    customInput={<CustomDateInputFullWidth value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null} />}
-                    selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
-                    onChange={newDate => updateMarkAsShipped(row.work_id, newDate)}
-                    showYearDropdown
-                    isClearable
-                    dateFormat="MM-dd-yyyy"
-                    className="w-full sm:w-auto md:w-auto text-xs sm:text-sm md:text-base"
-                />
+                <span className="w-full items-start">
+                    <DatePicker
+                        customInput={<CustomDateInputFullWidth value={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null} />}
+                        selected={row.shipped !== process.env.REACT_APP_DEFAULT_DATE ? new Date(row.shipped) : null}
+                        onChange={newDate => updateMarkAsShipped(row.work_id, newDate)}
+                        showYearDropdown
+                        isClearable
+                        dateFormat="MM-dd-yyyy"
+                        className="w-full text-sm"
+                    />
+                </span>
             ),
         },
         {

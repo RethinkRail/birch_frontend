@@ -613,6 +613,11 @@ const DepartmentReport = () => {
                         portalId="root-portal"
                     />
                 ),
+                sortingFn: (rowA, rowB) => {
+                    const dateA = new Date(rowA.original.projected_out_date);
+                    const dateB = new Date(rowB.original.projected_out_date);
+                    return dateA - dateB;
+                },
             },
             {
                 accessorKey: "total_cost",

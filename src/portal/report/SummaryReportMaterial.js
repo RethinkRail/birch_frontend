@@ -32,7 +32,12 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
         { accessorKey: 'status', header: 'Status', enableSorting: true,columnFilterModeOptions: ['between','lessThan', 'greaterThan'] },
         { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
-        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true
+        { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+                const dateA = new Date(rowA.original.projected_out_date);
+                const dateB = new Date(rowB.original.projected_out_date);
+                return dateA - dateB;
+            },
         },
         { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
         { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },

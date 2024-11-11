@@ -182,10 +182,10 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         const modifiledJobs = updateArray(copiedJobs,workOrder.id,workOrder.work_order,jobs.length)
         console.log(modifiledJobs)
         const response = await  handlePaste(modifiledJobs)
-        if(response.status==200){
-            localStorage.setItem("jobsToBePasted", null)
-            setJobsToBePasted(null)
-        }
+        // if(response.status==200){
+        //     localStorage.setItem("jobsToBePasted", null)
+        //     setJobsToBePasted(null)
+        // }
     }
 
     const updateArray = (data, newWorkId, newWorkOrder, startingLineNumber) => {

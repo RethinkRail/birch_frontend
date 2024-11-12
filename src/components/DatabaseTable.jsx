@@ -11,6 +11,7 @@ import {toast} from 'react-toastify'
 import DeleteModal from './DeleteModal'
 import {showToastMessage} from "../utils/CommonHelper";
 import DataTableSearch from "./DataTableSearch";
+import {Input} from "postcss";
 
 const DatabaseTable = () => {
 
@@ -224,6 +225,7 @@ const DatabaseTable = () => {
                         highlightOnHover={true}
                         className="display nowrap compact stripe"
                         customStyles={myStyles}
+
                     />
                 </div>
             ) : (

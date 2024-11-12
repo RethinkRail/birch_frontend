@@ -1247,13 +1247,13 @@ export function printInvoice(workorder, forWhom) {
         console.log(item)
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
-        const purchaseCost = Number(round2Dec(item.purchase_cost)) * Number(round2Dec(item.quantity));
+        const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
 
         //console.log(single_mat_cost)
 
-        total_material_cost += Number(single_mat_cost)
+        total_material_cost += Number(round2Dec(single_mat_cost))
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
             item.parts.title + '</td><td style="text-align: right;">' +
             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +

@@ -127,11 +127,6 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
 
 
     const handleSave = async () => {
-        console.log(inputValues)
-        console.log(inputValues.rfid)
-        console.log(rfiD)
-        console.log(rm)
-        console.log(reasonToCome)
         if (!inputValues.rfid || inputValues.rfid.trim().length != 10) {
             toast("In valid car number", {type: "error"})
             return
@@ -179,7 +174,6 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
             }
         }
 
-        console.log(transformedValues, "This is the transformed value");
 
         try {
             let response;
@@ -188,14 +182,12 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
                 console.log("Reached the create field");
                 transformedValues['rfid'] = rfiD.toUpperCase()
                 response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}table?table=railcar`, transformedValues);
-                console.log("here")
 
             } else {
-                console.log("inside elese")
+
                 response = await axios.patch(`${process.env.REACT_APP_BIRCH_API_URL}table?table=railcar`, transformedValues);
-                console.log("here2")
+
             }
-            console.log(response, "This is the response from the data creation/update");
 
             const newData = {...response.data};
 

@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {convertSqlToFormattedDateTime} from "../utils/DateTimeHelper";
 import qs from "qs";
 import axios from "axios";
@@ -8,6 +8,7 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
     const groupedItems = {};
     const commentModal = document.getElementById('commentModal');
     const statusTextArea = useRef(null);
+    const [disbaleSaveButton,setDisableSaveButton] = useState(false)
     data.forEach(item => {
         const statusKey = `${item.status_id}-${item.statuscode.title}`;
         if (!groupedItems[statusKey]) {
@@ -33,6 +34,7 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
         }
     }
     const saveNewComment = () => {
+        setDisableSaveButton(true)
         const newComment = getValueById("new_comment")
         if (newComment.length > 0) {
             // Call API
@@ -57,6 +59,7 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
             axios.request(config)
                 .then((response) => {
                     updateWorkUpdates(work_id, response.data, Object.values(groupedItems)[0].status_id)
+                    setDisableSaveButton(false)
                     if (commentModal) {
                         statusTextArea.current.value = ''
                         commentModal.close();
@@ -64,12 +67,14 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
                 })
                 .catch((error) => {
                     console.log(error);
+                    setDisableSaveButton(false)
                     if (commentModal) {
                         statusTextArea.current.value = ''
                         commentModal.close();
                     }
                 });
         } else {
+            setDisableSaveButton(false)
             if (commentModal) {
                 statusTextArea.current.value = ''
                 commentModal.close();
@@ -125,9 +130,13 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
                         close
                     </button>
                     <button
-                        className="btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px]"
-                        onClick={saveNewComment}>
-                        save
+                        className={`btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px] ${
+                            disbaleSaveButton ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={saveNewComment}
+                        disabled={disbaleSaveButton}
+                    >
+                        Save
                     </button>
                 </div>
             </div>

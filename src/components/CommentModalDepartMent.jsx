@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {convertSqlToFormattedDateTime} from "../utils/DateTimeHelper";
 import qs from "qs";
 import axios from "axios";
@@ -22,6 +22,7 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
         groupedItems[statusKey].names.push(item.user.name);
         groupedItems[statusKey].comments.push(item.comment);
     });
+    const [disbaleSaveButton,setDisableSaveButton] = useState(false)
     // console.log(Object.values(groupedItems))
     // const sorted_grouped_items = Object.values(groupedItems).sort((a,b)=>a.status-b.status)
     // console.log(sorted_grouped_items)
@@ -33,6 +34,7 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
         }
     }
     const saveNewComment = () => {
+        setDisableSaveButton(true)
         const newComment = getValueById("new_comment")
         if (newComment.length > 0) {
             // Call API
@@ -56,7 +58,9 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
 
             axios.request(config)
                 .then((response) => {
+
                     updateWorkUpdates(work_id, response.data, Object.values(groupedItems)[0].status_id,Object.values(groupedItems)[0].title)
+                    setDisableSaveButton(false)
                     if (commentModal) {
                         statusTextArea.current.value = ''
                         commentModal.close();
@@ -64,6 +68,7 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
                 })
                 .catch((error) => {
                     console.log(error);
+                    setDisableSaveButton(false)
                     if (commentModal) {
                         statusTextArea.current.value = ''
                         commentModal.close();
@@ -71,6 +76,7 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
                 });
         } else {
             if (commentModal) {
+                setDisableSaveButton(false)
                 statusTextArea.current.value = ''
                 commentModal.close();
             }
@@ -124,10 +130,20 @@ const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
                         onClick={closeModal}>
                         close
                     </button>
+                    {/*<button*/}
+                    {/*    className="btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px]"*/}
+                    {/*    onClick={saveNewComment}>*/}
+                    {/*    save*/}
+                    {/*</button>*/}
+
                     <button
-                        className="btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px]"
-                        onClick={saveNewComment}>
-                        save
+                        className={`btn text-white bg-[#002E54] hover:bg-[#002E54] ml-[12px] w-[106px] h-[40px] px-[30px] py-[10px] ${
+                            disbaleSaveButton ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={saveNewComment}
+                        disabled={disbaleSaveButton}
+                    >
+                        Save
                     </button>
                 </div>
             </div>

@@ -883,7 +883,7 @@ const OrderDetails = ({
                 printBRC(workOrder,3)
             }else if(docToDownload==='invoice'){
                 if(workOrder.railcar.owner_railcar_lessee_idToowner.is_po == 1){
-                    if(workOrder.purchase_order != ''){
+                    if(workOrder.secondary_owner_info.purchase_order != ''){
                         printInvoice(workOrder,3)
                     }else {
                         alert("Purchase order required")

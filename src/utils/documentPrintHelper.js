@@ -1366,10 +1366,10 @@ export function printInvoice(workorder, forWhom) {
         '<tr><td style="border: 1px solid black;">Bill To:</td><td></td>' +
         '<td style="border: 1px solid black;">Remit Payment To:</td>' +
         '</tr><tr><td style="border: 1px solid black;">' +
-        '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
+        '<textarea style="width: 100%;box-sizing: border-box;resize: none; border:0;background:none;" rows="10">' +
         owner_obj.name + '\n' + owner_address + '</textarea>' +
         '</td><td></td><td style="border: 1px solid black;">' +
-        '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="10">' +
+        '<textarea style="width: 100%;box-sizing: border-box;resize: none;margin-right: 10px; border:0;background:none;" rows="10">' +
         yard_name + '\n' + yard_billing_address + '\n\n' + yard_bank_info + ' </textarea>' +
         '</td></tr>' +
         '<tr><td></td></tr>' +

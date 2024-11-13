@@ -127,7 +127,7 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
 
 
     const handleSave = async () => {
-        console.log("sasa")
+        console.log(inputValues)
         console.log(inputValues.rfid)
         console.log(rfiD)
         console.log(rm)
@@ -140,6 +140,23 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
             toast("Reason is empty", {type: "error"})
             return
         }
+
+        if(!inputValues.last_product_id ){
+            toast("Product can't be empty", {type: "error"})
+            return
+        }
+
+        if(!inputValues.lessee_id ){
+            toast("Lessee can't be empty", {type: "error"})
+            return
+        }
+
+
+        if(!inputValues.owner_id ){
+            toast("Owner can't be empty", {type: "error"})
+            return
+        }
+
 
         if (rm == '') {
             toast("Routing matrix can't be empty", {type: "error"})

@@ -41,7 +41,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 availability:1,
                 part_id: part.id,
                 unit: part.parts_unit.name,
-                quantity: part.quantity,
+                quantity: part.quantity!=0?part.quantity:1,
                 parts:part
             }
         } else {

@@ -118,13 +118,17 @@ const WorkOrderDataTable = ({
     useEffect(() => {
         const handleChanges = () => {
            // console.log("Work orders changed from data table", workOrders)
-            if(workOrderToView !== null) {
-                const updated = workOrders.find(work => work.id == workOrderToView.id)
-                if(updated){
-                    setWorkOrderToView(updated)
-                }else {
-                    setWorkOrderToView(null)
+            //console.log(workOrderToView)
+            if(workOrderToView) {
+                if(workOrders.length>0){
+                    const updated = workOrders.find(work => work.id == workOrderToView.id)
+                    if(updated){
+                        setWorkOrderToView(updated)
+                    }else {
+                        setWorkOrderToView(null)
+                    }
                 }
+
 
             }
         }

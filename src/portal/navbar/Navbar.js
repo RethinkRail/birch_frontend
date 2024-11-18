@@ -46,7 +46,7 @@ const Navbar = () => {
                 {
                     title: 'Management Reports',
                     children: [
-                        { title: 'Revenue by Customer', path: '#' },
+                        { title: 'Revenue by Customer', path: '/rev_by_customer' },
                         { title: 'Revenue by Department', path: '#' },
                         { title: 'Revenue Recognition', path: '#' },
                         { title: 'Billed Cars', path: '#' }

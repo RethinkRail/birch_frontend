@@ -25,6 +25,7 @@ import StorageReport from "./portal/report/StorageReport";
 import WorkStationManager from "./portal/time/WorkStationManager";
 import TimeApproval from "./portal/time/TimeApproval";
 import RailcarTable from "./portal/report/RailcarTable";
+import ProfitChart from "./portal/report/ProfitChart";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -149,6 +150,13 @@ root.render(
                 <Route path="/time_approval" element={
                     <ProtectedRoute>
                         <TimeApproval/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/rev_by_customer" element={
+                    <ProtectedRoute>
+                        <ProfitChart/>
                     </ProtectedRoute>
                 }>
                 </Route>

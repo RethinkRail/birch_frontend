@@ -184,9 +184,9 @@ const ProfitChart = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">User Management</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue by Customer</h1>
             <div className="p-4">
-                <h1 className="text-lg font-bold mb-4">Owner Report Generator</h1>
+
 
                 {/* Select Menus */}
                 <div className="grid gap-1 grid-cols-5 mb-4">

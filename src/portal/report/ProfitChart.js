@@ -101,9 +101,9 @@ const ProfitChart = () => {
 
             // Limit to a maximum of 5 owners
             const ownerNames = Object.keys(groupedData).slice(0, 5);
-            if (ownerNames.length < 2) {
-                throw new Error('The data must contain at least 2 owners.');
-            }
+            // if (ownerNames.length < 2) {
+            //     throw new Error('The data must contain at least 2 owners.');
+            // }
 
             // Extract unique dates for labels
             const uniqueDates = Array.from(
@@ -141,7 +141,7 @@ const ProfitChart = () => {
             setLabels(uniqueDates);
             setDatasets(newDatasets);
             setLoading(false);
-            alert('Report generated successfully!');
+            //alert('Report generated successfully!');
         } catch (error) {
             console.error('Error generating report:', error);
             alert(error.response?.data?.error || 'Failed to generate the report!');

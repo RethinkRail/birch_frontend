@@ -37,7 +37,8 @@ const  PartReport = () => {
         { accessorKey: 'code', header: 'Code', enableSorting: true },
         { accessorKey: 'title', header: 'Title', enableSorting: true },
         { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
-        { accessorKey: 'cost', header: 'Cost', enableSorting: true },
+        { accessorKey: 'unit_cost', header: 'Unit Cost', enableSorting: true },
+        { accessorKey: 'cost', header: 'Total Cost', enableSorting: true },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -100,6 +101,7 @@ const  PartReport = () => {
                                         code,
                                         title,
                                         quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
+                                        unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
                                         cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
                                     });
                                 }

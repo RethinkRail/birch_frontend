@@ -5,7 +5,7 @@
  * Description:
  **/
 
-import React, {useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
@@ -34,9 +34,14 @@ const EmissionReport = () => {
     const [data, setData] = useState([]);
     // Handle change in date inputs
     const handleStartDateChange = (e) => {
+        console.log(e.target.value)
         setStartDate(e.target.value);
+        console.log(startDate)
     };
 
+    useEffect(() => {
+        console.log("Updated startDate:", startDate);
+    }, [startDate,endDate]);
     const handleEndDateChange = (e) => {
         setEndDate(e.target.value);
     };
@@ -88,8 +93,7 @@ const EmissionReport = () => {
     };
     function formatDate(data) {
         return data.map(item => {
-            const date = new Date(item.f1);
-            const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${date.getFullYear()}`;
+            const formattedDate = new Date(item.f1).toISOString().split("T")[0];
 
             return {
                 ...item,

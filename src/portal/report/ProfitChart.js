@@ -22,6 +22,8 @@ import {
 } from 'chart.js';
 import Select from "react-select";
 import {round2Dec} from "../../utils/NumberHelper";
+import LineGraph from "../../components/LineGraph";
+import {end} from "react-beautiful-dnd/src/view/key-codes";
 
 // Register Chart.js components
 ChartJS.register(
@@ -44,6 +46,7 @@ const ProfitChart = () => {
     const [datasets, setDatasets] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const [allData,setAllData] = useState([])
 
     // Fetch owners from the API
     useEffect(() => {
@@ -77,16 +80,225 @@ const ProfitChart = () => {
     };
 
 
-    const handleGenerate = async () => {
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates.');
-            return;
+
+    const aggregateData = (rawData, startDate, endDate) => {
+        const groupedData = {};
+        const DAY_MS = 86400000; // Milliseconds in a day
+        const rangeDays = (endDate - startDate) / DAY_MS;
+        const interval = rangeDays <= 30 ? 1 : rangeDays <= 90 ? 10 : rangeDays <= 180 ? 15 : 30;
+
+        rawData.forEach((item) => {
+            const date = new Date(item.invoice_date);
+            if (date >= startDate && date <= endDate) {
+                const companyKey = item.name;
+                const intervalStart = Math.floor((date - startDate) / (interval * DAY_MS)) * interval * DAY_MS + startDate.getTime();
+                const formattedInterval = new Date(intervalStart).toISOString().split("T")[0];
+
+                if (!groupedData[companyKey]) {
+                    groupedData[companyKey] = {};
+                }
+                if (!groupedData[companyKey][formattedInterval]) {
+                    groupedData[companyKey][formattedInterval] = 0;
+                }
+                groupedData[companyKey][formattedInterval] += parseFloat(item.total_cost);
+            }
+        });
+
+        return groupedData;
+    };
+    // const handleGenerate = async () => {
+    //     if (!startDate || !endDate) {
+    //         alert('Please select both start and end dates.');
+    //         return;
+    //     }
+    //
+    //     if (selectedOwners.every((owner) => !owner)) {
+    //         alert('Please select at least one owner.');
+    //         return;
+    //     }
+    //
+    //     try {
+    //         setLoading(true);
+    //         const payload = {
+    //             owners: selectedOwners.filter((id) => id), // Remove null values
+    //             startDate,
+    //             endDate,
+    //         };
+    //
+    //         console.log(startDate)
+    //         console.log(endDate)
+    //
+    //         const response = await axios.post(
+    //             `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report`,
+    //             payload
+    //         );
+    //
+    //         // const data = response.data.data;
+    //         // console.log(data)
+    //
+    //
+    //         const data = [
+    //             {
+    //                 "id": 7,
+    //                 "name": "GREENBRIER MANAGEMENT SERVICES",
+    //                 "railcar_id": "GBRX714198",
+    //                 "invoice_date": "10/15/2024",
+    //                 "total_cost": "4110.71"
+    //             },
+    //             {
+    //                 "id": 7,
+    //                 "name": "GREENBRIER MANAGEMENT SERVICES",
+    //                 "railcar_id": "CBTX781028",
+    //                 "invoice_date": "10/21/2024",
+    //                 "total_cost": "5204.42"
+    //             },
+    //             {
+    //                 "id": 29,
+    //                 "name": "DARLING INGREDIENTS INC C/O RSI",
+    //                 "railcar_id": "GATX090271",
+    //                 "invoice_date": "10/18/2024",
+    //                 "total_cost": "5535.71"
+    //             },
+    //             {
+    //                 "id": 29,
+    //                 "name": "DARLING INGREDIENTS INC C/O RSI",
+    //                 "railcar_id": "CTCX720584",
+    //                 "invoice_date": "10/21/2024",
+    //                 "total_cost": "6960.71"
+    //             },
+    //             {
+    //                 "id": 29,
+    //                 "name": "DARLING INGREDIENTS INC C/O RSI",
+    //                 "railcar_id": "GBRX714198",
+    //                 "invoice_date": "10/25/2024",
+    //                 "total_cost": "4110.71"
+    //             }
+    //         ]
+    //
+    //
+    //
+    //         // Group data by owner
+    //         let groupedData = data.reduce((acc, curr) => {
+    //             const owner = curr.name;
+    //             if (!acc[owner]) {
+    //                 acc[owner] = [];
+    //             }
+    //             acc[owner].push(curr);
+    //             return acc;
+    //         }, {});
+    //
+    //         groupedData = sortByDateAndCost(groupedData)
+    //         // Limit to a maximum of 5 owners
+    //         const ownerNames = Object.keys(groupedData).slice(0, 5);
+    //
+    //         if (ownerNames.length === 0) {
+    //             alert('No data available for the selected owners.');
+    //             setLoading(false);
+    //             return;
+    //         }
+    //
+    //         // Extract and sort unique dates
+    //         const uniqueDates = Array.from(
+    //             new Set(data.map((item) => item.invoice_date))
+    //         ).sort((a, b) => new Date(a) - new Date(b)); // Proper date sorting
+    //         // Create datasets for each owner
+    //         const newDatasets = ownerNames.map((owner, index) => {
+    //             const ownerData = groupedData[owner];
+    //
+    //             // Extract data points sequentially based on invoice_date
+    //             const sequentialData = ownerData.map((item) => ({
+    //                 x: item.invoice_date, // Use the invoice_date as the X-axis label
+    //                 y: parseFloat(item.total_cost), // Use the total_cost as the Y-axis value
+    //             }));
+    //
+    //             // Dynamic colors for up to 5 owners
+    //             const colors = [
+    //                 { border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.2)' },
+    //                 { border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.2)' },
+    //                 { border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.2)' },
+    //                 { border: 'rgba(255, 206, 86, 1)', background: 'rgba(255, 206, 86, 0.2)' },
+    //                 { border: 'rgba(153, 102, 255, 1)', background: 'rgba(153, 102, 255, 0.2)' },
+    //             ];
+    //
+    //             return {
+    //                 label: owner,
+    //                 data: sequentialData, // Sequential data points
+    //                 borderColor: colors[index % colors.length].border,
+    //                 backgroundColor: colors[index % colors.length].background,
+    //                 borderWidth: 2,
+    //                 tension: 0, // Straight lines
+    //                 spanGaps: true, // Bridge gaps if there are missing points
+    //                 parsing: false, // Disable auto-parsing to use x/y pairs
+    //             };
+    //         });
+    //
+    //         const sequentialLabels = [...new Set(data.map((item) => item.invoice_date))].sort(
+    //             (a, b) => new Date(a) - new Date(b)
+    //         );
+    //         setLabels(['01/15/2024','10/15/2024', '10/18/2024', '10/21/2024', '10/25/2024']);
+    //         setDatasets(newDatasets);
+    //         setLoading(false);
+    //
+    //
+    //         console.log(sequentialLabels)
+    //         console.log(newDatasets)
+    //
+    //         console.log(startDate.toLocaleDateString())
+    //         console.log(endDate.toLocaleDateString())
+    //     } catch (error) {
+    //         console.error('Error generating report:', error);
+    //         alert(error.response?.data?.error || 'Failed to generate the report!');
+    //         setLoading(false);
+    //     }
+    // };
+
+
+    function generateDateRange(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = end - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+        let dateRange = [];
+
+        // Case 1: If the difference is 30 days or less, return daily range
+        if (diffDays <= 30) {
+            let currentDate = new Date(start);
+            while (currentDate <= end) {
+                dateRange.push(formatDate(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        // Case 2: If the difference is between 3 months (90 days) and 6 months (180 days), return every 15 days
+        else if (diffDays > 90 && diffDays <= 180) {
+            let currentDate = new Date(start);
+            while (currentDate <= end) {
+                dateRange.push(formatDate(currentDate));
+                currentDate.setDate(currentDate.getDate() + 15);
+            }
+        }
+        // Case 3: If the difference is more than 6 months, return every 30 days
+        else {
+            let currentDate = new Date(start);
+            while (currentDate <= end) {
+                dateRange.push(formatDate(currentDate));
+                currentDate.setDate(currentDate.getDate() + 30);
+            }
         }
 
-        if (selectedOwners.every((owner) => !owner)) {
-            alert('Please select at least one owner.');
-            return;
-        }
+        return dateRange;
+    }
+
+    function formatDate(date) {
+        const month = date.getMonth() + 1;  // Months are zero-based, so add 1
+        const day = date.getDate();
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+    }
+
+
+    //original
+    const handleGenerate = async () => {
 
         try {
             setLoading(true);
@@ -102,9 +314,7 @@ const ProfitChart = () => {
             );
 
             const data = response.data.data;
-            console.log(data)
-            // Group data by owner
-            const groupedData = data.reduce((acc, curr) => {
+            let groupedData = data.reduce((acc, curr) => {
                 const owner = curr.name;
                 if (!acc[owner]) {
                     acc[owner] = [];
@@ -113,6 +323,8 @@ const ProfitChart = () => {
                 return acc;
             }, {});
 
+
+            groupedData = sortByDateAndCost(groupedData)
             // Limit to a maximum of 5 owners
             const ownerNames = Object.keys(groupedData).slice(0, 5);
 
@@ -126,16 +338,15 @@ const ProfitChart = () => {
             const uniqueDates = Array.from(
                 new Set(data.map((item) => item.invoice_date))
             ).sort((a, b) => new Date(a) - new Date(b)); // Proper date sorting
-
             // Create datasets for each owner
             const newDatasets = ownerNames.map((owner, index) => {
                 const ownerData = groupedData[owner];
 
-                // Ensure data aligns with sorted uniqueDates
-                const totalCosts = uniqueDates.map((date) => {
-                    const entry = ownerData.find((item) => item.invoice_date === date);
-                    return entry ?entry.total_cost : 0; // Fill missing dates with 0
-                });
+                // Extract data points sequentially based on invoice_date
+                const sequentialData = ownerData.map((item) => ({
+                    x: item.invoice_date, // Use the invoice_date as the X-axis label
+                    y: parseFloat(item.total_cost), // Use the total_cost as the Y-axis value
+                }));
 
                 // Dynamic colors for up to 5 owners
                 const colors = [
@@ -148,28 +359,23 @@ const ProfitChart = () => {
 
                 return {
                     label: owner,
-                    data: totalCosts,
+                    data: sequentialData, // Sequential data points
                     borderColor: colors[index % colors.length].border,
                     backgroundColor: colors[index % colors.length].background,
                     borderWidth: 2,
                     tension: 0, // Straight lines
-                    spanGaps: false, // Ensure gaps are connected
+                    spanGaps: true, // Bridge gaps if there are missing points
+                    parsing: false, // Disable auto-parsing to use x/y pairs
                 };
             });
 
-            // Update state
-            //setLabels(uniqueDates);
+            const sequentialLabels = [...new Set(data.map((item) => item.invoice_date))].sort(
+                (a, b) => new Date(a) - new Date(b)
+            );
+            setLabels(sequentialLabels);
             setDatasets(newDatasets);
             setLoading(false);
-            const uniformLabels = makeLabelsUniform(startDate.toLocaleDateString(), endDate.toLocaleDateString(), 2);
 
-            setLabels(uniformLabels)
-
-            console.log(uniqueDates)
-            console.log(newDatasets)
-
-            console.log(startDate.toLocaleDateString())
-            console.log(endDate.toLocaleDateString())
         } catch (error) {
             console.error('Error generating report:', error);
             alert(error.response?.data?.error || 'Failed to generate the report!');
@@ -209,99 +415,55 @@ const ProfitChart = () => {
         return result;
     }
 
-
-    // const handleGenerate = async () => {
-    //     if (!startDate || !endDate) {
-    //         alert('Please select both start and end dates.');
-    //         return;
-    //     }
+    // const sortByDateAndCost = (data) => {
+    //     for (const company in data) {
+    //         data[company].sort((a, b) => {
+    //             const dateA = new Date(a.invoice_date);
+    //             const dateB = new Date(b.invoice_date);
     //
-    //     if (selectedOwners.every((owner) => !owner)) {
-    //         alert('Please select at least one owner.');
-    //         return;
-    //     }
-    //
-    //     try {
-    //         setLoading(true);
-    //         const payload = {
-    //             owners: selectedOwners.filter((id) => id), // Remove null values
-    //             startDate,
-    //             endDate,
-    //         };
-    //
-    //         const response = await axios.post(
-    //             `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report`,
-    //             payload
-    //         );
-    //
-    //         const data = response.data.data;
-    //
-    //         // Generate continuous daily dates from startDate to endDate
-    //         const continuousDates = [];
-    //         let currentDate = new Date(startDate);
-    //         const end = new Date(endDate);
-    //
-    //         while (currentDate <= end) {
-    //             continuousDates.push(currentDate.toISOString().split('T')[0]); // Format: YYYY-MM-DD
-    //             currentDate.setDate(currentDate.getDate() + 1); // Increment by 1 day
-    //         }
-    //
-    //         // Group data by owner
-    //         const groupedData = data.reduce((acc, curr) => {
-    //             const owner = curr.name;
-    //             if (!acc[owner]) {
-    //                 acc[owner] = [];
+    //             if (dateA - dateB !== 0) {
+    //                 return dateA - dateB; // Sort by date first
+    //             } else {
+    //                 return parseFloat(a.total_cost) - parseFloat(b.total_cost); // If dates are equal, sort by total cost
     //             }
-    //             acc[owner].push(curr);
-    //             return acc;
-    //         }, {});
-    //
-    //         // Map data to datasets aligned with continuousDates
-    //         const newDatasets = Object.entries(groupedData).map(([owner, ownerData], index) => {
-    //             // Create a map of invoice_date to total_cost
-    //             const dataMap = ownerData.reduce((map, item) => {
-    //                 // Ensure date format matches continuousDates
-    //                 const formattedDate = new Date(item.invoice_date).toISOString().split('T')[0];
-    //                 map[formattedDate] = parseFloat(item.total_cost) || 0;
-    //                 return map;
-    //             }, {});
-    //
-    //             // Fill dataset with total costs for each day in continuousDates
-    //             const totalCosts = continuousDates.map((date) => dataMap[date] || 0);
-    //
-    //             // Assign colors for each dataset
-    //             const colors = [
-    //                 { border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.2)' },
-    //                 { border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.2)' },
-    //                 { border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.2)' },
-    //                 { border: 'rgba(255, 206, 86, 1)', background: 'rgba(255, 206, 86, 0.2)' },
-    //                 { border: 'rgba(153, 102, 255, 1)', background: 'rgba(153, 102, 255, 0.2)' },
-    //             ];
-    //
-    //             return {
-    //                 label: owner,
-    //                 data: totalCosts,
-    //                 borderColor: colors[index % colors.length].border,
-    //                 backgroundColor: colors[index % colors.length].background,
-    //                 borderWidth: 2,
-    //                 tension: 0,
-    //                 spanGaps: false,
-    //             };
     //         });
-    //
-    //         // Update chart state
-    //         setLabels(continuousDates);
-    //         setDatasets(newDatasets);
-    //         setLoading(false);
-    //     } catch (error) {
-    //         console.error('Error generating report:', error);
-    //         alert(error.response?.data?.error || 'Failed to generate the report!');
-    //         setLoading(false);
     //     }
+    //     return data;
     // };
+
+    //It is also merging in same date
+    const sortByDateAndCost = (data) => {
+        const result = {};
+
+        for (const company in data) {
+            // Group by `invoice_date`
+            const grouped = data[company].reduce((acc, curr) => {
+                const date = curr.invoice_date;
+                if (!acc[date]) {
+                    acc[date] = { ...curr, total_cost: parseFloat(curr.total_cost) };
+                } else {
+                    acc[date].total_cost += parseFloat(curr.total_cost);
+                }
+                return acc;
+            }, {});
+
+            // Convert grouped object back to array and sort
+            result[company] = Object.values(grouped).sort((a, b) => {
+                const dateA = new Date(a.invoice_date);
+                const dateB = new Date(b.invoice_date);
+
+                return dateA - dateB; // Sort by date
+            });
+        }
+
+        return result;
+    };
+
+
 
     const options = {
         responsive: true,
+        backgroundColor:"#6c1919",
         plugins: {
             legend: {
                 position: 'top',
@@ -391,12 +553,14 @@ const ProfitChart = () => {
                     {loading ? 'Generating...' : 'Generate'}
                 </button>
 
-                {/* Chart */}
+
                 {datasets.length > 0 && (
                     <div className="mt-8">
                         <Line data={chartData} options={options} />
                     </div>
                 )}
+
+                {/*<LineGraph data={allData} />*/}
             </div>
         </div>
     );

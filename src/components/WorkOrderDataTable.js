@@ -72,7 +72,7 @@ const WorkOrderDataTable = ({
 
     const handleSearchClick = () => {
         // alert(`Search clicked with term: ${searchTerm}`);
-        searchCar(searchTerm)
+        searchCar(searchTerm.toUpperCase())
         setSearchTerm(''); // Clear the search box
     };
 
@@ -85,7 +85,7 @@ const WorkOrderDataTable = ({
     };
 
     const handleChange = (event) => {
-        const value = event.target.value;
+        const value = event.target.value.toUpperCase();
         setSearchTerm(value);
         debouncedSearch(value); // Call debounced search function
     };

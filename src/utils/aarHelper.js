@@ -999,7 +999,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
             const laborCost = Number(round2Dec(item.labor_rate)) * Number(round2Dec(item.labor_time)) * Number(round2Dec(item.quantity));
 
-            labor_charge.value = getObjComputedValue(labor_charge, laborCost * 100);
+            labor_charge.value = getObjComputedValue(labor_charge, Math.abs(laborCost) * 100);
 
             var mat_cost_single_job = 0
             item.jobparts.forEach(function (part) {

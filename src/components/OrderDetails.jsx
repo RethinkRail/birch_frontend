@@ -208,14 +208,14 @@ const OrderDetails = ({
 
     useEffect(() => {
         if (!workOrder) {
-            console.warn("workOrder is null or undefined");
+            //console.warn("workOrder is null or undefined");
             return;
         }
 
         // const element = document.getElementById('car_info');
         // element?.scrollIntoView({ behavior: 'smooth' });
         // window.scrollBy(0, -50);
-        console.log("use effect in orderdetails");
+        //console.log("use effect in orderdetails");
         setReasonToCome(workOrder.reason_to_come ?? "");
         // console.log(workOrder);
         // console.log(workOrder.joblist);
@@ -249,7 +249,7 @@ const OrderDetails = ({
         setInvoiceNetDaysChangedForOwner(false);
         setInvoiceNetDaysChangedForLessee(false);
 
-        console.log(workOrder.secondary_owner_info);
+//        console.log(workOrder.secondary_owner_info);
         setOwnerInvoiceDate(workOrder.invoice_date ?? null);
         setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
 
@@ -267,7 +267,7 @@ const OrderDetails = ({
         setInvoiceDateChangedForOwner(false);
         setInvoiceDateChangedForLessee(false);
 
-        console.log(lesseeInvoiceDate);
+//        console.log(lesseeInvoiceDate);
         setMo_wk(workOrder.mo_wk ?? 0);
         setSP(workOrder.sp ?? 0);
         setTQ(workOrder.tq ?? 0);
@@ -292,7 +292,7 @@ const OrderDetails = ({
 
     const getRailCarTimeLog =async () => {
         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
-        console.log(response)
+//        console.log(response)
         setRailcarLog(response.data)
     }
     const formatDateToSQL = (date) => {

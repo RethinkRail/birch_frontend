@@ -20,10 +20,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import Select from "react-select";
-import {round2Dec} from "../../utils/NumberHelper";
-import LineGraph from "../../components/LineGraph";
-import {end} from "react-beautiful-dnd/src/view/key-codes";
+
 
 // Register Chart.js components
 ChartJS.register(
@@ -560,7 +557,7 @@ const ProfitChart = () => {
                     </div>
                 )}
 
-                {/*<LineGraph data={allData} />*/}
+
             </div>
         </div>
     );

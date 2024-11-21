@@ -105,6 +105,7 @@ const RoutingMatrixEditor = () => {
                 console.log(response)
                 const updatedSteps = steps.filter(step => step.id !== stepId);
                 setSteps(updatedSteps);
+                toast.success('Deleted successfully.')
             })
             .catch(error => console.error('Error deleting step:', error));
     };
@@ -125,12 +126,14 @@ const RoutingMatrixEditor = () => {
             // If other fields also need conversion, add them here
         };
 
-
+        delete updatedStep.role;
+        delete updatedStep.statuscode;
         console.log(updatedStep)
         axios.put(`${process.env.REACT_APP_BIRCH_API_URL}routingmatrix/${selectedMatrixId}/steps/${step.id}`, updatedStep)
             .then((response)=>{
                 const updatedSteps = steps.map(s => s.id === step.id ? { ...s, ...updatedStep, id: response.data.id } : s);
                 setSteps(updatedSteps);
+                toast.success('Updated successfully.')
             })
             .catch(error => toast.error('Error updating step.'));
     };

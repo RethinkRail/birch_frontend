@@ -91,7 +91,7 @@ const  PartReport = () => {
                                 // If the part code is already in the map, update quantity and cost
                                 if (jobPartsMap.has(code)) {
                                     const existingPart = jobPartsMap.get(code);
-                                    existingPart.quantity = round2Dec(parseFloat(existingPart.quantity + quantity));  // Increase the quantity
+                                    existingPart.quantity = round2Dec(parseFloat(existingPart.quantity) + parseFloat(quantity));  // Increase the quantity
                                     existingPart.cost = round2Dec(parseFloat(existingPart.cost + (purchase_cost * quantity))); // Update total cost
                                 } else {
                                     // Add new part to the map

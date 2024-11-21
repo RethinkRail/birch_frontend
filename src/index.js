@@ -154,12 +154,7 @@ root.render(
                 }>
                 </Route>
 
-                <Route path="/rev_by_customer" element={
-                    <ProtectedRoute>
-                        <ProfitChart/>
-                    </ProtectedRoute>
-                }>
-                </Route>
+
 
                 <Route path="/department_time_report" element={
                     <ProtectedRoute>

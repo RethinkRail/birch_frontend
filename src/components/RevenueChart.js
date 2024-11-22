@@ -90,7 +90,14 @@ const RevenueChart = ({data,startDate,endDate}) => {
     }
     const options = {
         responsive: true,
-
+        layout: {
+            padding: {
+                top: 50, // Add space above the graph
+                bottom: 50, // Add space below the graph
+                left: 50, // Add space on the left
+                right: 50, // Add space on the right
+            },
+        },
         plugins: {
             legend: { position: "top" },
             title: {

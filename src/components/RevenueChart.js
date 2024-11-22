@@ -11,6 +11,18 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 
 // Register Chart.js modules
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register({
+    id: "graphBackground",
+    beforeDraw: (chart) => {
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea; // Get the area inside the axes
+
+        ctx.save();
+        ctx.fillStyle = "white"; // Set the background color to white
+        ctx.fillRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+        ctx.restore();
+    },
+});
 
 const RevenueChart = ({data,startDate,endDate}) => {
     // Generate the date range
@@ -78,6 +90,14 @@ const RevenueChart = ({data,startDate,endDate}) => {
     }
     const options = {
         responsive: true,
+        layout: {
+            padding: {
+                top: 50, // Add space above the graph
+                bottom: 50, // Add space below the graph
+                left: 50, // Add space on the left
+                right: 50, // Add space on the right
+            },
+        },
         plugins: {
             legend: { position: "top" },
             title: {
@@ -94,7 +114,7 @@ const RevenueChart = ({data,startDate,endDate}) => {
                 ticks: {
                     callback: function (value, index, values) {
                         // Show labels only for every third date
-                        if (index % getDateDifferenceCategory(startDate,endDate) === 0) {
+                        if (index % getDateDifferenceCategory(startDate, endDate) === 0) {
                             return this.getLabelForValue(value);
                         }
                         return null; // Hide other labels

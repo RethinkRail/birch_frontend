@@ -129,7 +129,7 @@ const RevenueByCustomer = () => {
                                     handleOwnerChange(index, selectedOption?.value)
                                 }
                                 options={owners}
-                                placeholder="Select Owner"
+                                placeholder="Select Customer"
                                 isClearable
                                 className="border rounded"
                             />

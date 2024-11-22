@@ -54,18 +54,61 @@ const RevenueChart = ({data,startDate,endDate}) => {
         labels: dateRange,
         datasets,
     };
+    function getDateDifferenceCategory(date1, date2) {
+        // Convert dates to Date objects
+        const startDate = new Date(date1);
+        const endDate = new Date(date2);
 
+        // Calculate the difference in milliseconds
+        const diffInMs = Math.abs(endDate - startDate);
+
+        // Convert milliseconds to days
+        const diffInDays = diffInMs / (1000 * 3600 * 24);
+
+        // Check conditions based on the day difference
+        if (diffInDays <= 31) {
+            return 1; // 30 days or less
+        } else if (diffInDays > 31 && diffInDays <= 120) {
+            return 3; // Between 1 and 3 months (approx 30-90 days)
+        } else if (diffInDays > 120 && diffInDays <= 180) {
+            return 7; // Between 3 and 6 months (approx 90-180 days)
+        } else {
+            return 15; // More than 6 months
+        }
+    }
     const options = {
         responsive: true,
         plugins: {
             legend: { position: "top" },
-            title: { display: true, text: "Revenue Comparison by Company (10/01/2024 - 10/30/2024)" },
+            title: {
+                display: true,
+                text: "Revenue Comparison by Company From " +
+                    startDate.toLocaleDateString() +
+                    " To " +
+                    endDate.toLocaleDateString(),
+            },
         },
         scales: {
-            x: { title: { display: true, text: "Date" } },
-            y: { title: { display: true, text: "Revenue ($)" } },
+            x: {
+                title: { display: true, text: "Date" },
+                ticks: {
+                    callback: function (value, index, values) {
+                        // Show labels only for every third date
+                        if (index % getDateDifferenceCategory(startDate,endDate) === 0) {
+                            return this.getLabelForValue(value);
+                        }
+                        return null; // Hide other labels
+                    },
+                    maxTicksLimit: 100,
+                    autoSkip: false, // Ensure callback is used
+                },
+            },
+            y: {
+                title: { display: true, text: "Revenue ($)" },
+            },
         },
     };
+
 
     return (
             <Line data={chartData} options={options} />

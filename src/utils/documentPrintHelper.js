@@ -1073,13 +1073,13 @@ export function printInvoice(workorder, forWhom) {
     if(forWhom==3){
         purchase_order =workorder.secondary_owner_info.purchase_order
         owner_obj = [{
-            name:workorder.railcar.owner_railcar_lessee_idToowner.name,
-            contact_name:workorder.railcar.owner_railcar_lessee_idToowner.contact_name,
-            address_line1: workorder.railcar.owner_railcar_lessee_idToowner.address_line1,
-            address_line2: workorder.railcar.owner_railcar_lessee_idToowner.address_line2,
-            city: workorder.railcar.owner_railcar_lessee_idToowner.city,
-            state: workorder.railcar.owner_railcar_lessee_idToowner.state,
-            zip_code: workorder.railcar.owner_railcar_lessee_idToowner.zip_code
+            name:workorder.railcar.owner_railcar_lessee_idToowner.name?workorder.railcar.owner_railcar_lessee_idToowner.name:'',
+            contact_name:workorder.railcar.owner_railcar_lessee_idToowner.contact_name?workorder.railcar.owner_railcar_lessee_idToowner.contact_name:'',
+            address_line1: workorder.railcar.owner_railcar_lessee_idToowner.address_line1? workorder.railcar.owner_railcar_lessee_idToowner.address_line1:'',
+            address_line2: workorder.railcar.owner_railcar_lessee_idToowner.address_line2? workorder.railcar.owner_railcar_lessee_idToowner.address_line2:'',
+            city: workorder.railcar.owner_railcar_lessee_idToowner.city?workorder.railcar.owner_railcar_lessee_idToowner.city:'',
+            state: workorder.railcar.owner_railcar_lessee_idToowner.state?workorder.railcar.owner_railcar_lessee_idToowner.state:'',
+            zip_code: workorder.railcar.owner_railcar_lessee_idToowner.zip_code?workorder.railcar.owner_railcar_lessee_idToowner.zip_code:''
         }]
         invoice_number= workorder.secondary_owner_info.invoice_number
         inv_date= workorder.secondary_owner_info.invoice_date != null ?convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date ):""
@@ -1090,13 +1090,13 @@ export function printInvoice(workorder, forWhom) {
 
         purchase_order = workorder.purchase_order
         owner_obj = [{
-            name:workorder.railcar.owner_railcar_owner_idToowner.name,
-            contact_name:workorder.railcar.owner_railcar_owner_idToowner.contact_name,
-            address_line1: workorder.railcar.owner_railcar_owner_idToowner.address_line1,
-            address_line2: workorder.railcar.owner_railcar_owner_idToowner.address_line2,
-            city: workorder.railcar.owner_railcar_owner_idToowner.city,
-            state: workorder.railcar.owner_railcar_owner_idToowner.state,
-            zip_code: workorder.railcar.owner_railcar_owner_idToowner.zip_code
+            name:workorder.railcar.owner_railcar_owner_idToowner.name?workorder.railcar.owner_railcar_owner_idToowner.name:'',
+            contact_name:workorder.railcar.owner_railcar_owner_idToowner.contact_name?workorder.railcar.owner_railcar_owner_idToowner.contact_name:'',
+            address_line1: workorder.railcar.owner_railcar_owner_idToowner.address_line1?workorder.railcar.owner_railcar_owner_idToowner.address_line1:'',
+            address_line2: workorder.railcar.owner_railcar_owner_idToowner.address_line2?workorder.railcar.owner_railcar_owner_idToowner.address_line2:'',
+            city: workorder.railcar.owner_railcar_owner_idToowner.city?workorder.railcar.owner_railcar_owner_idToowner.city:'',
+            state: workorder.railcar.owner_railcar_owner_idToowner.state? workorder.railcar.owner_railcar_owner_idToowner.state:'',
+            zip_code: workorder.railcar.owner_railcar_owner_idToowner.zip_code?workorder.railcar.owner_railcar_owner_idToowner.zip_code:''
         }]
         invoice_number= workorder.invoice_number
         inv_date= workorder.invoice_date != process.env.REACT_APP_DEFAULT_DATE ?convertSqlWithTZToFormattedDate(workorder.invoice_date ):""
@@ -1127,14 +1127,17 @@ export function printInvoice(workorder, forWhom) {
     //         zip_code: "ZipCodeA"
     //     }
     // ]
+
+    // console.log("hiii")
+    // console.log(owner_obj)
     var owner_address = '';
     if (owner_obj != null && owner_obj.length > 0) {
         owner_obj = owner_obj[0];
         if (owner_obj.contact_name != '') {
             owner_address += owner_obj.contact_name + '\n';
         }
-        owner_address += owner_obj.address_line1 + '\n' + owner_obj.address_line2 + '\n';
-        owner_address += owner_obj.city + ', ' + owner_obj.state + ' ' + owner_obj.zip_code;
+        owner_address += owner_obj.address_line1?owner_obj.address_line1:'' + '\n' + owner_obj.address_line2? owner_obj.address_line2:'' + '\n';
+        owner_address += owner_obj.city ?owner_obj.city:''+ ', ' + owner_obj.state ? owner_obj.state:''+ ' ' + owner_obj.zip_code? owner_obj.zip_code:'';
     }
     var lessee = workorder.railcar.owner_railcar_lessee_idToowner.name
     var splc = workorder.yard.splc;
@@ -1232,19 +1235,13 @@ export function printInvoice(workorder, forWhom) {
         }
 
     });
-    console.log(all_parts_for_sort)
+    //console.log(all_parts_for_sort)
     console.log(all_parts_for_sort.sort(function (a, b) {
         return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
-    //sorting
 
-    // var single_mat_cost =round2Dec(part.quantity)*(round2Dec( part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
-
-    // mat_cost_for_job += Number(round2Dec(single_mat_cost))
-
-    console.log(all_parts_for_sort)
     all_parts_for_sort.forEach(function (item) {
-        console.log(item)
+        //console.log(item)
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;

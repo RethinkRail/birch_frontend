@@ -11,6 +11,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
     useEffect(() => {
         jobs.sort((a, b) => a.line_number - b.line_number)
+
         const jobListData = jobs.map((job) => ({
             id: job.id,
             action: job,
@@ -23,7 +24,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             description: job.job_description,
             wmc: job.whymadecode.code,
             labor_time: round2Dec(job.labor_time),
-            labor: round2Dec(job.labor_time * job.labor_rate),
+            labor: round2Dec(parseFloat(job.labor_time) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
             material: job.material_cost,
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
@@ -60,7 +61,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             description: job.job_description,
             wmc: job.whymadecode.code,
             labor_time: round2Dec(job.labor_time),
-            labor: round2Dec(job.labor_time * job.labor_rate),
+            labor: round2Dec(job.labor_time * job.labor_rate*job.quantity),
             material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,

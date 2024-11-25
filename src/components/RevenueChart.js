@@ -12,14 +12,12 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 // Register Chart.js modules
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 ChartJS.register({
-    id: "graphBackground",
+    id: "whiteBackground",
     beforeDraw: (chart) => {
         const ctx = chart.ctx;
-        const chartArea = chart.chartArea; // Get the area inside the axes
-
         ctx.save();
         ctx.fillStyle = "white"; // Set the background color to white
-        ctx.fillRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+        ctx.fillRect(0, 0, chart.width, chart.height);
         ctx.restore();
     },
 });
@@ -90,14 +88,7 @@ const RevenueChart = ({data,startDate,endDate}) => {
     }
     const options = {
         responsive: true,
-        layout: {
-            padding: {
-                top: 50, // Add space above the graph
-                bottom: 50, // Add space below the graph
-                left: 50, // Add space on the left
-                right: 50, // Add space on the right
-            },
-        },
+
         plugins: {
             legend: { position: "top" },
             title: {

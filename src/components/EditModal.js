@@ -44,17 +44,38 @@ const EditModal = ({setModalShowing, fields, selectedTable, setTable, editRowDat
 
             const relatedDataResults = await Promise.all(relatedDataPromises);
             console.log(relatedDataResults, "This is the related data results")
+            //console.log(field.foreignKeyInfo.referencedTable)
             const relatedDataMap = relatedDataResults.reduce((acc, {field, data}) => {
                 acc[field] = data;
                 return acc;
             }, {});
 
-            setRelatedData(relatedDataMap);
-
+            if(tableSchema === 'railcar'){
+                const  sortedData = sortNestedArraysByName(relatedDataMap)
+                setRelatedData(sortedData)
+            }else {
+                setRelatedData(relatedDataMap);
+            }
         };
 
         fetchRelatedData();
     }, [tableSchema]);
+
+
+// Function to sort nested arrays by "name"
+    const sortNestedArraysByName = (obj) => {
+        // Create a new object to avoid mutating the original
+        const sortedObj = { ...obj };
+
+        Object.keys(sortedObj).forEach(key => {
+            if (Array.isArray(sortedObj[key])) {
+                sortedObj[key] = sortedObj[key].sort((a, b) => a.name.localeCompare(b.name));
+            }
+        });
+
+        return sortedObj;
+    };
+
 
     // Function to set the type of the field to the one in the backend
     const getInputType = (type) => {

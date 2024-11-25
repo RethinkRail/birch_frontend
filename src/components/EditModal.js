@@ -50,7 +50,7 @@ const EditModal = ({setModalShowing, fields, selectedTable, setTable, editRowDat
                 return acc;
             }, {});
 
-            if(tableSchema === 'railcar'){
+            if(selectedTable === 'railcar'){
                 const  sortedData = sortNestedArraysByName(relatedDataMap)
                 setRelatedData(sortedData)
             }else {

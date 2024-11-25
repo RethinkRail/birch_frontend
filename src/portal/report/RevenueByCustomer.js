@@ -26,6 +26,7 @@ import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
+import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 
 
 // Register Chart.js components
@@ -186,6 +187,7 @@ const RevenueByCustomer = () => {
                 </div>
 
                 {/* Select Menus */}
+
                 <div
                     className={`grid gap-1 grid-cols-5 mb-4 ${isAllCustomers ? 'hidden' : ''}`}
                 >
@@ -241,7 +243,12 @@ const RevenueByCustomer = () => {
 
                 {allData.length > 0 && (
                     <div className="mt-4">
-                        <RevenueChart data={allData} startDate={startDate} endDate={endDate}  />
+                        {isAllCustomers ? (
+                            <RevenueChartAllCustomer data={allData} startDate={startDate} endDate={endDate} />
+                        ) : (
+                            <RevenueChart data={allData} startDate={startDate} endDate={endDate} />
+                        )}
+
 
                         <div className="overflow-x-auto mt-4">
                             {allData.length >0?(

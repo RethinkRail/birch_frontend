@@ -56,6 +56,8 @@ const EditModal = ({setModalShowing, fields, selectedTable, setTable, editRowDat
             }else {
                 setRelatedData(relatedDataMap);
             }
+
+
         };
 
         fetchRelatedData();

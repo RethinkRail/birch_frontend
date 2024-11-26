@@ -104,7 +104,6 @@ const RevenueChart = ({data,startDate,endDate}) => {
                 title: { display: true, text: "Date" },
                 ticks: {
                     callback: function (value, index, values) {
-                        // Show labels only for every third date
                         if (index % getDateDifferenceCategory(startDate, endDate) === 0) {
                             return this.getLabelForValue(value);
                         }

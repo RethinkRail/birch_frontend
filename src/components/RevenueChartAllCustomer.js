@@ -21,34 +21,30 @@ import {
 // Register the necessary Chart.js components
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
-const RevenueChartAllCustomer = ({ data,startDate,endDate }) => {
-    const result = Object.values(
-        data.reduce((acc, { invoice_date, total_cost }) => {
-            if (!acc[invoice_date]) {
-                acc[invoice_date] = { invoice_date, total_cost: 0 };
-            }
-            acc[invoice_date].total_cost += parseFloat(total_cost);
-            return acc;
-        }, {})
-    ).sort((a, b) => new Date(a.invoice_date) - new Date(b.invoice_date));
-
-    const chartData = {
-        labels: result.map((item) => item.invoice_date),
-        datasets: [
-            {
-                label: 'Total Cost',
-                data: result.map((item) => item.total_cost),
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-                borderWidth: 2,
-                pointRadius: 4,
-                spanGaps: true // Enable skipping null values
-            },
-        ],
+const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
+    // Helper function to generate all dates between startDate and endDate
+    const generateDates = (start, end) => {
+        const dates = [];
+        let currentDate = new Date(start);
+        while (currentDate <= new Date(end)) {
+            dates.push(currentDate.toLocaleDateString());
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return dates;
     };
 
-    // Chart options
+    // Generate the range of dates
+    const allDates = generateDates(startDate, endDate);
+
+    // Map data to include all dates, filling missing dates with total_cost = 0
+    const result = allDates.map((date) => {
+        const existing = data.find((item) => new Date(item.invoice_date).toLocaleDateString() === date);
+        return {
+            invoice_date: date,
+            total_cost: existing ? existing.total_cost : null,
+        };
+    });
+
     function getDateDifferenceCategory(date1, date2) {
         // Convert dates to Date objects
         const startDate = new Date(date1);
@@ -64,24 +60,43 @@ const RevenueChartAllCustomer = ({ data,startDate,endDate }) => {
         if (diffInDays <= 31) {
             return 1; // 30 days or less
         } else if (diffInDays > 31 && diffInDays <= 120) {
-            return 3; // Between 1 and 3 months (approx 30-90 days)
+            return 7; // Between 1 and 3 months (approx 30-90 days)
         } else if (diffInDays > 120 && diffInDays <= 180) {
-            return 7; // Between 3 and 6 months (approx 90-180 days)
+            return 15; // Between 3 and 6 months (approx 90-180 days)
         } else {
-            return 15; // More than 6 months
+            return 30; // More than 6 months
         }
     }
+
+
+    // Chart data
+    const chartData = {
+        labels: result.map((item) => item.invoice_date),
+        datasets: [
+            {
+                label: 'Total Revenue',
+                data: result.map((item) => item.total_cost),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 4,
+                spanGaps: true, // Enable skipping null values
+            },
+        ],
+    };
+
+    // Chart options
     const options = {
         responsive: true,
-
         plugins: {
             legend: { position: "top" },
             title: {
                 display: true,
-                text: "Revenue  by All Company From " +
-                    startDate.toLocaleDateString() +
+                text: "Revenue by All Company From " +
+                    new Date(startDate).toLocaleDateString() +
                     " To " +
-                    endDate.toLocaleDateString(),
+                    new Date(endDate).toLocaleDateString(),
             },
         },
         scales: {
@@ -89,7 +104,6 @@ const RevenueChartAllCustomer = ({ data,startDate,endDate }) => {
                 title: { display: true, text: "Date" },
                 ticks: {
                     callback: function (value, index, values) {
-                        // Show labels only for every third date
                         if (index % getDateDifferenceCategory(startDate, endDate) === 0) {
                             return this.getLabelForValue(value);
                         }
@@ -107,5 +121,6 @@ const RevenueChartAllCustomer = ({ data,startDate,endDate }) => {
 
     return <Line data={chartData} options={options} />;
 };
+
 
 export default RevenueChartAllCustomer;

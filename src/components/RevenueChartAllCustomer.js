@@ -22,56 +22,85 @@ import {
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
-    // Helper function to generate all dates between startDate and endDate
-    const generateDates = (start, end) => {
+    // Helper function to generate all dates at the specified interval
+    const generateDatesWithInterval = (start, end, interval) => {
         const dates = [];
         let currentDate = new Date(start);
+
         while (currentDate <= new Date(end)) {
-            dates.push(currentDate.toLocaleDateString());
-            currentDate.setDate(currentDate.getDate() + 1);
+            dates.push(currentDate.toISOString().split('T')[0]); // Format as YYYY-MM-DD for consistency
+            currentDate.setDate(currentDate.getDate() + interval);
         }
+
+        // Ensure the end date is included if not already present
+        const endFormatted = new Date(end).toISOString().split('T')[0];
+        if (!dates.includes(endFormatted)) {
+            dates.push(endFormatted);
+        }
+
         return dates;
     };
 
-    // Generate the range of dates
-    const allDates = generateDates(startDate, endDate);
+    // Interpolation function for `total_cost`
+    const interpolateValue = (x, x0, y0, x1, y1) => {
+        return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
+    };
 
-    // Map data to include all dates, filling missing dates with total_cost = 0
-    const result = allDates.map((date) => {
-        const existing = data.find((item) => new Date(item.invoice_date).toLocaleDateString() === date);
-        return {
-            invoice_date: date,
-            total_cost: existing ? existing.total_cost : null,
-        };
-    });
+    // Determine the interval dynamically
+    const getDateDifferenceCategory = (start, end) => {
+        const diffInDays = Math.abs((new Date(end) - new Date(start)) / (1000 * 3600 * 24));
+        if (diffInDays <= 31) return 1; // Every 2 days for less than a month
+        if (diffInDays > 31 && diffInDays <= 120) return 7; // Weekly for 1-4 months
+        if (diffInDays > 120 && diffInDays <= 180) return 15; // Bi-weekly for 4-6 months
+        return 30; // Monthly for over 6 months
+    };
 
-    function getDateDifferenceCategory(date1, date2) {
-        // Convert dates to Date objects
-        const startDate = new Date(date1);
-        const endDate = new Date(date2);
+    // Convert dates in the data to consistent format
+    const formattedData = data.map(({ invoice_date, total_cost }) => ({
+        date: new Date(invoice_date).toISOString().split('T')[0],
+        total_cost,
+    }));
 
-        // Calculate the difference in milliseconds
-        const diffInMs = Math.abs(endDate - startDate);
+    // Generate target dates
+    const interval = getDateDifferenceCategory(startDate, endDate);
+    const targetDates = generateDatesWithInterval(startDate, endDate, interval);
 
-        // Convert milliseconds to days
-        const diffInDays = diffInMs / (1000 * 3600 * 24);
+    // Interpolate data for the target dates
+    const result = targetDates.map((targetDate) => {
+        const targetTime = new Date(targetDate).getTime();
 
-        // Check conditions based on the day difference
-        if (diffInDays <= 31) {
-            return 1; // 30 days or less
-        } else if (diffInDays > 31 && diffInDays <= 120) {
-            return 7; // Between 1 and 3 months (approx 30-90 days)
-        } else if (diffInDays > 120 && diffInDays <= 180) {
-            return 15; // Between 3 and 6 months (approx 90-180 days)
-        } else {
-            return 30; // More than 6 months
+        // Find the closest previous and next data points
+        const previous = formattedData
+            .filter(({ date }) => new Date(date).getTime() <= targetTime)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+        const next = formattedData
+            .filter(({ date }) => new Date(date).getTime() >= targetTime)
+            .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+        // Interpolate if both neighbors exist
+        if (previous && next && previous.date !== next.date) {
+            const prevTime = new Date(previous.date).getTime();
+            const nextTime = new Date(next.date).getTime();
+            const interpolatedCost = interpolateValue(
+                targetTime,
+                prevTime,
+                previous.total_cost,
+                nextTime,
+                next.total_cost
+            );
+            return { date: targetDate, total_cost: interpolatedCost };
         }
-    }
 
+        // Use the closest value if interpolation isn't possible
+        return previous || next
+            ? { date: targetDate, total_cost: (previous || next).total_cost }
+            : { date: targetDate, total_cost: null };
+    });
 
     // Chart data
     const chartData = {
-        labels: result.map((item) => item.invoice_date),
+        labels: result.map((item) => item.date),
         datasets: [
             {
                 label: 'Total Revenue',
@@ -80,7 +109,7 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 fill: true,
                 borderWidth: 2,
-                pointRadius: 4,
+                pointRadius: 4, // Points are shown for every interpolated value
                 spanGaps: true, // Enable skipping null values
             },
         ],
@@ -90,31 +119,20 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
     const options = {
         responsive: true,
         plugins: {
-            legend: { position: "top" },
+            legend: { position: 'top' },
             title: {
                 display: true,
-                text: "Revenue by All Company From " +
-                    new Date(startDate).toLocaleDateString() +
-                    " To " +
-                    new Date(endDate).toLocaleDateString(),
+                text: `Revenue by All Company From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                    endDate
+                ).toLocaleDateString()}`,
             },
         },
         scales: {
             x: {
-                title: { display: true, text: "Date" },
-                ticks: {
-                    callback: function (value, index, values) {
-                        if (index % getDateDifferenceCategory(startDate, endDate) === 0) {
-                            return this.getLabelForValue(value);
-                        }
-                        return null; // Hide other labels
-                    },
-                    maxTicksLimit: 100,
-                    autoSkip: false, // Ensure callback is used
-                },
+                title: { display: true, text: 'Date' },
             },
             y: {
-                title: { display: true, text: "Revenue ($)" },
+                title: { display: true, text: 'Revenue ($)' },
             },
         },
     };

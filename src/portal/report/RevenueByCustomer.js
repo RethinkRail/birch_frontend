@@ -142,6 +142,46 @@ const RevenueByCustomer = () => {
         setIsAllCustomers(prev => !prev);
     }
 
+    function groupAndSortByDate(data) {
+        // Group by `invoice_date` and sum `total_cost`
+        const groupedData = Object.values(
+            data.reduce((acc, { invoice_date, total_cost }) => {
+                if (!acc[invoice_date]) {
+                    acc[invoice_date] = { invoice_date, total_cost: 0 };
+                }
+                acc[invoice_date].total_cost += parseFloat(total_cost);
+                return acc;
+            }, {})
+        );
+
+        // Sort by `invoice_date`
+        return groupedData.sort((a, b) => new Date(a.invoice_date) - new Date(b.invoice_date));
+    }
+
+    function mergeData(data) {
+        // Reduce the data to group by `id`, `name`, and `invoice_date`
+        const merged = Object.values(
+            data.reduce((acc, { id, name, railcar_id, invoice_date, total_cost }) => {
+                // Create a unique key for grouping
+                const key = `${id}-${name}-${invoice_date}`;
+                if (!acc[key]) {
+                    acc[key] = { id, name, invoice_date, total_cost: 0, railcars: [] };
+                }
+                // Sum up `total_cost` and keep track of `railcar_id`
+                acc[key].total_cost += parseFloat(total_cost);
+                acc[key].railcars.push(railcar_id);
+                return acc;
+            }, {})
+        );
+
+        // Return the grouped and merged data
+        return merged.map(({ railcars, ...rest }) => ({
+            ...rest,
+            railcar_ids: railcars.join(", "),
+        }));
+    }
+
+
 
     const handleExportRows = (table,rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
@@ -244,9 +284,9 @@ const RevenueByCustomer = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
                         {isAllCustomers ? (
-                            <RevenueChartAllCustomer data={allData} startDate={startDate} endDate={endDate} />
+                            <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate} />
                         ) : (
-                            <RevenueChart data={allData} startDate={startDate} endDate={endDate} />
+                            <RevenueChart data={mergeData(allData)} startDate={startDate} endDate={endDate} />
                         )}
 
 

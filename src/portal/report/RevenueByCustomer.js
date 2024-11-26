@@ -212,9 +212,9 @@ const RevenueByCustomer = () => {
     };
 
     return (
-        <div className="p-6">
+        <div className="py-6">
             <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue by Customer</h1>
-            <div className="p-4">
+            <div className="">
                 <div className="grid gap-1 grid-cols-5 mb-4">
                     <label className="label cursor-pointer">
                         <span className="label-text mr-5">All Customers</span>

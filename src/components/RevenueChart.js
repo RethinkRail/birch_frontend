@@ -22,109 +22,112 @@ ChartJS.register({
     },
 });
 
-const RevenueChart = ({data,startDate,endDate}) => {
-    // Generate the date range
-    // const startDate = new Date("2024-4-01");
-    // const endDate = new Date("2024-10-30");
-    const dateRange = [];
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        dateRange.push(new Date(d).toISOString().split("T")[0]); // Format as YYYY-MM-DD
-    }
 
-    console.log(data)
-    console.log(dateRange)
 
-    // Group data by company
-    const revenueByCompany = {};
 
-   data.forEach(({ name, invoice_date, total_cost }) => {
-        const formattedDate = new Date(invoice_date).toISOString().split("T")[0];
-        if (!revenueByCompany[name]) {
-            revenueByCompany[name] = dateRange.reduce((acc, date) => {
-                acc[date] = null; // Initialize with null for no revenue
-                return acc;
-            }, {});
+
+const RevenueChart = ({ startDate, endDate, dataSet, dateDiff }) => {
+    console.log(startDate)
+    console.log(endDate)
+    console.log(dataSet)
+    console.log(dateDiff)
+    const generateDateRange = (start, end, diff) => {
+        const dates = [];
+        let current = new Date(start);
+        const stop = new Date(end);
+
+        while (current <= stop) {
+            dates.push(current.toISOString().split('T')[0]);
+            current.setDate(current.getDate() + diff);
         }
-        revenueByCompany[name][formattedDate] = parseFloat(total_cost);
-    });
-
-    // Prepare datasets for each company
-    const datasets = Object.entries(revenueByCompany).map(([company, revenues], index) => ({
-        label: company,
-        data: dateRange.map((date) => revenues[date]),
-        borderColor: `hsl(${index * 360 / Object.keys(revenueByCompany).length}, 70%, 50%)`,
-        backgroundColor: `hsla(${index * 360 / Object.keys(revenueByCompany).length}, 70%, 50%, 0.2)`,
-        borderWidth: 2,
-        pointRadius: 4,
-        spanGaps: true // Enable skipping null values
-    }));
-
-    // Chart data
-    const chartData = {
-        labels: dateRange,
-        datasets,
+        return dates;
     };
-    function getDateDifferenceCategory(date1, date2) {
-        // Convert dates to Date objects
-        const startDate = new Date(date1);
-        const endDate = new Date(date2);
 
-        // Calculate the difference in milliseconds
-        const diffInMs = Math.abs(endDate - startDate);
+    const interpolateCost = (start, end, targetDate, startCost, endCost) => {
+        const totalDays = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24);
+        const targetDays = (new Date(targetDate) - new Date(start)) / (1000 * 60 * 60 * 24);
+        return startCost + ((endCost - startCost) / totalDays) * targetDays;
+    };
 
-        // Convert milliseconds to days
-        const diffInDays = diffInMs / (1000 * 3600 * 24);
+    const prepareData = () => {
+        const dateRange = generateDateRange(startDate, endDate, dateDiff);
+        const companyData = {};
 
-        // Check conditions based on the day difference
-        if (diffInDays <= 31) {
-            return 1; // 30 days or less
-        } else if (diffInDays > 31 && diffInDays <= 120) {
-            return 3; // Between 1 and 3 months (approx 30-90 days)
-        } else if (diffInDays > 120 && diffInDays <= 180) {
-            return 7; // Between 3 and 6 months (approx 90-180 days)
-        } else {
-            return 15; // More than 6 months
-        }
-    }
+        dataSet.forEach(({ name, invoice_date, total_cost }) => {
+            if (!companyData[name]) {
+                companyData[name] = [];
+            }
+            companyData[name].push({ date: invoice_date, cost: total_cost });
+        });
+
+        return Object.entries(companyData).map(([name, data], index) => {
+            const dataPoints = dateRange.map((date) => {
+                const before = data.filter(({ date: d }) => new Date(d) <= new Date(date)).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                const after = data.filter(({ date: d }) => new Date(d) > new Date(date)).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+                if (before && after) {
+                    return {
+                        date,
+                        cost: interpolateCost(before.date, after.date, date, before.cost, after.cost),
+                    };
+                } else if (before) {
+                    return { date, cost: before.cost };
+                } else {
+                    return { date, cost: null };
+                }
+            });
+
+            return {
+                label: name,
+                data: dataPoints.map((point) => point.cost),
+                borderColor: `hsl(${index * 360 / Object.keys(data).length}, 70%, 50%)`,
+                backgroundColor: `hsla(${index * 360 / Object.keys(data).length}, 70%, 50%, 0.2)`,
+                borderWidth: 2,
+                pointRadius: 4,
+                spanGaps: true // Enable skipping null values
+            };
+        });
+    };
+
+    const dateLabels = generateDateRange(startDate, endDate, dateDiff);
+    const chartData = {
+        labels: dateLabels,
+        datasets: prepareData(),
+    };
+
     const options = {
         responsive: true,
-
         plugins: {
-            legend: { position: "top" },
+            legend: {
+                position: 'top',
+            },
             title: {
                 display: true,
-                text: "Revenue Comparison by Company From " +
-                    startDate.toLocaleDateString() +
-                    " To " +
-                    endDate.toLocaleDateString(),
+                text: 'Company Costs Over Time',
             },
         },
         scales: {
             x: {
-                title: { display: true, text: "Date" },
-                ticks: {
-                    callback: function (value, index, values) {
-                        if (index % getDateDifferenceCategory(startDate, endDate) === 0) {
-                            return this.getLabelForValue(value);
-                        }
-                        return null; // Hide other labels
-                    },
-                    maxTicksLimit: 100,
-                    autoSkip: false, // Ensure callback is used
+                title: {
+                    display: true,
+                    text: 'Date',
                 },
             },
             y: {
-                title: { display: true, text: "Revenue ($)" },
+                title: {
+                    display: true,
+                    text: 'Revenue($)',
+                },
             },
         },
     };
 
-
-    return (
-            <Line data={chartData} options={options} />
-
-    );
+    return <Line options={options} data={chartData} />;
 };
+
+
+
+
 
 export default RevenueChart;
 

@@ -60,7 +60,11 @@ const RevenueByCustomer = () => {
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
+    const [selectedDateRange, setSelectedDateRange] = useState(1); // Default value is 1
 
+    const handleChange = (event) => {
+        setSelectedDateRange(event.target.value); // Update state variable
+    };
     // Fetch owners from the API
     useEffect(() => {
         const fetchOwners = async () => {
@@ -114,7 +118,6 @@ const RevenueByCustomer = () => {
                 );
 
                 const data = response.data.data;
-                console.log(data)
                 setAllData(data)
             }else {
                 const response = await axios.post(
@@ -158,30 +161,28 @@ const RevenueByCustomer = () => {
         return groupedData.sort((a, b) => new Date(a.invoice_date) - new Date(b.invoice_date));
     }
 
-    function mergeData(data) {
-        // Reduce the data to group by `id`, `name`, and `invoice_date`
+    function mergeAndSortData(data) {
+        // Reduce the data to group by `name` and `invoice_date`
         const merged = Object.values(
-            data.reduce((acc, { id, name, railcar_id, invoice_date, total_cost }) => {
+            data.reduce((acc, { name, invoice_date, total_cost }) => {
                 // Create a unique key for grouping
-                const key = `${id}-${name}-${invoice_date}`;
+                const key = `${name}-${invoice_date}`;
                 if (!acc[key]) {
-                    acc[key] = { id, name, invoice_date, total_cost: 0, railcars: [] };
+                    acc[key] = { name, invoice_date, total_cost: 0 };
                 }
-                // Sum up `total_cost` and keep track of `railcar_id`
+                // Sum up `total_cost`
                 acc[key].total_cost += parseFloat(total_cost);
-                acc[key].railcars.push(railcar_id);
                 return acc;
             }, {})
         );
 
-        // Return the grouped and merged data
-        return merged.map(({ railcars, ...rest }) => ({
-            ...rest,
-            railcar_ids: railcars.join(", "),
-        }));
+        // Sort by `name` (alphabetical), then by `invoice_date` (chronological)
+        return merged.sort((a, b) => {
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return new Date(a.invoice_date) - new Date(b.invoice_date);
+        });
     }
-
-
 
     const handleExportRows = (table,rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
@@ -269,6 +270,23 @@ const RevenueByCustomer = () => {
                             className="p-2 border rounded w-full"
                         />
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Select a Date Range:
+                        </label>
+                        <select
+                            id="dateRange"
+                            value={selectedDateRange}
+                            onChange={handleChange}
+                            className="block w-32 p-2 border rounded"
+                        >
+                            {Array.from({ length: 30 }, (_, index) => (
+                                <option key={index + 1} value={index + 1}>
+                                    {index + 1}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {/* Generate Button */}
@@ -284,9 +302,9 @@ const RevenueByCustomer = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
                         {isAllCustomers ? (
-                            <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate} />
+                            <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />
                         ) : (
-                            <RevenueChart data={mergeData(allData)} startDate={startDate} endDate={endDate} />
+                            <RevenueChart startDate={startDate} endDate={endDate} dataSet={mergeAndSortData(allData)}  dateDiff={parseInt(selectedDateRange)} />
                         )}
 
 

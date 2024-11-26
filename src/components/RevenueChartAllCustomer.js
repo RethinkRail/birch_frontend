@@ -21,7 +21,7 @@ import {
 // Register the necessary Chart.js components
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
-const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
+const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
     // Helper function to generate all dates at the specified interval
     const generateDatesWithInterval = (start, end, interval) => {
         const dates = [];
@@ -46,14 +46,7 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
         return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
     };
 
-    // Determine the interval dynamically
-    const getDateDifferenceCategory = (start, end) => {
-        const diffInDays = Math.abs((new Date(end) - new Date(start)) / (1000 * 3600 * 24));
-        if (diffInDays <= 31) return 1; // Every 2 days for less than a month
-        if (diffInDays > 31 && diffInDays <= 120) return 7; // Weekly for 1-4 months
-        if (diffInDays > 120 && diffInDays <= 180) return 15; // Bi-weekly for 4-6 months
-        return 30; // Monthly for over 6 months
-    };
+
 
     // Convert dates in the data to consistent format
     const formattedData = data.map(({ invoice_date, total_cost }) => ({
@@ -62,8 +55,8 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate }) => {
     }));
 
     // Generate target dates
-    const interval = getDateDifferenceCategory(startDate, endDate);
-    const targetDates = generateDatesWithInterval(startDate, endDate, interval);
+
+    const targetDates = generateDatesWithInterval(startDate, endDate, dateDiff);
 
     // Interpolate data for the target dates
     const result = targetDates.map((targetDate) => {

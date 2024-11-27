@@ -139,6 +139,14 @@ const Home = () => {
             .then((response) => {
                 setWorkOrders(response.data.active_workorder)
                 //console.log(workOrders)
+
+                toast.update(toastId.current, {
+                    render: "All workorder loaded. Total "+response.data.active_workorder.length,
+                    autoClose: 1500,
+                    type: "success",
+                    hideProgressBar: true,
+                    isLoading: false
+                });
                 return Promise.resolve();
             })
             .catch((error) => {
@@ -183,13 +191,7 @@ const Home = () => {
             .then((response) => {
                 setCommonData(response.data)
 //                console.log(response.data)
-                toast.update(toastId.current, {
-                    render: "All data loaded",
-                    autoClose: 1000,
-                    type: "success",
-                    hideProgressBar: true,
-                    isLoading: false
-                });
+
                 return Promise.resolve();
             })
             .catch((error) => {

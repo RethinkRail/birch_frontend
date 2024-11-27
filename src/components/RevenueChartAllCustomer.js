@@ -5,7 +5,7 @@
  * Description:
  **/
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -17,12 +17,15 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 // Register the necessary Chart.js components
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
-const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
+const RevenueChartAllCustomer = ({ data, startDate, endDate, dateDiff }) => {
+    const chartContainerRef = useRef(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
     // Helper function to generate all dates at the specified interval
     const calculateDates = (startDate, endDate, diff) => {
         const dates = [];
@@ -30,44 +33,39 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
         const end = dayjs(endDate);
 
         while (current.isBefore(end) || current.isSame(end)) {
-            dates.push(current.format("MM/DD/YYYY"));
-            current = current.add(diff, "day");
+            dates.push(current.format('MM/DD/YYYY'));
+            current = current.add(diff, 'day');
         }
 
         return dates;
     };
+
     const xAxis = calculateDates(startDate, endDate, dateDiff);
-    let revArray = []
+    let revArray = [];
     let lastSum = 0;
     xAxis.forEach((date) => {
         const currentDate = dayjs(date);
         const invoicesBeforeOrOnDate = data.filter(
-            (invoice) => dayjs(invoice.invoice_date).isBefore(currentDate) || dayjs(invoice.invoice_date).isSame(currentDate)
+            (invoice) =>
+                dayjs(invoice.invoice_date).isBefore(currentDate) ||
+                dayjs(invoice.invoice_date).isSame(currentDate)
         );
 
-
         if (invoicesBeforeOrOnDate.length > 0) {
-
-            // Reset the sum to the latest invoice found on or before the current date
             lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.total_cost, 0);
-            data = data.filter(item =>
-                !invoicesBeforeOrOnDate.some(removeItem =>
-                    removeItem.invoice_date === item.invoice_date &&
-                    removeItem.total_cost === item.total_cost
-                )
+            data = data.filter(
+                (item) =>
+                    !invoicesBeforeOrOnDate.some(
+                        (removeItem) =>
+                            removeItem.invoice_date === item.invoice_date &&
+                            removeItem.total_cost === item.total_cost
+                    )
             );
-            const valueToPush = {}
-            valueToPush.date = date
-            valueToPush.total_cost = lastSum
-            revArray.push(valueToPush)
+            revArray.push({ date, total_cost: lastSum });
         } else {
-            const valueToPush = {}
-            valueToPush.date = date
-            valueToPush.total_cost = lastSum
-            revArray.push(valueToPush)
+            revArray.push({ date, total_cost: lastSum });
         }
-
-    })
+    });
 
     // Chart data
     const chartData = {
@@ -80,8 +78,8 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 fill: true,
                 borderWidth: 2,
-                pointRadius: 4, // Points are shown for every interpolated value
-                spanGaps: true, // Enable skipping null values
+                pointRadius: 4,
+                spanGaps: true,
             },
         ],
     };
@@ -95,7 +93,7 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
                 display: true,
                 text: `Revenue by All Companies From ${new Date(startDate).toLocaleDateString()} To ${new Date(
                     endDate
-                ).toLocaleDateString()}`,
+                ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },
         },
         scales: {
@@ -108,8 +106,57 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
         },
     };
 
-    return <Line data={chartData} options={options} />;
+    // Fullscreen toggle logic
+    const toggleFullscreen = () => {
+        if (!isFullscreen) {
+            chartContainerRef.current?.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    const handleFullscreenChange = () => {
+        setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    React.useEffect(() => {
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
+    return (
+        <div
+            ref={chartContainerRef}
+            style={{
+                position: 'relative',
+                padding: '1rem',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                background: '#fff',
+            }}
+        >
+            <button
+                onClick={toggleFullscreen}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    padding: '0.5rem 1rem',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                }}
+            >
+                {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            </button>
+            <Line data={chartData} options={options} />
+        </div>
+    );
 };
 
-
 export default RevenueChartAllCustomer;
+

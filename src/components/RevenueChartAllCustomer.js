@@ -93,7 +93,7 @@ const RevenueChartAllCustomer = ({ data, startDate, endDate,dateDiff }) => {
             legend: { position: 'top' },
             title: {
                 display: true,
-                text: `Revenue by All Company From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                text: `Revenue by All Companies From ${new Date(startDate).toLocaleDateString()} To ${new Date(
                     endDate
                 ).toLocaleDateString()}`,
             },

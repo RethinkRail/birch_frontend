@@ -97,17 +97,19 @@ const RevenueByCustomer = () => {
 
     //original
     const handleGenerate = async () => {
-
+        let modified = new Date(startDate);
+        modified.setDate(modified.getDate() - selectedDateRange);
         try {
             setLoading(true);
             const payload = {
                 owners: selectedOwners.filter((id) => id), // Remove null values
-                startDate,
+                startDate:modified,
                 endDate,
             };
+            console.log(payload)
 
             const payloadAll = {
-                startDate,
+                startDate:modified,
                 endDate,
             };
 

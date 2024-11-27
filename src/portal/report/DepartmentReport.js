@@ -252,6 +252,7 @@ const DepartmentReport = () => {
 
             const statusCode = railcarData.workupdates?.[0]?.statuscode?.code || null;
             const comment = railcarData.workupdates;
+
             const owner = railcarData.railcar?.owner_railcar_owner_idToowner?.name || null;
             const lessee = railcarData.railcar?.owner_railcar_lessee_idToowner?.name || null;
             const products = railcarData.railcar?.products?.name || null;

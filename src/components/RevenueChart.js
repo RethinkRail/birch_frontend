@@ -8,7 +8,10 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
+dayjs.extend(isSameOrBefore);
 // Register Chart.js modules
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 ChartJS.register({
@@ -23,113 +26,140 @@ ChartJS.register({
 });
 
 
-
-
-
-const RevenueChart = ({ startDate, endDate, dataSet, dateDiff }) => {
-    console.log(startDate)
-    console.log(endDate)
+const RevenueChart = ({ startDate, endDate, dateDiff, dataSet }) => {
     console.log(dataSet)
-    console.log(dateDiff)
-    const generateDateRange = (start, end, diff) => {
+    // Generate X-Axis dates based on the given start and end date
+    const calculateDates = (startDate, endDate, diff) => {
         const dates = [];
-        let current = new Date(start);
-        const stop = new Date(end);
+        let current = dayjs(startDate);
+        const end = dayjs(endDate);
 
-        while (current <= stop) {
-            dates.push(current.toISOString().split('T')[0]);
-            current.setDate(current.getDate() + diff);
+        while (current.isBefore(end) || current.isSame(end)) {
+            dates.push(current.format("MM/DD/YYYY"));
+            current = current.add(diff, "day");
         }
+
         return dates;
     };
 
-    const interpolateCost = (start, end, targetDate, startCost, endCost) => {
-        const totalDays = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24);
-        const targetDays = (new Date(targetDate) - new Date(start)) / (1000 * 60 * 60 * 24);
-        return startCost + ((endCost - startCost) / totalDays) * targetDays;
-    };
+    const uniqueNames = [...new Set(dataSet.map((item) => item.name))];
+    const xAxis = calculateDates(startDate, endDate, dateDiff);
 
-    const prepareData = () => {
-        const dateRange = generateDateRange(startDate, endDate, dateDiff);
-        const companyData = {};
+    let revMap = new Map();
 
-        dataSet.forEach(({ name, invoice_date, total_cost }) => {
-            if (!companyData[name]) {
-                companyData[name] = [];
+    uniqueNames.map((name)=>{
+        revMap.set(name,[]);
+        let filteredData = dataSet.filter((item) => item.name === name);
+        let lastSum = 0;
+        xAxis.forEach((date) => {
+            const currentDate = dayjs(date);
+            const invoicesBeforeOrOnDate = filteredData.filter(
+                (invoice) => dayjs(invoice.invoice_date).isBefore(currentDate) || dayjs(invoice.invoice_date).isSame(currentDate)
+            );
+
+
+            if (invoicesBeforeOrOnDate.length > 0) {
+
+                // Reset the sum to the latest invoice found on or before the current date
+                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.total_cost, 0);
+                filteredData = filteredData.filter(item =>
+                    !invoicesBeforeOrOnDate.some(removeItem =>
+                        removeItem.invoice_date === item.invoice_date &&
+                        removeItem.total_cost === item.total_cost
+                    )
+                );
+                const values = revMap.get(name)
+                values.push(lastSum)
+            } else {
+
+                const values = revMap.get(name)
+                values.push(lastSum)
             }
-            companyData[name].push({ date: invoice_date, cost: total_cost });
-        });
 
-        return Object.entries(companyData).map(([name, data], index) => {
-            const dataPoints = dateRange.map((date) => {
-                const before = data.filter(({ date: d }) => new Date(d) <= new Date(date)).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                const after = data.filter(({ date: d }) => new Date(d) > new Date(date)).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+        })
 
-                if (before && after) {
-                    return {
-                        date,
-                        cost: interpolateCost(before.date, after.date, date, before.cost, after.cost),
-                    };
-                } else if (before) {
-                    return { date, cost: before.cost };
-                } else {
-                    return { date, cost: null };
-                }
-            });
+    })
 
-            return {
-                label: name,
-                data: dataPoints.map((point) => point.cost),
-                borderColor: `hsl(${index * 360 / Object.keys(data).length}, 70%, 50%)`,
-                backgroundColor: `hsla(${index * 360 / Object.keys(data).length}, 70%, 50%, 0.2)`,
-                borderWidth: 2,
-                pointRadius: 4,
-                spanGaps: true // Enable skipping null values
-            };
-        });
-    };
-
-    const dateLabels = generateDateRange(startDate, endDate, dateDiff);
+    // Process the dataset to calculate cumulative costs
+    const newData = Array.from(revMap, ([name, data]) => ({ name, data }));
     const chartData = {
-        labels: dateLabels,
-        datasets: prepareData(),
+        labels: xAxis,
+        datasets: newData.map((item, index) => ({
+            label: item.name,
+            data: item.data,
+            fill: false,
+            tension: 0.0,
+            backgroundColor: `hsla(${index * 360 / Object.keys(dataSet).length}, 70%, 50%, 0.2)`,
+            borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+            borderWidth: 2,
+            pointRadius: 4,
+            spanGaps: true, // Enable skipping null values
+        })),
     };
 
     const options = {
         responsive: true,
         plugins: {
             legend: {
-                position: 'top',
+                position: "top",
             },
             title: {
                 display: true,
-                text: 'Company Costs Over Time',
+                text: `Revenue by selected Companies From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                    endDate
+                ).toLocaleDateString()}`,
             },
         },
         scales: {
             x: {
                 title: {
                     display: true,
-                    text: 'Date',
+                    text: "Dates",
                 },
             },
             y: {
                 title: {
                     display: true,
-                    text: 'Revenue($)',
+                    text: "Revenue ($)",
                 },
             },
         },
     };
 
-    return <Line options={options} data={chartData} />;
+    return <Line data={chartData} options={options} />;
 };
 
-
-
-
-
 export default RevenueChart;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

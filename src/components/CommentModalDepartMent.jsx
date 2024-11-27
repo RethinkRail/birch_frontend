@@ -4,7 +4,7 @@ import qs from "qs";
 import axios from "axios";
 
 const CommentModalDepartMent = ({data, work_id, updateWorkUpdates}) => {
-    data.sort((a, b) => new Date(a.update_date) - new Date(b.update_date));
+    //data.sort((a, b) => new Date(a.update_date) - new Date(b.update_date));
     const groupedItems = {};
     const commentModal = document.getElementById('commentModal');
     const statusTextArea = useRef(null);

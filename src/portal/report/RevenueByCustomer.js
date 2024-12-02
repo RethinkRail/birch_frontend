@@ -274,7 +274,7 @@ const RevenueByCustomer = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">
-                            Select a Date Range:
+                            # of Days per Data Point
                         </label>
                         <select
                             id="dateRange"

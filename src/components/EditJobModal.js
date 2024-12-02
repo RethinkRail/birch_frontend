@@ -486,17 +486,25 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 id="loc"
                                 isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.qualifier_codes.map((qualifiercode) => ({
-                                    value: qualifiercode.id,
-                                    label: `${qualifiercode.code}: ${qualifiercode.title}`,
-                                })).find(option => option.value === inputValues["qualifier_code"])}
+                                value={[
+                                    { value: null, label: "Select an option" },
+                                    ...commonData.qualifier_codes.map((qualifiercode) => ({
+                                        value: qualifiercode.id,
+                                        label: `${qualifiercode.code}: ${qualifiercode.title}`,
+                                    }))
+                                ].find(option => option.value === inputValues["qualifier_code"])}
                                 onChange={(selectedOption) => handleChange("qualifier_code", selectedOption?.value)}
-                                options={commonData.qualifier_codes.map((qualifiercode) => ({
-                                    value: qualifiercode.id,
-                                    label: `${qualifiercode.code}: ${qualifiercode.title}`,
-                                }))}
+                                options={[
+                                    { value: null, label: "Select an option" },
+                                    ...commonData.qualifier_codes.map((qualifiercode) => ({
+                                        value: qualifiercode.id,
+                                        label: `${qualifiercode.code}: ${qualifiercode.title}`,
+                                    }))
+                                ]}
                                 placeholder="Select an option"
                             />
+
+
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Why Made Code (WMC)</label>

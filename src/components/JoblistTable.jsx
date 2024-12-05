@@ -147,7 +147,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         let i= 0
         jobs.map((job)=>{
             i++
-            console.log(job)
+            //console.log(job)
             const copiedJobFormatted = {
                 work_id: workOrder.id,
                 work_order: workOrder.work_order,
@@ -229,7 +229,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 accessorKey: 'action',
                 header: 'Copy',
                 size: 5,
-
                 Cell: ({ row }) => {
                     return (
                         <div class="flex justify-between items-center cursor-pointer ">
@@ -319,8 +318,11 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             onDragEnd: () => {
                 const { draggingRow, hoveredRow } = table.getState();
                 if (hoveredRow && draggingRow) {
-                    const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
-                    setTableData([...updatedTable]);
+                    if(hoveredRow.original.ln ==draggingRow.original.ln){
+                        //console.log("equal row")
+                        return
+                    }
+
                     const requestData = {
                         line_one: draggingRow.original.ln,
                         line_two: hoveredRow.original.ln,
@@ -332,7 +334,9 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         .then(response => {
                             console.log('Success:', response.data);
                             if(response.status==200){
-
+                                const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
+                                setTableData([...updatedTable]);
+                                //console.log(" row reorder successfull")
                             }
                         })
                         .catch(error => {

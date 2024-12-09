@@ -27,6 +27,7 @@ import TimeApproval from "./portal/time/TimeApproval";
 import RailcarTable from "./portal/report/RailcarTable";
 import RevenueByCustomer from "./portal/report/RevenueByCustomer";
 import RevenueChart from "./components/RevenueChart";
+import QbParts from "./portal/report/QbParts";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -167,6 +168,13 @@ root.render(
                 <Route path="/rev_by_customer" element={
                     <ProtectedRoute>
                         <RevenueByCustomer/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/qb_parts" element={
+                    <ProtectedRoute>
+                        <QbParts/>
                     </ProtectedRoute>
                 }>
                 </Route>

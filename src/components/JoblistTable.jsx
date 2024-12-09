@@ -10,6 +10,7 @@ import axios, {all} from "axios";
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
     useEffect(() => {
+
         jobs.sort((a, b) => a.line_number - b.line_number)
 
         const jobListData = jobs.map((job) => ({
@@ -147,7 +148,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         let i= 0
         jobs.map((job)=>{
             i++
-            //console.log(job)
+            console.log(job)
             const copiedJobFormatted = {
                 work_id: workOrder.id,
                 work_order: workOrder.work_order,
@@ -229,6 +230,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 accessorKey: 'action',
                 header: 'Copy',
                 size: 5,
+
                 Cell: ({ row }) => {
                     return (
                         <div class="flex justify-between items-center cursor-pointer ">
@@ -284,6 +286,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     );
 
     function swapLineNumbers(data, lineNumber1, lineNumber2) {
+
         // Find the objects with the given line numbers
         const obj1 = data.find(item => item.ln === lineNumber1);
         const obj2 = data.find(item => item.ln === lineNumber2);
@@ -293,6 +296,16 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             [obj1.ln, obj2.ln] = [obj2.ln, obj1.ln];
         }
         data.sort((a, b) => a.ln - b.ln)
+
+        const original_job1 = jobs.find(item => item.line_number === lineNumber1);
+        const original_job2 = jobs.find(item => item.line_number === lineNumber2);
+
+        // Swap their line numbers
+        if (original_job1 && original_job2) {
+            [original_job1.line_number, original_job2.line_number] = [original_job2.line_number, original_job1.line_number];
+        }
+        jobs.sort((a, b) => a.line_number - b.line_number)
+
         return data;
     }
 
@@ -319,10 +332,13 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 const { draggingRow, hoveredRow } = table.getState();
                 if (hoveredRow && draggingRow) {
                     if(hoveredRow.original.ln ==draggingRow.original.ln){
-                        //console.log("equal row")
                         return
                     }
-
+                    const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
+                    console.log(updatedTable)
+                    setTableData([...updatedTable]);
+                    console.log(tableData)
+                    console.log(jobs)
                     const requestData = {
                         line_one: draggingRow.original.ln,
                         line_two: hoveredRow.original.ln,
@@ -334,9 +350,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         .then(response => {
                             console.log('Success:', response.data);
                             if(response.status==200){
-                                const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
-                                setTableData([...updatedTable]);
-                                //console.log(" row reorder successfull")
+
                             }
                         })
                         .catch(error => {

@@ -383,7 +383,6 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             console.log(response)
             if(response.status == 200){
                 setModalShowing(false)
-
             }else {
 
             }
@@ -396,7 +395,6 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         console.log(response)
         if(response.status == 200){
             setModalShowing(false)
-
         }else {
 
         }

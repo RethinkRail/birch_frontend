@@ -39,7 +39,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     // ParentModal related stuffs can be found below
     const [modalShowing, setModalShowing] = useState(false)
     const [editData, setEditData] = useState()
-
+    const [isWebServiceCalling,setIsWebserviceCalling]= useState(false)
     const [tableData, setTableData] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({
         is_billed_to_lessee: false,
@@ -322,7 +322,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         enableExpanding:false,
         enableFullScreenToggle:false,
         enableGrouping:false,
-        enableRowOrdering:workOrder.locked_by==null,
+        enableRowOrdering:workOrder.locked_by==null && !isWebServiceCalling,
         enableTopToolbar:false,
         initialState: { columnVisibility: { id: false } },
         state: { columnVisibility },
@@ -334,6 +334,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     if(hoveredRow.original.ln ==draggingRow.original.ln){
                         return
                     }
+                    setIsWebserviceCalling(true)
                     const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
                     console.log(updatedTable)
                     setTableData([...updatedTable]);
@@ -349,11 +350,13 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
                         .then(response => {
                             console.log('Success:', response.data);
+                            setIsWebserviceCalling(false)
                             if(response.status==200){
 
                             }
                         })
                         .catch(error => {
+                            setIsWebserviceCalling(false)
                             console.error('Error:', error.response ? error.response.data : error.message);
                             setTableData(tableData);
                         });
@@ -378,7 +381,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 color: theme.palette.text.secondary,
                 fontWeight: 'normal',
                 fontSize: '12px',
-                padding:'5px'
+                paddingY:'20px',
+                paddingX:'5px'
             }),
         },
 

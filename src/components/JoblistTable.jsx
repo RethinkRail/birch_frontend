@@ -309,6 +309,43 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         return data;
     }
 
+    function reorderLines(data, toLine, fromLine) {
+        if (fromLine === toLine) return data; // No changes needed if the positions are the same
+
+        // Sort data by line numbers
+        data.sort((a, b) => a.ln - b.ln);
+
+        // Find the item to move
+        const itemToMove = data.find(item => item.ln === fromLine);
+
+        if (!itemToMove) {
+            console.error("Invalid `fromLine` number provided.");
+            return data;
+        }
+
+        // Remove the item from its current position
+        const remainingItems = data.filter(item => item.ln !== fromLine);
+
+        // Determine the new index for the item
+        const toIndex = remainingItems.findIndex(item => item.ln === toLine);
+
+        if (toIndex === -1) {
+            console.error("Invalid `toLine` number provided.");
+            return data;
+        }
+
+        // Insert the item at the new position
+        remainingItems.splice(toIndex, 0, itemToMove);
+
+        // Reassign line numbers to maintain sequential order
+        remainingItems.forEach((item, index) => {
+            item.ln = index + 1;
+        });
+
+        return remainingItems;
+    }
+
+
     const table = useMaterialReactTable({
         columns,
         data: tableData,
@@ -322,7 +359,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         enableExpanding:false,
         enableFullScreenToggle:false,
         enableGrouping:false,
-        enableRowOrdering:workOrder.locked_by==null && !isWebServiceCalling,
+        enableRowOrdering:workOrder.locked_by==null,
         enableTopToolbar:false,
         initialState: { columnVisibility: { id: false } },
         state: { columnVisibility },
@@ -335,11 +372,11 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         return
                     }
                     setIsWebserviceCalling(true)
-                    const updatedTable = swapLineNumbers(tableData,hoveredRow.original.ln,draggingRow.original.ln)
-                    console.log(updatedTable)
+                    const updatedTable = reorderLines(tableData,hoveredRow.original.ln,draggingRow.original.ln)
+                    //console.log(updatedTable)
                     setTableData([...updatedTable]);
-                    console.log(tableData)
-                    console.log(jobs)
+                    // console.log(tableData)
+                    // console.log(jobs)
                     const requestData = {
                         line_one: draggingRow.original.ln,
                         line_two: hoveredRow.original.ln,

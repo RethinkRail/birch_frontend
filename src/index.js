@@ -28,6 +28,8 @@ import RailcarTable from "./portal/report/RailcarTable";
 import RevenueByCustomer from "./portal/report/RevenueByCustomer";
 import RevenueChart from "./components/RevenueChart";
 import QbParts from "./portal/report/QbParts";
+import RevenueByDepartments from "./portal/report/RevenueByDepartment";
+import StockStatusReport from "./components/StockStatusReport";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -172,6 +174,14 @@ root.render(
                 }>
                 </Route>
 
+                <Route path="/rev_by_department" element={
+                    <ProtectedRoute>
+                        <RevenueByDepartments/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+
                 <Route path="/qb_parts" element={
                     <ProtectedRoute>
                         <QbParts/>
@@ -179,6 +189,12 @@ root.render(
                 }>
                 </Route>
 
+                <Route path="/stock_status_report" element={
+                    <ProtectedRoute>
+                        <StockStatusReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
             </Route>
 
         </Routes>

@@ -47,8 +47,7 @@ const EmissionReport = () => {
     };
 
     const handleRetrieve = async () => {
-        console.log("Start Date:", startDate);
-        console.log("End Date:", endDate);
+
         toastId.current = toast.loading("Fetching data...");
         const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL+'get_emission_report/', {
             start_date: startDate,

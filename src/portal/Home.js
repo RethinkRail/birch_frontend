@@ -98,7 +98,6 @@ const Home = () => {
         await axios.request(config)
             .then((response) => {
                 console.log(response.data)
-
                 // const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
                 // setWorkOrders(updatedWorkOrders)
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
@@ -252,7 +251,6 @@ const Home = () => {
                 console.log(error);
             });
     }
-
     const handleInspectedlDate = (work_id, date) => {
         let data = qs.stringify({
             'inspected_date': date ? date.toISOString() : null,

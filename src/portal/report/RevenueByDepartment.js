@@ -40,22 +40,20 @@ ChartJS.register(
     Legend
 );
 
-const RevenueByCustomer = () => {
-    const [owners, setOwners] = useState([]);
-    const [selectedOwners, setSelectedOwners] = useState(Array(5).fill(null)); //
+const RevenueByDepartments = () => {
+    const [departments, setDepartments] = useState([]);
+    const [selectedDepartments, setSelectedDepartments] = useState(Array(5).fill(null)); //
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
 
     const [loading, setLoading] = useState(false);
 
     const [allData,setAllData] = useState([])
-    const [isAllCustomers,setIsAllCustomers] = useState(false)
+    const [isAllDepartment,setIsAllDepartment] = useState(false)
 
     const initialColumns = useMemo(() => [
-        { accessorKey: 'id', header: 'ID', enableSorting: true, size: 50 },
-        { accessorKey: 'name', header: 'Customer', enableSorting: true, size: 50 },
         { accessorKey: 'invoice_date', header: 'Invoice Date', enableSorting: true },
-        { accessorKey: 'railcar_id', header: 'Car Number', enableSorting: true },
+        { accessorKey: 'name', header: 'Revenue Category', enableSorting: true },
         { accessorKey: 'total_cost', header: 'Revenue', enableSorting: true }
     ], []);
 
@@ -65,34 +63,34 @@ const RevenueByCustomer = () => {
     const handleChange = (event) => {
         setSelectedDateRange(event.target.value); // Update state variable
     };
-    // Fetch owners from the API
+    // Fetch departments from the API
     useEffect(() => {
-        const fetchOwners = async () => {
+        const fetchDepartments = async () => {
             try {
                 const response = await axios.get(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_owners/`
+                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_revenue_category/`
                 );
 
                 // Map API data to React Select format
-                const ownerOptions = response.data.map((owner) => ({
-                    value: owner.id,
-                    label: owner.name,
+                const departmentOptions = response.data.map((department) => ({
+                    value: department.id,
+                    label: department.name,
                 }));
 
-                setOwners(ownerOptions);
+                setDepartments(departmentOptions);
             } catch (error) {
-                console.error('Error fetching owners:', error);
+                console.error('Error fetching departments:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchOwners();
+        fetchDepartments();
     }, []);
 
     const handleOwnerChange = (index, value) => {
-        const updatedSelectedOwners = [...selectedOwners];
+        const updatedSelectedOwners = [...selectedDepartments];
         updatedSelectedOwners[index] = value;
-        setSelectedOwners(updatedSelectedOwners);
+        setSelectedDepartments(updatedSelectedOwners);
     };
 
     //original
@@ -102,34 +100,45 @@ const RevenueByCustomer = () => {
         try {
             setLoading(true);
             const payload = {
-                owners: selectedOwners.filter((id) => id), // Remove null values
+                departments:!isAllDepartment? selectedDepartments.filter((id) => id):departments.map(item => item.value), // Remove null values
                 startDate:modified,
                 endDate,
             };
             console.log(payload)
+            console.log(departments)
 
             const payloadAll = {
                 startDate:modified,
                 endDate,
             };
 
-            if(!isAllCustomers){
-                const response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report`,
-                    payload
-                );
+            const response = await axios.post(
+                `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_departments`,
+                payload
+            );
 
-                const data = response.data.data;
-                setAllData(data)
-            }else {
-                const response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report_all`,
-                    payloadAll
-                );
+            const data = response.data.data;
+            console.log(data)
+            setAllData(data)
 
-                const data = response.data.data;
-                setAllData(data)
-            }
+            // if(!isAllDepartment){
+            //     const response = await axios.post(
+            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_departments`,
+            //         payload
+            //     );
+            //
+            //     const data = response.data.data;
+            //     console.log(data)
+            //     setAllData(data)
+            // }else {
+            //     const response = await axios.post(
+            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report_all`,
+            //         payloadAll
+            //     );
+            //
+            //     const data = response.data.data;
+            //     setAllData(data)
+            // }
 
 
 
@@ -144,7 +153,7 @@ const RevenueByCustomer = () => {
 
 
     function handleSetIsAllCustomers() {
-        setIsAllCustomers(prev => !prev);
+        setIsAllDepartment(prev => !prev);
     }
 
     function groupAndSortByDate(data) {
@@ -215,15 +224,15 @@ const RevenueByCustomer = () => {
 
     return (
         <div className="py-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue by Customer</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue by Departments</h1>
             <div className="">
                 <div className="grid gap-1 grid-cols-5 mb-4">
                     <label className="label cursor-pointer">
-                        <span className="label-text mr-5">All Customers</span>
+                        <span className="label-text mr-5">All Departments</span>
                         <input
                             type="checkbox"
                             className="toggle"
-                            checked={isAllCustomers}
+                            checked={isAllDepartment}
                             onChange={handleSetIsAllCustomers}
                         />
                     </label>
@@ -232,21 +241,21 @@ const RevenueByCustomer = () => {
                 {/* Select Menus */}
 
                 <div
-                    className={`grid gap-1 grid-cols-5 mb-4 ${isAllCustomers ? 'hidden' : ''}`}
+                    className={`grid gap-1 grid-cols-5 mb-4 ${isAllDepartment ? 'hidden' : ''}`}
                 >
                     {Array.from({ length: 5 }).map((_, index) => (
                         <div key={index} className="p-2">
                             <Select
                                 value={
-                                    owners.find(
-                                        (option) => option.value === selectedOwners[index]
+                                    departments.find(
+                                        (option) => option.value === selectedDepartments[index]
                                     ) || null
                                 } // Find the matching selected option or default to null
                                 onChange={(selectedOption) =>
                                     handleOwnerChange(index, selectedOption?.value)
                                 }
-                                options={owners}
-                                placeholder="Select Customer"
+                                options={departments}
+                                placeholder="Select Department"
                                 isClearable
                                 className="border rounded"
                             />
@@ -303,11 +312,13 @@ const RevenueByCustomer = () => {
 
                 {allData.length > 0 && (
                     <div className="mt-4">
-                        {isAllCustomers ? (
-                            <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />
-                        ) : (
-                            <RevenueChart startDate={startDate} endDate={endDate} dataSet={mergeAndSortData(allData)}  dateDiff={parseInt(selectedDateRange)} name={'Companies'} />
-                        )}
+
+                        <RevenueChart startDate={startDate} endDate={endDate} dataSet={mergeAndSortData(allData)}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} />
+                        {/*{isAllDepartment ? (*/}
+                        {/*    <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />*/}
+                        {/*) : (*/}
+                        {/*    <RevenueChart startDate={startDate} endDate={endDate} dataSet={mergeAndSortData(allData)}  dateDiff={parseInt(selectedDateRange)} />*/}
+                        {/*)}*/}
 
 
                         <div className="overflow-x-auto mt-4">
@@ -410,5 +421,5 @@ const RevenueByCustomer = () => {
     );
 };
 
-export default RevenueByCustomer;
+export default RevenueByDepartments;
 

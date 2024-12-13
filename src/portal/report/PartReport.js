@@ -73,8 +73,6 @@ const  PartReport = () => {
                             // Ensure part and part.parts exist
                             if (part && part.parts) {
                                 const { code, title } = part.parts;
-
-
                                 // Ensure quantity and purchase_cost are valid numbers, default to 0 if undefined or invalid
                                 const quantity = !isNaN(parseFloat(part.quantity)) && part.quantity !== null && part.quantity !== undefined
                                     ? parseFloat(part.quantity)

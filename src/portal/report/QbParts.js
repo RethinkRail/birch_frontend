@@ -5,19 +5,22 @@
  * Description:
  **/
 
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import readXlsxFile from "read-excel-file";
 import axios from "axios";
 import {MaterialReactTable} from "material-react-table";
+import {toast, ToastContainer} from "react-toastify";
 
 const QbParts = () => {
     const [file, setFile] = useState(null);
     const [data, setData] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null);
 
     // Fetch data from the server
     const fetchData = async () => {
         try {
-            const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+"get_qb_parts");
+            const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL + "get_qb_parts");
             setData(response.data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -39,6 +42,9 @@ const QbParts = () => {
             return;
         }
 
+        setIsUploading(true);
+        toast.info("Uploading...");
+
         try {
             const rows = await readXlsxFile(file);
 
@@ -58,19 +64,24 @@ const QbParts = () => {
 
             if (formattedData.length === 0) {
                 alert("No valid data found in the file.");
+                setIsUploading(false);
                 return;
             }
-            console.log(formattedData)
 
-            await axios.post(process.env.REACT_APP_BIRCH_API_URL+"upload_qb_parts", { data: formattedData });
-            alert("File uploaded successfully!");
+            await axios.post(process.env.REACT_APP_BIRCH_API_URL + "upload_qb_parts", { data: formattedData });
+            toast.success("File uploaded successfully!");
+            setFile(null); // Clear the file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ""; // Clear file input field
+            }
             fetchData(); // Fetch the updated data
         } catch (error) {
             console.error("Error uploading file:", error);
-            alert("Failed to upload file!");
+            toast.error("Failed to upload file!");
+        } finally {
+            setIsUploading(false);
         }
     };
-
 
     const columns = [
         { accessorKey: "code", header: "Code" },
@@ -84,19 +95,21 @@ const QbParts = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-xl font-bold mb-4">Upload Excel File</h1>
+            <h1 className="text-xl font-bold mb-4">Upload QB parts</h1>
             <div className="mb-4">
                 <input
                     type="file"
                     accept=".xlsx"
                     onChange={handleFileChange}
+                    ref={fileInputRef}
                     className="block mb-2"
                 />
                 <button
                     onClick={handleUpload}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    disabled={isUploading}
+                    className={`px-4 py-2 rounded ${isUploading ? "bg-gray-400" : "bg-blue-500 text-white"}`}
                 >
-                    Upload
+                    {isUploading ? "Uploading..." : "Upload"}
                 </button>
             </div>
             <MaterialReactTable
@@ -106,7 +119,29 @@ const QbParts = () => {
                 enableSorting
                 enableColumnFilters
                 initialState={{ pagination: { pageSize: 10 } }}
+                muiTableHeadCellProps={{
+                    sx: {
+                        backgroundColor: "#DCE5FF",
+                        fontSize: '12px',
+                        padding: '10px',
+                    }
+                }}
+                muiTableBodyCellProps={{
+                    sx: {
+                        fontSize: '12px',
+                        padding: '10px',
+                    }
+                }}
+                muiTableBodyRowProps={({ row, table }) => ({
+                    sx: {
+                        backgroundColor:
+                            table.getRowModel().flatRows.indexOf(row) % 2 === 0
+                                ? "#F9F9F9"
+                                : "#ffffff", // Use table row index to alternate row colors
+                    },
+                })}
             />
+            <ToastContainer />
         </div>
     );
 };

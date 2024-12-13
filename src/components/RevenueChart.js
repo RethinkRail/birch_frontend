@@ -26,7 +26,8 @@ ChartJS.register({
 });
 
 
-const RevenueChart = ({ startDate, endDate, dateDiff, dataSet }) => {
+const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
+    console.log(dataSet)
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     // Generate X-Axis dates based on the given start and end date
@@ -106,7 +107,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet }) => {
             },
             title: {
                 display: true,
-                text: `Revenue by selected Companies From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                text: `Revenue by selected `+name+` From ${new Date(startDate).toLocaleDateString()} To ${new Date(
                     endDate
                 ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },

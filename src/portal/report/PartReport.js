@@ -95,22 +95,22 @@ const  PartReport = () => {
 
                                 partsNewReport.push(singleRow)
                                 // If the part code is already in the map, update quantity and cost
-                                if (jobPartsMap.has(code)) {
-                                    const existingPart = jobPartsMap.get(code);
-                                    existingPart.quantity = round2Dec(parseFloat(existingPart.quantity) + parseFloat(quantity));  // Increase the quantity
-                                    existingPart.cost = round2Dec(parseFloat(existingPart.cost) + parseFloat(parseFloat(purchase_cost)*parseFloat(quantity))); // Update total cost
-                                } else {
-                                    // Add new part to the map
-                                    jobPartsMap.set(code, {
-                                        railcar_id: item.railcar_id,
-                                        status: status,
-                                        code,
-                                        title,
-                                        quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
-                                        unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
-                                        cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
-                                    });
-                                }
+                                // if (jobPartsMap.has(code)) {
+                                //     const existingPart = jobPartsMap.get(code);
+                                //     existingPart.quantity = round2Dec(parseFloat(existingPart.quantity) + parseFloat(quantity));  // Increase the quantity
+                                //     existingPart.cost = round2Dec(parseFloat(existingPart.cost) + parseFloat(parseFloat(purchase_cost)*parseFloat(quantity))); // Update total cost
+                                // } else {
+                                //     // Add new part to the map
+                                //     jobPartsMap.set(code, {
+                                //         railcar_id: item.railcar_id,
+                                //         status: status,
+                                //         code,
+                                //         title,
+                                //         quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
+                                //         unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
+                                //         cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
+                                //     });
+                                // }
                             } else {
                                 console.warn(`Missing part data: ${JSON.stringify(part)}`);
                             }
@@ -118,10 +118,10 @@ const  PartReport = () => {
                     });
 
                     // Convert the map back to an array
-                    const jobpartsArray = Array.from(jobPartsMap.values());
-
-                    // Add the consolidated job parts to the result
-                    result.push(...jobpartsArray);
+                    // const jobpartsArray = Array.from(jobPartsMap.values());
+                    //
+                    // // Add the consolidated job parts to the result
+                    // result.push(...jobpartsArray);
                 });
 
 

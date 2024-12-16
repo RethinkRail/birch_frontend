@@ -5,13 +5,6 @@
  * Description:
  **/
 
-/**
- * @author : Mithun Sarker
- * @mailto : mithun@ihrail.com
- * @created : 9/24/2024, Tuesday
- * Description:
- **/
-
 import React, {useState, useMemo, useRef, useEffect} from 'react';
 
 
@@ -33,12 +26,14 @@ const  PartReport = () => {
 
     const initialColumns = useMemo(() => [
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true, size: 50 },
+        { accessorKey: 'line_number', header: 'Line Number', enableSorting: true },
         { accessorKey: 'status', header: 'Status', enableSorting: true },
         { accessorKey: 'code', header: 'Code', enableSorting: true },
         { accessorKey: 'title', header: 'Title', enableSorting: true },
         { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
         { accessorKey: 'unit_cost', header: 'Unit Cost', enableSorting: true },
         { accessorKey: 'cost', header: 'Total Cost', enableSorting: true },
+        { accessorKey: 'tech_sign_off_date', header: 'Tech Sign Off Date', enableSorting: true },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -52,15 +47,13 @@ const  PartReport = () => {
     };
 
 
-
-
     useEffect(() => {
         const fetchData = async () => {
             toastId.current = toast.loading("Fetching data...");
             try {
                 const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+'get_part_report');
                 const result = [];
-
+                const partsNewReport = []
                 response.data.forEach(item => {
                     // Get status from workupdates
                     const status = `${item.workupdates[0].statuscode.code} ${item.workupdates[0].statuscode.title}`;
@@ -69,6 +62,8 @@ const  PartReport = () => {
                     const jobPartsMap = new Map();
 
                     item.joblist.forEach(job => {
+                        const techSignOfDate = job.crew_checked_time?new Date(job.crew_checked_time).toLocaleDateString():''
+                        const line_number = job.line_number
                         job.jobparts.forEach(part => {
                             // Ensure part and part.parts exist
                             if (part && part.parts) {
@@ -86,6 +81,19 @@ const  PartReport = () => {
                                     console.warn(`Invalid data for part code ${code}: quantity=${part.quantity}, purchase_cost=${part.purchase_cost}`);
                                 }
 
+                                const singleRow = {
+                                    'line_number':line_number,
+                                    'tech_sign_off_date':techSignOfDate,
+                                    railcar_id: item.railcar_id,
+                                    status: status,
+                                    code,
+                                    title,
+                                    quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
+                                    unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
+                                    cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
+                                }
+
+                                partsNewReport.push(singleRow)
                                 // If the part code is already in the map, update quantity and cost
                                 if (jobPartsMap.has(code)) {
                                     const existingPart = jobPartsMap.get(code);
@@ -118,7 +126,7 @@ const  PartReport = () => {
 
 
 
-                setData(result);
+                setData(partsNewReport);
                 toast.update(toastId.current, {
                     render: "All data loaded",
                     autoClose: 1000,

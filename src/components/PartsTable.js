@@ -54,6 +54,7 @@ function getFirstValue(str) {
 }
 // React component to display parts in a table using react-data-table-component
 const PartsTable = ({ jobs }) => {
+    console.log(jobs)
     const uniqueParts = getUniqueParts(jobs);
     const columns = [
         {
@@ -68,7 +69,6 @@ const PartsTable = ({ jobs }) => {
             selector: row => removeLastComma(row.line_number),
             sortable: true,
             width: '8%',
-
         },
         {
             name: 'TITLE',

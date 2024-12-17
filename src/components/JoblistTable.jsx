@@ -371,6 +371,11 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     if(hoveredRow.original.ln ==draggingRow.original.ln){
                         return
                     }
+                    console.log(hoveredRow.original.ln)
+                    console.log(draggingRow.original.ln)
+
+                    const line_from=draggingRow.original.ln
+                    const line_to=hoveredRow.original.ln
                     setIsWebserviceCalling(true)
                     const updatedTable = reorderLines(tableData,hoveredRow.original.ln,draggingRow.original.ln)
                     //console.log(updatedTable)
@@ -378,12 +383,14 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     // console.log(tableData)
                     // console.log(jobs)
                     const requestData = {
-                        line_one: draggingRow.original.ln,
-                        line_two: hoveredRow.original.ln,
+                        line_one: line_from,
+                        line_two: line_to,
                         work_order: workOrder.work_order,
                         user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
                         work_id:workOrder.id
                     };
+
+                    console.log(requestData)
                     axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
                         .then(response => {
                             console.log('Success:', response.data);

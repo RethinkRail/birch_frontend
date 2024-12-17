@@ -106,7 +106,8 @@ const RevenueByDepartments = () => {
             };
             console.log(payload)
             console.log(departments)
-
+            console.log(new Date(modified).toISOString())
+            console.log(new Date(endDate).toISOString())
             const payloadAll = {
                 startDate:modified,
                 endDate,

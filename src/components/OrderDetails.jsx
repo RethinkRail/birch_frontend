@@ -1362,6 +1362,10 @@ const OrderDetails = ({
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">
                                 <PartsTable jobs={workOrder.joblist}/>
                             </div>
+
+                            {/*<div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">*/}
+                            {/*    <PartReportTable workOrder={workOrder.work_order}/>*/}
+                            {/*</div>*/}
                             {/*End Parts information*/}
 
                             {/*Railcar log*/}

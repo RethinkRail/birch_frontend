@@ -1240,14 +1240,19 @@ export function printInvoice(workorder, forWhom) {
         return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
 
+    let average_markrup= 0;
+    let total_parts=0
+    let total_mark_up=0
+
     all_parts_for_sort.forEach(function (item) {
         //console.log(item)
+        total_parts++
         //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
         //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
-
+        total_mark_up += item.markup_percent*100
         //console.log(single_mat_cost)
 
         total_material_cost += Number(round2Dec(single_mat_cost))
@@ -1258,8 +1263,11 @@ export function printInvoice(workorder, forWhom) {
             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
     });
 
+    if(total_parts>0){
+        average_markrup = total_mark_up/total_parts
+    }
 
-    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost(Average labor rate:' + round2Dec(rate_per_line / total_job_line) + ')</td><td>' + labor_category +
+    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost (Average labor rate: ' + round2Dec(rate_per_line / total_job_line) + ') | <br> Average mark up: ' + round2Dec(average_markrup) + '</td><td>' + labor_category +
         '</td><td style="text-align: right;">' +
         '1' +
         '</td><td style="text-align: right;">' +

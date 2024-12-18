@@ -71,6 +71,13 @@ const Navbar = () => {
                     ]
                 },
                 {
+                    title: 'Inventory',
+                    children: [
+                        { title: 'QB Parts', path: '/qb_parts' },
+                        { title: 'Stock Status Report', path: '/stock_status_report' }
+                    ]
+                },
+                {
                     title: 'Misc. Reports',
                     children: [
                         { title: 'User Activity', path: '#' },

@@ -18,6 +18,7 @@ import RailCareTimeLog from "./RailCareTimeLog";
 import {printAAR} from "../utils/aarHelper";
 import TaskTable from "./TaskTable";
 import {hasRole} from "../utils/CommonHelper";
+import PartReportTable from "./PartReportTable";
 
 const OrderDetails = ({
                           commonData,
@@ -80,6 +81,7 @@ const OrderDetails = ({
     const [lesseeDueDateOriginal, setLesseeDueDateOriginal] = useState()
     const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
+    const [partReport, setPartReport] = useState([])
 
     //const [joblist,setJobList] =useState([])
 
@@ -280,15 +282,26 @@ const OrderDetails = ({
         setIsBilledToLessee(
             secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
         );
-
-
         calculateJobCosts(workOrder.joblist ?? []);
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
         getRailCarTimeLog();
         setStorageInformation(workOrder.storage_information ?? {});
-
+        fetchPartReport()
     }, [workOrder]);
 
+
+    const fetchPartReport = async () => {
+        try {
+            const response = await axios.get(
+                process.env.REACT_APP_BIRCH_API_URL+`get_part_report_for_work_order/?work_order=${workOrder.work_order}`
+            );
+            setPartReport(response.data);
+        } catch (err) {
+            console.error("Error fetching part report:", err);
+        } finally {
+
+        }
+    };
 
     const getRailCarTimeLog =async () => {
         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
@@ -1359,13 +1372,13 @@ const OrderDetails = ({
                                 </div>
                             </div>
                             {/*Parts information*/}
-                            <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">
-                                <PartsTable jobs={workOrder.joblist}/>
-                            </div>
-
                             {/*<div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">*/}
-                            {/*    <PartReportTable workOrder={workOrder.work_order}/>*/}
+                            {/*    <PartsTable jobs={workOrder.joblist}/>*/}
                             {/*</div>*/}
+
+                            <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">
+                                <PartReportTable data={partReport}/>
+                            </div>
                             {/*End Parts information*/}
 
                             {/*Railcar log*/}

@@ -12,33 +12,34 @@ import axios from "axios";
 import {round2Dec} from "../utils/NumberHelper";
 import {FaArrowDown} from "react-icons/fa";
 
-const PartReportTable = ({ workOrder }) => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+const PartReportTable = ({ data }) => {
+    // const [data, setData] = useState([]);
+    // const [loading, setLoading] = useState(false);
+    // const [error, setError] = useState("");
 
-    useEffect(() => {
-        if (workOrder) {
-            fetchData(workOrder);
-        }
-    }, [workOrder]);
-
-    const fetchData = async (workOrder) => {
-        setLoading(true);
-        setError("");
-        try {
-            const response = await axios.get(
-                process.env.REACT_APP_BIRCH_API_URL+`get_part_report_for_work_order/?work_order=${workOrder}`
-            );
-            console.log(response.data)
-            setData(response.data);
-        } catch (err) {
-            console.error("Error fetching part report:", err);
-            setError("Failed to fetch data. Please try again later.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    // useEffect(() => {
+    //     console.log("use effect in part order table")
+    //     if (workOrder) {
+    //         fetchData(workOrder);
+    //     }
+    // }, [workOrder]);
+    //
+    // const fetchData = async (workOrder) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         const response = await axios.get(
+    //             process.env.REACT_APP_BIRCH_API_URL+`get_part_report_for_work_order/?work_order=${workOrder}`
+    //         );
+    //         console.log(response.data)
+    //         setData(response.data);
+    //     } catch (err) {
+    //         console.error("Error fetching part report:", err);
+    //         setError("Failed to fetch data. Please try again later.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const columns = [
         {
@@ -113,7 +114,7 @@ const PartReportTable = ({ workOrder }) => {
 
             cell: (row) => (
                 <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {row.quantity_available>0?row.quantity_available:0}
+                    {row.quantity_available}
                 </span>
             ),
             width: '14%',

@@ -43,6 +43,7 @@ const StorageReport = () => {
             toastId.current = toast.loading("Fetching data...");
             const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_storage_information/')
             const formattedData = formatDate(response.data)
+            console.log(response.data)
             setData(formattedData)
             toast.update(toastId.current, {
                 render: "All data loaded",
@@ -105,7 +106,7 @@ const StorageReport = () => {
                 transformedData.push({
                     railcar_id: storageInfo.railcar_id,
                     start_date: new Date(storageInfo.start_date).toLocaleDateString(),
-                    end_date:storageInfo.end_date!=='1900-01-01T00:00:00.000Z'? new Date(storageInfo.end_date).toLocaleDateString():'',
+                    end_date:storageInfo.end_date!==null? new Date(storageInfo.end_date).toLocaleDateString():'',
                     is_billed: storageInfo.is_billed==1?'YES':'NO',
                     total_days: totalDays
                 });

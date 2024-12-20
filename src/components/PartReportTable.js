@@ -114,7 +114,7 @@ const PartReportTable = ({ data }) => {
 
             cell: (row) => (
                 <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {row.quantity_available}
+                    {row.quantity_available>0?round2Dec(row.quantity_available):0}
                 </span>
             ),
             width: '14%',

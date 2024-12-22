@@ -96,18 +96,6 @@ const PartReportTable = ({ data }) => {
             width: '10%',
         },
         {
-            name: "Condition",
-            selector: (row) => row.condition,
-            sortable: true,
-            width: '10%',
-        },
-        {
-            name: "Availability",
-            selector: (row) => row.availability,
-            sortable: true,
-            width: '10%',
-        },
-        {
             name: "Quantity Available",
             selector: (row) => row.quantity_available,
             sortable: true,
@@ -119,6 +107,19 @@ const PartReportTable = ({ data }) => {
             ),
             width: '14%',
         },
+        {
+            name: "Condition",
+            selector: (row) => row.condition,
+            sortable: true,
+            width: '10%',
+        },
+        {
+            name: "Availability",
+            selector: (row) => row.availability,
+            sortable: true,
+            width: '10%',
+        }
+
     ];
 
     return (

@@ -110,8 +110,7 @@ const WorkOrderDataTable = ({
     useEffect(() => {
         const userToken = localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE);
         if (userToken) {
-
-            setCanFinalized(hasRole( 'ADMIN') || hasRole('BILLING'));
+            setCanFinalized(hasRole( 'ADMIN') || hasRole('BILLING') || hasRole('CUSTOMER SERVICE'));
         }
     }, []);
 

@@ -1377,7 +1377,7 @@ const OrderDetails = ({
                             {/*</div>*/}
 
                             <div className="w-full bg-white p-4  mt-[24px] rounded-none" id="part_list">
-                                <PartReportTable data={partReport}/>
+                                <PartReportTable initialData={partReport}/>
                             </div>
                             {/*End Parts information*/}
 

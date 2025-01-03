@@ -149,6 +149,7 @@ const RevenueByCustomer = () => {
 
     function groupAndSortByDate(data) {
         // Group by `invoice_date` and sum `total_cost`
+        console.log(data)
         const groupedData = Object.values(
             data.reduce((acc, { invoice_date, total_cost }) => {
                 if (!acc[invoice_date]) {

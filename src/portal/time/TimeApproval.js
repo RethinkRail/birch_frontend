@@ -290,6 +290,8 @@ const TimeApproval = () =>{
             setIsButtonDisabled(true)
             const start_date = new Date(fromDateToTimeRetrieve).toISOString().split('T')[0]
             const end_date = new Date(toDateToTimeRetrive).toISOString().split('T')[0]
+            console.log(start_date)
+            console.log(end_date)
             let qbResponse;
             let birchResponse;
             try {

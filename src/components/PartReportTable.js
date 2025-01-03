@@ -69,7 +69,7 @@ const PartReportTable = ({ initialData }) => {
                 return (
                     <span style={{ display: "flex", alignItems: "center" }}>
             {purchaseCost.toFixed(2)}
-                        {is_price_higher && <span style={{ color: "red", marginLeft: "5px" }}>↓</span>}
+                        {is_price_higher &&  <FaArrowDown style={{ color: 'red', marginLeft: '5px' }} />}
           </span>
                 );
             },

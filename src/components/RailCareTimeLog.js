@@ -42,7 +42,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         setSelectedRow(row);
         setIsModalOpen(true);
         setLoading(true);  // Start loading indicator
-
+        console.log(row.job_id)
         try {
             const response = await axios.get(
                 process.env.REACT_APP_BIRCH_API_URL+`get_time_log_by_job_id?is_rework=${row.is_rework_in_progress}&job_id=${row.job_id}`

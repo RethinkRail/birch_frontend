@@ -26,12 +26,10 @@ const  SummaryReportMaterial = () => {
     const [onlyInvoicedCars, setOnlyInvoicedCars] = useState(false);
     const [shipped, setShipped] = useState(false);
     const initialColumns = useMemo(() => [
-        { accessorKey: 'dis', header: 'DIS', enableSorting: true, size: 50 },
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
-        { accessorKey: 'owner', header: 'Owner', enableSorting: true },
-        { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
         { accessorKey: 'status', header: 'Status', enableSorting: true,columnFilterModeOptions: ['between','lessThan', 'greaterThan'] },
         { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
+        { accessorKey: 'qa_date', header: 'QA Date', enableSorting: true },
         { accessorKey: 'projected_out_date', header: 'Projected Out Date', enableSorting: true,
             sortingFn: (rowA, rowB) => {
                 const dateA = new Date(rowA.original.projected_out_date);
@@ -39,11 +37,17 @@ const  SummaryReportMaterial = () => {
                 return dateA - dateB;
             },
         },
+        { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
+        { accessorKey: 'dis', header: 'DIS', enableSorting: true, size: 50 },
+
+        { accessorKey: 'owner', header: 'Owner', enableSorting: true },
+        { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
+
         { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
         { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },
         { accessorKey: 'mhr_applied', header: 'MHR Applied', enableSorting: true },
         { accessorKey: 'mhr_estimated', header: 'MHR Estimated', enableSorting: true },
-        { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
+
         { accessorKey: 'last_content', header: 'Last Content', enableSorting: true },
         { accessorKey: 'railcar_type', header: 'Railcar Type', enableSorting: true },
         { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true },
@@ -58,7 +62,7 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'valve_date', header: 'Valve Date', enableSorting: true },
         { accessorKey: 'pd_date', header: 'PD Date', enableSorting: true },
         { accessorKey: 'final_date', header: 'Final Date', enableSorting: true },
-        { accessorKey: 'qa_date', header: 'QA Date', enableSorting: true },
+
         { accessorKey: 'shipped_date', header: 'Shipped Date', enableSorting: true },
         { accessorKey: 'sp', header: 'Special Process', enableSorting: true },
         { accessorKey: 'tq', header: 'Tank Qualification', enableSorting: true },
@@ -281,7 +285,43 @@ const  SummaryReportMaterial = () => {
                                 pageIndex: 0,
                                 pageSize: 50, // Set default page size to 50
                             },
+
+                            columnVisibility: {
+                                dis: false,
+                                rfid: true,
+                                status: true,
+                                last_comment: true,
+                                qa_date: true,
+                                projected_out_date: true,
+                                total_cost: true,
+                                owner: false,
+                                lessee: false,
+                                month_to_invoice: false,
+                                mo_wk: false,
+                                mhr_applied: false,
+                                mhr_estimated: false,
+                                last_content: false,
+                                railcar_type: false,
+                                material_cost: false,
+                                labor_cost: false,
+                                arrival_date: false,
+                                inspected_date: false,
+                                material_eta: false,
+                                clean_date: false,
+                                repair_schedule_date: false,
+                                paint_date: false,
+                                exterior_paint: false,
+                                valve_date: false,
+                                pd_date: false,
+                                final_date: false,
+                                shipped_date: false,
+                                sp: false,
+                                tq: false,
+                                re: false,
+                                ep: false,
+                            },
                         }}
+
                         muiTableHeadCellProps={{
                             sx: {
                                 backgroundColor: "#DCE5FF",

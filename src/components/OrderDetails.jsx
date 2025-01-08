@@ -179,6 +179,15 @@ const OrderDetails = ({
     const [totalLaborHours,setTotalLaborHours]= useState()
     const [totalLaborCost,setTotalLaborCost]= useState()
     const [totalMatCost,setTotalMatCost]= useState()
+    const [utilization,setUtilization]= useState()
+
+
+    const calculateUtilazation = (workOrder) =>{
+        const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
+        const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
+        const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
+        setUtilization(percentage)
+    }
 
     const calculateJobCosts = (jobs) => {
         let totalLaborCost = 0;
@@ -283,6 +292,7 @@ const OrderDetails = ({
             secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
         );
         calculateJobCosts(workOrder.joblist ?? []);
+        calculateUtilazation(workOrder)
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
         getRailCarTimeLog();
         setStorageInformation(workOrder.storage_information ?? {});
@@ -1352,7 +1362,7 @@ const OrderDetails = ({
                                 {/*end job list */}
 
 
-                                <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
+                                <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-5 gap-x-64">
                                     <div className="">
                                         <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
                                         <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
@@ -1368,6 +1378,11 @@ const OrderDetails = ({
                                     <div className="]">
                                         <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
                                         <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
+                                    </div>
+
+                                    <div className="]">
+                                        <h2 className='text-[12px] font-normal '>Utilization</h2>
+                                        <p className='text-[#979C9E] mt-[2px]'>{!isNaN(utilization) && isFinite(utilization) ? round2Dec(utilization) + "%" : "0.00%"}</p>
                                     </div>
                                 </div>
                             </div>

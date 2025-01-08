@@ -1133,12 +1133,16 @@ export function printInvoice(workorder, forWhom) {
     var owner_address = '';
     if (owner_obj != null && owner_obj.length > 0) {
         owner_obj = owner_obj[0];
-        if (owner_obj.contact_name != '') {
+        if (owner_obj.contact_name) {
             owner_address += owner_obj.contact_name + '\n';
         }
-        owner_address += owner_obj.address_line1?owner_obj.address_line1:'' + '\n' + owner_obj.address_line2? owner_obj.address_line2:'' + '\n';
-        owner_address += owner_obj.city ?owner_obj.city:''+ ', ' + owner_obj.state ? owner_obj.state:''+ ' ' + owner_obj.zip_code? owner_obj.zip_code:'';
+        owner_address += (owner_obj.address_line1 ? owner_obj.address_line1 : '') + '\n';
+        owner_address += (owner_obj.address_line2 ? owner_obj.address_line2 : '') + '\n';
+        owner_address += (owner_obj.city ? owner_obj.city : '') +
+            (owner_obj.state ? ', ' + owner_obj.state : '') +
+            (owner_obj.zip_code ? ' ' + owner_obj.zip_code : '');
     }
+    console.log(owner_address)
     var lessee = workorder.railcar.owner_railcar_lessee_idToowner.name
     var splc = workorder.yard.splc;
     var arr_date = convertSqlWithTZToFormattedDate(workorder.arrival_date);

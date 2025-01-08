@@ -478,9 +478,6 @@ const DepartmentReport = () => {
 
     const columns = React.useMemo(
         () => [
-            { accessorKey: "id", header: "ID" },
-            { accessorKey: "type", header: "Type" },
-            { accessorKey: "dis", header: "DIS",size: 20 ,columnFilterModeOptions: ['lessThan', 'greaterThan'],},
             { accessorKey: "railcar_id", header: "Railcar",size: 20 },
             {
                 accessorKey: "status_code",
@@ -628,6 +625,12 @@ const DepartmentReport = () => {
                     return value ==='NaN' ? 0 : value;
                 },
             },
+            { accessorKey: "admin_man_hour_estimated", header: "ADMIN MHE" },
+            { accessorKey: "admin_man_hour_applied", header: "ADMIN MHA" },
+            { accessorKey: "id", header: "ID" },
+            { accessorKey: "type", header: "Type" },
+            { accessorKey: "dis", header: "DIS",size: 20 ,columnFilterModeOptions: ['lessThan', 'greaterThan'],},
+
             {
                 accessorKey: "month_to_invoice",
                 header: "Month to Invoice",
@@ -658,8 +661,7 @@ const DepartmentReport = () => {
 
                 ),
             },
-            { accessorKey: "admin_man_hour_estimated", header: "ADMIN MHE" },
-            { accessorKey: "admin_man_hour_applied", header: "ADMIN MHA" },
+
             { accessorKey: "owner", header: "Owner" },
             { accessorKey: "lessee", header: "Lessee" },
             { accessorKey: "products", header: "Products" },
@@ -886,7 +888,53 @@ const DepartmentReport = () => {
                                 pageSize: 50, // Set default page size to 50
                             },
                             columnPinning: { left: ['railcar_id'] },
-                            columnVisibility: { id: false,type:false }
+                            columnVisibility: {
+                                railcar_id: true, // First column
+                                status_code: true, // Second column
+                                comment: true,
+                                clean_date: true,
+                                repair_schedule_date: true,
+                                paint_date: true,
+                                pd_date: true,
+                                qa_date: true,
+                                projected_out_date: true,
+                                total_cost: true,
+                                admin_man_hour_estimated: true,
+                                admin_man_hour_applied: true,
+                                id: false,
+                                type: false,
+                                dis: false,
+                                month_to_invoice: false,
+                                mo_wk: false,
+                                owner: false,
+                                lessee: false,
+                                products: false,
+                                inspected_date: false,
+                                material_eta: false,
+                                clean_man_hour_estimated: false,
+                                clean_man_hour_applied: false,
+                                repair_man_hour_estimated: false,
+                                repair_man_hour_applied: false,
+                                exterior_paint: false,
+                                paint_man_hour_estimated: false,
+                                paint_man_hour_applied: false,
+                                valve_date: false,
+                                valve_man_hour_estimated: false,
+                                valve_man_hour_applied: false,
+                                pd_man_hour_estimated: false,
+                                pd_man_hour_applied: false,
+                                indirect_labor_man_hour_estimated: false,
+                                indirect_labor_man_hour_applied: false,
+                                indirect_switching_man_hour_estimated: false,
+                                indirect_switching_man_hour_applied: false,
+                                maintenance_man_hour_estimated: false,
+                                maintenance_man_hour_applied: false,
+                                final_date: false,
+                                sp: false,
+                                tq: false,
+                                re: false,
+                                ep: false,
+                            },
                         }}
                         muiTableHeadCellProps={{
                             sx: {

@@ -56,6 +56,7 @@ const Navbar = () => {
                     title: 'Operations Reports',
                     children: [
                         { title: 'Shop Summary Report', path: '#' },
+                        { title: 'Indirect Hours Report', path: '/indirect_hour_report' },
                         { title: 'Manhours', path: '#' },
                         { title: 'Billing Efficiency', path: '#' },
                         { title: 'Utilization', path: '#' },

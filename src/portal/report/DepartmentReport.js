@@ -18,7 +18,7 @@ import Modal from "react-modal";
 import qs from "qs";
 
 import CommentModalDepartMent from "../../components/CommentModalDepartMent";
-import {MaterialReactTable} from "material-react-table";
+import {MaterialReactTable, useMaterialReactTable} from "material-react-table";
 import {download, generateCsv, mkConfig} from "export-to-csv";
 
 
@@ -36,6 +36,7 @@ const DepartmentReport = () => {
 
     const [updatedStatusCode, setupdatedStatusCode] = useState(null)
     const [workOrderToUpdateStatus, setWorkOrdeToUpdateStatus] = useState(null)
+
     useEffect(() => {
         setIsStatusDropDownModalOpenInDetails(false)
         const fetchData = async () => {
@@ -133,6 +134,444 @@ const DepartmentReport = () => {
             })
         );
     }
+
+    const table = useMaterialReactTable({
+        columns: [
+            { accessorKey: "railcar_id", header: "Railcar",size: 20 },
+            {
+                accessorKey: "status_code",
+                header: "Status",
+                size:50,
+                columnFilterModeOptions: ['between','lessThan', 'greaterThan'],
+                Cell: ({ row, column }) => (
+                    <select onChange={(e) => handleDropdownChangeInDetails(e, row.original.id)} className="w-[200px]">
+                        {statusCodes.map((status) => (
+                            <option key={status.code} value={status.code} selected={row.original.status_code === status.code}>
+                                {status.code + ":" + status.title}
+                            </option>
+                        ))}
+                    </select>
+                ),
+            },
+            {
+                accessorKey: "comment",
+                header: "Comment",
+                size: 250, // Optionally constrain width
+                Cell: ({ row }) => (
+                    <div
+                        className="truncate w-60 whitespace-nowrap overflow-hidden whitespace-pre-wrap cursor-pointer"
+                        onClick={() => {
+                            document.getElementById('commentModal').showModal();
+                            setCommentObject(row.original.comment);
+                            setWorkIdForComment(row.original.id);
+
+                        }}
+                        title={row.original.comment[0]?.comment}
+                    >
+                        {row.original.comment[0]?.comment}
+                    </div>
+                ),
+            },
+            {
+                accessorKey: "clean_date",
+                header: "Clean Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.clean_date ? new Date(row.original.clean_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+
+                    />
+                ),
+            },
+            {
+                accessorKey: "repair_schedule_date",
+                header: "Repair Schedule Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.repair_schedule_date
+                                ? new Date(row.original.repair_schedule_date)
+                                : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "paint_date",
+                header: "Paint Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.paint_date ? new Date(row.original.paint_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "pd_date",
+                header: "PD Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.pd_date ? new Date(row.original.pd_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "qa_date",
+                header: "QA Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.qa_date ? new Date(row.original.qa_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "projected_out_date",
+                header: "POD",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.projected_out_date ? new Date(row.original.projected_out_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+                sortingFn: (rowA, rowB) => {
+                    const dateA = new Date(rowA.original.projected_out_date);
+                    const dateB = new Date(rowB.original.projected_out_date);
+                    return dateA - dateB;
+                },
+            },
+            {
+                accessorKey: "total_cost",
+                header: "Total Cost",
+                Cell: ({ row, column  }) => {
+                    const value = row.original.total_cost;
+                    return value ==='NaN' ? 0 : value;
+                },
+            },
+            { accessorKey: "admin_man_hour_estimated", header: "ADMIN MHE" },
+            { accessorKey: "admin_man_hour_applied", header: "ADMIN MHA" },
+            { accessorKey: "id", header: "ID" },
+            { accessorKey: "type", header: "Type" },
+            { accessorKey: "dis", header: "DIS",size: 20 ,columnFilterModeOptions: ['lessThan', 'greaterThan'],},
+
+            {
+                accessorKey: "month_to_invoice",
+                header: "Month to Invoice",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.month_to_invoice ? new Date(row.original.month_to_invoice) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "mo_wk",
+                header: "MO/WK",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.mo_wk || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+
+                ),
+            },
+
+            { accessorKey: "owner", header: "Owner" },
+            { accessorKey: "lessee", header: "Lessee" },
+            { accessorKey: "products", header: "Products" },
+            {
+                accessorKey: "inspected_date",
+                header: "Inspected Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={new Date(row.original.inspected_date)}
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "material_eta",
+                header: "Material ETA",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.material_eta ? new Date(row.original.material_eta) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "clean_man_hour_estimated", header: "CLEAN MHE" },
+            { accessorKey: "clean_man_hour_applied", header: "CLEAN MHA" },
+            { accessorKey: "repair_man_hour_estimated", header: "REPAIR MHE" },
+            { accessorKey: "repair_man_hour_applied", header: "REPAIR MHA" },
+            {
+                accessorKey: "exterior_paint",
+                header: "Exterior Paint",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.exterior_paint ? new Date(row.original.exterior_paint) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "paint_man_hour_estimated", header: "PAINT MHE" },
+            { accessorKey: "paint_man_hour_applied", header: "PAINT MHA" },
+            {
+                accessorKey: "valve_date",
+                header: "Valve Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.valve_date ? new Date(row.original.valve_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            { accessorKey: "valve_man_hour_estimated", header: "VALVE MHE" },
+            { accessorKey: "valve_man_hour_applied", header: "VALVE MHA" },
+            { accessorKey: "pd_man_hour_estimated", header: "PD MHE" },
+            { accessorKey: "pd_man_hour_applied", header: "PD MHA" },
+            { accessorKey: "indirect_labor_man_hour_estimated", header: "INDIRECT MHE" },
+            { accessorKey: "indirect_labor_man_hour_applied", header: "INDIRECT MHA" },
+            { accessorKey: "indirect_switching_man_hour_estimated", header: "INDIRECT SWITCHING MHE" },
+            { accessorKey: "indirect_switching_man_hour_applied", header: "INDIRECT SWITCHING MHA" },
+            { accessorKey: "maintenance_man_hour_estimated", header: "MAINTENANCE MHE" },
+            { accessorKey: "maintenance_man_hour_applied", header: "MAINTENANCE MHA" },
+            {
+                accessorKey: "final_date",
+                header: "Final Date",
+                size: 100,
+                Cell: ({ row, column }) => (
+                    <DatePicker
+                        selected={
+                            row.original.final_date ? new Date(row.original.final_date) : null
+                        }
+                        onChange={(date) => handleDateChange(date, row, column)}
+                        className="border p-1 rounded w-full"
+                        popperClassName="z-50" // Ensure it has a higher z-index
+                        portalId="root-portal"
+                    />
+                ),
+            },
+            {
+                accessorKey: "sp",
+                header: "SP",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.sp || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "tq",
+                header: "TQ",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.tq || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "re",
+                header: "RE",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.re || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            {
+                accessorKey: "ep",
+                header: "EP",
+                Cell: ({ row, column }) => (
+                    <input
+                        type="text"
+                        value={row.original.ep || ""}
+                        onChange={(e) => handleTextChange(e, row.original.id, column)}
+                        className="border p-1 rounded w-full"
+                        onBlur={(e) => updateTextField(e, row.original.id, column)}
+                    />
+                ),
+            },
+            // Date fields with Date Picker
+        ],
+        data: processedReport,
+        enablePagination: true,
+        enableColumnFilterModes: true,
+        enableStickyHeader: true,
+        autoResetPageIndex:false,
+        initialState: {
+            pagination: { pageIndex: 0, pageSize: 50 },
+            columnVisibility: {
+                railcar_id: true,
+                status_code: true,
+                comment: true,
+                clean_date: true,
+                repair_schedule_date: true,
+                paint_date: true,
+                pd_date: true,
+                qa_date: true,
+                projected_out_date: true,
+                total_cost: true,
+                admin_man_hour_estimated: true,
+                admin_man_hour_applied: true,
+                // Hide other columns
+                id: false,
+                type: false,
+                dis: false,
+                month_to_invoice: false,
+                mo_wk: false,
+                owner: false,
+                lessee: false,
+                products: false,
+                inspected_date: false,
+                material_eta: false,
+                clean_man_hour_estimated: false,
+                clean_man_hour_applied: false,
+                repair_man_hour_estimated: false,
+                repair_man_hour_applied: false,
+                exterior_paint: false,
+                paint_man_hour_estimated: false,
+                paint_man_hour_applied: false,
+                valve_date: false,
+                valve_man_hour_estimated: false,
+                valve_man_hour_applied: false,
+                pd_man_hour_estimated: false,
+                pd_man_hour_applied: false,
+                indirect_labor_man_hour_estimated: false,
+                indirect_labor_man_hour_applied: false,
+                indirect_switching_man_hour_estimated: false,
+                indirect_switching_man_hour_applied: false,
+                maintenance_man_hour_estimated: false,
+                maintenance_man_hour_applied: false,
+                final_date: false,
+                sp: false,
+                tq: false,
+                re: false,
+                ep: false,
+            },
+        },
+        muiTableHeadCellProps: {
+            sx: { backgroundColor: '#DCE5FF', fontSize: '10px', padding: '8px' },
+        },
+        muiTableBodyCellProps: {
+            sx: { fontSize: '10px', padding: '10px' },
+        },
+        muiTableBodyRowProps: ({ row, table }) => ({
+            sx: {
+                backgroundColor:
+                    table.getRowModel().flatRows.indexOf(row) % 2 === 0 ? '#F9F9F9' : '#ffffff',
+            },
+        }),
+        renderTopToolbarCustomActions: ({ table }) => (
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '16px',
+                    padding: '8px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <button
+                    disabled={table.getPrePaginationRowModel().rows.length === 0}
+                    onClick={() =>
+                        handleExportRows(table, table.getPrePaginationRowModel().rows)
+                    }
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '8px 16px',
+                        backgroundColor: '#1976d2',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        opacity: table.getPrePaginationRowModel().rows.length === 0 ? 0.5 : 1,
+                    }}
+                >
+                    <FaDownload style={{ marginRight: '8px' }} />
+                    Export All
+                </button>
+            </div>
+        ),
+    });
 
 
     const orderDetailsModal = document.getElementById('orderDetailsModal');
@@ -316,9 +755,7 @@ const DepartmentReport = () => {
     }
 
     const handleDateChange = async (date, id, field) => {
-        console.log(date)
-        console.log(id)
-        console.log(field)
+
         setProcessedReport(prevReport => {
             const updatedData = prevReport.map(item => {
                 if (item.id === id.original.id) {
@@ -431,7 +868,7 @@ const DepartmentReport = () => {
         fieldSeparator: ',',
         decimalSeparator: '.',
         useKeysAsHeaders: true,
-        filename: 'BIRCH Summary Report '+new Date().toLocaleDateString()
+        filename: 'BIRCH department Report '+new Date().toLocaleDateString()
     });
 
     const handleExportRows = (table,rows) => {
@@ -876,122 +1313,8 @@ const DepartmentReport = () => {
                         work_id={workIdForComment}
                         updateWorkUpdates={putComments}
                     />
-                    <MaterialReactTable
-                        columns={columns}
-                        data={processedReport}
-                        enablePagination={true}
-                        enableColumnFilterModes={true}
-                        enableStickyHeader
-                        initialState={{
-                            pagination: {
-                                pageIndex: 0,
-                                pageSize: 50, // Set default page size to 50
-                            },
-                            columnPinning: { left: ['railcar_id'] },
-                            columnVisibility: {
-                                railcar_id: true, // First column
-                                status_code: true, // Second column
-                                comment: true,
-                                clean_date: true,
-                                repair_schedule_date: true,
-                                paint_date: true,
-                                pd_date: true,
-                                qa_date: true,
-                                projected_out_date: true,
-                                total_cost: true,
-                                admin_man_hour_estimated: true,
-                                admin_man_hour_applied: true,
-                                id: false,
-                                type: false,
-                                dis: false,
-                                month_to_invoice: false,
-                                mo_wk: false,
-                                owner: false,
-                                lessee: false,
-                                products: false,
-                                inspected_date: false,
-                                material_eta: false,
-                                clean_man_hour_estimated: false,
-                                clean_man_hour_applied: false,
-                                repair_man_hour_estimated: false,
-                                repair_man_hour_applied: false,
-                                exterior_paint: false,
-                                paint_man_hour_estimated: false,
-                                paint_man_hour_applied: false,
-                                valve_date: false,
-                                valve_man_hour_estimated: false,
-                                valve_man_hour_applied: false,
-                                pd_man_hour_estimated: false,
-                                pd_man_hour_applied: false,
-                                indirect_labor_man_hour_estimated: false,
-                                indirect_labor_man_hour_applied: false,
-                                indirect_switching_man_hour_estimated: false,
-                                indirect_switching_man_hour_applied: false,
-                                maintenance_man_hour_estimated: false,
-                                maintenance_man_hour_applied: false,
-                                final_date: false,
-                                sp: false,
-                                tq: false,
-                                re: false,
-                                ep: false,
-                            },
-                        }}
-                        muiTableHeadCellProps={{
-                            sx: {
-                                backgroundColor: "#DCE5FF",
-                                fontSize: '10px',
-                                padding: '8px',
-                            }
-                        }}
-                        muiTableBodyCellProps={{
-                            sx: {
-                                fontSize: '10px',
-                                padding: '10px',
-                            }
-                        }}
-                        muiTableBodyRowProps={({ row, table }) => ({
-                            sx: {
-                                backgroundColor:
-                                    table.getRowModel().flatRows.indexOf(row) % 2 === 0
-                                        ? "#F9F9F9"
-                                        : "#ffffff", // Use table row index to alternate row colors
-                            },
-                        })}
-                        renderTopToolbarCustomActions={({ table }) => (
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    gap: '16px',
-                                    padding: '8px',
-                                    flexWrap: 'wrap',
-                                }}
-                            >
+                    <MaterialReactTable table={table} />
 
-                                <button
-                                    disabled={table.getPrePaginationRowModel().rows.length === 0}
-                                    onClick={() =>
-                                        handleExportRows(table,table.getPrePaginationRowModel().rows)
-                                    }
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        padding: '8px 16px',
-                                        backgroundColor: '#1976d2',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        opacity: table.getPrePaginationRowModel().rows.length === 0 ? 0.5 : 1,
-                                    }}
-                                >
-                                    <FaDownload style={{ marginRight: '8px' }} />
-                                    Export All
-                                </button>
-
-
-                            </div>
-                        )}
-                    />
                 </div>
             ) : null}
 

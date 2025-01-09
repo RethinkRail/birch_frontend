@@ -32,10 +32,20 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
     const [selectedRow, setSelectedRow] = useState(null);
     const [timeLogs, setTimeLogs] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [utilization,setUtilization]= useState()
+
+
+    const calculateUtilazation = (workOrder) =>{
+        const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
+        const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
+        const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
+        setUtilization(percentage)
+    }
 
     useEffect(()=>{
         setIsInVoiced(workOrder.locked_by != null)
         setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
+        calculateUtilazation(workOrder)
     },[workOrder])
 
     const showModal = async (row) => {
@@ -382,7 +392,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                 />
             </div>
 
-            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64 mb-[24px]" >
+            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-5 gap-x-64 mb-[24px]" >
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS ESTIMATED</h2>
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(laboorHRSEST)} Hrs</p>
@@ -398,6 +408,11 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                 <div className="]">
                     <h2 className='text-[12px] font-normal '>Difference</h2>
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(round2Dec(laboorHRSEST)-(totalHoursApplied+totalRework))}</p>
+                </div>
+
+                <div className="]">
+                    <h2 className='text-[12px] font-normal '>LHR</h2>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(utilization)+"%"}</p>
                 </div>
             </div>
 

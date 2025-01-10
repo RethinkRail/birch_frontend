@@ -51,11 +51,14 @@ const IndirectHour = () => {
     const [loading, setLoading] = useState(false);
 
     const [allData,setAllData] = useState([])
+    const [tableData,setTableData] = useState([])
     const [isAllDepartment,setIsAllDepartment] = useState(false)
 
     const initialColumns = useMemo(() => [
+        { accessorKey: 'team_member', header: 'Team Member', enableSorting: true },
         { accessorKey: 'department_name', header: 'Department', enableSorting: true },
         { accessorKey: 'start_date', header: 'Date', enableSorting: true },
+        { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         {
             accessorKey: 'total_hour',
             header: 'Hour',
@@ -128,7 +131,20 @@ const IndirectHour = () => {
             );
 
             const data = response.data.data;
-            console.log(data)
+            setTableData(data)
+            const mergedData = Object.values(
+                data.reduce((acc, item) => {
+                    const key = `${item.department_name}-${item.start_date}`;
+                    if (!acc[key]) {
+                        acc[key] = { ...item, total_hour: parseFloat(item.total_hour) };
+                    } else {
+                        acc[key].total_hour += parseFloat(item.total_hour);
+                    }
+                    return acc;
+                }, {})
+            );
+
+            console.log(mergedData)
             setAllData(data)
 
             // if(!isAllDepartment){
@@ -297,7 +313,7 @@ const IndirectHour = () => {
                             {allData.length >0?(
                                 <MaterialReactTable
                                     columns={columns}
-                                    data={allData}
+                                    data={tableData}
                                     enablePagination={true}
                                     enableColumnFilterModes={true}
                                     initialState={{

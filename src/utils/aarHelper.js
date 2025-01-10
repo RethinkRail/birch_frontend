@@ -990,10 +990,10 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             location_on_car.value = getObjComputedValue(location_on_car, item.locationcode ? item.locationcode.code : null);
             quantity.value = getObjComputedValue(quantity, item.quantity);
             condition_code.value = getObjComputedValue(condition_code, item.conditioncode ? item.conditioncode.code : null);
-            applied_job_code.value = getObjComputedValue(applied_job_code, item.jobcode_joblist_job_code_appliedTojobcode ? item.jobcode_joblist_job_code_appliedTojobcode.code : null);
+            applied_job_code.value = getObjComputedValue(applied_job_code, item.jobcode_joblist_job_code_appliedTojobcode ? item.jobcode_joblist_job_code_appliedTojobcode.code.substring(0, 4) : null);
             applied_qualifier.value = getObjComputedValue(applied_qualifier, item.qualifiercode_joblist_qualifier_applied_idToqualifiercode ? item.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code : null);
             why_made_code.value = getObjComputedValue(why_made_code, item.whymadecode ? item.whymadecode.code : null);
-            removed_job_code.value = getObjComputedValue(removed_job_code, item.jobcode_joblist_job_code_removedTojobcode ? item.jobcode_joblist_job_code_removedTojobcode.code : null);
+            removed_job_code.value = getObjComputedValue(removed_job_code, item.jobcode_joblist_job_code_removedTojobcode ? item.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4) : null);
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 

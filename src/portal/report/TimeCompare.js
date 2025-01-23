@@ -102,7 +102,10 @@ const TimeCompare = () => {
         return data.map(employee => {
             // Convert time from seconds to hours
             const timeInBRC = employee.time_in_birch / 3600;
-            const timeInQUICKBOOK = employee.time_in_qb / 3600;
+            const timeInQUICKBOOK = employee.time_in_qb > 6 * 3600
+                ? round2Dec( (employee.time_in_qb - (30 * 60)) / 3600)
+                : employee.time_in_qb / 3600;
+
 
             // Calculate difference
             const difference = timeInQUICKBOOK - timeInBRC;

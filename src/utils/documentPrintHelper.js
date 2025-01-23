@@ -1153,38 +1153,38 @@ export function printInvoice(workorder, forWhom) {
     let yard_bank_info = workorder.yard.billing_address;
 
     workorder.joblist.forEach((myjob, i) => {
-
+        console.log(myjob.line_number)
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
-                if (myjob.labor_cost > 0) {
+                //if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time)
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
                     }
-                }
+                //}
             }
         }else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
-                if (myjob.labor_cost > 0) {
+                //if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time);
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
                     }
-                }
+                //}
             }
         }else {
-            if (myjob.labor_cost > 0) {
+            //if (myjob.labor_cost > 0) {
                 if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time);
                     revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                 } else {
-                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
                 }
-            }
+            //}
         }
 
     })

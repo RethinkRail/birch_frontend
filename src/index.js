@@ -31,6 +31,7 @@ import QbParts from "./portal/report/QbParts";
 import RevenueByDepartments from "./portal/report/RevenueByDepartment";
 import StockStatusReport from "./components/StockStatusReport";
 import IndirectHour from "./portal/report/IndirectHour";
+import UtilizationReport from "./portal/report/UtilizationReport";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -200,6 +201,14 @@ root.render(
                 <Route path="/indirect_hour_report" element={
                     <ProtectedRoute>
                         <IndirectHour/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+
+                <Route path="/utilization_report" element={
+                    <ProtectedRoute>
+                        <UtilizationReport/>
                     </ProtectedRoute>
                 }>
                 </Route>

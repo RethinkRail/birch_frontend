@@ -103,7 +103,12 @@ const TimeApproval = () =>{
             const employeeApprovedZero = {
                 employee_name: employee.employee_name,
                 employee_number: employee.employee_number,
-                time_in_qb: employee.time_in_qb== 0?0: employee.time_in_qb-1800,
+                time_in_qb: employee.time_in_qb === 0
+                    ? 0
+                    : employee.time_in_qb > 6 * 3600
+                        ? employee.time_in_qb - 1800
+                        : employee.time_in_qb,
+
                 total_logged_time: 0, // Initialize total_logged_time
                 logs: []
             };

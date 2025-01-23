@@ -59,7 +59,7 @@ const Navbar = () => {
                         { title: 'Indirect Hours Report', path: '/indirect_hour_report' },
                         { title: 'Manhours', path: '#' },
                         { title: 'Billing Efficiency', path: '#' },
-                        { title: 'Utilization', path: '#' },
+                        { title: 'Utilization', path: '/utilization_report' },
                         { title: 'POD Accuracy', path: '#' },
                         { title: 'Days in Status', path: '#' }
                     ]

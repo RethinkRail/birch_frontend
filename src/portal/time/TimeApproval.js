@@ -116,7 +116,9 @@ const TimeApproval = () =>{
             const employeeApprovedOne = {
                 employee_name: employee.employee_name,
                 employee_number: employee.employee_number,
-                time_in_qb: employee.time_in_qb== 0?0: employee.time_in_qb-1800,
+                time_in_qb: employee.time_in_qb== 0?0: employee.time_in_qb > 6 * 3600
+                    ? employee.time_in_qb - 1800
+                    : employee.time_in_qb,
                 total_logged_time: 0, // Initialize total_logged_time
                 logs: []
             };
@@ -454,10 +456,14 @@ const TimeApproval = () =>{
         return result;
     };
 
+    //row.time_in_qb > 6 * 3600 ? round2Dec( (row.time_in_qb - (30 * 60)) / 3600) : round2Dec( row.time_in_qb / 3600), sortable: true
+
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
         { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
-        { name: 'QB Time (hrs)', selector: row => (row.time_in_qb / 3600).toFixed(2), sortable: true },
+        { name: 'QB Time (hrs)', selector: row =>  row.time_in_qb > 6 * 3600
+                ? round2Dec( (row.time_in_qb - (30 * 60)) / 3600)
+                : round2Dec( row.time_in_qb / 3600), sortable: true },
         {
             name: 'Utilization (%)',
             selector: row =>   row.time_in_qb==0?'Not in QB' : ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),

@@ -142,12 +142,12 @@ const UtilizationReport = () => {
         try {
             setLoading(true);
             const payloadCrew = {
-                crew:selectedCrew.value,
+                crew:selectedCrew?selectedCrew.value:0,
                 startDate:modified,
                 endDate,
             };
             const payloadDepartment = {
-                department_id:selectedDepartment.value,
+                department_id:selectedDepartment? selectedDepartment.value:0,
                 startDate:modified,
                 endDate,
             };

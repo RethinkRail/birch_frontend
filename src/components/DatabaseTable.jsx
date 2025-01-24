@@ -9,7 +9,7 @@ import EditModal from './EditModal'
 import Plus from './Plus'
 import {toast} from 'react-toastify'
 import DeleteModal from './DeleteModal'
-import {showToastMessage} from "../utils/CommonHelper";
+import {hasRole, showToastMessage} from "../utils/CommonHelper";
 import DataTableSearch from "./DataTableSearch";
 import {Input} from "postcss";
 
@@ -171,11 +171,28 @@ const DatabaseTable = () => {
                         <select name="table" id="table" defaultValue={selectedTable}
                                 onChange={(e) => setSelectedTable(e.target.value)} placeholder='Select Table'
                                 className='text-[12px] p-1 rounded-md uppercase'>
-                            {Object.keys(allTables).map((table, index) => (
-                                !JSON.parse(process.env.REACT_APP_DB_OPERATION_EXCLUDED_TABLES).includes(table) ? (
-                                    <option key={index} value={table}>{table.split("_").join(" ")}</option>
-                                ) : null
-                            ))}
+                            {Object.keys(allTables).map((table, index) => {
+                                // Determine the correct excluded tables list based on role
+                                const excludedTables = hasRole('CFO')
+                                    ? process.env.REACT_APP_DB_OPERATION_EXCLUDED_TABLES_CFO
+                                    : process.env.REACT_APP_DB_OPERATION_EXCLUDED_TABLES;
+
+                                // Parse the excluded tables safely
+                                let excludedTablesArray = [];
+                                try {
+                                    excludedTablesArray = JSON.parse(excludedTables || "[]");
+                                } catch (error) {
+                                    console.error("Failed to parse excluded tables:", error);
+                                }
+
+                                // Render options conditionally
+                                return !excludedTablesArray.includes(table) ? (
+                                    <option key={index} value={table}>
+                                        {table.split("_").join(" ")}
+                                    </option>
+                                ) : null;
+                            })}
+
                         </select>
                     </div>
                     <div className='flex-1'>

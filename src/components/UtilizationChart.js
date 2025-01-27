@@ -26,8 +26,9 @@ ChartJS.register({
 });
 
 
-const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
+const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) => {
     console.log(dataSet)
+    console.log(type)
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     // Generate X-Axis dates based on the given start and end date

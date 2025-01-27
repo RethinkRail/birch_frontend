@@ -75,8 +75,8 @@ const UtilizationReport = () => {
         },
 
         {
-            accessorKey: 'utilization(%)',
-            header: 'Utilization',
+            accessorKey: 'utilization',
+            header: 'utilization',
             enableSorting: true,
             Cell: ({ cell }) => round2Dec( cell.getValue()), // Add 2 to the value of total_hour
         },
@@ -175,8 +175,32 @@ const UtilizationReport = () => {
             console.log(response)
             setTableData(data)
 
+            if(showDepartments){
 
-            setAllData(data)
+                const mergedData = data.reduce((acc, curr) => {
+                    const key = `${curr.job_id}-${curr.start_date}`;
+                    if (!acc[key]) {
+                        acc[key] = {
+                            ...curr,
+                            crew_id: selectedDepartment.value,
+                            crew_name: selectedDepartment.label,
+                            utilization: (curr.applied_time * 100) / curr.estimated_time || 0,
+                        };
+                    } else {
+                        acc[key].applied_time += curr.applied_time;
+                        acc[key].estimated_time += curr.estimated_time;
+                        acc[key].utilization = (acc[key].applied_time * 100) / acc[key].estimated_time || 0;
+                    }
+                    return acc;
+                }, {});
+
+                const result = Object.values(mergedData);
+                setAllData(result)
+            }else {
+                setAllData(data)
+            }
+
+
 
             // if(!isAllDepartment){
             //     const response = await axios.post(
@@ -348,7 +372,7 @@ const UtilizationReport = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
 
-                        <UtilizationChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Utilization'} />
+                        <UtilizationChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Utilization'} type={showDepartments} />
                         {/*{isAllDepartment ? (*/}
                         {/*    <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />*/}
                         {/*) : (*/}

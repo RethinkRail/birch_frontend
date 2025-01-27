@@ -1443,7 +1443,7 @@ function saveDivII(sTable, title, filename, landscape = false) {
     style = style + ".forjobs td{height: 1.67rem; border-collapse: collapse; border:0.083rem solid gray;}"
     style = style + " @media print { .no-print {display: none !important;}} ";
     style = style + "</style>";
-    var page_size = ' height=750,width=563';
+    var page_size = ' height=750,width=663';
     if (landscape) {
         style = "<style>";
         style = style + "div { text-transform: uppercase; }"
@@ -1455,7 +1455,7 @@ function saveDivII(sTable, title, filename, landscape = false) {
         style = style + ".forjobs td{height: 1.67rem; border-collapse: collapse; border:0.083rem solid gray;}"
         style = style + " @media print { .no-print {display: none !important;}} ";
         style = style + "</style>";
-        var page_size = 'height=563,width=750';
+        var page_size = 'height=563,width=850';
     }
 
     var win = window.open('', '', page_size);

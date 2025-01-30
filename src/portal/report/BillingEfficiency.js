@@ -27,9 +27,8 @@ import {FaDownload} from "react-icons/fa";
 import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
-import IndirectHourChart from "../../components/IndirectHourChart";
 import {round2Dec} from "../../utils/NumberHelper";
-import UtilizationChart from "../../components/UtilizationChart";
+import BillingEfficiencyChart from "../../components/BillingEfficiencyChart";
 
 
 // Register Chart.js components
@@ -43,44 +42,21 @@ ChartJS.register(
     Legend
 );
 
-const UtilizationReport = () => {
-    const [departments, setDepartments] = useState([]);
-    const [selectedDepartment, setSelectedDepartment] = useState(null);
-
-    const [crews, setCrews] = useState([]);
-    const [selectedCrew, setSelectedCrew] = useState(null);
-
-    const [showDepartments, setShowDepartments] = useState(true);
-
+const BillingEfficiency = () => {
+    const [selectedRailCar, setSelectedRailCar] = useState(Array(5).fill("")); //
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
-
     const [loading, setLoading] = useState(false);
-
     const [allData,setAllData] = useState([])
-    const [tableData,setTableData] = useState([])
-    const [isAllDepartment,setIsAllDepartment] = useState(false)
 
     const initialColumns = useMemo(() => [
-        { accessorKey: 'crew_id', header: 'Team member ID', enableSorting: true },
-        { accessorKey: 'crew_name', header: 'Team member Name', enableSorting: true },
-        { accessorKey: 'start_date', header: 'Date', enableSorting: true },
-        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round2Dec( cell.getValue())  },
+        { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true, size: 50 },
+        { accessorKey: 'line', header: 'Line', enableSorting: true, size: 50 },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
-        {
-            accessorKey: 'estimated_time',
-            header: 'Estimated Time',
-            enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
-        },
-
-        {
-            accessorKey: 'utilization',
-            header: 'utilization',
-            enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()), // Add 2 to the value of total_hour
-        },
-
+        { accessorKey: 'completed_time', header: 'Completion Date', enableSorting: true },
+        { accessorKey: 'estimated_time', header: 'Estimated Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'applied_time', header: 'Applied Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'utilization', header: 'Utilization', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -89,136 +65,37 @@ const UtilizationReport = () => {
     const handleChange = (event) => {
         setSelectedDateRange(event.target.value); // Update state variable
     };
-    // Fetch departments from the API
-    useEffect(() => {
-        const fetchDepartmentsAndCrews = async () => {
-            try {
-                const response = await axios.get(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_revenue_category/`
-                );
 
-                // Map API data to React Select format
-                const departmentOptions = response.data.map((department) => ({
-                    value: department.id,
-                    label: department.name,
-                }));
 
-                const crewsResponse = await axios.get(
-                    `${process.env.REACT_APP_BIRCH_API_URL}crews`
-                );
-
-                const activeEmployees = crewsResponse.data
-                    .filter((employee) => employee.is_active === 1)
-                    .map(({ id, name }) => ({ value: id, label: name }));
-
-                setCrews(activeEmployees);
-                setDepartments(departmentOptions);
-            } catch (error) {
-                console.error('Error fetching departments or crews:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDepartmentsAndCrews();
-    }, []);
-
-    // const handleOwnerChange = (index, value) => {
-    //     const updatedSelectedOwners = [...selectedDepartments];
-    //     updatedSelectedOwners[index] = value;
-    //     setSelectedDepartments(updatedSelectedOwners);
-    // };
+    const handleRailCarChange = (index, value) => {
+        const updatedSelectedOwners = [...selectedRailCar];
+        updatedSelectedOwners[index] = value;
+        setSelectedRailCar(updatedSelectedOwners);
+    };
 
     //original
     const handleGenerate = async () => {
         let modified = new Date(startDate);
+        console.log(selectedRailCar)
         modified.setDate(modified.getDate() - selectedDateRange);
-
-        console.log(showDepartments)
-        console.log(selectedCrew)
-        console.log(selectedDepartment)
-        console.log(startDate)
-        console.log(endDate)
         try {
             setLoading(true);
-            const payloadCrew = {
-                crew:selectedCrew?selectedCrew.value:0,
+            const payload = {
+                railcars: selectedRailCar.filter((id) => id), // Remove null values
                 startDate:modified,
                 endDate,
             };
-            const payloadDepartment = {
-                department_id:selectedDepartment? selectedDepartment.value:0,
-                startDate:modified,
-                endDate,
-            };
-            console.log(payloadCrew)
-            console.log(payloadDepartment)
-            console.log(new Date(modified).toISOString())
-            console.log(new Date(endDate).toISOString())
+            console.log(payload)
 
-            let response
+            const response = await axios.post(
+                `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency`,
+                payload
+            );
 
-            if(showDepartments){
-                response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_utilization_by_department`,
-                    payloadDepartment
-                );
-            }else {
-                response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_utilization_by_crew`,
-                    payloadCrew
-                );
-            }
-
-
+            console.log(response.data)
             const data = response.data.data;
-            console.log(response)
-            setTableData(data)
+            setAllData(data)
 
-            if(showDepartments){
-                const mergedData = data.reduce((acc, curr) => {
-                    const key = `${curr.job_id}-${curr.start_date}`;
-                    if (!acc[key]) {
-                        acc[key] = {
-                            ...curr,
-                            crew_id: selectedDepartment.value,
-                            crew_name: selectedDepartment.label,
-                            utilization: (curr.applied_time * 100) / curr.estimated_time || 0,
-                        };
-                    } else {
-                        acc[key].applied_time += curr.applied_time;
-                        acc[key].estimated_time += curr.estimated_time;
-                        acc[key].utilization = (acc[key].applied_time * 100) / acc[key].estimated_time || 0;
-                    }
-                    return acc;
-                }, {});
-
-                const result = Object.values(mergedData);
-                setAllData(result)
-            }else {
-                setAllData(data)
-            }
-
-
-
-            // if(!isAllDepartment){
-            //     const response = await axios.post(
-            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_departments`,
-            //         payload
-            //     );
-            //
-            //     const data = response.data.data;
-            //     console.log(data)
-            //     setAllData(data)
-            // }else {
-            //     const response = await axios.post(
-            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report_all`,
-            //         payloadAll
-            //     );
-            //
-            //     const data = response.data.data;
-            //     setAllData(data)
-            // }
 
 
 
@@ -230,12 +107,6 @@ const UtilizationReport = () => {
             setLoading(false);
         }
     };
-
-
-    function handleSetIsAllDepartments() {
-        setIsAllDepartment(prev => !prev);
-    }
-
 
     const handleExportRows = (table,rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
@@ -255,71 +126,43 @@ const UtilizationReport = () => {
         // Create a new workbook and add the data
         const worksheet = XLSX.utils.json_to_sheet(rowData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Indirect Hour Report');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Revenue Report');
 
         // Define filename with today's date
-        const filename = 'BIRCH Indirect Revenue Report from '+startDate.toLocaleDateString()+"  to "+endDate.toLocaleDateString()+'.xlsx' ;
+        const filename = 'BIRCH Revenue Report from '+startDate.toLocaleDateString()+"  to "+endDate.toLocaleDateString()+'.xlsx' ;
 
         // Trigger a download of the Excel file
         XLSX.writeFile(workbook, filename);
     };
 
-    const handleChangeDepartment = () =>{
-        setShowDepartments(!showDepartments)
-        if(showDepartments){
-            setSelectedCrew(false)
-        }else {
-            setShowDepartments(false)
-        }
-    }
-
     return (
         <div className="py-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Utilization report</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Billing Efficiency</h1>
             <div className="">
-                <div className="flex items-center space-x-4">
-                    {/* Toggle */}
-                    <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-700 mr-2">
-                        {showDepartments ? 'Departments' : 'Team Member'}
-                      </span>
 
-                        <label className="label cursor-pointer">
-                            <input
-                                type="checkbox"
-                                className="toggle"
-                                checked={showDepartments}
-                                onChange={() => setShowDepartments(!showDepartments)}
-                            />
-                        </label>
-                    </div>
 
-                    {/* Dropdown */}
-                    <div className="flex-1">
-                        {showDepartments ? (
-                            <Select
-                                options={departments}
-                                value={selectedDepartment}
-                                onChange={setSelectedDepartment}
-                                isSearchable
-                                placeholder="Select a Department"
-                                className="react-select-container w-1/4"
-                                classNamePrefix="react-select"
-                            />
-                        ) : (
-                            <Select
-                                options={crews}
-                                value={selectedCrew}
-                                onChange={setSelectedCrew}
-                                isSearchable
-                                placeholder="Select a Team Member"
-                                className="react-select-container w-1/4"
-                                classNamePrefix="react-select"
-                            />
-                        )}
-                    </div>
-                </div>
                 {/* Select Menus */}
+
+                <div
+                    className={`grid gap-1 grid-cols-5 mb-4 `}
+                >
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={index} className="p-2">
+                            <input
+                                type="text"
+                                value={selectedRailCar[index] || ""}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    handleRailCarChange(index, value); // Allow all input changes
+                                }}
+
+                                placeholder="Enter car number"
+                                className="border rounded p-2 w-full"
+                            />
+                        </div>
+                    ))}
+
+                </div>
 
                 {/* Date Pickers */}
                 <div className="flex gap-4 mb-4">
@@ -370,20 +213,12 @@ const UtilizationReport = () => {
 
                 {allData.length > 0 && (
                     <div className="mt-4">
-
-                        <UtilizationChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Utilization'} type={showDepartments} />
-                        {/*{isAllDepartment ? (*/}
-                        {/*    <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />*/}
-                        {/*) : (*/}
-                        {/*    <RevenueChart startDate={startDate} endDate={endDate} dataSet={mergeAndSortData(allData)}  dateDiff={parseInt(selectedDateRange)} />*/}
-                        {/*)}*/}
-
-
+                        <BillingEfficiencyChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
                         <div className="overflow-x-auto mt-4">
                             {allData.length >0?(
                                 <MaterialReactTable
                                     columns={columns}
-                                    data={tableData}
+                                    data={allData}
                                     enablePagination={true}
                                     enableColumnFilterModes={true}
                                     initialState={{
@@ -391,7 +226,7 @@ const UtilizationReport = () => {
                                             pageIndex: 0,
                                             pageSize: 50, // Set default page size to 50
                                         },
-                                        columnVisibility: { crew_id : false }
+                                        columnVisibility: { id: false }
                                     }}
                                     muiTableHeadCellProps={{
                                         sx: {
@@ -472,10 +307,12 @@ const UtilizationReport = () => {
                         </div>
                     </div>
                 )}
+
+
             </div>
         </div>
     );
 };
 
-export default UtilizationReport;
+export default BillingEfficiency;
 

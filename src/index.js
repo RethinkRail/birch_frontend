@@ -32,6 +32,7 @@ import RevenueByDepartments from "./portal/report/RevenueByDepartment";
 import StockStatusReport from "./components/StockStatusReport";
 import IndirectHour from "./portal/report/IndirectHour";
 import UtilizationReport from "./portal/report/UtilizationReport";
+import BillingEfficiency from "./portal/report/BillingEfficiency";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -209,6 +210,13 @@ root.render(
                 <Route path="/utilization_report" element={
                     <ProtectedRoute>
                         <UtilizationReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/billing_efficiency" element={
+                    <ProtectedRoute>
+                        <BillingEfficiency/>
                     </ProtectedRoute>
                 }>
                 </Route>

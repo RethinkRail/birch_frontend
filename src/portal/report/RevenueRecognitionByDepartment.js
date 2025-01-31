@@ -180,7 +180,7 @@ const RevenueByDepartments = () => {
 
     return (
         <div className="py-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue by Departments</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue Recognition by Departments</h1>
             <div className="">
                 <div className="grid gap-1 grid-cols-5 mb-4">
                     <label className="label cursor-pointer">

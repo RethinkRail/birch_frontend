@@ -48,7 +48,8 @@ const Navbar = () => {
                     children: [
                         { title: 'Revenue by Customer', path: '/rev_by_customer' },
                         { title: 'Revenue by Department', path: '/rev_by_department' },
-                        { title: 'Revenue Recognition', path: '#' },
+                        { title: 'Revenue Recognition', path: 'revenue_recognition' },
+                        { title: 'Rev. Recog. By DEPT', path: '/revenue_recognition_by_department' },
                         { title: 'Billed Cars', path: '#' }
                     ]
                 },
@@ -58,7 +59,7 @@ const Navbar = () => {
                         { title: 'Shop Summary Report', path: '#' },
                         { title: 'Indirect Hours Report', path: '/indirect_hour_report' },
                         { title: 'Manhours', path: '#' },
-                        { title: 'Billing Efficiency', path: '#' },
+                        { title: 'Billing Efficiency', path: '/billing_efficiency' },
                         { title: 'Utilization', path: '/utilization_report' },
                         { title: 'POD Accuracy', path: '#' },
                         { title: 'Days in Status', path: '#' }

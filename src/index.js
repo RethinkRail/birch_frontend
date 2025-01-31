@@ -33,6 +33,8 @@ import StockStatusReport from "./components/StockStatusReport";
 import IndirectHour from "./portal/report/IndirectHour";
 import UtilizationReport from "./portal/report/UtilizationReport";
 import BillingEfficiency from "./portal/report/BillingEfficiency";
+import RevenueRecognition from "./portal/report/RevenueRecognition";
+import RevenueRecognitionByDepartment from "./portal/report/RevenueRecognitionByDepartment";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -217,6 +219,19 @@ root.render(
                 <Route path="/billing_efficiency" element={
                     <ProtectedRoute>
                         <BillingEfficiency/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+                <Route path="/revenue_recognition" element={
+                    <ProtectedRoute>
+                        <RevenueRecognition/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/revenue_recognition_by_department" element={
+                    <ProtectedRoute>
+                        <RevenueRecognitionByDepartment/>
                     </ProtectedRoute>
                 }>
                 </Route>

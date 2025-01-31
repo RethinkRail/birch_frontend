@@ -28,8 +28,7 @@ import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import {round2Dec} from "../../utils/NumberHelper";
-import BillingEfficiencyChart from "../../components/BillingEfficiencyChart";
-import BillingEfficiencyByJobCodeChart from "../../components/BillingEfficiencyByJobCodeChart";
+import RecognitionChart from "../../components/RecognitionChart";
 
 
 // Register Chart.js components
@@ -43,24 +42,22 @@ ChartJS.register(
     Legend
 );
 
-const BillingEfficiency = () => {
-    const [selectedRailCar, setSelectedRailCar] = useState(Array(5).fill("")); //
-    const [selectedJobCodes, setSelectedJobCodes] = useState(Array(5).fill(null)); //
+const RevenueRecognition = () => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+
     const [loading, setLoading] = useState(false);
+
     const [allData,setAllData] = useState([])
-    const [byJobCode, setIsByJobCode] = useState(false);
-    const [jobCode, setJobCode] = useState([]);
+    const [isUSD,setIsUSD] = useState(false)
+
     const initialColumns = useMemo(() => [
-        { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true, size: 50 },
-        { accessorKey: 'line', header: 'Line', enableSorting: true, size: 50 },
-        { accessorKey: 'job_code_applied', header: 'Job Code Applied', enableSorting: true, size: 50 },
+        { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
+        { accessorKey: 'line', header: 'Line', enableSorting: true },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
-        { accessorKey: 'completed_time', header: 'Completion Date', enableSorting: true },
-        { accessorKey: 'estimated_time', header: 'Estimated Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
-        { accessorKey: 'applied_time', header: 'Applied Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
-        { accessorKey: 'utilization', header: 'Utilization', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'applied_time', header: 'Applied hour', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'net_cost', header: 'Net cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'completed_time', header: 'Completed AT', enableSorting: true },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -69,82 +66,34 @@ const BillingEfficiency = () => {
     const handleChange = (event) => {
         setSelectedDateRange(event.target.value); // Update state variable
     };
+    // Fetch departments from the API
 
-    const handleJobCodeChange = (index, value) => {
-        const updatedSelectedJobCodes = [...selectedJobCodes];
-        updatedSelectedJobCodes[index] = value;
-        setSelectedJobCodes(updatedSelectedJobCodes);
-    };
-    const handleRailCarChange = (index, value) => {
-        const updatedSelectedOwners = [...selectedRailCar];
-        updatedSelectedOwners[index] = value;
-        setSelectedRailCar(updatedSelectedOwners);
-    };
 
-    useEffect(() => {
-        const fetchJobCode = async () => {
-            try {
-                const response = await axios.get(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_job_code/`
-                );
 
-                // Map API data to React Select format
-                const jobCOdeOptions = response.data.map((jobCode) => ({
-                    value: jobCode.code,
-                    label: jobCode.code+":"+jobCode.title,
-                }));
-                console.log(jobCOdeOptions)
-                setJobCode(jobCOdeOptions);
-            } catch (error) {
-                console.error('Error fetching owners:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchJobCode();
-    }, []);
 
     //original
     const handleGenerate = async () => {
         let modified = new Date(startDate);
-        //console.log(selectedRailCar)
         modified.setDate(modified.getDate() - selectedDateRange);
         try {
             setLoading(true);
             const payload = {
-                railcars: selectedRailCar.filter((id) => id), // Remove null values
                 startDate:modified,
                 endDate,
             };
-            console.log(selectedJobCodes)
-            const payloadJobCodes = {
-                jobcodes: selectedJobCodes.filter((id) => id), // Remove null values
-                startDate:modified,
-                endDate,
-            };
-
-            let response
-
-            if(byJobCode){
-                response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency_by_jobcode`,
-                    payloadJobCodes
-                );
-
-            }else {
-                response = await axios.post(
-                    `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency`,
-                    payload
-                );
-
-            }
+            console.log(payload)
+            console.log(new Date(modified).toISOString())
+            console.log(new Date(endDate).toISOString())
 
 
-            console.log(response.data)
+            const response = await axios.post(
+                `${process.env.REACT_APP_BIRCH_API_URL}get_revenue_recognition`,
+                payload
+            );
+
             const data = response.data.data;
+            console.log(data)
             setAllData(data)
-
-
 
 
             setLoading(false);
@@ -155,6 +104,15 @@ const BillingEfficiency = () => {
             setLoading(false);
         }
     };
+
+
+    function handleSetUSD() {
+        setIsUSD(prev => !prev);
+    }
+
+
+
+
 
     const handleExportRows = (table,rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
@@ -185,57 +143,21 @@ const BillingEfficiency = () => {
 
     return (
         <div className="py-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Billing Efficiency</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue Recognition</h1>
             <div className="">
-
-                <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-700 mr-2">
-                        By Job Code
-                      </span>
-
+                <div className="grid gap-1 grid-cols-5 mb-4">
                     <label className="label cursor-pointer">
+                        <span className="label-text mr-5">USD</span>
                         <input
                             type="checkbox"
                             className="toggle"
-                            checked={byJobCode}
-                            onChange={() => setIsByJobCode(!byJobCode)}
+                            checked={isUSD}
+                            onChange={handleSetUSD}
                         />
                     </label>
                 </div>
 
-
-                    {byJobCode ? (
-                        <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                                <div key={index} className="p-1 w-full">
-                                    <Select
-                                        value={
-                                            jobCode.find((option) => option.value === selectedJobCodes[index]) || null
-                                        }
-                                        onChange={(selectedOption) => handleJobCodeChange(index, selectedOption?.value)}
-                                        options={jobCode}
-                                        placeholder="Select Job code"
-                                        isClearable
-                                        className="border rounded w-full"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                                <div key={index} className="p-1 w-full">
-                                    <input
-                                        type="text"
-                                        value={selectedRailCar[index] || ""}
-                                        onChange={(e) => handleRailCarChange(index, e.target.value)}
-                                        placeholder="Enter car number"
-                                        className="border rounded p-2 w-full"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                {/* Select Menus */}
 
 
                 {/* Date Pickers */}
@@ -288,11 +210,9 @@ const BillingEfficiency = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
 
-                        {byJobCode?
-                            <BillingEfficiencyByJobCodeChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
-                            :
-                            <BillingEfficiencyChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
-                        }
+                        <RecognitionChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
+
+
 
                         <div className="overflow-x-auto mt-4">
                             {allData.length >0?(
@@ -394,5 +314,5 @@ const BillingEfficiency = () => {
     );
 };
 
-export default BillingEfficiency;
+export default RevenueRecognition;
 

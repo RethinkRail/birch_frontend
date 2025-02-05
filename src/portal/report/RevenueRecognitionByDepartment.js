@@ -28,7 +28,7 @@ import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import RecognitionChart from "../../components/RecognitionChart";
-import {round2Dec} from "../../utils/NumberHelper";
+import {round3Dec} from "../../utils/NumberHelper";
 
 
 // Register Chart.js components
@@ -59,8 +59,8 @@ const RevenueByDepartments = () => {
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
         { accessorKey: 'line', header: 'Line', enableSorting: true },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
-        { accessorKey: 'applied_time', header: 'Applied hour', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
-        { accessorKey: 'net_cost', header: 'Net cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'applied_time', header: 'Applied hour', enableSorting: true,Cell: ({ cell }) => round3Dec( cell.getValue()) },
+        { accessorKey: 'net_cost', header: 'Net cost', enableSorting: true,Cell: ({ cell }) => round3Dec( cell.getValue()) },
         { accessorKey: 'completed_time', header: 'Completed AT', enableSorting: true },
     ], []);
 

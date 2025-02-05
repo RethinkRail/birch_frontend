@@ -196,7 +196,7 @@ const RevenueByDepartments = () => {
         });
     }
 
-    const handleExportRows = (table,rows) => {
+    const handleExportRows = (table, rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
 
         // Map the rows to include only the visible columns and use the column headers
@@ -204,7 +204,14 @@ const RevenueByDepartments = () => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
                 // Use the header as the key for the Excel, but still fetch the data using accessorKey
-                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
+                const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
+
+                // Convert the value to a number if it is a numeric string
+                if (!isNaN(value) && value !== "") {
+                    filteredRow[column.columnDef.header] = parseFloat(value);
+                } else {
+                    filteredRow[column.columnDef.header] = value;
+                }
             });
             return filteredRow;
         });
@@ -217,7 +224,7 @@ const RevenueByDepartments = () => {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Revenue Report');
 
         // Define filename with today's date
-        const filename = 'BIRCH Revenue Report from '+startDate.toLocaleDateString()+"  to "+endDate.toLocaleDateString()+'.xlsx' ;
+        const filename = 'BIRCH Revenue Report from ' + startDate.toLocaleDateString() + " to " + endDate.toLocaleDateString() + '.xlsx';
 
         // Trigger a download of the Excel file
         XLSX.writeFile(workbook, filename);

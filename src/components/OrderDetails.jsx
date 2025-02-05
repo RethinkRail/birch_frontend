@@ -12,7 +12,7 @@ import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 import JoblistTable from "./JoblistTable";
 import PartsTable from "./PartsTable";
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import StorageComponent from "./StorageComponent";
 import RailCareTimeLog from "./RailCareTimeLog";
 import {printAAR} from "../utils/aarHelper";
@@ -188,19 +188,19 @@ const OrderDetails = ({
 
         jobs.forEach(job => {
 
-            const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
-            totalLaborCost += Number(round2Dec(laborCost));
+            const laborCost = Number(round3Dec(job.labor_rate)) * Number(round3Dec(job.labor_time)) * Number(round3Dec(job.quantity));
+            totalLaborCost += Number(round3Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
-            totalLaborHours += Number(round2Dec(laborHours));
+            const laborHours = Number(round3Dec(job.labor_time)) * job.quantity;
+            totalLaborHours += Number(round3Dec(laborHours));
 
             // Calculate material cost
             job.jobparts.forEach(part => {
-                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
-                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
-                const materialCost = Number(round2Dec(purchaseCost + markup));
-                totalMaterialCost += Number(round2Dec(materialCost));
+                const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
+                const materialCost = Number(round3Dec(purchaseCost + markup));
+                totalMaterialCost += Number(round3Dec(materialCost));
             });
         });
         setTotalLaborHours(totalLaborHours)
@@ -1357,19 +1357,19 @@ const OrderDetails = ({
                                 <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-4 gap-x-64">
                                     <div className="">
                                         <h2 className='text-[12px] font-normal '>TOTAL HOURS</h2>
-                                        <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalLaborHours)} Hrs</p>
+                                        <p className='text-[#979C9E] mt-[2px]'>{round3Dec(totalLaborHours)} Hrs</p>
                                     </div>
                                     <div className="">
                                         <h2 className='text-[12px] font-normal '>TOTAL LABOUR COST</h2>
-                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost)}</p>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round3Dec(totalLaborCost)}</p>
                                     </div>
                                     <div className="">
                                         <h2 className='text-[12px] font-normal '>TOTAL MATERIALS</h2>
-                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalMatCost)}</p>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round3Dec(totalMatCost)}</p>
                                     </div>
                                     <div className="]">
                                         <h2 className='text-[12px] font-normal '>TOTAL NET</h2>
-                                        <p className='text-[#979C9E] mt-[2px]'>$ {round2Dec(totalLaborCost+totalMatCost)}</p>
+                                        <p className='text-[#979C9E] mt-[2px]'>$ {round3Dec(totalLaborCost+totalMatCost)}</p>
                                     </div>
 
 

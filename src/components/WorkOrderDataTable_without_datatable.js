@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from "react-datepicker";
 import $ from 'jquery';
@@ -17,7 +17,7 @@ const WorkOrderDataTable = ({workOrders, statusCode}) => {
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
         console.log(percentage)
         const workOrderObject = {
-            'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
+            'lhr': !isNaN(percentage) && isFinite(percentage) ? round3Dec(percentage) + "%" : "0.00%",
             'dif': differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"],
             'railcar_id': workOrder.railcar_id,
             'arrival_date': convertSqlToFormattedDate(workOrder.arrival_date),

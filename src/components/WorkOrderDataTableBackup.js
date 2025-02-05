@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from "react-datepicker";
 import DataTable from "react-data-table-component";
@@ -13,7 +13,7 @@ const WorkOrderDataTable = ({workOrders, statusCode}) => {
         const durationHours = workOrder.timesheets.reduce((acc, item) => acc + item.duration / 3600, 0);
         const percentage = durationHours == 0 ? 0 : (durationHours / laborHours) * 100;
         const workOrderObject = {
-            'lhr': round2Dec(percentage) + "%",
+            'lhr': round3Dec(percentage) + "%",
             'dif': differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"],
             'railcar_id': workOrder.railcar_id,
             'arrival_date': convertSqlToFormattedDate(workOrder.arrival_date),

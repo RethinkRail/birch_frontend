@@ -158,22 +158,7 @@ const BillingEfficiencyChart = ({ startDate, endDate, dateDiff, dataSet,name }) 
                 background: '#fff',
             }}
         >
-            <button
-                onClick={toggleFullscreen}
-                style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    padding: '0.5rem 1rem',
-                    background: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                }}
-            >
-                {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            </button>
+
             <Line data={chartData} options={options} />
         </div>
     );

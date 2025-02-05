@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
 import {toast} from "react-toastify";
 import Select from "react-select";
@@ -282,7 +282,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 work_order: workOrder.work_order,
                 line_number: Number(lineNumber),
                 location_code: inputValues["location_code"],
-                quantity: Number(round2Dec(inputValues["quantity"])),
+                quantity: Number(round3Dec(inputValues["quantity"])),
                 condition_code: inputValues["condition_code"],
                 job_code_applied: inputValues["job_code"],
                 qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
@@ -292,10 +292,10 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
 
-                labor_cost: Number(round2Dec(totalLabor)),
-                labor_time: Number(round2Dec(inputValues["labor_time"])),
-                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
-                material_cost: Number(round2Dec(totalMaterial)),
+                labor_cost: Number(round3Dec(totalLabor)),
+                labor_time: Number(round3Dec(inputValues["labor_time"])),
+                labor_rate: Number(round3Dec(inputValues["labor_rate"])),
+                material_cost: Number(round3Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsData: populatedJobPart,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
@@ -356,7 +356,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 work_id: workOrder.id,
                 line_number: Number(editData.line_number),
                 location_code: inputValues["location_code"],
-                quantity: Number(round2Dec(inputValues["quantity"])),
+                quantity: Number(round3Dec(inputValues["quantity"])),
                 condition_code: inputValues["condition_code"],
                 job_code_applied:inputValues["job_code"],
                 qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
@@ -365,10 +365,10 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 job_code_removed: inputValues["job_code_removed"],
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
-                labor_cost: Number(round2Dec(totalLabor)),
-                labor_time: Number(round2Dec(inputValues["labor_time"])),
-                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
-                material_cost: Number(round2Dec(totalMaterial)),
+                labor_cost: Number(round3Dec(totalLabor)),
+                labor_time: Number(round3Dec(inputValues["labor_time"])),
+                labor_rate: Number(round3Dec(inputValues["labor_rate"])),
+                material_cost: Number(round3Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsToAdd: jobPartsToAdd,
                 jobPartsToDelete,
@@ -631,8 +631,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 <div className="col-span-2 flex flex-row items-center gap-1">
                                     <input type="text" name="" id="" className="w-[45%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.additional_info || ""} onChange={(e) => handleFieldChange(jobPart.part_id, "additional_info", e.target.value)} />
                                     <input type="text" name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1 " value={jobPart?.parts.parts_unit.name} disabled={true} />
-                                    <input type="number"  step={0.1} name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", parseFloat(e.target.value).toFixed(2))} />
-                                    <input type="number" step={0.1} name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", parseFloat(e.target.value).toFixed(2))} />
+                                    <input type="number"  step={0.1} name="" id="" className="w-[14%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.quantity} onChange={(e) => handleFieldChange(jobPart.part_id, "quantity", parseFloat(e.target.value).toFixed(3))} />
+                                    <input type="number" step={0.1} name="" id="" className="w-[20%] p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={jobPart?.purchase_cost} onChange={(e) => handleFieldChange(jobPart.part_id, "purchase_cost", parseFloat(e.target.value).toFixed(3))} />
                                     <div className="w-[7%]">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => handleRemovePart(jobPart?.part_id)}>
                                             <path d="M18 6L6 18M6 6L18 18" stroke="#464646" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -652,7 +652,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 <label className="text-[12px] capitalize">ST. Time (HR)</label>
                                 <input
                                     type="number"
-                                    step={0.01}
+                                    step={0.001}
                                     disabled={workOrder.locked_by != null}
                                     name=""
                                     id=""
@@ -661,9 +661,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                     onChange={(e) => {
                                         let value = parseFloat(e.target.value);
                                         // Check if the value has more than 2 decimal places
-                                        if (value && value.toString().split(".")[1]?.length > 2) {
+                                        if (value && value.toString().split(".")[1]?.length > 3) {
                                             // Round to 2 decimal places if necessary
-                                            value = parseFloat(value.toFixed(2));
+                                            value = parseFloat(value.toFixed(3));
                                         }
                                         handleChange("labor_time", value);
                                     }}
@@ -685,7 +685,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                         // Check if the value has more than 2 decimal places
                                         if (value && value.toString().split(".")[1]?.length > 2) {
                                             // If more than 2 decimal places, round it to 2 decimals
-                                            value = parseFloat(value.toFixed(2));
+                                            value = parseFloat(value.toFixed(3));
                                         }
                                         handleChange("labor_rate", value);
                                     }}
@@ -694,11 +694,11 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Labor ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalLabor)} readOnly />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round3Dec(totalLabor)} readOnly />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Purchase ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(purchase)} onChange={(e) => setPurchase(round2Dec(purchase))} />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round3Dec(purchase)} onChange={(e) => setPurchase(round3Dec(purchase))} />
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Markup (%)</label>
@@ -714,7 +714,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                         // Check if the value has more than 2 decimal places
                                         if (value && value.toString().split(".")[1]?.length > 2) {
                                             // If more than 2 decimal places, round it to 2 decimals
-                                            setMarkupPercent(value.toFixed(2));
+                                            setMarkupPercent(value.toFixed(3));
                                         } else {
                                             setMarkupPercent(e.target.value);
                                         }
@@ -724,13 +724,13 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             </div>
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Material ($)</label>
-                                <input type="text"  disabled  name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalMaterial)} readOnly />
+                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round3Dec(totalMaterial)} readOnly />
                             </div>
                             <div className="col-span-1" />
                             <div className="col-span-1" />
                             <div className="flex flex-col col-span-1">
                                 <label className="text-[12px] capitalize">Total Net ($)</label>
-                                <input type="number"  disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalNet)} readOnly />
+                                <input type="number" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round3Dec(totalNet)} readOnly />
                             </div>
                         </div>
                     </div>

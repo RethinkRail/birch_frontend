@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import {convertSqlToFormattedDate, differenceBetweenTwoTimeStamp} from "../utils/DateTimeHelper";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -161,9 +161,9 @@ const WorkOrderDataTable = ({
 
             const workOrderObject = {
                 'workOrder': workOrder,
-                'estimated_time': round2Dec(laborHours),
-                'labor_hours': round2Dec(durationHours),
-                'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
+                'estimated_time': round3Dec(laborHours),
+                'labor_hours': round3Dec(durationHours),
+                'lhr': !isNaN(percentage) && isFinite(percentage) ? round3Dec(percentage) + "%" : "0.00%",
                 'dif': actual_dif,
                 'railcar_id': workOrder.railcar_id,
                 'arrival_date': workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.arrival_date),

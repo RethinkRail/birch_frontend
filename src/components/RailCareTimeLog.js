@@ -10,7 +10,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import DataTable from 'react-data-table-component';
 import 'react-datepicker/dist/react-datepicker.css';
-import { round2Dec } from "../utils/NumberHelper";
+import { round3Dec } from "../utils/NumberHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 import * as XLSX from 'xlsx';
@@ -214,13 +214,13 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         },
         {
             name: 'HOURS ESTIMATED',
-            selector: row => round2Dec(row.labor_time*row.quantity),
+            selector: row => round3Dec(row.labor_time*row.quantity),
             sortable: true,
             width: "10%",
         },
         {
             name: 'HOURS APPLIED',
-            selector: row => round2Dec(row.hours_applied),
+            selector: row => round3Dec(row.hours_applied),
             sortable: true,
             width: "10%",
             cell: row => (
@@ -228,13 +228,13 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                     className="hover:underline"
                     onClick={() => showModal(row)}
                 >
-                    {round2Dec(row.hours_applied)}
+                    {round3Dec(row.hours_applied)}
                 </button>
             )
         },
         {
             name: 'HOURS APPLIED (RE WORK)',
-            selector: row => round2Dec(row.hours_applied_rework),
+            selector: row => round3Dec(row.hours_applied_rework),
             sortable: true,
             width: "10%",
             cell: row => (
@@ -242,7 +242,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                     className="hover:underline"
                     onClick={() => showModal(row)}
                 >
-                    {round2Dec(row.hours_applied_rework)}
+                    {round3Dec(row.hours_applied_rework)}
                 </button>
             )
         },
@@ -345,9 +345,9 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         // Map railcarLog to include only the desired fields
         const filteredData = railcarLog.map(row => ({
             'JOB DESCRIPTION': row.job_description,
-            'HOURS ESTIMATED': round2Dec(row.labor_time),
-            'HOURS APPLIED': round2Dec(row.hours_applied),
-            'HOURS APPLIED (RE WORK)': round2Dec(row.hours_applied_rework),
+            'HOURS ESTIMATED': round3Dec(row.labor_time),
+            'HOURS APPLIED': round3Dec(row.hours_applied),
+            'HOURS APPLIED (RE WORK)': round3Dec(row.hours_applied_rework),
             'TEAM MEMBER COMPLETION TIME': datePickers.crewChecked[row.job_id] ?
                 datePickers.crewChecked[row.job_id].toLocaleString() : '',
             'IN PROCESS TIME': datePickers.managerChecked[row.job_id] ?
@@ -395,24 +395,24 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
             <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-5 gap-x-64 mb-[24px]" >
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS ESTIMATED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(laboorHRSEST)} Hrs</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round3Dec(laboorHRSEST)} Hrs</p>
                 </div>
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL HOURS APPLIED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursApplied)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round3Dec(totalHoursApplied)}</p>
                 </div>
                 <div className="">
                     <h2 className='text-[12px] font-normal '>TOTAL REWORK</h2>
-                    <p className='text-[#979C9E] mt-[2px]'> {round2Dec(totalRework)}</p>
+                    <p className='text-[#979C9E] mt-[2px]'> {round3Dec(totalRework)}</p>
                 </div>
                 <div className="]">
                     <h2 className='text-[12px] font-normal '>Difference</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(round2Dec(laboorHRSEST)-(totalHoursApplied+totalRework))}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round3Dec(round3Dec(laboorHRSEST)-(totalHoursApplied+totalRework))}</p>
                 </div>
 
                 <div className="]">
                     <h2 className='text-[12px] font-normal '>LHR</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(utilization)+"%"}</p>
+                    <p className='text-[#979C9E] mt-[2px]'>{round3Dec(utilization)+"%"}</p>
                 </div>
             </div>
 
@@ -444,7 +444,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                                         <td className="border p-2">{log.job_description}</td>
                                         <td className="border p-2">{new Date(log.start_time).toLocaleString()}</td>
                                         <td className="border p-2">{new Date(log.end_time).toLocaleString()}</td>
-                                        <td className="border p-2">{round2Dec(log.logged_time_in_seconds/3600)+ 'HRS'}</td>
+                                        <td className="border p-2">{round3Dec(log.logged_time_in_seconds/3600)+ 'HRS'}</td>
                                     </tr>
                                 ))}
                                 </tbody>

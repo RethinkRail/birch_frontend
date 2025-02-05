@@ -7,7 +7,7 @@
 
 import React from 'react';
 import DataTable from 'react-data-table-component';
-import {round2Dec} from "../utils/NumberHelper";
+import {round3Dec} from "../utils/NumberHelper";
 import {FaArrowDown} from "react-icons/fa";
 
 // Utility function to get unique parts with aggregated details
@@ -78,7 +78,7 @@ const PartsTable = ({ jobs }) => {
         },
         {
             name: 'COST',
-            selector: row => round2Dec(row.purchase_cost),
+            selector: row => round3Dec(row.purchase_cost),
             sortable: true,
             width: '8%',
             cell: (row) => {
@@ -87,7 +87,7 @@ const PartsTable = ({ jobs }) => {
                 const is_price_higher = parseFloat(purchaseCost)<parseFloat(price)
                 return (
                     <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {round2Dec(purchaseCost)}
+                    {round3Dec(purchaseCost)}
                         {is_price_higher && (
                             <FaArrowDown style={{ color: 'red', marginLeft: '5px' }} />
                         )}
@@ -101,14 +101,14 @@ const PartsTable = ({ jobs }) => {
             sortable: true,
             cell: (row) => (
                 <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {round2Dec(row.price)}
+                    {round3Dec(row.price)}
                 </span>
             ),
             width: '18%',
         },
         {
             name: 'QUANTITY',
-            selector: row => round2Dec(row.quantity),
+            selector: row => round3Dec(row.quantity),
             sortable: true,
             width: '10%',
         },

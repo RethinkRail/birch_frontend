@@ -11,7 +11,7 @@ import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
-import {round2Dec} from "../../utils/NumberHelper";
+import {round3Dec} from "../../utils/NumberHelper";
 
 const StorageReport = () => {
     const [startDate, setStartDate] = useState("");

@@ -28,7 +28,7 @@ import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import IndirectHourChart from "../../components/IndirectHourChart";
-import {round2Dec} from "../../utils/NumberHelper";
+import {round3Dec} from "../../utils/NumberHelper";
 import UtilizationChart from "../../components/UtilizationChart";
 
 
@@ -65,20 +65,20 @@ const UtilizationReport = () => {
         { accessorKey: 'crew_id', header: 'Team member ID', enableSorting: true },
         { accessorKey: 'crew_name', header: 'Team member Name', enableSorting: true },
         { accessorKey: 'start_date', header: 'Date', enableSorting: true },
-        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round2Dec( cell.getValue())  },
+        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round3Dec( cell.getValue())  },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         {
             accessorKey: 'estimated_time',
             header: 'Estimated Time',
             enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
+            Cell: ({ cell }) => round3Dec( cell.getValue()) , // Add 2 to the value of total_hour
         },
 
         {
             accessorKey: 'utilization',
             header: 'utilization',
             enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()), // Add 2 to the value of total_hour
+            Cell: ({ cell }) => round3Dec( cell.getValue()), // Add 2 to the value of total_hour
         },
 
     ], []);

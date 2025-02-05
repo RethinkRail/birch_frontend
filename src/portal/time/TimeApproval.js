@@ -12,7 +12,7 @@ import Select from "react-select";
 import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
 import {toUTCDateTime} from "../../utils/DateTimeHelper";
-import {round2Dec} from "../../utils/NumberHelper";
+import {round3Dec} from "../../utils/NumberHelper";
 import {fetchAndTransformTimesheets} from "../../utils/qbHelper";
 import {toast} from "react-toastify";
 import DataTable from "react-data-table-component";
@@ -460,13 +460,13 @@ const TimeApproval = () =>{
 
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
-        { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
+        { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(3), sortable: true },
         { name: 'QB Time (hrs)', selector: row =>  row.time_in_qb > 6 * 3600
-                ? round2Dec( (row.time_in_qb - (30 * 60)) / 3600)
-                : round2Dec( row.time_in_qb / 3600), sortable: true },
+                ? round3Dec( (row.time_in_qb - (30 * 60)) / 3600)
+                : round3Dec( row.time_in_qb / 3600), sortable: true },
         {
             name: 'Utilization (%)',
-            selector: row =>   row.time_in_qb==0?'Not in QB' : ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),
+            selector: row =>   row.time_in_qb==0?'Not in QB' : ((row.total_logged_time * 100) / row.time_in_qb).toFixed(3),
             sortable: true
         },
         {
@@ -851,7 +851,7 @@ const TimeApproval = () =>{
                                     />
                                     {totalSecondToAddTime > 0 && (
                                         <p className="text-sm font-medium">
-                                            Total Time: {round2Dec(totalSecondToAddTime / (60 * 60))} Hrs
+                                            Total Time: {round3Dec(totalSecondToAddTime / (60 * 60))} Hrs
                                         </p>
                                     )}
                                 </div>

@@ -11,7 +11,7 @@ import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
-import {round2Dec} from "../../utils/NumberHelper";
+import {round3Dec} from "../../utils/NumberHelper";
 import {toUTCDateTime} from "../../utils/DateTimeHelper";
 
 const TimeCompare = () => {
@@ -103,7 +103,7 @@ const TimeCompare = () => {
             // Convert time from seconds to hours
             const timeInBRC = employee.time_in_birch / 3600;
             const timeInQUICKBOOK = employee.time_in_qb > 6 * 3600
-                ? round2Dec( (employee.time_in_qb - (30 * 60)) / 3600)
+                ? round3Dec( (employee.time_in_qb - (30 * 60)) / 3600)
                 : employee.time_in_qb / 3600;
 
 
@@ -112,15 +112,15 @@ const TimeCompare = () => {
 
             // Calculate utilization
             const utilization = timeInQUICKBOOK > 0
-                ? `${((timeInBRC * 100) / timeInQUICKBOOK).toFixed(2)}%`
+                ? `${((timeInBRC * 100) / timeInQUICKBOOK).toFixed(3)}%`
                 : "N/A";
 
             // Return a new object with the desired properties
             return {
                 employee_name: employee.employee_name,
-                time_in_birch: round2Dec(timeInBRC),
-                time_in_qb: round2Dec(timeInQUICKBOOK),
-                difference: round2Dec(difference),
+                time_in_birch: round3Dec(timeInBRC),
+                time_in_qb: round3Dec(timeInQUICKBOOK),
+                difference: round3Dec(difference),
                 utilization: utilization
             };
         });

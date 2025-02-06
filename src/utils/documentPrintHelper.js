@@ -714,7 +714,7 @@ export function printATask(workOrder) {
             var additional_info = part_item.additional_info ? ":" + part_item.additional_info : ""
             row_html += `<tr>
                             <td style='border:0'></td>
-                            <td style='border:0'>${round3Dec(part_item.quantity)}</td>
+                            <td style='border:0'>${round2Dec(part_item.quantity)}</td>
                             <td style='border:0;padding-left: 10px'><strong>${part_item.parts.code}</strong>: ${part_item.parts.title}${additional_info}</td>
                          </tr>`
         });
@@ -729,7 +729,7 @@ export function printATask(workOrder) {
         '</td><td>Owner:    ' +
         owner +
         '</td><td colspan="2" rowspan="3"><b>Total Hours:    ' +
-        round3Dec(parseFloat(totalhours)).toString() +
+        round2Dec(parseFloat(totalhours)).toString() +
         ' Hrs</b><tr><td>Work Order:    ' +
         w_order +
         '</td><td>Lessee:    ' +
@@ -829,34 +829,34 @@ export function printBRC(workOrder,forWhom) {
                 row_html += "<td>" + myjob.locationcode.code + "</td>";
                 row_html += "<td>" + myjob.quantity + "</td>";
                 row_html += "<td>" + myjob.conditioncode.code + "</td>";
-                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code.substring(0, 4) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
                 row_html += "<td>" + aq + "</td>";
                 row_html += "<td>" + myjob.job_description + "</td>";
                 row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
                 row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
-                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4)  + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
                 row_html += "<td>" + rq + "</td>";
                 row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
                 row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
 
-                //total_material_cost +=item.quantity*round3Dec( item.purchase_cost * (1 + round3Dec(item.markup_percent) * 1))
+                //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
                 var mat_cost_single_job = 0.0;
                 myjob.jobparts.forEach(function (part) {
-                    //var single_part_cost = round3Dec(part.quantity) * (round3Dec(part.purchase_cost) * (1 + round3Dec(part.markup_percent) * 1))
-                    //mat_cost_single_job += Number(round3Dec(single_part_cost))
+                    //var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                    //mat_cost_single_job += Number(round2Dec(single_part_cost))
 
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const single_part_cost = Number(round3Dec(purchaseCost + markup));
-                    mat_cost_single_job += Number(round3Dec(single_part_cost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_part_cost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_single_job += Number(round2Dec(single_part_cost));
                 });
 
                 row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
-                row_html += "<td>" + dollarFormated(Number(round3Dec(myjob.labor_cost + mat_cost_single_job))) + "</td></tr>";
-                netCost += round3Dec(myjob.labor_cost + mat_cost_single_job)
-                laborCost += Number(round3Dec(myjob.labor_cost))
-                //var rounded_mat_cost = round3Dec(mat_cost_single_job)
-                materialCost += Number(round3Dec(mat_cost_single_job))
+                row_html += "<td>" + dollarFormated(Number(round2Dec(myjob.labor_cost + mat_cost_single_job))) + "</td></tr>";
+                netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
+                laborCost += Number(round2Dec(myjob.labor_cost))
+                //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+                materialCost += Number(round2Dec(mat_cost_single_job))
                 job_table += row_html;
             }
         }else if (forWhom==2){
@@ -869,34 +869,34 @@ export function printBRC(workOrder,forWhom) {
                 row_html += "<td>" + myjob.locationcode.code + "</td>";
                 row_html += "<td>" + myjob.quantity + "</td>";
                 row_html += "<td>" + myjob.conditioncode.code + "</td>";
-                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code.substring(0, 4) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
                 row_html += "<td>" + aq + "</td>";
                 row_html += "<td>" + myjob.job_description + "</td>";
                 row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
                 row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
-                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
                 row_html += "<td>" + rq + "</td>";
                 row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
                 row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
 
-                //total_material_cost +=item.quantity*round3Dec( item.purchase_cost * (1 + round3Dec(item.markup_percent) * 1))
+                //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
                 var mat_cost_single_job = 0.0;
                 myjob.jobparts.forEach(function (part) {
-                    // var single_part_cost = round3Dec(part.quantity) * (round3Dec(part.purchase_cost) * (1 + round3Dec(part.markup_percent) * 1))
-                    // mat_cost_single_job += Number(round3Dec(single_part_cost))
+                    // var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                    // mat_cost_single_job += Number(round2Dec(single_part_cost))
 
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const single_part_cost = Number(round3Dec(purchaseCost + markup));
-                    mat_cost_single_job += Number(round3Dec(single_part_cost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_part_cost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_single_job += Number(round2Dec(single_part_cost));
                 });
 
-                row_html += "<td>" + dollarFormated(Number(round3Dec(mat_cost_single_job))) + "</td>";
+                row_html += "<td>" + dollarFormated(Number(round2Dec(mat_cost_single_job))) + "</td>";
                 row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
-                netCost += round3Dec(Number(round3Dec(myjob.labor_cost + mat_cost_single_job)))
-                laborCost += Number(round3Dec(myjob.labor_cost))
-                //var rounded_mat_cost = round3Dec(mat_cost_single_job)
-                materialCost += Number(round3Dec(mat_cost_single_job))
+                netCost += round2Dec(Number(round2Dec(myjob.labor_cost + mat_cost_single_job)))
+                laborCost += Number(round2Dec(myjob.labor_cost))
+                //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+                materialCost += Number(round2Dec(mat_cost_single_job))
                 job_table += row_html;
             }
         }else {
@@ -908,41 +908,41 @@ export function printBRC(workOrder,forWhom) {
             row_html += "<td>" + myjob.locationcode.code + "</td>";
             row_html += "<td>" + myjob.quantity + "</td>";
             row_html += "<td>" + myjob.conditioncode.code + "</td>";
-            row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code.substring(0, 4) + "</td>";
+            row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
             row_html += "<td>" + aq + "</td>";
             row_html += "<td>" + myjob.job_description + "</td>";
             row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
             row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
-            row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4) + "</td>";
+            row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
             row_html += "<td>" + rq + "</td>";
             row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
             row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
 
-            //total_material_cost +=item.quantity*round3Dec( item.purchase_cost * (1 + round3Dec(item.markup_percent) * 1))
+            //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
             var mat_cost_single_job = 0.0;
             myjob.jobparts.forEach(function (part) {
-                // var single_part_cost = round3Dec(part.quantity) * (round3Dec(part.purchase_cost) * (1 + round3Dec(part.markup_percent) * 1))
-                // mat_cost_single_job += Number(round3Dec(single_part_cost))
-                const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                const single_part_cost = Number(round3Dec(purchaseCost + markup));
-                mat_cost_single_job += Number(round3Dec(single_part_cost));
+                // var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                // mat_cost_single_job += Number(round2Dec(single_part_cost))
+                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                const single_part_cost = Number(round2Dec(purchaseCost + markup));
+                mat_cost_single_job += Number(round2Dec(single_part_cost));
             });
 
             row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
-            row_html += "<td>" + dollarFormated(Number(round3Dec(myjob.labor_cost + mat_cost_single_job) ))+ "</td></tr>";
-            netCost += round3Dec(Number(round3Dec(myjob.labor_cost + mat_cost_single_job)))
-            laborCost += Number(round3Dec(myjob.labor_cost))
-            //var rounded_mat_cost = round3Dec(mat_cost_single_job)
-            materialCost += Number(round3Dec(mat_cost_single_job))
+            row_html += "<td>" + dollarFormated(Number(round2Dec(myjob.labor_cost + mat_cost_single_job) ))+ "</td></tr>";
+            netCost += round2Dec(Number(round2Dec(myjob.labor_cost + mat_cost_single_job)))
+            laborCost += Number(round2Dec(myjob.labor_cost))
+            //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+            materialCost += Number(round2Dec(mat_cost_single_job))
             job_table += row_html;
         }
 
 
     });
-    var total_labor_cost = round3Dec(laborCost);
-    var total_material_cost = round3Dec(materialCost);
-    var total_net_cost = round3Dec(laborCost + materialCost);
+    var total_labor_cost = round2Dec(laborCost);
+    var total_material_cost = round2Dec(materialCost);
+    var total_net_cost = round2Dec(laborCost + materialCost);
     sTable += '<tr>' +
         '<table class="mytable forjobs">' +
         job_table +
@@ -988,57 +988,57 @@ export function printInvoice(workorder, forWhom) {
                 // net_cost+= (labor_cost+material_cost)
                 // total_hour+= job.labor_time
 
-                const laborCost = Number(round3Dec(job.labor_rate)) * Number(round3Dec(job.labor_time)) * Number(round3Dec(job.quantity));
-                labor_cost += Number(round3Dec(laborCost));
+                const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+                labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round3Dec(job.labor_time)) * job.quantity;
-                total_hour += Number(round3Dec(laborHours));
+                const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+                total_hour += Number(round2Dec(laborHours));
 
                 let mat_cost_for_a_job =0
                 job.jobparts.forEach(part => {
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const materialCost = Number(round3Dec(purchaseCost + markup));
-                    mat_cost_for_a_job += Number(round3Dec(materialCost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const materialCost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_for_a_job += Number(round2Dec(materialCost));
                 });
-                net_cost +=Number(round3Dec((labor_cost+material_cost)))
+                net_cost +=Number(round2Dec((labor_cost+material_cost)))
 
             }
         }else if(forWhom==2){
             if(job.secondary_bill_to_id == null){
-                const laborCost = Number(round3Dec(job.labor_rate)) * Number(round3Dec(job.labor_time)) * Number(round3Dec(job.quantity));
-                labor_cost += Number(round3Dec(laborCost));
+                const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+                labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round3Dec(job.labor_time)) * job.quantity;
-                total_hour += Number(round3Dec(laborHours));
+                const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+                total_hour += Number(round2Dec(laborHours));
 
                 let mat_cost_for_a_job =0
                 job.jobparts.forEach(part => {
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const materialCost = Number(round3Dec(purchaseCost + markup));
-                    mat_cost_for_a_job += Number(round3Dec(materialCost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const materialCost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_for_a_job += Number(round2Dec(materialCost));
                 });
-                net_cost +=Number(round3Dec((labor_cost+material_cost)))
+                net_cost +=Number(round2Dec((labor_cost+material_cost)))
             }
         }else {
-            const laborCost = Number(round3Dec(job.labor_rate)) * Number(round3Dec(job.labor_time)) * Number(round3Dec(job.quantity));
-            labor_cost += Number(round3Dec(laborCost));
+            const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+            labor_cost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round3Dec(job.labor_time)) * job.quantity;
-            total_hour += Number(round3Dec(laborHours));
+            const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+            total_hour += Number(round2Dec(laborHours));
 
             let mat_cost_for_a_job =0
             job.jobparts.forEach(part => {
-                const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                const materialCost = Number(round3Dec(purchaseCost + markup));
-                mat_cost_for_a_job += Number(round3Dec(materialCost));
+                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                const materialCost = Number(round2Dec(purchaseCost + markup));
+                mat_cost_for_a_job += Number(round2Dec(materialCost));
             });
-            net_cost +=Number(round3Dec((labor_cost+material_cost)))
+            net_cost +=Number(round2Dec((labor_cost+material_cost)))
         }
 
     })
@@ -1133,16 +1133,12 @@ export function printInvoice(workorder, forWhom) {
     var owner_address = '';
     if (owner_obj != null && owner_obj.length > 0) {
         owner_obj = owner_obj[0];
-        if (owner_obj.contact_name) {
+        if (owner_obj.contact_name != '') {
             owner_address += owner_obj.contact_name + '\n';
         }
-        owner_address += (owner_obj.address_line1 ? owner_obj.address_line1 : '') + '\n';
-        owner_address += (owner_obj.address_line2 ? owner_obj.address_line2 : '') + '\n';
-        owner_address += (owner_obj.city ? owner_obj.city : '') +
-            (owner_obj.state ? ', ' + owner_obj.state : '') +
-            (owner_obj.zip_code ? ' ' + owner_obj.zip_code : '');
+        owner_address += owner_obj.address_line1?owner_obj.address_line1:'' + '\n' + owner_obj.address_line2? owner_obj.address_line2:'' + '\n';
+        owner_address += owner_obj.city ?owner_obj.city:''+ ', ' + owner_obj.state ? owner_obj.state:''+ ' ' + owner_obj.zip_code? owner_obj.zip_code:'';
     }
-    console.log(owner_address)
     var lessee = workorder.railcar.owner_railcar_lessee_idToowner.name
     var splc = workorder.yard.splc;
     var arr_date = convertSqlWithTZToFormattedDate(workorder.arrival_date);
@@ -1153,38 +1149,38 @@ export function printInvoice(workorder, forWhom) {
     let yard_bank_info = workorder.yard.billing_address;
 
     workorder.joblist.forEach((myjob, i) => {
-        console.log(myjob.line_number)
+
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
-                //if (myjob.labor_cost > 0) {
+                if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time)
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
                     }
-                //}
+                }
             }
         }else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
-                //if (myjob.labor_cost > 0) {
+                if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time);
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
                     }
-                //}
+                }
             }
         }else {
-            //if (myjob.labor_cost > 0) {
+            if (myjob.labor_cost > 0) {
                 if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (myjob.quantity*myjob.labor_rate*myjob.labor_time);
+                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
                     revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                 } else {
-                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, (myjob.quantity*myjob.labor_rate*myjob.labor_time))
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
                 }
-            //}
+            }
         }
 
     })
@@ -1244,46 +1240,38 @@ export function printInvoice(workorder, forWhom) {
         return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
 
-    let average_markrup= 0;
-    let total_parts=0
-    let total_mark_up=0
-
     all_parts_for_sort.forEach(function (item) {
         //console.log(item)
-        total_parts++
-        //var single_mat_cost = round3Dec(item.quantity) * (round3Dec(item.purchase_cost) * (1 + round3Dec(item.markup_percent) * 1))
-        //var single_mat_cost = item.quantity * round3Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
-        const purchaseCost = Number(round3Dec(item.purchase_cost)) * item.quantity;
-        const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(item.markup_percent));
-        const single_mat_cost = Number(round3Dec(purchaseCost + markup));
-        total_mark_up += item.markup_percent*100
+        //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
+        //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
+        const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
+        const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
+        const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+
         //console.log(single_mat_cost)
 
-        total_material_cost += Number(round3Dec(single_mat_cost))
+        total_material_cost += Number(round2Dec(single_mat_cost))
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
             item.parts.title + '</td><td style="text-align: right;">' +
-            round3Dec(item.quantity) + '</td><td style="text-align: right;">' +
-            dollarFormated(round3Dec(round3Dec(item.purchase_cost) * (1 + round3Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
-            dollarFormated(round3Dec(item.quantity) * round3Dec(round3Dec(item.purchase_cost) * (1 + round3Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
+            round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
+            dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
+            dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
     });
 
-    if(total_parts>0){
-        average_markrup = total_mark_up/total_parts
-    }
 
-    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost (Average labor rate: ' + round3Dec(rate_per_line / total_job_line) + ') | <br> Average mark up: ' + round3Dec(average_markrup) + '</td><td>' + labor_category +
+    detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost(Average labor rate:' + round2Dec(rate_per_line / total_job_line) + ')</td><td>' + labor_category +
         '</td><td style="text-align: right;">' +
         '1' +
         '</td><td style="text-align: right;">' +
-        dollarFormated(round3Dec(costs.labor_cost)) +
+        dollarFormated(round2Dec(costs.labor_cost)) +
         '</td><td style="text-align: right;">' +
-        dollarFormated(round3Dec(costs.labor_cost)) + '</td></tr>';
+        dollarFormated(round2Dec(costs.labor_cost)) + '</td></tr>';
 
     detailedTable += '<tr style="line-height: 48px;"><td colspan=3 >' +
         '<textarea style="width: 100%;box-sizing: border-box;resize: none;border:0;background:none;" rows="2">PLEASE REACH OUT TO ACCOUNTING@IHRAIL.COM OR CUSTOMERSERVICE@IHRAIL.COM WITH QUESTIONS.</textarea>' +
         '</td><td style="text-align: left; font-weight:bold;"> Total' +
         '</td><td style="text-align: right;font-weight:bold;">' +
-        dollarFormated(round3Dec(total_material_cost + costs.labor_cost), true) + '</td></tr>';
+        dollarFormated(round2Dec(total_material_cost + costs.labor_cost), true) + '</td></tr>';
 
     detailedTable += '</tbody></table>';
     //sortTable("detailed_table_for_invoice",0)
@@ -1297,23 +1285,23 @@ export function printInvoice(workorder, forWhom) {
         '</td><td>' +
         splc +
         '</td><td>' +
-        dollarFormated(round3Dec(costs.labor_cost)) +
+        dollarFormated(round2Dec(costs.labor_cost)) +
         '</td><td>' +
-        dollarFormated(round3Dec(total_material_cost)) +
+        dollarFormated(round2Dec(total_material_cost)) +
         '</td><td>' +
-        dollarFormated(round3Dec(costs.labor_cost + total_material_cost)) +
+        dollarFormated(round2Dec(costs.labor_cost + total_material_cost)) +
         '</td></tr>' +
         '<tr><td colspan=3 style="border:0;text-align: right;"><b>Sum:</b>' +
         '</td><td style="border:0"><b>' +
-        dollarFormated(round3Dec(costs.labor_cost), true) +
+        dollarFormated(round2Dec(costs.labor_cost), true) +
         '</b></td><td style="border:0"><b>' +
-        dollarFormated(round3Dec(total_material_cost), true) +
+        dollarFormated(round2Dec(total_material_cost), true) +
         '</b></td><td style="border:0"><b>' +
-        dollarFormated(round3Dec(total_material_cost + costs.labor_cost), true) +
+        dollarFormated(round2Dec(total_material_cost + costs.labor_cost), true) +
         '</b></td></tr>' +
         '<tr><td colspan=5 style="border:0;text-align: right;"><b>Total:</b>' +
         '</td><td style="border:0"><b>' +
-        dollarFormated(round3Dec(total_material_cost + costs.labor_cost), true) +
+        dollarFormated(round2Dec(total_material_cost + costs.labor_cost), true) +
         '</b></td></tr>' +
         '</table>';
 
@@ -1423,7 +1411,7 @@ export function printBBOM(workOrder) {
     parts_for_bill.forEach((item, i) => {
         console.log(item)
         var additional_info= item.additional_info?item.additional_info:""
-        bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.title + '</td><td>' + round3Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
+        bomTable += '<tr><td style="white-space: nowrap;">' + item.code + '</td><td>' + item.title + '</td><td>' + round2Dec(item.quantity) + '</td><td>' + item.part_condition + '</td><td>' + item.availability + '</td><td style="width: 140px">' + additional_info+ '</td></tr>';
     });
     bomTable += '</tbody></table>';
 
@@ -1443,7 +1431,7 @@ function saveDivII(sTable, title, filename, landscape = false) {
     style = style + ".forjobs td{height: 1.67rem; border-collapse: collapse; border:0.083rem solid gray;}"
     style = style + " @media print { .no-print {display: none !important;}} ";
     style = style + "</style>";
-    var page_size = ' height=750,width=663';
+    var page_size = ' height=750,width=563';
     if (landscape) {
         style = "<style>";
         style = style + "div { text-transform: uppercase; }"
@@ -1455,7 +1443,7 @@ function saveDivII(sTable, title, filename, landscape = false) {
         style = style + ".forjobs td{height: 1.67rem; border-collapse: collapse; border:0.083rem solid gray;}"
         style = style + " @media print { .no-print {display: none !important;}} ";
         style = style + "</style>";
-        var page_size = 'height=563,width=850';
+        var page_size = 'height=563,width=750';
     }
 
     var win = window.open('', '', page_size);
@@ -1479,22 +1467,22 @@ function saveDivII(sTable, title, filename, landscape = false) {
     win.print();
 }
 
-function dollarFormated(x, show_dollar = false, n_decimal = 3) {
+function dollarFormated(x, show_dollar = false, n_decimal = 2) {
     var txt = parseFloat(x).toFixed(n_decimal).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     txt = (show_dollar ? "$" : "") + txt;
     return txt;
 }
 
-function round3Dec(value) {
-    return Number(Math.round(value + 'e' + 3) + 'e-' + 3).toFixed(2);
+function round2Dec(value) {
+    return Number(Math.round(value + 'e' + 2) + 'e-' + 2).toFixed(2);
 }
 
 function convertSecondsToDecimalHours(seconds) {
     var hours = Math.floor(seconds / 3600);
     var minutes = Math.floor((seconds % 3600) / 60);
     var decimalHours = hours + (minutes / 60);
-    //return round3Dec(decimalHours); // Convert to decimal format with 2 decimal places
-    return round3Dec(seconds / 3600); // Convert to decimal format with 2 decimal places
+    //return round2Dec(decimalHours); // Convert to decimal format with 2 decimal places
+    return round2Dec(seconds / 3600); // Convert to decimal format with 2 decimal places
 }
 
 // function toUTCDateTime(actual_date_time){

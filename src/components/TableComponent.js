@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 
-import { round3Dec } from "../utils/NumberHelper";
+import { round2Dec } from "../utils/NumberHelper";
 import axios from "axios";
 
 // Formatting field names
@@ -166,7 +166,7 @@ const TableComponent = () => {
                             className="date-picker"
                         />
                     ) : (
-                        <span>{typeof value === 'number' ? round3Dec(value) : value}</span>
+                        <span>{typeof value === 'number' ? round2Dec(value) : value}</span>
                     );
                 },
                 style: {

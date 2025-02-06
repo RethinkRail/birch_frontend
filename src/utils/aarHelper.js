@@ -5,7 +5,7 @@
  * Description:
  **/
 
-import {round3Dec} from "./NumberHelper";
+import {round2Dec} from "./NumberHelper";
 
 /**
  *  This method will generate 500 bytes AAR
@@ -817,24 +817,24 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             // });
 
 
-            const laborCost = Number(round3Dec(myjob.labor_rate)) * Number(round3Dec(myjob.labor_time)) * Number(round3Dec(myjob.quantity));
-            labor_cost += Number(round3Dec(laborCost));
+            const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+            labor_cost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round3Dec(myjob.labor_time)) * myjob.quantity;
-            total_hour += Number(round3Dec(laborHours));
+            const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+            total_hour += Number(round2Dec(laborHours));
 
             // Calculate material cost
             myjob.jobparts.forEach(part => {
-                const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                const single_mat_cost = Number(round3Dec(purchaseCost + markup));
-                total_material_cost += Number(round3Dec(single_mat_cost));
+                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+                total_material_cost += Number(round2Dec(single_mat_cost));
             });
 
 
         });
-        net_cost = Number(round3Dec(labor_cost + material_cost))
+        net_cost = Number(round2Dec(labor_cost + material_cost))
     } else if (forWhom == 2) {
         workorder.joblist.forEach((myjob, i) => {
             if (myjob.secondary_bill_to_id == null) {
@@ -847,24 +847,24 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 //     total_material_cost += Number(round2Dec(single_mat_cost))
                 // });
 
-                const laborCost = Number(round3Dec(myjob.labor_rate)) * Number(round3Dec(myjob.labor_time)) * Number(round3Dec(myjob.quantity));
-                labor_cost += Number(round3Dec(laborCost));
+                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+                labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round3Dec(myjob.labor_time)) * myjob.quantity;
-                total_hour += Number(round3Dec(laborHours));
+                const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+                total_hour += Number(round2Dec(laborHours));
 
                 // Calculate material cost
                 myjob.jobparts.forEach(part => {
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const single_mat_cost = Number(round3Dec(purchaseCost + markup));
-                    total_material_cost += Number(round3Dec(single_mat_cost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+                    total_material_cost += Number(round2Dec(single_mat_cost));
                 });
 
             }
         });
-        net_cost = Number(round3Dec(labor_cost + material_cost))
+        net_cost = Number(round2Dec(labor_cost + material_cost))
     } else {
         workorder.joblist.forEach((myjob, i) => {
             if (myjob.secondary_bill_to_id !== null) {
@@ -877,37 +877,36 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 //     total_material_cost += Number(round2Dec(single_mat_cost))
                 // });
 
-                const laborCost = Number(round3Dec(myjob.labor_rate)) * Number(round3Dec(myjob.labor_time)) * Number(round3Dec(myjob.quantity));
-                labor_cost += Number(round3Dec(laborCost));
+                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+                labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round3Dec(myjob.labor_time)) * myjob.quantity;
-                total_hour += Number(round3Dec(laborHours));
+                const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+                total_hour += Number(round2Dec(laborHours));
 
                 // Calculate material cost
                 myjob.jobparts.forEach(part => {
-                    const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                    const markup = Number(round3Dec(purchaseCost)) * Number(round3Dec(part.markup_percent));
-                    const single_mat_cost = Number(round3Dec(purchaseCost + markup));
-                    total_material_cost += Number(round3Dec(single_mat_cost));
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+                    total_material_cost += Number(round2Dec(single_mat_cost));
                 });
             }
         });
-        net_cost = Number(round3Dec(labor_cost + material_cost))
+        net_cost = Number(round2Dec(labor_cost + material_cost))
     }
 
     let costs = {
-        'labor_cost': round3Dec(labor_cost),
-        'material_cost': round3Dec(material_cost),
-        'net_cost': round3Dec(net_cost),
-        'total_hour': round3Dec(total_hour)
+        'labor_cost': round2Dec(labor_cost),
+        'material_cost': round2Dec(material_cost),
+        'net_cost': round2Dec(net_cost),
+        'total_hour': round2Dec(total_hour)
     };
 
 
     total_record_count.value = getObjComputedValue(total_record_count, number_of_jobs);
-    total_labor_charge.value = getObjComputedValue(total_labor_charge, costs.labor_cost * 1000);
-
-    total_material_charge.value = getObjComputedValue(total_material_charge, total_material_cost * 1000);
+    total_labor_charge.value = getObjComputedValue(total_labor_charge, costs.labor_cost * 100);
+    total_material_charge.value = getObjComputedValue(total_material_charge, total_material_cost * 100);
     account_date.value = getObjComputedValue(account_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
     invoice_number.value = getObjComputedValue(invoice_number, forWhom == 1 || forWhom == 2 ? workorder.invoice_number : workorder.secondary_owner_info.invoice_number);
     invoice_date.value = getObjComputedValue(invoice_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
@@ -998,32 +997,29 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
-            const laborCost = Number(round3Dec(item.labor_rate)) * Number(round3Dec(item.labor_time)) * Number(round3Dec(item.quantity));
+            const laborCost = Number(round2Dec(item.labor_rate)) * Number(round2Dec(item.labor_time)) * Number(round2Dec(item.quantity));
 
-            labor_charge.value = getObjComputedValue(labor_charge, laborCost * 1000);
+            labor_charge.value = getObjComputedValue(labor_charge, Math.abs(laborCost) * 100);
 
             var mat_cost_single_job = 0
             item.jobparts.forEach(function (part) {
                 // var single_mat_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
                 // mat_cost_single_job += Number(round2Dec(single_mat_cost))
 
-                const purchaseCost = Number(round3Dec(part.purchase_cost)) * part.quantity;
-                console.log(purchaseCost)
-                const markup = round3Dec(Number(round3Dec(purchaseCost)) * Number(part.markup_percent));
-                console.log(markup)
-                const single_mat_cost = round3Dec(Number(purchaseCost) + Number(markup));
-                console.log(single_mat_cost)
-                mat_cost_single_job += Number(round3Dec(single_mat_cost))
+                const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+                mat_cost_single_job += Number(round2Dec(single_mat_cost))
             });
 
-            material_charge.value = getObjComputedValue(material_charge, mat_cost_single_job * 1000);
+            material_charge.value = getObjComputedValue(material_charge, mat_cost_single_job * 100);
             if (parseInt(item.job_code_applied) > 6999) {
                 machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, "N");
             } else {
                 machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, "Y");
             }
             wheel_narrative.value = getObjComputedValue(wheel_narrative, item.job_description);
-            labor_rate.value = getObjComputedValue(labor_rate, item.labor_rate * 1000);
+            labor_rate.value = getObjComputedValue(labor_rate, item.labor_rate * 100);
             line_number.value = getObjComputedValue(line_number, item.line_number);
             var mat_sign;
             if (item.labor_rate >= 0) {
@@ -1075,7 +1071,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 + machine_priceable_indicator.value
                 + wrong_repair_indicator.value;
 
-
+            console.log(machine_priceable_indicator.value)
 
 
             wheel_narrative.value = getObjComputedValue(wheel_narrative);
@@ -1332,7 +1328,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
     en_txt += padStringTo500(invoice_header + "Z".repeat(19) + totals_header) + "\n";
 
     var textFileAsBlob = new Blob([en_txt], {type: 'text/plain'});
-
+    console.log(textFileAsBlob)
     var fileNameToSaveAs = filename; //filename.extension
 
     var downloadLink = document.createElement("a");
@@ -1501,7 +1497,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 }
 
 function getObjComputedValue(data, value) {
-
     const obj = data;
     var v = value;
     if (value == undefined || value == null) {
@@ -1568,7 +1563,3 @@ function nDigitString(text, n) {
     var z_text = text == null || text == "NA" ? " ".repeat(n) : text + " ".repeat(n);
     return z_text.slice(0, n).toUpperCase();
 }
-
-
-
-

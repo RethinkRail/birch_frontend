@@ -11,7 +11,7 @@ import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 
 const StorageReport = () => {
     const [startDate, setStartDate] = useState("");
@@ -76,12 +76,18 @@ const StorageReport = () => {
         const rowData = rows.map((row) => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
-                // Use the header as the key for the CSV, but still fetch the data using accessorKey
-                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
+                // Use the header as the key for the Excel, but still fetch the data using accessorKey
+                const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
+
+                // Convert the value to a number if it is a numeric string
+                if (!isNaN(value) && value !== "") {
+                    filteredRow[column.columnDef.header] = parseFloat(value);
+                } else {
+                    filteredRow[column.columnDef.header] = value;
+                }
             });
             return filteredRow;
         });
-
         console.log(rowData);
 
         // Generate the CSV with the filtered row data

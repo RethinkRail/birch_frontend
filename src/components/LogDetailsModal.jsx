@@ -8,7 +8,7 @@
 // LogDetailsModal.js
 // LogDetailsModal.js
 import React from 'react';
-import {round3Dec} from "../utils/NumberHelper";
+import {round2Dec} from "../utils/NumberHelper";
 
 const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditClick }) => {
     if (!log) return null;
@@ -58,12 +58,12 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                                     { entry.end_time? new Date(entry.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }):'Still working'}
                                 </td>
                                 <td className="border px-4 py-2">
-                                    {entry.logged_time_in_seconds >0? round3Dec(entry.logged_time_in_seconds / 3600):"--"}
+                                    {entry.logged_time_in_seconds >0? round2Dec(entry.logged_time_in_seconds / 3600):"--"}
                                 </td>
                                 <td className="border px-4 py-2">{entry.railcar_id}</td>
                                 <td className="border px-4 py-2">{entry.job_description}</td>
                                 <td className="border px-4 py-2">
-                                    {round3Dec((entry.mhe - entry.approved_time_in_line) / 3600)}
+                                    {round2Dec((entry.mhe - entry.approved_time_in_line) / 3600)}
                                 </td>
                                 <td className="border px-4 py-2 flex space-x-2">
                                     {entry.locked_for_time_clocking === 1 ? (

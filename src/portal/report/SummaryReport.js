@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import {convertSqlToFormattedDate} from "../../utils/DateTimeHelper";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 
 const SummaryReport = () => {
     const initialColumns = [
@@ -92,11 +92,11 @@ const SummaryReport = () => {
                     qa_date: formatDate(item.qa_date),
                     month_to_invoice: formatDate(item.month_to_invoice),
                     shipped_date: formatDate(item.shipped_date),
-                    mhr_applied: round3Dec(item.mhr_applied),
-                    mhr_estimated: round3Dec(item.mhr_estimated),
-                    material_cost: round3Dec(item.material_cost),
-                    labor_cost: round3Dec(item.labor_cost),
-                    total_cost: round3Dec(item.total_cost),
+                    mhr_applied: round2Dec(item.mhr_applied),
+                    mhr_estimated: round2Dec(item.mhr_estimated),
+                    material_cost: round2Dec(item.material_cost),
+                    labor_cost: round2Dec(item.labor_cost),
+                    total_cost: round2Dec(item.total_cost),
 
                 };
             });

@@ -27,7 +27,7 @@ import {FaDownload} from "react-icons/fa";
 import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 import BillingEfficiencyChart from "../../components/BillingEfficiencyChart";
 import BillingEfficiencyByJobCodeChart from "../../components/BillingEfficiencyByJobCodeChart";
 
@@ -58,9 +58,9 @@ const BillingEfficiency = () => {
         { accessorKey: 'job_code_applied', header: 'Job Code Applied', enableSorting: true, size: 50 },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         { accessorKey: 'completed_time', header: 'Completion Date', enableSorting: true },
-        { accessorKey: 'estimated_time', header: 'Estimated Time', enableSorting: true,Cell: ({ cell }) => round3Dec( cell.getValue()) },
-        { accessorKey: 'applied_time', header: 'Applied Time', enableSorting: true,Cell: ({ cell }) => round3Dec( cell.getValue()) },
-        { accessorKey: 'utilization', header: 'Utilization', enableSorting: true,Cell: ({ cell }) => round3Dec( cell.getValue()) },
+        { accessorKey: 'estimated_time', header: 'Estimated Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'applied_time', header: 'Applied Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'utilization', header: 'Utilization', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);

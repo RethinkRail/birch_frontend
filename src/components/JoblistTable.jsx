@@ -3,7 +3,7 @@ import {
     MaterialReactTable,
     useMaterialReactTable,
 } from 'material-react-table';
-import { round3Dec } from "../utils/NumberHelper";
+import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
 
@@ -24,10 +24,10 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null ? '' : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
             description: job.job_description,
             wmc: job.whymadecode.code,
-            labor_time: round3Dec(job.labor_time),
-            labor: round3Dec(parseFloat(job.labor_time) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
+            labor_time: round2Dec(job.labor_time),
+            labor: round2Dec(parseFloat(job.labor_time) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
             material: job.material_cost,
-            net: round3Dec(job.labor_cost + job.material_cost),
+            net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
             secondary_bill_to_id: job.secondary_bill_to_id
         }));
@@ -61,10 +61,10 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?'':job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
             description: job.job_description,
             wmc: job.whymadecode.code,
-            labor_time: round3Dec(job.labor_time),
-            labor: round3Dec(job.labor_time * job.labor_rate*job.quantity),
-            material: round3Dec(job.material_cost),
-            net: round3Dec(job.labor_cost + job.material_cost),
+            labor_time: round2Dec(job.labor_time),
+            labor: round2Dec(job.labor_time * job.labor_rate*job.quantity),
+            material: round2Dec(job.material_cost),
+            net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
             secondary_bill_to_id: job.secondary_bill_to_id
         }));
@@ -131,7 +131,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             labor_cost: jobToCopy.labor_cost,
             labor_time: jobToCopy.labor_time,
             labor_rate: jobToCopy.labor_rate,
-            material_cost: Number(round3Dec(jobToCopy.material_cost)),
+            material_cost: Number(round2Dec(jobToCopy.material_cost)),
             jobPartsData: jobToCopy.jobparts.map(({ id, parts, ...rest }) => rest),
             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
         }
@@ -166,7 +166,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 labor_cost: job.labor_cost,
                 labor_time: job.labor_time,
                 labor_rate: job.labor_rate,
-                material_cost: Number(round3Dec(job.material_cost)),
+                material_cost: Number(round2Dec(job.material_cost)),
                 jobPartsData: job.jobparts.map(({ id, parts, ...rest }) => rest),
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
             }

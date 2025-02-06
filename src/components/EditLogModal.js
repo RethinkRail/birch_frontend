@@ -10,7 +10,7 @@ import React, {useEffect, useState} from 'react';
 import Select from "react-select";
 import axios from "axios";
 import Datetime from "react-datetime";
-import {round3Dec} from "../utils/NumberHelper";
+import {round2Dec} from "../utils/NumberHelper";
 import {toUTCDateTime} from "../utils/DateTimeHelper";
 
 const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
@@ -179,7 +179,7 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
                         />
                     </div>
 
-                    <p>Total time: {formData.logged_time_in_seconds>0?round3Dec(formData.logged_time_in_seconds/3600):'0'} Hrs</p>
+                    <p>Total time: {formData.logged_time_in_seconds>0?round2Dec(formData.logged_time_in_seconds/3600):'0'} Hrs</p>
 
                     <div className="flex justify-end mt-4">
                         <button

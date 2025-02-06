@@ -15,7 +15,7 @@ import {
 
 import axios from 'axios';
 import {convertSqlToFormattedDate} from "../../utils/DateTimeHelper";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 import { mkConfig, generateCsv, download } from 'export-to-csv'; //or use your library of choice here
 import {FaDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
@@ -167,11 +167,11 @@ const  SummaryReportMaterial = () => {
                     qa_date: formatDate(item.qa_date),
                     month_to_invoice: formatDate(item.month_to_invoice),
                     shipped_date: formatDate(item.shipped_date),
-                    mhr_applied: round3Dec(item.mhr_applied),
-                    mhr_estimated: round3Dec(item.mhr_estimated),
-                    material_cost: round3Dec(item.material_cost),
-                    labor_cost: round3Dec(item.labor_cost),
-                    total_cost: round3Dec(item.total_cost),
+                    mhr_applied: round2Dec(item.mhr_applied),
+                    mhr_estimated: round2Dec(item.mhr_estimated),
+                    material_cost: round2Dec(item.material_cost),
+                    labor_cost: round2Dec(item.labor_cost),
+                    total_cost: round2Dec(item.total_cost),
                 };
             });
             if(formattedData.length>0){
@@ -213,7 +213,14 @@ const  SummaryReportMaterial = () => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
                 // Use the header as the key for the Excel, but still fetch the data using accessorKey
-                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
+                const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
+
+                // Convert the value to a number if it is a numeric string
+                if (!isNaN(value) && value !== "") {
+                    filteredRow[column.columnDef.header] = parseFloat(value);
+                } else {
+                    filteredRow[column.columnDef.header] = value;
+                }
             });
             return filteredRow;
         });

@@ -28,7 +28,7 @@ import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import IndirectHourChart from "../../components/IndirectHourChart";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 
 
 // Register Chart.js components
@@ -63,7 +63,7 @@ const IndirectHour = () => {
             accessorKey: 'total_hour',
             header: 'Hour',
             enableSorting: true,
-            Cell: ({ cell }) => round3Dec( cell.getValue()) , // Add 2 to the value of total_hour
+            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
         }
     ], []);
 

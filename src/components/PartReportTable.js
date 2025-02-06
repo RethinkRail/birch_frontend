@@ -9,7 +9,7 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import {round3Dec} from "../utils/NumberHelper";
+import {round2Dec} from "../utils/NumberHelper";
 import {FaArrowDown} from "react-icons/fa";
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
 
@@ -68,7 +68,7 @@ const PartReportTable = ({ initialData }) => {
                 const is_price_higher = parseFloat(purchaseCost) < parseFloat(price);
                 return (
                     <span style={{ display: "flex", alignItems: "center" }}>
-            {purchaseCost.toFixed(3)}
+            {purchaseCost.toFixed(2)}
                         {is_price_higher &&  <FaArrowDown style={{ color: 'red', marginLeft: '5px' }} />}
           </span>
                 );
@@ -78,7 +78,7 @@ const PartReportTable = ({ initialData }) => {
             name: "Inventory Price",
             selector: (row) => row.price_in_inventory,
             sortable: true,
-            cell: (row) => <span>{row.price_in_inventory.toFixed(3)}</span>,
+            cell: (row) => <span>{row.price_in_inventory.toFixed(2)}</span>,
             width: "14%",
         },
         {
@@ -96,7 +96,7 @@ const PartReportTable = ({ initialData }) => {
                     style={{ cursor: "pointer", color: "blue" }}
                     onClick={() => fetchStockStatusReport(row.code)}
                 >
-          {row.quantity_available > 0 ? row.quantity_available.toFixed(3) : 0}
+          {row.quantity_available > 0 ? row.quantity_available.toFixed(2) : 0}
         </span>
             ),
             width: "14%",

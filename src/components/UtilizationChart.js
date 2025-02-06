@@ -58,39 +58,65 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) =
 
         let lastSum = 0;
         xAxis.forEach((date) => {
-
             const currentDate = dayjs(date);
 
+            // Filter items where start_date is on or before the current date
             const startDateBeforeOrOnDate = filteredData.filter(
                 (item) => dayjs(item.start_date).isBefore(currentDate) || dayjs(item.start_date).isSame(currentDate)
             );
 
             if (startDateBeforeOrOnDate.length > 0) {
+                // Calculate the sum of (applied_time / estimated_time) * 100 for all matching items
+                lastSum = startDateBeforeOrOnDate.reduce((sum, item) => {
+                    // Convert applied_time and estimated_time to numbers
+                    const appliedTime = parseFloat(item.applied_time);
+                    const estimatedTime = parseFloat(item.estimated_time);
 
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = startDateBeforeOrOnDate.reduce((sum, item) => sum + item.utilization, 0);
+                    // Check if the conversion resulted in valid numbers
+                    if (isNaN(appliedTime) || isNaN(estimatedTime)) {
+                        console.warn('Invalid data: applied_time or estimated_time is not a valid number', item);
+                        return sum; // Skip this item
+                    }
+
+                    // Ensure estimated_time is not zero to avoid division by zero
+                    if (estimatedTime === 0) {
+                        console.warn('Invalid data: estimated_time is zero', item);
+                        return sum; // Skip this item
+                    }
+
+                    // Calculate utilization percentage
+                    const utilizationPercentage = (appliedTime / estimatedTime) * 100;
+                    console.log(`Item:`, item, `Utilization Percentage:`, utilizationPercentage);
+
+                    return sum + utilizationPercentage;
+                }, 0);
+
+                // Remove processed items from filteredData
                 filteredData = filteredData.filter(item =>
                     !startDateBeforeOrOnDate.some(removeItem =>
                         removeItem.start_date === item.start_date &&
-                        removeItem.utilization === item.utilization
+                        removeItem.applied_time === item.applied_time &&
+                        removeItem.estimated_time === item.estimated_time
                     )
                 );
-                const values = timeMap.get(crew_name)
 
-                values.push(lastSum)
+                // Update the timeMap with the new sum
+                const values = timeMap.get(crew_name);
+                values.push(lastSum);
             } else {
-
-                const values = timeMap.get(crew_name)
-
-                values.push(lastSum)
+                // If no matching items, push the existing lastSum
+                const values = timeMap.get(crew_name);
+                values.push(lastSum);
             }
-
-        })
+        });
 
     })
 
+    console.log(timeMap)
+
     // Process the dataset to calculate cumulative costs
     const newData = Array.from(timeMap, ([name, data]) => ({ name, data }));
+    console.log(newData)
     const chartData = {
         labels: xAxis,
         datasets: newData.map((item, index) => ({

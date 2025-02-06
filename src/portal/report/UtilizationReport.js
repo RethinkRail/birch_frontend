@@ -28,7 +28,7 @@ import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import IndirectHourChart from "../../components/IndirectHourChart";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 import UtilizationChart from "../../components/UtilizationChart";
 
 
@@ -65,20 +65,20 @@ const UtilizationReport = () => {
         { accessorKey: 'crew_id', header: 'Team member ID', enableSorting: true },
         { accessorKey: 'crew_name', header: 'Team member Name', enableSorting: true },
         { accessorKey: 'start_date', header: 'Date', enableSorting: true },
-        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round3Dec( cell.getValue())  },
+        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round2Dec( cell.getValue())  },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         {
             accessorKey: 'estimated_time',
             header: 'Estimated Time',
             enableSorting: true,
-            Cell: ({ cell }) => round3Dec( cell.getValue()) , // Add 2 to the value of total_hour
+            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
         },
 
         {
             accessorKey: 'utilization',
             header: 'utilization',
             enableSorting: true,
-            Cell: ({ cell }) => round3Dec( cell.getValue()), // Add 2 to the value of total_hour
+            Cell: ({ cell }) => round2Dec( cell.getValue()), // Add 2 to the value of total_hour
         },
 
     ], []);
@@ -194,8 +194,10 @@ const UtilizationReport = () => {
                 }, {});
 
                 const result = Object.values(mergedData);
+                console.log(result)
                 setAllData(result)
             }else {
+                console.log(data)
                 setAllData(data)
             }
 
@@ -245,11 +247,17 @@ const UtilizationReport = () => {
             const filteredRow = {};
             visibleColumns.forEach((column) => {
                 // Use the header as the key for the Excel, but still fetch the data using accessorKey
-                filteredRow[column.columnDef.header] = row.original[column.id]; // or column.columnDef.accessorKey if needed
+                const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
+
+                // Convert the value to a number if it is a numeric string
+                if (!isNaN(value) && value !== "") {
+                    filteredRow[column.columnDef.header] = parseFloat(value);
+                } else {
+                    filteredRow[column.columnDef.header] = value;
+                }
             });
             return filteredRow;
         });
-
         console.log(rowData);
 
         // Create a new workbook and add the data

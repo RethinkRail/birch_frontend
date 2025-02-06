@@ -15,7 +15,7 @@ import {
 
 import axios from 'axios';
 import {convertSqlToFormattedDate} from "../../utils/DateTimeHelper";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 import { mkConfig, generateCsv, download } from 'export-to-csv'; //or use your library of choice here
 import {FaDownload} from "react-icons/fa";
 import {toast} from "react-toastify";
@@ -88,9 +88,9 @@ const  PartReport = () => {
                                     status: status,
                                     code,
                                     title,
-                                    quantity: round3Dec(parseFloat(quantity)), // Round quantity to 2 decimals
-                                    unit_cost: round3Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
-                                    cost: round3Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
+                                    quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
+                                    unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
+                                    cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
                                 }
 
                                 partsNewReport.push(singleRow)

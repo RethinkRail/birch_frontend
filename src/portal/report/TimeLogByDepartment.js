@@ -12,7 +12,7 @@ import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
 import {convertSqlToFormattedDateTime, toUTCDateTime} from "../../utils/DateTimeHelper";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 
 const TimeLogByDepartment = () => {
     const [startDate, setStartDate] = useState("");
@@ -109,7 +109,7 @@ const TimeLogByDepartment = () => {
             //const formattedDateEndDate = `${String(end_date.getMonth() + 1).padStart(2, '0')}-${String(end_date.getDate()).padStart(2, '0')}-${end_date.getFullYear()}`;
 
             // Format Total Time (f6)
-            const totalTime = item.f6 == null ? "Not Yet Approved" : round3Dec(item.f6 / 3600);
+            const totalTime = item.f6 == null ? "Not Yet Approved" : round2Dec(item.f6 / 3600);
 
             // Return formatted item
             return {

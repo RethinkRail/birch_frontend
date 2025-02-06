@@ -11,7 +11,7 @@ import {toast} from "react-toastify";
 import {MaterialReactTable} from "material-react-table";
 import {FaDownload} from "react-icons/fa";
 import {download, generateCsv, mkConfig} from "export-to-csv";
-import {round3Dec} from "../../utils/NumberHelper";
+import {round2Dec} from "../../utils/NumberHelper";
 
 const EmissionReport = () => {
     const [startDate, setStartDate] = useState("");
@@ -97,7 +97,7 @@ const EmissionReport = () => {
             return {
                 ...item,
                 f1: formattedDate,
-                emission: round3Dec(item.f6* 33000 * (1 / 7.48) / (10.73 * 560) * item.f5 * (item.f3 / 100))
+                emission: round2Dec(item.f6* 33000 * (1 / 7.48) / (10.73 * 560) * item.f5 * (item.f3 / 100))
             };
         });
     }

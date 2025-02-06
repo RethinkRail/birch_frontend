@@ -64,22 +64,15 @@ const UtilizationReport = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'crew_id', header: 'Team member ID', enableSorting: true },
         { accessorKey: 'crew_name', header: 'Team member Name', enableSorting: true },
-        { accessorKey: 'start_date', header: 'Date', enableSorting: true },
-        { accessorKey: 'applied_time', header: 'Applied time', enableSorting: true, Cell: ({ cell }) => round2Dec( cell.getValue())  },
-        { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
-        {
-            accessorKey: 'estimated_time',
-            header: 'Estimated Time',
-            enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
-        },
-
+        { accessorKey: 'date', header: 'Date', enableSorting: true },
+        { accessorKey: 'direct_time', header: 'Direct time(HRs)', enableSorting: true, Cell: ({ cell }) => round2Dec( cell.getValue())  },
+        { accessorKey: 'indirect_time', header: 'Indirect time(HRs)', enableSorting: true, Cell: ({ cell }) =>cell.getValue()==0?"0": round2Dec( cell.getValue())+" "},
         {
             accessorKey: 'utilization',
-            header: 'utilization',
+            header: 'Utilization(%)',
             enableSorting: true,
-            Cell: ({ cell }) => round2Dec( cell.getValue()), // Add 2 to the value of total_hour
-        },
+            Cell: ({ cell }) => round2Dec( cell.getValue()) , // Add 2 to the value of total_hour
+        }
 
     ], []);
 
@@ -134,11 +127,6 @@ const UtilizationReport = () => {
         let modified = new Date(startDate);
         modified.setDate(modified.getDate() - selectedDateRange);
 
-        console.log(showDepartments)
-        console.log(selectedCrew)
-        console.log(selectedDepartment)
-        console.log(startDate)
-        console.log(endDate)
         try {
             setLoading(true);
             const payloadCrew = {
@@ -151,11 +139,8 @@ const UtilizationReport = () => {
                 startDate:modified,
                 endDate,
             };
-            console.log(payloadCrew)
-            console.log(payloadDepartment)
-            console.log(new Date(modified).toISOString())
-            console.log(new Date(endDate).toISOString())
-
+            console.log(showDepartments)
+            setAllData([])
             let response
 
             if(showDepartments){
@@ -163,66 +148,50 @@ const UtilizationReport = () => {
                     `${process.env.REACT_APP_BIRCH_API_URL}get_utilization_by_department`,
                     payloadDepartment
                 );
+                console.log(response)
             }else {
                 response = await axios.post(
                     `${process.env.REACT_APP_BIRCH_API_URL}get_utilization_by_crew`,
                     payloadCrew
                 );
+                console.log(response)
             }
 
 
             const data = response.data.data;
-            console.log(response)
+            console.log(data)
             setTableData(data)
 
             if(showDepartments){
-                const mergedData = data.reduce((acc, curr) => {
-                    const key = `${curr.job_id}-${curr.start_date}`;
-                    if (!acc[key]) {
-                        acc[key] = {
-                            ...curr,
+                const result = {};
+
+                data.forEach(entry => {
+                    const key = entry.date; // Use date as the key
+                    if (!result[key]) {
+                        result[key] = {
                             crew_id: selectedDepartment.value,
                             crew_name: selectedDepartment.label,
-                            utilization: (curr.applied_time * 100) / curr.estimated_time || 0,
+                            date: entry.date,
+                            direct_time: 0,
+                            indirect_time: 0,
+                            utilization: 0
                         };
-                    } else {
-                        acc[key].applied_time += curr.applied_time;
-                        acc[key].estimated_time += curr.estimated_time;
-                        acc[key].utilization = (acc[key].applied_time * 100) / acc[key].estimated_time || 0;
                     }
-                    return acc;
-                }, {});
 
-                const result = Object.values(mergedData);
-                console.log(result)
-                setAllData(result)
+                    // Sum direct_time and indirect_time for the same date
+                    result[key].direct_time += entry.direct_time;
+                    result[key].indirect_time += entry.indirect_time;
+
+                    // Calculate utilization
+                    const totalTime = result[key].direct_time + result[key].indirect_time;
+                    result[key].utilization = totalTime === 0 ? 0 : (result[key].direct_time * 100) / totalTime;
+                });
+                console.log(Object.values(result))
+                setAllData(Object.values(result))
             }else {
                 console.log(data)
                 setAllData(data)
             }
-
-
-
-            // if(!isAllDepartment){
-            //     const response = await axios.post(
-            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_departments`,
-            //         payload
-            //     );
-            //
-            //     const data = response.data.data;
-            //     console.log(data)
-            //     setAllData(data)
-            // }else {
-            //     const response = await axios.post(
-            //         `${process.env.REACT_APP_BIRCH_API_URL}generate_revenue_by_customer_report_all`,
-            //         payloadAll
-            //     );
-            //
-            //     const data = response.data.data;
-            //     setAllData(data)
-            // }
-
-
 
             setLoading(false);
 
@@ -249,16 +218,17 @@ const UtilizationReport = () => {
                 // Use the header as the key for the Excel, but still fetch the data using accessorKey
                 const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
 
-                // Convert the value to a number if it is a numeric string
-                if (!isNaN(value) && value !== "") {
+                // Convert the value to a number only if it is a valid number
+                if (typeof value === 'string' && !isNaN(parseFloat(value)) && isFinite(value)) {
                     filteredRow[column.columnDef.header] = parseFloat(value);
                 } else {
+                    // Otherwise, keep the original value
                     filteredRow[column.columnDef.header] = value;
                 }
             });
             return filteredRow;
         });
-        console.log(rowData);
+
 
         // Create a new workbook and add the data
         const worksheet = XLSX.utils.json_to_sheet(rowData);

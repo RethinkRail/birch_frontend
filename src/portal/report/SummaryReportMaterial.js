@@ -62,7 +62,6 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'valve_date', header: 'Valve Date', enableSorting: true },
         { accessorKey: 'pd_date', header: 'PD Date', enableSorting: true },
         { accessorKey: 'final_date', header: 'Final Date', enableSorting: true },
-
         { accessorKey: 'shipped_date', header: 'Shipped Date', enableSorting: true },
         { accessorKey: 'sp', header: 'Special Process', enableSorting: true },
         { accessorKey: 'tq', header: 'Tank Qualification', enableSorting: true },
@@ -215,17 +214,17 @@ const  SummaryReportMaterial = () => {
                 // Use the header as the key for the Excel, but still fetch the data using accessorKey
                 const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
 
-                // Convert the value to a number if it is a numeric string
-                if (!isNaN(value) && value !== "") {
+                // Convert the value to a number only if it is a valid number
+                if (typeof value === 'string' && !isNaN(parseFloat(value)) && isFinite(value)) {
                     filteredRow[column.columnDef.header] = parseFloat(value);
                 } else {
+                    // Otherwise, keep the original value
                     filteredRow[column.columnDef.header] = value;
                 }
             });
             return filteredRow;
         });
 
-        console.log(rowData);
 
         // Create a new workbook and add the data
         const worksheet = XLSX.utils.json_to_sheet(rowData);

@@ -50,7 +50,8 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
     let revMap = new Map();
 
     uniqueNames.map((name)=>{
-
+        revMap.set(name,[]);
+        let filteredData = dataSet.filter((item) => item.name === name);
         let lastSum = 0;
         xAxis.forEach((date) => {
             const currentDate = dayjs(date);

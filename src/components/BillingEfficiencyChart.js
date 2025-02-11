@@ -122,7 +122,7 @@ const BillingEfficiencyChart = ({ startDate, endDate, dateDiff, dataSet,name }) 
             y: {
                 title: {
                     display: true,
-                    text: "Utilization (%)",
+                    text: "Billing Efficiency ",
                 },
             },
         },

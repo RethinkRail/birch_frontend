@@ -203,6 +203,21 @@ const BillingEfficiency = () => {
                     </label>
                 </div>
 
+                <div className="flex items-center">
+                      <span className="text-sm font-medium text-gray-700 mr-2">
+                        By Railcar
+                      </span>
+
+                    <label className="label cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={!byJobCode}
+                            onChange={() => setIsByJobCode(!byJobCode)}
+                        />
+                    </label>
+                </div>
+
 
                     {byJobCode ? (
                         <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">

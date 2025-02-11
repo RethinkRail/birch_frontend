@@ -26,7 +26,7 @@ ChartJS.register({
 });
 
 
-const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
+const RecognitionChart = ({ startDate, endDate, dateDiff, dataSet }) => {
     console.log(dataSet)
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -44,45 +44,52 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
         return dates;
     };
 
-    const uniqueNames = [...new Set(dataSet.map((item) => item.name))];
+    //const uniqueNames = [...new Set(dataSet.map((item) => item.name))];
     const xAxis = calculateDates(startDate, endDate, dateDiff);
 
-    let revMap = new Map();
+    console.log(xAxis)
 
-    uniqueNames.map((name)=>{
+    let recognitionMap = new Map();
+    const heading = "Revenue recognition inventory"
+    recognitionMap.set(heading,[]);
+    //let filteredData = dataSet.filter((item) => item.name === name);
+    let lastSum = 0;
+    xAxis.forEach((date) => {
+        const currentDate = dayjs(date);
+        const invoicesBeforeOrOnDate = dataSet.filter(
+            (invoice) => dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
+        );
 
-        let lastSum = 0;
-        xAxis.forEach((date) => {
-            const currentDate = dayjs(date);
-            const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) => dayjs(invoice.invoice_date).isBefore(currentDate) || dayjs(invoice.invoice_date).isSame(currentDate)
-            );
+        console.log(invoicesBeforeOrOnDate)
 
 
-            if (invoicesBeforeOrOnDate.length > 0) {
+        if (invoicesBeforeOrOnDate.length > 0) {
 
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.total_cost, 0);
-                filteredData = filteredData.filter(item =>
+                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.material_cost, 0);
+                dataSet = dataSet.filter(item =>
                     !invoicesBeforeOrOnDate.some(removeItem =>
-                        removeItem.invoice_date === item.invoice_date &&
-                        removeItem.total_cost === item.total_cost
+                        removeItem.completed_time === item.completed_time &&
+                        removeItem.material_cost === item.material_cost
                     )
                 );
-                const values = revMap.get(name)
+                const values = recognitionMap.get(heading)
                 values.push(lastSum)
-            } else {
 
-                const values = revMap.get(name)
-                values.push(lastSum)
-            }
 
-        })
+            // Reset the sum to the latest invoice found on or before the current date
+
+        } else {
+
+            const values = recognitionMap.get(heading)
+            values.push(lastSum)
+        }
 
     })
 
+    console.log(recognitionMap)
+
     // Process the dataset to calculate cumulative costs
-    const newData = Array.from(revMap, ([name, data]) => ({ name, data }));
+    const newData = Array.from(recognitionMap, ([name, data]) => ({ name, data }));
     const chartData = {
         labels: xAxis,
         datasets: newData.map((item, index) => ({
@@ -106,7 +113,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
             },
             title: {
                 display: true,
-                text: `Revenue by selected `+name+` From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                text: `Revenue recognition Inventory  From ${new Date(startDate).toLocaleDateString()} To ${new Date(
                     endDate
                 ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },
@@ -121,7 +128,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
             y: {
                 title: {
                     display: true,
-                    text: "Revenue ($)",
+                    text: "Inventory Revenue ($)",
                 },
             },
         },
@@ -164,7 +171,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
 
 };
 
-export default RevenueChart;
+export default RecognitionChart;
 
 
 

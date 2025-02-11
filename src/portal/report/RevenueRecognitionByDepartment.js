@@ -29,6 +29,7 @@ import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import RecognitionChart from "../../components/RecognitionChart";
 import {round2Dec} from "../../utils/NumberHelper";
+import RecognitionChartAllDepartment from "../../components/RecognitionChartAllDepartment";
 
 
 // Register Chart.js components
@@ -58,6 +59,7 @@ const RevenueByDepartments = () => {
     const initialColumns = useMemo(() => [
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
         { accessorKey: 'line', header: 'Line', enableSorting: true },
+        { accessorKey: 'department', header: 'Department', enableSorting: true },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         { accessorKey: 'applied_time', header: 'Applied hour', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
         { accessorKey: 'net_cost', header: 'Net cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
@@ -193,8 +195,8 @@ const RevenueByDepartments = () => {
                         />
                     </label>
                 </div>
-                <div className="grid gap-1 grid-cols-5 mb-4">
-                    <label className="label cursor-pointer">
+                <div className="flex gap-4 mb-4">
+                    <label className="label cursor-pointer flex items-center">
                         <span className="label-text mr-5">USD</span>
                         <input
                             type="checkbox"
@@ -203,14 +205,33 @@ const RevenueByDepartments = () => {
                             onChange={handleSetUSD}
                         />
                     </label>
+                    <label className="label cursor-pointer flex items-center">
+                        <span className="label-text mr-5">MHR</span>
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={!isUSD}
+                            onChange={handleSetUSD}
+                        />
+                    </label>
                 </div>
-                <div className="grid gap-1 grid-cols-5 mb-4">
-                    <label className="label cursor-pointer">
-                        <span className="label-text mr-5">Is non invoiced Car Only</span>
+
+                <div className="flex gap-4 mb-4">
+                    <label className="label cursor-pointer flex items-center">
+                        <span className="label-text mr-5">Non Invoiced</span>
                         <input
                             type="checkbox"
                             className="toggle"
                             checked={isNonInVoicedOnly}
+                            onChange={handleSetNonInvoicedOnly}
+                        />
+                    </label>
+                    <label className="label cursor-pointer flex items-center">
+                        <span className="label-text mr-5">All Cars</span>
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={!isNonInVoicedOnly}
                             onChange={handleSetNonInvoicedOnly}
                         />
                     </label>
@@ -290,7 +311,14 @@ const RevenueByDepartments = () => {
 
                 {allData.length > 0 && (
                     <div className="mt-4">
-                        <RecognitionChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
+
+                        {!isAllDepartment ? (
+                            <RecognitionChartAllDepartment startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
+                        ) : (
+                            <RecognitionChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
+                        )}
+
+
 
 
                         <div className="overflow-x-auto mt-4">

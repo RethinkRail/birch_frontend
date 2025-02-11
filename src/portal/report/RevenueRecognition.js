@@ -145,13 +145,22 @@ const RevenueRecognition = () => {
         <div className="py-6">
             <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue Recognition</h1>
             <div className="">
-                <div className="grid gap-1 grid-cols-5 mb-4">
-                    <label className="label cursor-pointer">
+                <div className="flex gap-4 mb-4">
+                    <label className="label cursor-pointer flex items-center">
                         <span className="label-text mr-5">USD</span>
                         <input
                             type="checkbox"
                             className="toggle"
                             checked={isUSD}
+                            onChange={handleSetUSD}
+                        />
+                    </label>
+                    <label className="label cursor-pointer flex items-center">
+                        <span className="label-text mr-5">MHR</span>
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={!isUSD}
                             onChange={handleSetUSD}
                         />
                     </label>

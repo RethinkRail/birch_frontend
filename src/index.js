@@ -35,6 +35,7 @@ import UtilizationReport from "./portal/report/UtilizationReport";
 import BillingEfficiency from "./portal/report/BillingEfficiency";
 import RevenueRecognition from "./portal/report/RevenueRecognition";
 import RevenueRecognitionByDepartment from "./portal/report/RevenueRecognitionByDepartment";
+import RevenueRecognitionInventroy from "./portal/report/RevenueRecognitionInventroy";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -232,6 +233,12 @@ root.render(
                 <Route path="/revenue_recognition_by_department" element={
                     <ProtectedRoute>
                         <RevenueRecognitionByDepartment/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+                <Route path="/revenue_recognition_by_inventory" element={
+                    <ProtectedRoute>
+                        <RevenueRecognitionInventroy/>
                     </ProtectedRoute>
                 }>
                 </Route>

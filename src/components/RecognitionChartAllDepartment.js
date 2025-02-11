@@ -26,7 +26,7 @@ ChartJS.register({
 });
 
 
-const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
+const RecognitionChartAllDepartment = ({ startDate, endDate, dateDiff, dataSet,isUSD }) => {
     console.log(dataSet)
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -44,45 +44,67 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
         return dates;
     };
 
-    const uniqueNames = [...new Set(dataSet.map((item) => item.name))];
+    const uniqueNames = [...new Set(dataSet.map((item) => item.department))];
     const xAxis = calculateDates(startDate, endDate, dateDiff);
 
-    let revMap = new Map();
+    console.log(xAxis)
+
+    let recognitionMap = new Map();
 
     uniqueNames.map((name)=>{
-
         let lastSum = 0;
+        recognitionMap.set(name,[]);
+        let filteredData = dataSet.filter((item) => item.department === name);
         xAxis.forEach((date) => {
             const currentDate = dayjs(date);
             const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) => dayjs(invoice.invoice_date).isBefore(currentDate) || dayjs(invoice.invoice_date).isSame(currentDate)
+                (invoice) => dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
             );
+
+            console.log(invoicesBeforeOrOnDate)
 
 
             if (invoicesBeforeOrOnDate.length > 0) {
 
+                if(isUSD){
+                    lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.net_cost, 0);
+                    filteredData = filteredData.filter(item =>
+                        !invoicesBeforeOrOnDate.some(removeItem =>
+                            removeItem.completed_time === item.completed_time &&
+                            removeItem.net_cost === item.net_cost
+                        )
+                    );
+                    const values = recognitionMap.get(name)
+                    values.push(lastSum)
+                }else {
+                    lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + parseInt(invoice.applied_time), 0);
+                    filteredData = filteredData.filter(item =>
+                        !invoicesBeforeOrOnDate.some(removeItem =>
+                            removeItem.completed_time === item.completed_time &&
+                            removeItem.applied_time === parseInt(item.applied_time)
+                        )
+                    );
+                    const values = recognitionMap.get(name)
+                    values.push(lastSum)
+                }
+
                 // Reset the sum to the latest invoice found on or before the current date
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.total_cost, 0);
-                filteredData = filteredData.filter(item =>
-                    !invoicesBeforeOrOnDate.some(removeItem =>
-                        removeItem.invoice_date === item.invoice_date &&
-                        removeItem.total_cost === item.total_cost
-                    )
-                );
-                const values = revMap.get(name)
-                values.push(lastSum)
+
             } else {
 
-                const values = revMap.get(name)
+                const values = recognitionMap.get(name)
                 values.push(lastSum)
             }
 
         })
-
     })
+    //let filteredData = dataSet.filter((item) => item.name === name);
+
+
+    console.log(recognitionMap)
 
     // Process the dataset to calculate cumulative costs
-    const newData = Array.from(revMap, ([name, data]) => ({ name, data }));
+    const newData = Array.from(recognitionMap, ([name, data]) => ({ name, data }));
     const chartData = {
         labels: xAxis,
         datasets: newData.map((item, index) => ({
@@ -106,7 +128,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
             },
             title: {
                 display: true,
-                text: `Revenue by selected `+name+` From ${new Date(startDate).toLocaleDateString()} To ${new Date(
+                text: `Revenue recognition  From ${new Date(startDate).toLocaleDateString()} To ${new Date(
                     endDate
                 ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },
@@ -121,7 +143,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
             y: {
                 title: {
                     display: true,
-                    text: "Revenue ($)",
+                    text: isUSD? " ($)":"Applied Hour",
                 },
             },
         },
@@ -164,7 +186,7 @@ const RevenueChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
 
 };
 
-export default RevenueChart;
+export default RecognitionChartAllDepartment;
 
 
 

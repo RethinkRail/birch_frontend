@@ -1415,7 +1415,7 @@ export function printBBOM(workOrder) {
     });
     bomTable += '</tbody></table>';
 
-    var tbl_title = "Bill of Material for "
+    var tbl_title = "Bill of Material for "+ workOrder.railcar_id
     var tbl_name = "BOM - " +".pdf";
     saveDivII(bomTable, tbl_title, tbl_name, false);
 }

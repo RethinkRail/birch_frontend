@@ -96,7 +96,7 @@ const RevenueByDepartments = () => {
     //original
     const handleGenerate = async () => {
         let modified = new Date(startDate);
-        modified.setDate(modified.getDate() - selectedDateRange);
+        modified.setDate(modified.getDate() - 0);
         try {
             setLoading(true);
             const payload = {

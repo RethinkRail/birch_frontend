@@ -23,12 +23,15 @@ const Navbar = () => {
     const navItems = [
         { title: 'Work Order', path: '/' },
         { title: 'Database', path: '/database' },
+        { title: 'Attendance', path: '/attendance' },
         {
             title: 'Management',
             children: [
                 { title: 'Birch User Management', path: '/user_management' },
                 { title: 'Team Member Management', path: '/team_member_management' },
+
                 ...(hasRole('ADMIN') ? [{ title: 'Routing Matrix', path: '/routing_matrix' }] : []), // Only for ADMIN
+                // Only for PAYROLL
             ]
         },
         {
@@ -94,16 +97,31 @@ const Navbar = () => {
             ]
         }
     ].filter(item => {
+        // Debugging the role check
+        console.log('Checking role for:', item.title);
         if (item.title === 'Management') {
-            // Hide Management if user does not have ADMIN or HR role
-            return hasRole('ADMIN') || hasRole('HR');
+            const hasManagementAccess = hasRole('ADMIN') || hasRole('HR');
+            console.log('Management access:', hasManagementAccess);
+            return hasManagementAccess;
         }
         if (item.title === 'Time Tracking') {
-            // Hide Time Tracking if user does not have ADMIN, MANAGEMENT, or TIME APPROVAL role
-            return hasRole('ADMIN') || hasRole('MANAGEMENT') || hasRole('TIME APPROVAL');
+            const hasTimeTrackingAccess = hasRole('ADMIN') || hasRole('MANAGEMENT') || hasRole('TIME APPROVAL');
+            console.log('Time Tracking access:', hasTimeTrackingAccess);
+            return hasTimeTrackingAccess;
         }
-        return true; // Include all other items
+
+        if (item.title === 'Attendance') {
+            const hasTimeTrackingAccess = hasRole('PAYROLL') ;
+            console.log('Time Tracking access:', hasTimeTrackingAccess);
+            return hasTimeTrackingAccess;
+        }
+        // No filtering for other items
+        return true;
     });
+
+    console.log('Final navItems:', navItems);
+
+
 
 // Conditionally append Management for ADMIN or HR roles
     if (hasRole('ADMIN') || hasRole('HR')) {

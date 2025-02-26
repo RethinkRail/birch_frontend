@@ -30,6 +30,7 @@ import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
 import {round2Dec} from "../../utils/NumberHelper";
 import BillingEfficiencyChart from "../../components/BillingEfficiencyChart";
 import BillingEfficiencyByJobCodeChart from "../../components/BillingEfficiencyByJobCodeChart";
+import BillingEfficiencyByDepartmentChart from "../../components/BillingEfficiencyByDepartmentChart";
 
 
 // Register Chart.js components
@@ -46,16 +47,22 @@ ChartJS.register(
 const BillingEfficiency = () => {
     const [selectedRailCar, setSelectedRailCar] = useState(Array(5).fill("")); //
     const [selectedJobCodes, setSelectedJobCodes] = useState(Array(5).fill(null)); //
+    const [selectedDepartments, setSelectedDepartments] = useState(Array(5).fill(null)); //
+    const [departments, setDepartments] = useState([]);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [allData,setAllData] = useState([])
     const [byJobCode, setIsByJobCode] = useState(false);
+    const [byDepartment, setIsDepartment] = useState(false);
+    const [byRailcar, setByRailcar] = useState(false);
     const [jobCode, setJobCode] = useState([]);
+    const [selectedFilter, setSelectedFilter] = useState(null);
     const initialColumns = useMemo(() => [
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true, size: 50 },
         { accessorKey: 'line', header: 'Line', enableSorting: true, size: 50 },
         { accessorKey: 'job_code_applied', header: 'Job Code Applied', enableSorting: true, size: 50 },
+        { accessorKey: 'departmen', header: 'Department', enableSorting: true, size: 50 },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         { accessorKey: 'completed_time', header: 'Completion Date', enableSorting: true },
         { accessorKey: 'estimated_time', header: 'Estimated Time', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
@@ -82,6 +89,29 @@ const BillingEfficiency = () => {
     };
 
     useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_revenue_category/`
+                );
+
+                // Map API data to React Select format
+                const departmentOptions = response.data.map((department) => ({
+                    value: department.id,
+                    label: department.name,
+                }));
+
+                setDepartments(departmentOptions);
+            } catch (error) {
+                console.error('Error fetching departments:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDepartments();
+    }, []);
+
+    useEffect(() => {
         const fetchJobCode = async () => {
             try {
                 const response = await axios.get(
@@ -104,11 +134,18 @@ const BillingEfficiency = () => {
         fetchJobCode();
     }, []);
 
+    const handleOwnerChange = (index, value) => {
+        const updatedSelectedOwners = [...selectedDepartments];
+        updatedSelectedOwners[index] = value;
+        setSelectedDepartments(updatedSelectedOwners);
+    };
+
+
     //original
     const handleGenerate = async () => {
         let modified = new Date(startDate);
-        //console.log(selectedRailCar)
-        modified.setDate(modified.getDate() - selectedDateRange);
+        console.log(selectedDateRange)
+        modified.setDate(modified.getDate() - 0);
         try {
             setLoading(true);
             const payload = {
@@ -123,18 +160,33 @@ const BillingEfficiency = () => {
                 endDate,
             };
 
+            const payloadDepartments = {
+                departments: selectedDepartments.filter((id) => id), // Remove null values
+                startDate:modified,
+                endDate,
+            };
+            console.log(selectedFilter)
             let response
 
-            if(byJobCode){
+            if(selectedFilter === 'jobCode'){
                 response = await axios.post(
                     `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency_by_jobcode`,
                     payloadJobCodes
                 );
 
-            }else {
+            }else if (selectedFilter === 'railcar') {
                 response = await axios.post(
                     `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency`,
                     payload
+                );
+
+            }
+
+
+            else if (selectedFilter === 'department') {
+                response = await axios.post(
+                    `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency_by_department`,
+                    payloadDepartments
                 );
 
             }
@@ -189,68 +241,89 @@ const BillingEfficiency = () => {
             <div className="">
 
                 <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-700 mr-2">
-                        By Job Code
-                      </span>
-
+                    <span className="text-sm font-medium text-gray-700 mr-2">By Job Code</span>
                     <label className="label cursor-pointer">
                         <input
                             type="checkbox"
                             className="toggle"
-                            checked={byJobCode}
-                            onChange={() => setIsByJobCode(!byJobCode)}
+                            checked={selectedFilter === 'jobCode'}
+                            onChange={() => setSelectedFilter(selectedFilter === 'jobCode' ? null : 'jobCode')}
                         />
                     </label>
                 </div>
 
                 <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-700 mr-2">
-                        By Railcar
-                      </span>
-
+                    <span className="text-sm font-medium text-gray-700 mr-2">By Railcar</span>
                     <label className="label cursor-pointer">
                         <input
                             type="checkbox"
                             className="toggle"
-                            checked={!byJobCode}
-                            onChange={() => setIsByJobCode(!byJobCode)}
+                            checked={selectedFilter === 'railcar'}
+                            onChange={() => setSelectedFilter(selectedFilter === 'railcar' ? null : 'railcar')}
                         />
                     </label>
                 </div>
 
+                <div className="flex items-center">
+                    <span className="text-sm font-medium text-gray-700 mr-2">By Department</span>
+                    <label className="label cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={selectedFilter === 'department'}
+                            onChange={() => setSelectedFilter(selectedFilter === 'department' ? null : 'department')}
+                        />
+                    </label>
+                </div>
+                {selectedFilter === 'jobCode' && (
+                    <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="p-1 w-full">
+                                <Select
+                                    value={jobCode.find((option) => option.value === selectedJobCodes[index]) || null}
+                                    onChange={(selectedOption) => handleJobCodeChange(index, selectedOption?.value)}
+                                    options={jobCode}
+                                    placeholder="Select Job code"
+                                    isClearable
+                                    className="border rounded w-full"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-                    {byJobCode ? (
-                        <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                                <div key={index} className="p-1 w-full">
-                                    <Select
-                                        value={
-                                            jobCode.find((option) => option.value === selectedJobCodes[index]) || null
-                                        }
-                                        onChange={(selectedOption) => handleJobCodeChange(index, selectedOption?.value)}
-                                        options={jobCode}
-                                        placeholder="Select Job code"
-                                        isClearable
-                                        className="border rounded w-full"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                                <div key={index} className="p-1 w-full">
-                                    <input
-                                        type="text"
-                                        value={selectedRailCar[index] || ""}
-                                        onChange={(e) => handleRailCarChange(index, e.target.value)}
-                                        placeholder="Enter car number"
-                                        className="border rounded p-2 w-full"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                {selectedFilter === 'railcar' && (
+                    <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="p-1 w-full">
+                                <input
+                                    type="text"
+                                    value={selectedRailCar[index] || ""}
+                                    onChange={(e) => handleRailCarChange(index, e.target.value)}
+                                    placeholder="Enter car number"
+                                    className="border rounded p-2 w-full"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {selectedFilter === 'department' && (
+                    <div className="flex grid gap-0 grid-cols-5 mb-4 w-auto">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div key={index} className="p-2">
+                                <Select
+                                    value={departments.find((option) => option.value === selectedDepartments[index]) || null}
+                                    onChange={(selectedOption) => handleOwnerChange(index, selectedOption?.value)}
+                                    options={departments}
+                                    placeholder="Select Department"
+                                    isClearable
+                                    className="border rounded"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
 
 
                 {/* Date Pickers */}
@@ -303,11 +376,20 @@ const BillingEfficiency = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
 
-                        {byJobCode?
+                        {selectedFilter === "jobCode" ? (
                             <BillingEfficiencyByJobCodeChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
-                            :
+                        ) : selectedFilter === "railcar" ? (
                             <BillingEfficiencyChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
-                        }
+                        ) : (
+                            <BillingEfficiencyByDepartmentChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />
+                        )}
+
+
+                        {/*{byJobCode?*/}
+                        {/*    <BillingEfficiencyByJobCodeChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />*/}
+                        {/*    :*/}
+                        {/*    <BillingEfficiencyChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Billing Efficiency'} />*/}
+                        {/*}*/}
 
                         <div className="overflow-x-auto mt-4">
                             {allData.length >0?(

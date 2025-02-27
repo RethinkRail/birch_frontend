@@ -49,55 +49,64 @@ const BillingEfficiencyByDepartmentChart = ({ startDate, endDate, dateDiff, data
 
     let revMap = new Map();
 
-    uniqueNames.map((job_code_applied)=>{
-        revMap.set(job_code_applied,[]);
+    uniqueNames.map((job_code_applied) => {
+        revMap.set(job_code_applied, []);
         let filteredData = dataSet.filter((item) => item.departmen === job_code_applied);
         let lastSum = 0;
+
         xAxis.forEach((date) => {
             const currentDate = dayjs(date);
             const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) => dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
+                (invoice) =>
+                    dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
             );
 
-
             if (invoicesBeforeOrOnDate.length > 0) {
+                // Compute utilization based on applied_time and estimated_time
+                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => {
+                    const utilization = invoice.applied_time > 0 ? (invoice.applied_time / invoice.estimated_time) * 100 : 0;
+                    return sum + utilization;
+                }, 0);
 
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.utilization, 0);
-                filteredData = filteredData.filter(item =>
-                    !invoicesBeforeOrOnDate.some(removeItem =>
-                        removeItem.completed_time === item.completed_time &&
-                        removeItem.utilization === item.utilization
-                    )
+                // Remove processed invoices
+                filteredData = filteredData.filter(
+                    (item) =>
+                        !invoicesBeforeOrOnDate.some(
+                            (removeItem) =>
+                                removeItem.completed_time === item.completed_time &&
+                                removeItem.applied_time === item.applied_time &&
+                                removeItem.estimated_time === item.estimated_time
+                        )
                 );
-                const values = revMap.get(job_code_applied)
-                values.push(lastSum)
+
+                const values = revMap.get(job_code_applied);
+                values.push(lastSum);
             } else {
-
-                const values = revMap.get(job_code_applied)
-                values.push(lastSum)
+                const values = revMap.get(job_code_applied);
+                values.push(lastSum);
             }
+        });
+    });
 
-        })
-
-    })
 
     // Process the dataset to calculate cumulative costs
     const newData = Array.from(revMap, ([name, data]) => ({ name, data }));
+    console.log(newData)
     const chartData = {
         labels: xAxis,
         datasets: newData.map((item, index) => ({
             label: item.name,
-            data: item.data,
+            data: item.data.map(value => (value === 0 ? null : value)), // Replace 0 with null
             fill: true,
             tension: 0.0,
-            backgroundColor: `hsla(${index * 360 / Object.keys(dataSet).length}, 70%, 50%, 0.2)`,
+            backgroundColor: `hsla(${index * 360 / newData.length}, 70%, 50%, 0.2)`,
             borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
             borderWidth: 2,
             pointRadius: 4,
-            spanGaps: false, // Enable skipping null values
+            spanGaps: true, // Enables non-continuous graph for null values
         })),
     };
+
 
     const options = {
         responsive: true,

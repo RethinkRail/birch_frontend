@@ -49,41 +49,49 @@ const BillingEfficiencyByJobCodeChart = ({ startDate, endDate, dateDiff, dataSet
 
     let revMap = new Map();
 
-    uniqueNames.map((job_code_applied)=>{
-        revMap.set(job_code_applied,[]);
-        let filteredData = dataSet.filter((item) => item.job_code_applied === job_code_applied);
-        let lastSum = 0;
+    uniqueNames.map((job_code_applied) => {
+        revMap.set(job_code_applied, []); // Initialize an empty array for this job_code_applied
+        let filteredData = dataSet.filter((item) => item.job_code_applied === job_code_applied); // Filter data for the current job_code_applied
+        let lastSum = 0; // Initialize cumulative utilization
+
         xAxis.forEach((date) => {
-            const currentDate = dayjs(date);
+            const currentDate = dayjs(date); // Convert current date to dayjs object
             const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) => dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
+                (invoice) =>
+                    dayjs(invoice.completed_time).isBefore(currentDate) || // Filter invoices on or before the current date
+                    dayjs(invoice.completed_time).isSame(currentDate)
             );
 
-
             if (invoicesBeforeOrOnDate.length > 0) {
+                // Calculate utilization for each invoice and add to the cumulative sum
+                lastSum += invoicesBeforeOrOnDate.reduce((sum, invoice) => {
+                    const utilization = invoice.applied_time === 0 ? 0 : (invoice.applied_time / invoice.estimated_time) * 100; // Calculate utilization
+                    return sum + utilization;
+                }, 0);
 
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.utilization, 0);
+                // Remove processed invoices from filteredData to avoid reprocessing
                 filteredData = filteredData.filter(item =>
                     !invoicesBeforeOrOnDate.some(removeItem =>
                         removeItem.completed_time === item.completed_time &&
-                        removeItem.utilization === item.utilization
+                        removeItem.applied_time === item.applied_time &&
+                        removeItem.estimated_time === item.estimated_time
                     )
                 );
-                const values = revMap.get(job_code_applied)
-                values.push(lastSum)
+
+                // Store the cumulative utilization for this date
+                const values = revMap.get(job_code_applied);
+                values.push(lastSum);
             } else {
-
-                const values = revMap.get(job_code_applied)
-                values.push(lastSum)
+                // If no invoices are found, carry forward the previous cumulative utilization
+                const values = revMap.get(job_code_applied);
+                values.push(lastSum);
             }
-
-        })
-
-    })
+        });
+    });
 
     // Process the dataset to calculate cumulative costs
     const newData = Array.from(revMap, ([name, data]) => ({ name, data }));
+    console.log(newData)
     const chartData = {
         labels: xAxis,
         datasets: newData.map((item, index) => ({

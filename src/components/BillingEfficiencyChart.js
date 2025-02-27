@@ -49,38 +49,45 @@ const BillingEfficiencyChart = ({ startDate, endDate, dateDiff, dataSet,name }) 
 
     let revMap = new Map();
 
-    uniqueNames.map((railcar_id)=>{
-        revMap.set(railcar_id,[]);
-        let filteredData = dataSet.filter((item) => item.railcar_id === railcar_id);
-        let lastSum = 0;
+    uniqueNames.map((railcar_id) => {
+        revMap.set(railcar_id, []); // Initialize an empty array for this railcar_id
+        let filteredData = dataSet.filter((item) => item.railcar_id === railcar_id); // Filter data for the current railcar_id
+        let lastSum = 0; // Initialize cumulative utilization
+
         xAxis.forEach((date) => {
-            const currentDate = dayjs(date);
+            const currentDate = dayjs(date); // Convert current date to dayjs object
             const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) => dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
+                (invoice) =>
+                    dayjs(invoice.completed_time).isBefore(currentDate) || // Filter invoices on or before the current date
+                    dayjs(invoice.completed_time).isSame(currentDate)
             );
 
-
             if (invoicesBeforeOrOnDate.length > 0) {
+                // Calculate utilization for each invoice and add to the cumulative sum
+                lastSum += invoicesBeforeOrOnDate.reduce((sum, invoice) => {
+                    const utilization = invoice.applied_time === 0 ? 0 : (invoice.applied_time / invoice.estimated_time) * 100; // Calculate utilization
+                    return sum + utilization;
+                }, 0);
 
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => sum + invoice.utilization, 0);
+                // Remove processed invoices from filteredData to avoid reprocessing
                 filteredData = filteredData.filter(item =>
                     !invoicesBeforeOrOnDate.some(removeItem =>
                         removeItem.completed_time === item.completed_time &&
-                        removeItem.utilization === item.utilization
+                        removeItem.applied_time === item.applied_time &&
+                        removeItem.estimated_time === item.estimated_time
                     )
                 );
-                const values = revMap.get(railcar_id)
-                values.push(lastSum)
+
+                // Store the cumulative utilization for this date
+                const values = revMap.get(railcar_id);
+                values.push(lastSum);
             } else {
-
-                const values = revMap.get(railcar_id)
-                values.push(lastSum)
+                // If no invoices are found, carry forward the previous cumulative utilization
+                const values = revMap.get(railcar_id);
+                values.push(lastSum);
             }
-
-        })
-
-    })
+        });
+    });
 
     // Process the dataset to calculate cumulative costs
     const newData = Array.from(revMap, ([name, data]) => ({ name, data }));

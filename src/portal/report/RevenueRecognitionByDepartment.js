@@ -227,7 +227,7 @@ const RevenueByDepartments = () => {
                         />
                     </label>
                     <label className="label cursor-pointer flex items-center">
-                        <span className="label-text mr-5">All Cars</span>
+                        <span className="label-text mr-5">Invoiced Cars</span>
                         <input
                             type="checkbox"
                             className="toggle"

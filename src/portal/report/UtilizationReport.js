@@ -99,7 +99,7 @@ const UtilizationReport = () => {
                 const crewsResponse = await axios.get(
                     `${process.env.REACT_APP_BIRCH_API_URL}crews`
                 );
-
+                console.log(crewsResponse)
                 const activeEmployees = crewsResponse.data
                     .filter((employee) => employee.is_active === 1)
                     .map(({ id, name }) => ({ value: id, label: name }));

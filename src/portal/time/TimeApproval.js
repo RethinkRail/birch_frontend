@@ -176,6 +176,7 @@ const TimeApproval = () =>{
                 setActiveCarsToEditLog(activeCarsToEdit)
                 const activeCarsToAddT = [
                     { value: 'INDIRECT', label: 'INDIRECT' },
+                    { value: 'BREAK', label: 'BREAK' },
                     ...activeCarResponse.data.map((item) => ({
                         value: item.id,
                         label: item.railcar_id,
@@ -378,8 +379,8 @@ const TimeApproval = () =>{
         if (selectedCrewsToAddTime !== '' && selectedCarToAddTimeLog !== '' && outTimeToAddJob !== '' && inTimeToAddJob !== '' && jobToAddTime !== '' && totalSecondToAddTime > 0) {
             const params = {
                 crew: selectedCrewsToAddTime.value,
-                work_id: selectedCarToAddTimeLog.value === 'INDIRECT' ? null : selectedCarToAddTimeLog.value,
-                job_id: selectedCarToAddTimeLog.value === 'INDIRECT' ? null : jobToAddTime.value,
+                work_id: selectedCarToAddTimeLog.value === 'INDIRECT' || selectedCarToAddTimeLog.value === 'BREAK' ? null : selectedCarToAddTimeLog.value,
+                job_id: selectedCarToAddTimeLog.value === 'INDIRECT'  || selectedCarToAddTimeLog.value === 'BREAK' ? null : jobToAddTime.value,
                 railcar_id: selectedCarToAddTimeLog.label,
                 indirect_labor_id: selectedCarToAddTimeLog.value === 'INDIRECT' ? jobToAddTime.value : null,
                 job_description: jobToAddTime.label,

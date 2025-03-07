@@ -351,7 +351,11 @@ const ReportDates = () => {
                                             <td className="p-2 border">{format(parseISO(log.start_time), "hh:mm a")}</td>
                                             <td className="p-2 border">{log.end_time?format(parseISO(log.end_time), "hh:mm a"):""}</td>
                                             <td className="p-2 border">{log.duration.toFixed(2)}</td>
-                                            <td className="p-2 border">{log.railcar_id}</td>
+                                            <td className="p-2">
+                                              <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
+                                                {log.railcar_id}
+                                              </span>
+                                            </td>
                                             <td className="p-2 border">{log.job_description}</td>
                                         </tr>
                                     ))}

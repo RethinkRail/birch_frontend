@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays } from 'date-fns';
+import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays ,isBefore} from 'date-fns';
 import axios from 'axios';
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 const ReportDates = () => {
     const [reportType, setReportType] = useState("week");
@@ -69,10 +70,25 @@ const ReportDates = () => {
 
             if (reportType === "week") {
                 for (let i = 0; i < 50; i++) {
-                    startDate = subWeeks(today, i);
-                    startDate.setDate(startDate.getDate() - startDate.getDay());
-                    let end = subDays(startDate, -6);
-                    ranges.push({ label: `${format(startDate, "M/d/yyyy")} - ${format(end, "M/d/yyyy")}`, startDate, end });
+                    // Start date is 14 days after the previous start date
+                    let start = subDays(startDate, i * 7);
+
+                    // End date is 13 days after the start date (total of 14 days)
+                    let end = subDays(start, -6);
+
+                    console.log(start)
+
+                    if(isBefore(start,new Date()) ){
+                        // Push the range to the ranges array
+                        ranges.push({
+                            label: `${format(start, "MM/dd")} - ${format(end, "MM/dd")}, ${format(end, "yyyy")}`,
+                            value: `${format(start, "yyyy-MM-dd")}:${format(end, "yyyy-MM-dd")}`,
+                            start,
+                            end
+                        });
+                    }
+
+
                 }
             } else if (reportType === "payPeriod") {
                 for (let i = 0; i < 50; i++) {
@@ -82,13 +98,15 @@ const ReportDates = () => {
                     // End date is 13 days after the start date (total of 14 days)
                     let end = subDays(start, -13);
 
-                    // Push the range to the ranges array
-                    ranges.push({
-                        label: `${format(start, "MM/dd")} - ${format(end, "MM/dd")}, ${format(end, "yyyy")}`,
-                        value: `${format(start, "yyyy-MM-dd")}:${format(end, "yyyy-MM-dd")}`,
-                        start,
-                        end
-                    });
+                    if(isBefore(start,new Date()) ){
+                        // Push the range to the ranges array
+                        ranges.push({
+                            label: `${format(start, "MM/dd")} - ${format(end, "MM/dd")}, ${format(end, "yyyy")}`,
+                            value: `${format(start, "yyyy-MM-dd")}:${format(end, "yyyy-MM-dd")}`,
+                            start,
+                            end
+                        });
+                    }
                 }
 
             }
@@ -298,19 +316,22 @@ const ReportDates = () => {
                 <div key={name} className="collapse border collapse-plus mb-2 bg-white">
                     <input type="checkbox" className="peer" />
                     <div className="collapse-title  flex justify-between">
-                        <span>{name}</span>
-                        <div className="p-2 rounded-lg text-gray-700 flex gap-2">
-                            <div className="tooltip tooltip-right" data-tip="Total Hours"><span>{data.totalHours.toFixed(2)}h</span></div> |
-                            <div className="tooltip tooltip-right" data-tip="Standard Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span></div> |
-                            <div className="tooltip tooltip-right" data-tip="Overtime Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0).toFixed(2)}h</span></div> |
-                            <div className="tooltip tooltip-right" data-tip="Break Hours"><span>{data.breakHours.toFixed(2)}h</span></div>
+                        <span className="pt-4">
+                          <span className="font-semibold text-lg mr-2">{name.split(":")[0]}</span>
+                          <span className="text-xs">{name.split(":")[1].toString().toLowerCase()}</span>
+                        </span>
+                        <div className="p-2 rounded-lg text-gray-700 flex gap-2 pt-4">
+                            <div className="tooltip z-[100] border p-1 bg-green-500" data-tip="Regular Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span></div>
+                            <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0).toFixed(2)}h</span></div>
+                            <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Hours"><span>{data.totalHours.toFixed(2)}h</span></div>
+                            <div className="tooltip z-[100] border p-1 bg-white" data-tip="Break Hours"><span>{data.breakHours.toFixed(2)}h</span></div>
                         </div>
                     </div>
                     <div className="collapse-content ">
                         {Object.entries(data.weeks).map(([week, { logs }]) => (
                             <div key={week}>
-                                <h3 className="font-bold">Week of {week}</h3>
-                                <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden">
+                                <h3 className="font-bold mb-5">Week of {week}</h3>
+                                <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden mb-5">
                                     <thead className="bg-gray-100 text-gray-700">
                                     <tr>
                                         <th className="p-2 border">Date</th>

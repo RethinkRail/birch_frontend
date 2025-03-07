@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, subWeeks, subDays,parseISO, differenceInSeconds } from 'date-fns';
+import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays } from 'date-fns';
 import axios from 'axios';
 
 const ReportDates = () => {
@@ -58,22 +58,39 @@ const ReportDates = () => {
         const generateDateRanges = () => {
             let ranges = [];
             let today = new Date();
-            let start;
+            let currentDate = new Date(); // Dynamically use the current date
+
+
+            // Find the next Sunday after the current date
+            let startDate = currentDate;
+            if (startDate.getDay() !== 0) { // If it's not already a Sunday
+                startDate = addDays(startDate, 7 - startDate.getDay()); // Move to the next Sunday
+            }
 
             if (reportType === "week") {
-                for (let i = 0; i < 10; i++) {
-                    start = subWeeks(today, i);
-                    start.setDate(start.getDate() - start.getDay());
-                    let end = subDays(start, -6);
-                    ranges.push({ label: `${format(start, "M/d/yyyy")} - ${format(end, "M/d/yyyy")}`, start, end });
+                for (let i = 0; i < 50; i++) {
+                    startDate = subWeeks(today, i);
+                    startDate.setDate(startDate.getDate() - startDate.getDay());
+                    let end = subDays(startDate, -6);
+                    ranges.push({ label: `${format(startDate, "M/d/yyyy")} - ${format(end, "M/d/yyyy")}`, startDate, end });
                 }
             } else if (reportType === "payPeriod") {
-                for (let i = 0; i < 10; i++) {
-                    start = subWeeks(today, i * 2);
-                    start.setDate(start.getDate() - start.getDay());
+                for (let i = 0; i < 50; i++) {
+                    // Start date is 14 days after the previous start date
+                    let start = subDays(startDate, i * 14);
+
+                    // End date is 13 days after the start date (total of 14 days)
                     let end = subDays(start, -13);
-                    ranges.push({ label: `${format(start, "M/d/yyyy")} - ${format(end, "M/d/yyyy")}`, start, end });
+
+                    // Push the range to the ranges array
+                    ranges.push({
+                        label: `${format(start, "MM/dd")} - ${format(end, "MM/dd")}, ${format(end, "yyyy")}`,
+                        value: `${format(start, "yyyy-MM-dd")}:${format(end, "yyyy-MM-dd")}`,
+                        start,
+                        end
+                    });
                 }
+
             }
             setDateRanges(ranges);
             setSelectedRangeLabel("");
@@ -142,25 +159,25 @@ const ReportDates = () => {
     const processLogs = (logs) => {
         const grouped = {};
         logs.forEach(log => {
-            const { team_member, start_time, end_time, railcar_id } = log;
+            const { team_member, start_time, end_time, railcar_id,department_name,logged_time_in_seconds } = log;
             const start = parseISO(start_time);
             const end = parseISO(end_time);
-            const duration = differenceInSeconds(end, start) / 3600;
-            if (!grouped[team_member]) {
-                grouped[team_member] = { totalHours: 0, breakHours: 0, weeks: {} };
+            const duration = logged_time_in_seconds/ 3600;
+            if (!grouped[team_member+":"+department_name]) {
+                grouped[team_member+":"+department_name] = { totalHours: 0, breakHours: 0, weeks: {} };
             }
             if (railcar_id === "BREAK") {
-                grouped[team_member].breakHours += duration;
+                grouped[team_member+":"+department_name].breakHours += duration;
             } else {
-                grouped[team_member].totalHours += duration;
+                grouped[team_member+":"+department_name].totalHours += duration;
             }
             const weekStart = start.setDate(start.getDate() - start.getDay());
             const weekKey = format(weekStart, "yyyy-MM-dd");
-            if (!grouped[team_member].weeks[weekKey]) {
-                grouped[team_member].weeks[weekKey] = { logs: [], totalWeekHours: 0 };
+            if (!grouped[team_member+":"+department_name].weeks[weekKey]) {
+                grouped[team_member+":"+department_name].weeks[weekKey] = { logs: [], totalWeekHours: 0 };
             }
-            grouped[team_member].weeks[weekKey].logs.push({ ...log, duration });
-            grouped[team_member].weeks[weekKey].totalWeekHours += duration;
+            grouped[team_member+":"+department_name].weeks[weekKey].logs.push({ ...log, duration });
+            grouped[team_member+":"+department_name].weeks[weekKey].totalWeekHours += duration;
         });
 
         Object.values(grouped).forEach(team => {
@@ -278,15 +295,15 @@ const ReportDates = () => {
 
             </div>
             {Object.entries(filteredData).map(([name, data]) => (
-                <div key={name} className="collapse border collapse-plus">
+                <div key={name} className="collapse border collapse-plus mb-2 bg-white">
                     <input type="checkbox" className="peer" />
                     <div className="collapse-title  flex justify-between">
                         <span>{name}</span>
                         <div className="p-2 rounded-lg text-gray-700 flex gap-2">
-                            <div className="tooltip" data-tip="Total Hours"><span>{data.totalHours.toFixed(2)}h</span></div> |
-                            <div className="tooltip" data-tip="Standard Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span></div> |
-                            <div className="tooltip" data-tip="Overtime Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0).toFixed(2)}h</span></div> |
-                            <div className="tooltip" data-tip="Break Hours"><span>{data.breakHours.toFixed(2)}h</span></div>
+                            <div className="tooltip tooltip-right" data-tip="Total Hours"><span>{data.totalHours.toFixed(2)}h</span></div> |
+                            <div className="tooltip tooltip-right" data-tip="Standard Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span></div> |
+                            <div className="tooltip tooltip-right" data-tip="Overtime Hours"><span>{Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0).toFixed(2)}h</span></div> |
+                            <div className="tooltip tooltip-right" data-tip="Break Hours"><span>{data.breakHours.toFixed(2)}h</span></div>
                         </div>
                     </div>
                     <div className="collapse-content ">

@@ -66,9 +66,8 @@ const ReportDates = () => {
             // Find the next Sunday after the current date
             let startDate = currentDate;
             if (startDate.getDay() !== 0) { // If it's not already a Sunday
-                startDate = addDays(startDate, 7 - startDate.getDay()); // Move to the next Sunday
+                startDate = addDays(startDate, -startDate.getDay()); // Move to the previous Sunday
             }
-
             if (reportType === "week") {
                 for (let i = 0; i < 50; i++) {
                     // Start date is 14 days after the previous start date
@@ -109,6 +108,7 @@ const ReportDates = () => {
                 }
 
             }
+            console.log(ranges)
             setDateRanges(ranges);
             setSelectedRangeLabel("");
             //setSelectedDates({ start: "", end: "" });
@@ -413,51 +413,88 @@ const ReportDates = () => {
                                     Download XLS
                                 </button>
                             </span>
-                            {Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => (
-                                <div key={week}>
-                                    <h3 className="font-bold mb-5">{weekLabel} - Week of {week}</h3>
+                            {Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => {
 
-                                    <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden mb-5">
-                                        <thead className="bg-gray-100 text-gray-700">
-                                        <tr>
-                                            <th className="p-2 border">Date</th>
-                                            <th className="p-2 border">Day</th>
-                                            <th className="p-2 border">In</th>
-                                            <th className="p-2 border">Out</th>
-                                            <th className="p-2 border">Hours</th>
-                                            <th className="p-2 border">Customer</th>
-                                            <th className="p-2 border">Job</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {logs.map((log, index) => (
-                                            <tr key={index} className="border">
-                                                <td className="p-2 border">{format(parseISO(log.start_time), "yyyy-MM-dd")}</td>
-                                                <td className="p-2 border">{format(parseISO(log.start_time), "EEEE")}</td>
-                                                <td className="p-2 border">{format(parseISO(log.start_time), "hh:mm a")}</td>
-                                                <td className="p-2 border">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
-                                                <td className="p-2 border">{log.duration.toFixed(2)}</td>
-                                                <td className="p-2">
-                                            <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
-                                                {log.railcar_id}
-                                            </span>
-                                                </td>
-                                                <td className="p-2 border">{log.job_description}</td>
+                                const dayTotalsMap = {};
+                                let currentDate = null;
+
+                                return (
+                                    <div key={week}>
+                                        <h3 className="font-bold mb-5">{weekLabel} - Week of {week}</h3>
+
+                                        <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden mb-5">
+                                            <thead className="bg-gray-100 text-gray-700">
+                                            <tr>
+                                                <th className="p-2 border">Date</th>
+                                                <th className="p-2 border">Day</th>
+                                                <th className="p-2 border">In</th>
+                                                <th className="p-2 border">Out</th>
+                                                <th className="p-2 border">Hours</th>
+                                                <th className="p-2 border">Day Total</th>
+                                                <th className="p-2 border">Customer</th>
+                                                <th className="p-2 border">Job</th>
                                             </tr>
-                                        ))}
-                                        </tbody>
-                                        <tfoot>
-                                        <tr className="bg-gray-50">
-                                            <td colSpan="3" className="p-2 border text-right">Totals:</td>
-                                            <td className="p-2 border text-sm">Standard: {standardHours.toFixed(2)}h</td>
-                                            <td className="p-2 border text-sm">Overtime: {overtimeHours.toFixed(2)}h</td>
-                                            <td className="p-2 border text-sm">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
-                                            <td className="p-2 border"></td>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            ))}
+                                            </thead>
+                                            <tbody>
+                                            {logs.map((log, index) => {
+                                                const dateStr = format(parseISO(log.start_time), "yyyy-MM-dd");
+
+                                                // Initialize or accumulate non-break hours for the date
+                                                if (!dayTotalsMap[dateStr]) {
+                                                    dayTotalsMap[dateStr] = 0;
+                                                }
+
+                                                if (log.railcar_id !== "BREAK") {
+                                                    dayTotalsMap[dateStr] += log.duration;
+                                                }
+
+                                                // Determine if this is the last log for the current date
+                                                const nextLog = logs[index + 1];
+                                                const nextDateStr = nextLog ? format(parseISO(nextLog.start_time), "yyyy-MM-dd") : null;
+                                                const isEndOfDay = dateStr !== nextDateStr;
+
+                                                return (
+                                                    <React.Fragment key={index}>
+                                                        <tr className="border">
+                                                            <td className="p-2 border">{dateStr}</td>
+                                                            <td className="p-2 border">{format(parseISO(log.start_time), "EEEE")}</td>
+                                                            <td className="p-2 border">{format(parseISO(log.start_time), "hh:mm a")}</td>
+                                                            <td className="p-2 border">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
+                                                            <td className="p-2 border">{log.duration.toFixed(2)}</td>
+                                                            <td className="p-2 border">{dayTotalsMap[dateStr].toFixed(2)}</td>
+                                                            <td className="p-2">
+                                        <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
+                                            {log.railcar_id}
+                                        </span>
+                                                            </td>
+                                                            <td className="p-2 border">{log.job_description}</td>
+                                                        </tr>
+
+                                                        {/* 🔸 Separator Row After Each Day */}
+                                                        {isEndOfDay && (
+                                                            <tr className="bg-gray-200">
+                                                                <td colSpan="8" className="h-2 p-0"></td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                            </tbody>
+                                            <tfoot>
+                                            <tr className="bg-gray-50">
+                                                <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>
+                                                <td className="p-2 border text-sm font-semibold">{(standardHours + overtimeHours).toFixed(2)}h</td>
+                                                <td className="p-2 border text-sm font-semibold"></td>
+                                                <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
+                                                <td className="p-2 border"></td>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                );
+                            })}
+
+
                         </div>
                     </div>
                 );

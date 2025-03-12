@@ -27,6 +27,7 @@ const CrewManagement = () => {
     };
 
     const handleUpdate = async (crew) => {
+        console.log(crew)
         await axios.put(process.env.REACT_APP_BIRCH_API_URL + `crews/${crew.id}`, crew);
         setEditCrew(null); // Reset editCrew after update
         fetchCrewsAndDepartments();
@@ -48,6 +49,7 @@ const CrewManagement = () => {
 
     const handleEditChange = (field, value) => {
         setEditCrew({ ...editCrew, [field]: value });
+        console.log(editCrew)
     };
 
     const renderCrewRow = (crew) => {
@@ -79,6 +81,8 @@ const CrewManagement = () => {
                         crew.employee_id || '-'
                     )}
                 </td>
+
+
                 <td className="py-2 px-4">
                     {isEditing ? (
                         <select
@@ -94,6 +98,18 @@ const CrewManagement = () => {
                         </select>
                     ) : (
                         departments.find((dept) => dept.id === crew.department)?.name || '-'
+                    )}
+                </td>
+                <td className="py-2 px-4">
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            className="border border-gray-300 rounded px-2 py-1"
+                            value={editCrew.certificate || ''}
+                            onChange={(e) => handleEditChange('certificate', e.target.value)}
+                        />
+                    ) : (
+                        crew.certificate || ''
                     )}
                 </td>
                 <td className="py-2 px-4">
@@ -223,6 +239,7 @@ const CrewManagement = () => {
                     <th className="py-2 px-4 text-left">Name</th>
                     <th className="py-2 px-4 text-left">Employee ID</th>
                     <th className="py-2 px-4 text-left">Department</th>
+                    <th className="py-2 px-4 text-left">Certifications</th>
                     <th className="py-2 px-4 text-left">Actions</th>
                 </tr>
                 </thead>

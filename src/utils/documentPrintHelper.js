@@ -708,7 +708,7 @@ export function printATask(workOrder) {
         row_html += "<td>" + myjob.quantity + "</td>";
         row_html += "<td>" + ('0' + myjob.whymadecode.code) + "</td>";
         row_html += "<td>" + hour.toFixed(2) + "</td>";
-        row_html += "<td>" + tech_date + "</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.crews?.name) + "</td><td style='font-size: 10px;font-weight: bold'>" + getInitialsByNameId(myjob.user_joblist_manager_checked_byTouser?.name) + '<br>' + manager_checked_time + "   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.user_joblist_qa_checked_byTouser?.name) + '<br>' + qa_date + "</td><tr>";
+        row_html += "<td>" + tech_date + "</td> <td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.crews?.name)+"\n"+myjob.crews?.certificate + "</td><td style='font-size: 10px;font-weight: bold'>" + getInitialsByNameId(myjob.user_joblist_manager_checked_byTouser?.name) + '<br>' + manager_checked_time + "   </td><td style='background: lightgray; font-size: 10px;font-weight: bold'> " + getInitialsByNameId(myjob.user_joblist_qa_checked_byTouser?.name) + '<br>' + qa_date + "</td><tr>";
         row_html += "<tr><td style='border:0'></td><td style='border:0'>Qty</td><td style='border:0;padding-left: 10px'>Part #</td>";
         myjob.jobparts.forEach((part_item, p_i) => {
             var additional_info = part_item.additional_info ? ":" + part_item.additional_info : ""

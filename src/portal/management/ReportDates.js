@@ -494,11 +494,14 @@ const ReportDates = () => {
                                             </tbody>
                                             <tfoot>
                                             <tr className="bg-gray-50">
+
                                                 <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>
                                                 <td className="p-2 border text-sm font-semibold">{(standardHours + overtimeHours).toFixed(2)}h</td>
-                                                <td className="p-2 border text-sm font-semibold"></td>
+                                                <td className="p-1 border text-sm font-semibold">Standard: {standardHours.toFixed(2)}h</td>
+                                                <td className="p-1 border text-sm font-semibold">Overtime: {overtimeHours.toFixed(2)}h</td>
                                                 <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
-                                                <td className="p-2 border"></td>
+
+
                                             </tr>
                                             </tfoot>
                                         </table>

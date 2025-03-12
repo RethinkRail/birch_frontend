@@ -62,12 +62,24 @@ const ReportDates = () => {
             let today = new Date();
             let currentDate = new Date(); // Dynamically use the current date
 
-
+            const firstSunday = new Date(2025, 0, 12)
             // Find the next Sunday after the current date
             let startDate = currentDate;
-            if (startDate.getDay() !== 0) { // If it's not already a Sunday
-                startDate = addDays(startDate, -startDate.getDay()); // Move to the previous Sunday
+
+// If the current date is before the first Sunday, set startDate to the first Sunday
+            if (startDate < firstSunday) {
+                startDate = firstSunday;
+            } else {
+                // Calculate the difference in milliseconds between the current date and the first Sunday
+                const timeDifference = startDate - firstSunday;
+                // Convert the difference to weeks
+                const weeksDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 7));
+                // Calculate the number of 2-week intervals passed
+                const twoWeekIntervals = Math.floor(weeksDifference / 2);
+                // Move to the next Sunday after the last 2-week interval
+                startDate = addDays(firstSunday, (twoWeekIntervals + 1) * 14);
             }
+
             if (reportType === "week") {
                 for (let i = 0; i < 50; i++) {
                     // Start date is 14 days after the previous start date

@@ -49,6 +49,7 @@ const StockStatusReport = () => {
         { accessorKey: 'part_code', header: 'Part Code' },
         { accessorKey: 'title', header: 'Title' },
         { accessorKey: 'price', header: 'Price' },
+        { accessorKey: 'minimum_quantity', header: 'Min Quantity' },
         { accessorKey: 'qty_on_hand', header: 'Qty on Hand' },
         { accessorKey: 'qty_applied', header: 'Qty Applied' },
         { accessorKey: 'qty_estimated', header: 'Qty Estimated' },

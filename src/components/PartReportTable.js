@@ -115,12 +115,20 @@ const PartReportTable = ({ initialData }) => {
         },
     ];
 
+    const conditionalRowStyles = [
+        {
+            when: (row) => row.is_anomaly,
+            style: {
+                backgroundColor: 'lightyellow',
+            },
+        },
+    ];
     return (
         <div>
             <div className="flex justify-between mb-5 items-center">
                 <h6 className="font-semibold">Parts List</h6>
             </div>
-            <DataTable columns={columns} data={initialData} highlightOnHover responsive />
+            <DataTable columns={columns} data={initialData} conditionalRowStyles={conditionalRowStyles} highlightOnHover responsive />
 
             {open && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

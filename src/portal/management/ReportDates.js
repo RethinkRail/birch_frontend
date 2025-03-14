@@ -384,113 +384,86 @@ const ReportDates = () => {
     function generateTypeHoursReport(logs, startDate, endDate) {
         const grouped = {};
 
-        // Group logs by team member, week, and accumulate hours
+        // Step 1: Group logs by team member
         logs.forEach(log => {
             const teamMember = log.team_member;
-            const department = log.department_name || 'Unknown';
-            const date = format(parseISO(log.start_time), 'yyyy-MM-dd');
+            const department = log.department_name;
             const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
             const hours = log.logged_time_in_seconds / 3600;
 
             if (!grouped[teamMember]) {
                 grouped[teamMember] = {
-                    department,
-                    weeks: {},
+                    department: department,
+                    weeks: {}
                 };
             }
 
             if (!grouped[teamMember].weeks[weekStart]) {
                 grouped[teamMember].weeks[weekStart] = {
-                    daily: {},
-                    totalHours: 0,
+                    regularHours: 0,
+                    overtimeHours: 0,
+                    totalHoursInWeek: 0
                 };
             }
 
-            if (!grouped[teamMember].weeks[weekStart].daily[date]) {
-                grouped[teamMember].weeks[weekStart].daily[date] = 0;
-            }
-
-            grouped[teamMember].weeks[weekStart].daily[date] += hours;
-            grouped[teamMember].weeks[weekStart].totalHours += hours;
+            grouped[teamMember].weeks[weekStart].totalHoursInWeek += hours;
         });
 
-        const report = [];
+        const reportRows = [];
 
-        // Step 1: Add summary row
-        report.push([`Summary Report through ${startDate} and ${endDate}`]);
-
-        // Step 2: Add an empty row
-        report.push([]);
-
-        // Step 3: Add header row
-        report.push(['Type', 'Name', 'Department', 'Hours', 'Start Date', 'End Date']);
-
-        // Step 4: Process each team member
+        // Step 2: Process each employee
         Object.entries(grouped).forEach(([teamMember, data]) => {
-            let totalRegularHours = 0;
-            let totalOvertimeHours = 0;
+            let employeeRegularTotal = 0;
+            let employeeOvertimeTotal = 0;
 
             Object.entries(data.weeks).forEach(([weekStart, weekData]) => {
-                let weeklyRegularAccum = 0;
+                const { totalHoursInWeek } = weekData;
 
-                const sortedDays = Object.entries(weekData.daily).sort(
-                    ([dateA], [dateB]) => new Date(dateA) - new Date(dateB)
-                );
+                let regular = Math.min(totalHoursInWeek, 40);
+                let overtime = totalHoursInWeek > 40 ? totalHoursInWeek - 40 : 0;
 
-                sortedDays.forEach(([date, dailyTotal]) => {
-                    let regular = 0;
-                    let overtime = 0;
-
-                    if (weeklyRegularAccum < 40) {
-                        if (weeklyRegularAccum + dailyTotal <= 40) {
-                            regular = dailyTotal;
-                        } else {
-                            regular = 40 - weeklyRegularAccum;
-                            overtime = dailyTotal - regular;
-                        }
-                    } else {
-                        overtime = dailyTotal;
-                    }
-
-                    weeklyRegularAccum += regular;
-
-                    totalRegularHours += regular;
-                    totalOvertimeHours += overtime;
-                });
+                employeeRegularTotal += regular;
+                employeeOvertimeTotal += overtime;
             });
 
-            // Step 5: Push two rows (Regular and Overtime)
-            report.push([
-                'Regular',
-                teamMember,
-                data.department,
-                totalRegularHours.toFixed(2),
-                startDate,
-                endDate
-            ]);
-
-            report.push([
-                'Overtime',
-                teamMember,
-                data.department,
-                totalOvertimeHours.toFixed(2),
-                startDate,
-                endDate
-            ]);
-
-            // Step 6: Add an empty row after each employee
-            report.push([]);
+            reportRows.push({
+                Name: teamMember,
+                "Standard Hours": employeeRegularTotal.toFixed(2),
+                "Overtime Hours": employeeOvertimeTotal.toFixed(2),
+                Department: data.department,
+                "Start Date": startDate,
+                "End Date": endDate
+            });
         });
 
-        exportToExcel3(report, `type_hours_report_${startDate}_to_${endDate}.xlsx`);
+        exportToExcel3(reportRows, startDate, endDate);
     }
 
-    function exportToExcel3(data, fileName = 'report.xlsx') {
-        const ws = XLSX.utils.aoa_to_sheet(data); // <- Change to aoa_to_sheet because we're using an array of arrays
-        const wb = XLSX.utils.book_new();
+    function exportToExcel3(reportRows, startDate, endDate) {
+        const workbook = XLSX.utils.book_new();
 
-        XLSX.utils.book_append_sheet(wb, ws, 'Report');
-        XLSX.writeFile(wb, fileName);
+        const worksheet = XLSX.utils.json_to_sheet([], { skipHeader: true });
+
+        // 1. Add the summary line in cell A1
+        XLSX.utils.sheet_add_aoa(
+            worksheet,
+            [[`Summary Report through ${startDate} and ${endDate}`]],
+            { origin: 'A1' }
+        );
+
+        // Optional: leave row 2 blank
+        // XLSX.utils.sheet_add_aoa(worksheet, [[]], { origin: 'A2' });
+
+        // 2. Add the headers and data starting at row 3 (row index 2 in zero-based)
+        XLSX.utils.sheet_add_json(
+            worksheet,
+            reportRows,
+            { origin: 'A3', skipHeader: false }
+        );
+
+        // 3. Append the sheet and write the file
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Payroll Report');
+        XLSX.writeFile(workbook, 'Payroll Report from '+startDate+' to '+endDate+'.xlsx');
     }
 
 

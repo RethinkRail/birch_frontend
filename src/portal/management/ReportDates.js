@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays ,isBefore} from 'date-fns';
+import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays ,isBefore,startOfWeek} from 'date-fns';
 import axios from 'axios';
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
@@ -20,6 +20,7 @@ const ReportDates = () => {
     const [isWebServiceCalling, setIsWebServiceCalling] = useState(false);
 
     const [filteredData, setFilteredData] = useState([]);
+    const [dataForReport, setDataForReport] = useState([]);
     // Fetch payroll report
     const fetchPayrollReport = async (start, end) => {
         setSelectedDepartment("all")
@@ -170,6 +171,7 @@ const ReportDates = () => {
             return departmentMatch && teamMemberMatch;
         });
         console.log(filter)
+        setDataForReport(filter)
         setFilteredData(processLogs(filter));
         console.log("Filtered Data:", filter);
     };
@@ -219,6 +221,7 @@ const ReportDates = () => {
             });
         });
 
+        console.log(grouped)
 
         return grouped;
     };
@@ -285,6 +288,221 @@ const ReportDates = () => {
         // Write the workbook to a file and trigger a download
         XLSX.writeFile(workbook, teammemebr_name+"_"+selectedDates.start+"_"+ selectedDates.end+".xlsx");
     };
+
+    function generateWeeklyReport(logs) {
+        const grouped = {};
+        // Step 1: Group logs by team member and week start
+        logs.forEach(log => {
+            const teamMember = log.team_member;
+            const date = format(parseISO(log.start_time), 'yyyy-MM-dd');
+            const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+            const hours = log.logged_time_in_seconds / 3600;
+
+            if (!grouped[teamMember]) grouped[teamMember] = {};
+            if (!grouped[teamMember][weekStart]) grouped[teamMember][weekStart] = { daily: {}, totalHours: 0 };
+
+            if (!grouped[teamMember][weekStart].daily[date]) {
+                grouped[teamMember][weekStart].daily[date] = { regular: 0, overtime: 0, total: 0 };
+            }
+
+            grouped[teamMember][weekStart].daily[date].total += hours;
+            grouped[teamMember][weekStart].totalHours += hours;
+        });
+
+        const report = [];
+
+        // Step 2: Process each team member
+        Object.entries(grouped).forEach(([teamMember, weeks]) => {
+            let employeeRegularTotal = 0;
+            let employeeOvertimeTotal = 0;
+            let employeeTotalHours = 0;
+
+            Object.entries(weeks).forEach(([weekStart, data]) => {
+                let weeklyRegularAccum = 0;
+
+                const sortedDays = Object.entries(data.daily).sort(
+                    ([dateA], [dateB]) => new Date(dateA) - new Date(dateB)
+                );
+
+                sortedDays.forEach(([date, hoursData]) => {
+                    const { total } = hoursData;
+
+                    let regular = 0;
+                    let overtime = 0;
+
+                    if (weeklyRegularAccum < 40) {
+                        if (weeklyRegularAccum + total <= 40) {
+                            regular = total;
+                        } else {
+                            regular = 40 - weeklyRegularAccum;
+                            overtime = total - regular;
+                        }
+                    } else {
+                        overtime = total;
+                    }
+
+                    weeklyRegularAccum += regular;
+
+                    employeeRegularTotal += regular;
+                    employeeOvertimeTotal += overtime;
+                    employeeTotalHours += total;
+
+                    report.push({
+                        Name: teamMember,
+                        WeekStart: weekStart,
+                        Date: date,
+                        RegularHours: regular.toFixed(2),
+                        OvertimeHours: overtime.toFixed(2),
+                        TotalHours: total.toFixed(2),
+                    });
+                });
+            });
+
+            // Step 3: Add totals for the employee
+            report.push({
+                Name: `${teamMember} - Totals`,
+                WeekStart: '',
+                Date: '',
+                RegularHours: employeeRegularTotal.toFixed(2),
+                OvertimeHours: employeeOvertimeTotal.toFixed(2),
+                TotalHours: employeeTotalHours.toFixed(2),
+            });
+
+            // Step 4: Add an empty row for spacing
+            report.push({
+                Name: '',
+                WeekStart: '',
+                Date: '',
+                RegularHours: '',
+                OvertimeHours: '',
+                TotalHours: '',
+            });
+        });
+
+        exportToExcel2(report);
+    }
+    function generateTypeHoursReport(logs, startDate, endDate) {
+        const grouped = {};
+
+        // Group logs by team member, week, and accumulate hours
+        logs.forEach(log => {
+            const teamMember = log.team_member;
+            const department = log.department_name || 'Unknown';
+            const date = format(parseISO(log.start_time), 'yyyy-MM-dd');
+            const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+            const hours = log.logged_time_in_seconds / 3600;
+
+            if (!grouped[teamMember]) {
+                grouped[teamMember] = {
+                    department,
+                    weeks: {},
+                };
+            }
+
+            if (!grouped[teamMember].weeks[weekStart]) {
+                grouped[teamMember].weeks[weekStart] = {
+                    daily: {},
+                    totalHours: 0,
+                };
+            }
+
+            if (!grouped[teamMember].weeks[weekStart].daily[date]) {
+                grouped[teamMember].weeks[weekStart].daily[date] = 0;
+            }
+
+            grouped[teamMember].weeks[weekStart].daily[date] += hours;
+            grouped[teamMember].weeks[weekStart].totalHours += hours;
+        });
+
+        const report = [];
+
+        // Step 1: Add summary row
+        report.push([`Summary Report through ${startDate} and ${endDate}`]);
+
+        // Step 2: Add an empty row
+        report.push([]);
+
+        // Step 3: Add header row
+        report.push(['Type', 'Name', 'Department', 'Hours', 'Start Date', 'End Date']);
+
+        // Step 4: Process each team member
+        Object.entries(grouped).forEach(([teamMember, data]) => {
+            let totalRegularHours = 0;
+            let totalOvertimeHours = 0;
+
+            Object.entries(data.weeks).forEach(([weekStart, weekData]) => {
+                let weeklyRegularAccum = 0;
+
+                const sortedDays = Object.entries(weekData.daily).sort(
+                    ([dateA], [dateB]) => new Date(dateA) - new Date(dateB)
+                );
+
+                sortedDays.forEach(([date, dailyTotal]) => {
+                    let regular = 0;
+                    let overtime = 0;
+
+                    if (weeklyRegularAccum < 40) {
+                        if (weeklyRegularAccum + dailyTotal <= 40) {
+                            regular = dailyTotal;
+                        } else {
+                            regular = 40 - weeklyRegularAccum;
+                            overtime = dailyTotal - regular;
+                        }
+                    } else {
+                        overtime = dailyTotal;
+                    }
+
+                    weeklyRegularAccum += regular;
+
+                    totalRegularHours += regular;
+                    totalOvertimeHours += overtime;
+                });
+            });
+
+            // Step 5: Push two rows (Regular and Overtime)
+            report.push([
+                'Regular',
+                teamMember,
+                data.department,
+                totalRegularHours.toFixed(2),
+                startDate,
+                endDate
+            ]);
+
+            report.push([
+                'Overtime',
+                teamMember,
+                data.department,
+                totalOvertimeHours.toFixed(2),
+                startDate,
+                endDate
+            ]);
+
+            // Step 6: Add an empty row after each employee
+            report.push([]);
+        });
+
+        exportToExcel3(report, `type_hours_report_${startDate}_to_${endDate}.xlsx`);
+    }
+
+    function exportToExcel3(data, fileName = 'report.xlsx') {
+        const ws = XLSX.utils.aoa_to_sheet(data); // <- Change to aoa_to_sheet because we're using an array of arrays
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Report');
+        XLSX.writeFile(wb, fileName);
+    }
+
+
+    function exportToExcel2(data) {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Weekly Report');
+
+        XLSX.writeFile(wb, 'weekly_report.xlsx');
+    }
+
 
     return (
         <div>
@@ -387,8 +605,18 @@ const ReportDates = () => {
                     Submit
                 </button>
             </div>
+            {Object.entries(filteredData).length>0?(
+                    <div>
+                        <button className="bg-blue-500 text-white rounded-md p-2 mt-4 mb-4 mr-2" onClick={()=>generateWeeklyReport(dataForReport)}>Payroll By Day</button>
+                        <button className="bg-blue-500 text-white rounded-md p-2 mt-4 mb-4" onClick={()=>generateTypeHoursReport(dataForReport,selectedDates.start,selectedDates.end)}>Payroll Totals</button>
+
+                    </div>
+
+            ):""}
+
+
             {Object.entries(filteredData).map(([name, data]) => {
-                // Print name and data to the console
+                console.log(filteredData)
 
                 return (
                     <div key={name} className="collapse border collapse-plus mb-2 bg-white">

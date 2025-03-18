@@ -252,7 +252,7 @@ root.render(
                 }>
                 </Route>
 
-                <Route path="/pay_period" element={
+                <Route path="/payroll" element={
                     <ProtectedRoute>
                         <ReportDates/>
                     </ProtectedRoute>

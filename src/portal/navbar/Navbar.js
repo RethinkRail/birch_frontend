@@ -39,6 +39,9 @@ const Navbar = () => {
             children: [
                 { title: 'Time Approval', path: '/time_approval' },
                 ...(hasRole('TECH') ? [{ title: 'WORK STATION', path: '/work_station' }] : []),
+                ...(hasRole('TECH') || hasRole('MANAGEMENT') ? [{ title: 'Attendance', path: '/attendance' }] : []),
+                ...(hasRole('TECH') || hasRole('MANAGEMENT') ? [{ title: 'Payroll', path: '/payroll' }] : []),
+
             ]
         },
         {

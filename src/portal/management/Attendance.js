@@ -205,12 +205,28 @@ const Attendance = () => {
             <MaterialReactTable columns={columns} data={data} state={{ isLoading: loading }} />
 
             {selectedImage && (
-                <div className="modal-overlay" onClick={handleCloseModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <span className="modal-close" onClick={handleCloseModal}>&times;</span>
-                        <img src={selectedImage} alt="Full Size" className="modal-image" />
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        className="relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-2 right-2 text-white text-3xl font-bold focus:outline-none"
+                            onClick={handleCloseModal}
+                        >
+                            &times;
+                        </button>
+                        <img
+                            src={selectedImage}
+                            alt="Full Size"
+                            className="max-w-full max-h-screen object-contain rounded-lg shadow-lg"
+                        />
                     </div>
                 </div>
+
             )}
         </div>
     );

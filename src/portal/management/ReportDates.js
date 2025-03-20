@@ -198,6 +198,8 @@ const ReportDates = () => {
                 grouped[team_member+":"+department_name] = { totalHours: 0, breakHours: 0, weeks: {} };
             }
             if (railcar_id === "BREAK") {
+                console.log("calculating break")
+                console.log(duration)
                 grouped[team_member+":"+department_name].breakHours += duration;
             } else {
                 grouped[team_member+":"+department_name].totalHours += duration;
@@ -212,12 +214,15 @@ const ReportDates = () => {
         });
 
         Object.values(grouped).forEach(team => {
+            console.log(team)
             const weekKeys = Object.keys(team.weeks).sort();
             weekKeys.forEach((weekKey, index) => {
                 const week = team.weeks[weekKey];
+                console.log(week)
                 week.weekLabel = `Week ${index + 1}`;
                 week.standardHours = Math.min(40, week.totalWeekHours);
                 week.overtimeHours = Math.max(0, week.totalWeekHours - 40);
+                week.breakHours = week.breakHours
             });
         });
 
@@ -590,6 +595,8 @@ const ReportDates = () => {
 
             {Object.entries(filteredData).map(([name, data]) => {
                 console.log(filteredData)
+                console.log(name)
+                console.log(data)
 
                 return (
                     <div key={name} className="collapse border collapse-plus mb-2 bg-white">
@@ -627,7 +634,8 @@ const ReportDates = () => {
                                 </button>
                             </span>
                             {Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => {
-
+                                console.log(breakHours)
+                                console.log(logs)
                                 const dayTotalsMap = {};
                                 let currentDate = null;
 

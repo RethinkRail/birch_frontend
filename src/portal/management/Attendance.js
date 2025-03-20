@@ -8,8 +8,8 @@
 
 
 import React, { useState } from "react";
-import axios from "axios";
 import {MaterialReactTable} from "material-react-table";
+import axios from "axios";
 
 const Attendance = () => {
     const [date, setDate] = useState(new Date());
@@ -33,45 +33,52 @@ const Attendance = () => {
         setLoading(false);
     };
 
-    // Handle image click to show full-size image in modal
-    const handleImageClick = (imageUrl) => {
-        setSelectedImage(imageUrl);
-    };
+    // Show full-size image
+    const handleImageClick = (imageUrl) => setSelectedImage(imageUrl);
 
-    // Close modal
-    const handleCloseModal = () => {
-        setSelectedImage(null);
-    };
+    const handleCloseModal = () => setSelectedImage(null);
 
-    // Handle Edit button click
     const handleEdit = (row) => {
         setEditingRow(row.id);
+
+        const startDate = new Date(row.start_time);
+        const endDate = row.end_time ? new Date(row.end_time) : null;
+
         setEditedData({
-            start_time: new Date(row.start_time).toISOString().slice(0, 16),
-            end_time: row.end_time ? new Date(row.end_time).toISOString().slice(0, 16) : "",
+            start_date: startDate.toISOString().split("T")[0],
+            start_time: startDate.toTimeString().slice(0, 5),
+            end_date: endDate ? endDate.toISOString().split("T")[0] : "",
+            end_time: endDate ? endDate.toTimeString().slice(0, 5) : "",
         });
     };
 
-    // Handle Cancel button click
     const handleCancel = () => {
         setEditingRow(null);
         setEditedData({});
     };
 
-    // Handle input changes
     const handleInputChange = (e, field) => {
-        let value = e.target.value;
-        if (field === "end_time" && !value) {
-            setEditedData((prev) => ({ ...prev, [field]: "", out_pic: null }));
-        } else {
-            setEditedData((prev) => ({ ...prev, [field]: value }));
-        }
+        const { value } = e.target;
+        setEditedData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
     };
 
-    // Handle Save button click
     const handleSave = async (id) => {
+        const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         try {
-            await axios.put(`${process.env.REACT_APP_BIRCH_API_URL}attendance/${id}`, editedData);
+            const { start_date, start_time, end_date, end_time } = editedData;
+            const localStartDateTime = `${start_date}T${start_time}:00`;
+            const localEndDateTime = end_date && end_time ? `${end_date}T${end_time}:00` : null;
+            const startDateObj = new Date(localStartDateTime);
+            const endDateObj = localEndDateTime ? new Date(localEndDateTime) : null;
+            const updatedData = {
+                start_time: startDateObj.toISOString(), // UTC ISO
+                end_time: endDateObj ? endDateObj.toISOString() : null, // UTC ISO or null
+            };
+
+            await axios.put(`${process.env.REACT_APP_BIRCH_API_URL}attendance/${id}`, updatedData);
             fetchAttendance();
             setEditingRow(null);
         } catch (error) {
@@ -79,12 +86,10 @@ const Attendance = () => {
         }
     };
 
-    // Format UTC time to local time
     const formatTime = (utcTime) => {
         return utcTime ? new Date(utcTime).toLocaleString() : "";
     };
 
-    // Calculate total time difference
     const calculateTotalTime = (start, end) => {
         if (!end) return "";
         const diffMs = new Date(end) - new Date(start);
@@ -98,33 +103,52 @@ const Attendance = () => {
         {
             accessorKey: "start_time",
             header: "Start Time",
-            Cell: ({ row }) =>
-                editingRow === row.original.id ? (
-                    <input
-                        type="datetime-local"
-                        value={editedData.start_time}
-                        onChange={(e) => handleInputChange(e, "start_time")}
-                        required
-                        className="input-field"
-                    />
-                ) : (
-                    formatTime(row.original.start_time)
-                ),
+            Cell: ({ row }) => {
+                if (editingRow === row.original.id) {
+                    return (
+                        <div className="flex gap-2">
+                            <input
+                                type="date"
+                                value={editedData.start_date}
+                                onChange={(e) => handleInputChange(e, "start_date")}
+                                className="input-field"
+                            />
+                            <input
+                                type="time"
+                                value={editedData.start_time}
+                                onChange={(e) => handleInputChange(e, "start_time")}
+                                className="input-field"
+                            />
+                        </div>
+                    );
+                }
+                return formatTime(row.original.start_time);
+            },
         },
         {
             accessorKey: "end_time",
             header: "End Time",
-            Cell: ({ row }) =>
-                editingRow === row.original.id ? (
-                    <input
-                        type="datetime-local"
-                        value={editedData.end_time}
-                        onChange={(e) => handleInputChange(e, "end_time")}
-                        className="input-field"
-                    />
-                ) : (
-                    formatTime(row.original.end_time)
-                ),
+            Cell: ({ row }) => {
+                if (editingRow === row.original.id) {
+                    return (
+                        <div className="flex gap-2">
+                            <input
+                                type="date"
+                                value={editedData.end_date}
+                                onChange={(e) => handleInputChange(e, "end_date")}
+                                className="input-field"
+                            />
+                            <input
+                                type="time"
+                                value={editedData.end_time}
+                                onChange={(e) => handleInputChange(e, "end_time")}
+                                className="input-field"
+                            />
+                        </div>
+                    );
+                }
+                return formatTime(row.original.end_time);
+            },
         },
         {
             accessorKey: "total_time",
@@ -159,33 +183,38 @@ const Attendance = () => {
         },
         {
             header: "Actions",
-            Cell: ({ row }) =>
-                editingRow === row.original.id ? (
-                    <>
-                        <button className="btn btn-save mb-1 w-20" onClick={() => handleSave(row.original.id)}>Save</button>
-                        <button className="btn btn-cancel w-20" onClick={handleCancel}>Cancel</button>
-                    </>
-                ) : (
+            Cell: ({ row }) => {
+                if (editingRow === row.original.id) {
+                    return (
+                        <div className="flex gap-2">
+                            <button className="btn btn-save" onClick={() => handleSave(row.original.id)}>Save</button>
+                            <button className="btn btn-cancel" onClick={handleCancel}>Cancel</button>
+                        </div>
+                    );
+                }
+                return (
                     <button className="btn btn-edit" onClick={() => handleEdit(row.original)}>Edit</button>
-                ),
+                );
+            },
         },
     ];
 
     const styles = `
-    .container { padding: 20px; font-family: Arial, sans-serif; }
-    .header { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
-    .date-picker { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
-    .btn { padding: 8px 15px; font-size: 14px; border: none; cursor: pointer; border-radius: 5px; }
-    .btn-edit { background-color: #007bff; color: white; }
-    .btn-save { background-color: #28a745; color: white; }
-    .btn-cancel { background-color: #dc3545; color: white; margin-left: 5px; }
-    .btn-fetch { background-color: #17a2b8; color: white; }
-    .image-thumbnail { width: 50px; height: 50px; cursor: pointer; border-radius: 5px; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-    .modal-content { background: white; padding: 15px; border-radius: 8px; position: relative; max-width: 90%; max-height: 90%; }
-    .modal-close { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; }
-    .modal-image { max-width: 100%; max-height: 80vh; }
-`;
+        .container { padding: 20px; font-family: Arial, sans-serif; }
+        .header { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .date-picker { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+        .btn { padding: 8px 15px; font-size: 14px; border: none; cursor: pointer; border-radius: 5px; }
+        .btn-edit { background-color: #007bff; color: white; }
+        .btn-save { background-color: #28a745; color: white; }
+        .btn-cancel { background-color: #dc3545; color: white; }
+        .btn-fetch { background-color: #17a2b8; color: white; }
+        .input-field { padding: 6px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; }
+        .image-thumbnail { width: 50px; height: 50px; cursor: pointer; border-radius: 5px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .modal-content { background: white; padding: 15px; border-radius: 8px; position: relative; max-width: 90%; max-height: 90%; }
+        .modal-close { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; }
+        .modal-image { max-width: 100%; max-height: 80vh; }
+    `;
     document.head.insertAdjacentHTML("beforeend", `<style>${styles}</style>`);
 
     return (
@@ -205,28 +234,12 @@ const Attendance = () => {
             <MaterialReactTable columns={columns} data={data} state={{ isLoading: loading }} />
 
             {selectedImage && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-                    onClick={handleCloseModal}
-                >
-                    <div
-                        className="relative"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            className="absolute top-2 right-2 text-white text-3xl font-bold focus:outline-none"
-                            onClick={handleCloseModal}
-                        >
-                            &times;
-                        </button>
-                        <img
-                            src={selectedImage}
-                            alt="Full Size"
-                            className="max-w-full max-h-screen object-contain rounded-lg shadow-lg"
-                        />
+                <div className="modal-overlay" onClick={handleCloseModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <span className="modal-close" onClick={handleCloseModal}>&times;</span>
+                        <img src={selectedImage} alt="Full Size" className="modal-image" />
                     </div>
                 </div>
-
             )}
         </div>
     );

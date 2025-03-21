@@ -23,7 +23,6 @@ const Navbar = () => {
     const navItems = [
         { title: 'Work Order', path: '/' },
         { title: 'Database', path: '/database' },
-        { title: 'Attendance', path: '/attendance' },
         {
             title: 'Management',
             children: [

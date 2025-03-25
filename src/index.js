@@ -50,6 +50,12 @@ if ('serviceWorker' in navigator) {
         });
 }
 
+if (process.env.NODE_ENV === "production") {
+    console.log = () => {};
+    console.warn = () => {};
+}
+
+
 // This is the fix for IOS
 // if ('serviceWorker' in navigator) {
 //     const isChromeOniPad = /CriOS/i.test(navigator.userAgent) && /iPad/i.test(navigator.userAgent);

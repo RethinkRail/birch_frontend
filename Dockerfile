@@ -1,6 +1,5 @@
-# Use the official Node.js image
-FROM node:19-bullseye
-
+# Stage 1: Build the React app
+FROM node:19-bullseye AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,15 +16,14 @@ COPY . .
 # Build the React app
 RUN npm run build
 
-# Stage 2: Serve the built app using a lightweight web server (nginx or serve)
+# Stage 2: Serve the built app using a lightweight web server (nginx)
 FROM nginx:alpine
 
 # Copy the build files from the build stage
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Expose the port that the app will run on
-EXPOSE 3000
+# Expose port 80 for the web server
+EXPOSE 80
 
-# Run the React app
 # Start nginx server
 CMD ["nginx", "-g", "daemon off;"]

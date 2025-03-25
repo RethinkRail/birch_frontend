@@ -21,6 +21,12 @@ const Home = () => {
     //const messaging = getMessaging();
     const forceUpdate = React.useReducer(() => ({}), {})[1];
     const [workOrders, setWorkOrders] = useState([]);
+    // For pagination
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [skip, setSkip] = useState(0);
+    const take = 50;
+    // For pagination
     const [activeTasks, setActiveTask] = useState([])
     const [statusCodes, setStatusCodes] = useState([])
     const [commonData, setCommonData] = useState(null)
@@ -126,35 +132,27 @@ const Home = () => {
 
     }
 
-    const getActiveWorkOrders = () => {
-        let config = {
-            method: 'get',
-            maxBodyLength: Infinity,
-            url: process.env.REACT_APP_BIRCH_API_URL + 'get_active_workorder',
-            headers: {}
-        };
+    const loadMoreWorkOrders = async (skip = 0) => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder?skip=${skip}&take=${take}`);
+            const newOrders = response.data.active_workorder;
 
-        axios.request(config)
-            .then((response) => {
-                setWorkOrders(response.data.active_workorder)
-                //console.log(workOrders)
+            if (newOrders.length === 0) {
+                toast.success(`All work orders loaded. Total: ${skip}`);
+                return;
+            }
 
-                toast.update(toastId.current, {
-                    render: "All workorder loaded. Total "+response.data.active_workorder.length,
-                    autoClose: 1500,
-                    type: "success",
-                    hideProgressBar: true,
-                    isLoading: false
-                });
-                return Promise.resolve();
-            })
-            .catch((error) => {
-                console.log(error);
+            setWorkOrders(prevOrders => [...prevOrders, ...newOrders]);
 
-                return Promise.resolve();
-            });
-
-    }
+            if (newOrders.length === take) {
+                loadMoreWorkOrders(skip + take); // Load next batch
+            } else {
+                toast.success(`All work orders loaded. Total: ${skip + newOrders.length}`);
+            }
+        } catch (error) {
+            console.error("Error loading work orders:", error);
+        }
+    };
     const getAllStatusCode = () => {
         if (statusCodes.length == 0) {
             let config = {
@@ -1172,18 +1170,26 @@ const Home = () => {
         console.log("calling active task")
         getActiveTasks();
     }, []);
-    useEffect(() => {
-        //getAllStatusCode()
-        toastId.current = toast.loading("Loading...")
-        getAllStatusCode()
-            .then(() => getActiveWorkOrders())
-            .then(() => getAllCommonData())
-            .catch((error) => {
-                // Handle any errors that occur during the sequence
-                console.error("Error during sequential execution:", error);
-            });
-    }, []);
 
+
+    // useEffect(() => {
+    //     //getAllStatusCode()
+    //     toastId.current = toast.loading("Loading...")
+    //     getAllStatusCode()
+    //         .then(() => loadMoreWorkOrders())
+    //         .then(() => getAllCommonData())
+    //         .catch((error) => {
+    //             // Handle any errors that occur during the sequence
+    //             console.error("Error during sequential execution:", error);
+    //         });
+    // }, []);
+
+    useEffect(() => {
+        getAllStatusCode()
+            .then(() => loadMoreWorkOrders(0)) // Start recursive loading
+            .then(() => getAllCommonData())
+            .catch(error => console.error("Error during sequential execution:", error));
+    }, []);
     return (
         <React.Fragment>
             {activeTasks.length > 0 ? (

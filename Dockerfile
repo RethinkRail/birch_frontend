@@ -3,17 +3,11 @@ FROM node:19-bullseye AS build
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the container
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install --force
 
-# Copy the rest of the application code to the container
 COPY . .
-
-# Increase memory limit for Node.js and build the React app
-RUN node --max-old-space-size=4096 /usr/local/bin/npm run build
+RUN npm run build
 
 # Stage 2: Serve the built app using Nginx
 FROM nginx:alpine

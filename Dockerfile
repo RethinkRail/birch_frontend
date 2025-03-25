@@ -19,6 +19,9 @@ RUN npm run build
 # Stage 2: Serve the built app using a lightweight web server (nginx)
 FROM nginx:alpine
 
+# Copy the custom nginx configuration file
+COPY nginx.conf /etc/nginx/nginx.conf
+
 # Copy the build files from the build stage
 COPY --from=build /app/build /usr/share/nginx/html
 

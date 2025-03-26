@@ -41,31 +41,34 @@ const Home = () => {
 
     onMessage(messaging, (payload) => {
         console.log(payload)
-        if(payload.data.type === 'new_order'){
-            getActiveTasks()
-            getWorkOrderById(parseInt(payload.data.value))
-        }else if(payload.data.type === 'updated_wo'){
-            console.log("Push received wo updated")
-            getWorkOrderById(parseInt(payload.data.value))
-        } else if(payload.data.type === 'routing'){
-            getActiveTasks()
-        }else if(payload.data.type ==='deleted_order'){
-            console.log("deleted order")
-            const updatedArray = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
 
-            const originalLength = workOrders.length;
-            const filteredWorkOrders = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
-            const isDeleted = originalLength > filteredWorkOrders.length;
+        if(!isLoading){
+            if(payload.data.type === 'new_order'){
+                getActiveTasks()
+                getWorkOrderById(parseInt(payload.data.value))
+            }else if(payload.data.type === 'updated_wo'){
+                console.log("Push received wo updated")
+                getWorkOrderById(parseInt(payload.data.value))
+            } else if(payload.data.type === 'routing'){
+                getActiveTasks()
+            }else if(payload.data.type ==='deleted_order'){
+                console.log("deleted order")
+                const updatedArray = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
 
-            if (isDeleted) {
-                setWorkOrders(updatedArray)
-                // toast.info(
-                //     "A order has been deleted"
-                // );
-            } else {
-                console.log("No items were deleted.");
+                const originalLength = workOrders.length;
+                const filteredWorkOrders = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
+                const isDeleted = originalLength > filteredWorkOrders.length;
+                if (isDeleted) {
+                    setWorkOrders(updatedArray)
+                    // toast.info(
+                    //     "A order has been deleted"
+                    // );
+                } else {
+                    console.log("No items were deleted.");
+                }
             }
         }
+
     })
 
     //CLoud messaging
@@ -133,6 +136,7 @@ const Home = () => {
     }
 
     const loadMoreWorkOrders = async (skip = 0) => {
+        setIsLoading(true)
         try {
             const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder?skip=${skip}&take=${take}`);
             const newOrders = response.data.active_workorder;
@@ -147,7 +151,9 @@ const Home = () => {
             if (newOrders.length === take) {
                 loadMoreWorkOrders(skip + take); // Load next batch
             } else {
+                setIsLoading(false)
                 toast.success(`All work orders loaded. Total: ${skip + newOrders.length}`);
+                console.log(`All work orders loaded. Total: ${skip + newOrders.length}`)
             }
         } catch (error) {
             console.error("Error loading work orders:", error);

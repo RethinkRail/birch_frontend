@@ -191,6 +191,7 @@ const WorkOrderDataTable = ({
             workOrderData.push(workOrderObject)
         })
         console.log()
+        workOrderData.sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date));
         setWoForDT(workOrderData)
 //        console.log("in action")
     }, [workOrders])

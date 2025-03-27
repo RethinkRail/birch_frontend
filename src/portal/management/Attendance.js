@@ -23,8 +23,19 @@ const Attendance = () => {
     const fetchAttendance = async () => {
         setLoading(true);
 
+        const localDate = new Date(date.toLocaleDateString());
+
+        // Get start and end of the local day
+        const startOfDayLocal = new Date(localDate.setHours(0, 0, 0, 0));
+        const endOfDayLocal = new Date(localDate.setHours(23, 59, 59, 999));
+
+        // Convert to UTC
+        const startOfDayUTC = new Date(startOfDayLocal.getTime() + startOfDayLocal.getTimezoneOffset() * 60000);
+        const endOfDayUTC = new Date(endOfDayLocal.getTime() + endOfDayLocal.getTimezoneOffset() * 60000);
+
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}attendance?start_date=${date.toLocaleDateString()}`);
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}attendance?start_date=${startOfDayUTC.toISOString()}&end_date=${endOfDayUTC.toISOString()}`);
+
             setData(response.data);
         } catch (error) {
             console.error("Error fetching attendance data:", error);

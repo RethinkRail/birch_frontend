@@ -22,9 +22,9 @@ const Attendance = () => {
     // Fetch attendance data from the server
     const fetchAttendance = async () => {
         setLoading(true);
+
         try {
-            const formattedDate = date.toISOString().split("T")[0] + "T00:00:00Z";
-            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}attendance?start_date=${formattedDate}`);
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}attendance?start_date=${date.toLocaleDateString()}`);
             setData(response.data);
         } catch (error) {
             console.error("Error fetching attendance data:", error);

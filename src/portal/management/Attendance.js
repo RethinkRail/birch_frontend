@@ -210,7 +210,7 @@ const Attendance = () => {
                         src={row.original.entry_pic}
                         alt="Entry"
                         className="w-16 h-16 object-cover rounded-lg cursor-pointer"
-                        onClick={() => window.open(row.original.entry_pic, "_blank")}
+                        onClick={() => handleImageClick(row.original.entry_pic)}
                     />
                 ),
         },
@@ -223,7 +223,7 @@ const Attendance = () => {
                         src={row.original.out_pic}
                         alt="Exit"
                         className="w-16 h-16 object-cover rounded-lg cursor-pointer"
-                        onClick={() => window.open(row.original.out_pic, "_blank")}
+                        onClick={() => handleImageClick(row.original.out_pic)}
                     />
                 ),
         },

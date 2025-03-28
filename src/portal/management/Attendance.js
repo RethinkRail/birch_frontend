@@ -10,6 +10,8 @@
 import React, { useState } from "react";
 import {MaterialReactTable} from "material-react-table";
 import axios from "axios";
+import * as XLSX from "xlsx";
+
 
 const Attendance = () => {
     const [date, setDate] = useState(new Date());
@@ -109,57 +111,90 @@ const Attendance = () => {
         return `${hours}h ${minutes}m`;
     };
 
+
+    const handleExportExcel = async () => {
+        const wb = XLSX.utils.book_new();
+
+        // Convert images to base64
+        const convertImageToBase64 = async (imageUrl) => {
+            console.log(imageUrl)
+            if (!imageUrl) return "";
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        };
+
+        // Convert times to local time and fetch images
+        const wsData = await Promise.all(
+            data.map(async (row) => ({
+                Name: row.crew_name,
+                "Start Time": new Date(row.start_time).toLocaleString(),
+                "End Time":row.end_time==null?"": new Date(row.end_time).toLocaleString(),
+                "Total Time": row.end_time==null?"": calculateTotalTime(row.start_time, row.end_time),
+
+
+            }))
+        );
+
+        const ws = XLSX.utils.json_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        // Save file
+        XLSX.writeFile(wb, "Attendance report "+new Date(date.toLocaleString())+".xlsx");
+    };
+
+
     const columns = [
         { accessorKey: "crew_name", header: "Name" },
         {
             accessorKey: "start_time",
             header: "Start Time",
-            Cell: ({ row }) => {
-                if (editingRow === row.original.id) {
-                    return (
-                        <div className="flex gap-2">
-                            <input
-                                type="date"
-                                value={editedData.start_date}
-                                onChange={(e) => handleInputChange(e, "start_date")}
-                                className="input-field"
-                            />
-                            <input
-                                type="time"
-                                value={editedData.start_time}
-                                onChange={(e) => handleInputChange(e, "start_time")}
-                                className="input-field"
-                            />
-                        </div>
-                    );
-                }
-                return formatTime(row.original.start_time);
-            },
+            Cell: ({ row }) =>
+                editingRow === row.original.id ? (
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <input
+                            type="date"
+                            value={editedData.start_date}
+                            onChange={(e) => handleInputChange(e, "start_date")}
+                            className="border border-gray-300 rounded-lg p-2 w-36"
+                        />
+                        <input
+                            type="time"
+                            value={editedData.start_time}
+                            onChange={(e) => handleInputChange(e, "start_time")}
+                            className="border border-gray-300 rounded-lg p-2 w-28"
+                        />
+                    </div>
+                ) : (
+                    formatTime(row.original.start_time)
+                ),
         },
         {
             accessorKey: "end_time",
             header: "End Time",
-            Cell: ({ row }) => {
-                if (editingRow === row.original.id) {
-                    return (
-                        <div className="flex gap-2">
-                            <input
-                                type="date"
-                                value={editedData.end_date}
-                                onChange={(e) => handleInputChange(e, "end_date")}
-                                className="input-field"
-                            />
-                            <input
-                                type="time"
-                                value={editedData.end_time}
-                                onChange={(e) => handleInputChange(e, "end_time")}
-                                className="input-field"
-                            />
-                        </div>
-                    );
-                }
-                return formatTime(row.original.end_time);
-            },
+            Cell: ({ row }) =>
+                editingRow === row.original.id ? (
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <input
+                            type="date"
+                            value={editedData.end_date}
+                            onChange={(e) => handleInputChange(e, "end_date")}
+                            className="border border-gray-300 rounded-lg p-2 w-36"
+                        />
+                        <input
+                            type="time"
+                            value={editedData.end_time}
+                            onChange={(e) => handleInputChange(e, "end_time")}
+                            className="border border-gray-300 rounded-lg p-2 w-28"
+                        />
+                    </div>
+                ) : (
+                    formatTime(row.original.end_time)
+                ),
         },
         {
             accessorKey: "total_time",
@@ -174,8 +209,8 @@ const Attendance = () => {
                     <img
                         src={row.original.entry_pic}
                         alt="Entry"
-                        className="image-thumbnail"
-                        onClick={() => handleImageClick(row.original.entry_pic)}
+                        className="w-16 h-16 object-cover rounded-lg cursor-pointer"
+                        onClick={() => window.open(row.original.entry_pic, "_blank")}
                     />
                 ),
         },
@@ -187,28 +222,31 @@ const Attendance = () => {
                     <img
                         src={row.original.out_pic}
                         alt="Exit"
-                        className="image-thumbnail"
-                        onClick={() => handleImageClick(row.original.out_pic)}
+                        className="w-16 h-16 object-cover rounded-lg cursor-pointer"
+                        onClick={() => window.open(row.original.out_pic, "_blank")}
                     />
                 ),
         },
         {
             header: "Actions",
-            Cell: ({ row }) => {
-                if (editingRow === row.original.id) {
-                    return (
-                        <div className="flex gap-2">
-                            <button className="btn btn-save" onClick={() => handleSave(row.original.id)}>Save</button>
-                            <button className="btn btn-cancel" onClick={handleCancel}>Cancel</button>
-                        </div>
-                    );
-                }
-                return (
-                    <button className="btn btn-edit" onClick={() => handleEdit(row.original)}>Edit</button>
-                );
-            },
+            Cell: ({ row }) =>
+                editingRow === row.original.id ? (
+                    <div className="flex flex-wrap gap-2">
+                        <button className="bg-green-500 text-white px-3 py-2 rounded-lg" onClick={() => handleSave(row.original.id)}>
+                            Save
+                        </button>
+                        <button className="bg-red-500 text-white px-3 py-2 rounded-lg" onClick={handleCancel}>
+                            Cancel
+                        </button>
+                    </div>
+                ) : (
+                    <button className="bg-blue-500 text-white px-3 py-2 rounded-lg" onClick={() => handleEdit(row.original)}>
+                        Edit
+                    </button>
+                ),
         },
     ];
+
 
     const styles = `
         .container { padding: 20px; font-family: Arial, sans-serif; }
@@ -242,7 +280,29 @@ const Attendance = () => {
                 </button>
             </div>
 
-            <MaterialReactTable columns={columns} data={data} state={{ isLoading: loading }} />
+            <div className="flex justify-between items-center mb-2">
+                <button className="btn btn-export" onClick={handleExportExcel}>
+                    Export to Excel
+                </button>
+                <span className="text-lg font-semibold">Total Entries: {data.length}</span>
+            </div>
+
+            <MaterialReactTable
+                columns={columns}
+                data={data}
+                state={{ isLoading: loading }}
+                enablePagination={false}
+                enableStickyHeader={true}
+                enableRowVirtualization={true}
+                enableColumnResizing={true}
+            />
+
+            <div className="flex justify-between items-center mb-2 mt-4">
+                <button className="btn btn-export" onClick={handleExportExcel}>
+                    Export to Excel
+                </button>
+                <span className="text-lg font-semibold">Total Entries: {data.length}</span>
+            </div>
 
             {selectedImage && (
                 <div

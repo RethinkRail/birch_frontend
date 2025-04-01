@@ -14,7 +14,7 @@ import * as XLSX from "xlsx";
 
 
 const Attendance = () => {
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState(null);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -24,7 +24,7 @@ const Attendance = () => {
     // Fetch attendance data from the server
     const fetchAttendance = async () => {
         setLoading(true);
-
+        setData([])
         const localDate = new Date(date.toLocaleDateString());
 
         // Get start and end of the local day
@@ -34,7 +34,8 @@ const Attendance = () => {
         // Convert to UTC
         const startOfDayUTC = new Date(startOfDayLocal.getTime() + startOfDayLocal.getTimezoneOffset() * 60000);
         const endOfDayUTC = new Date(endOfDayLocal.getTime() + endOfDayLocal.getTimezoneOffset() * 60000);
-
+        console.warn(startOfDayUTC)
+        console.warn(endOfDayUTC)
         try {
             const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}attendance?start_date=${startOfDayUTC.toISOString()}&end_date=${endOfDayUTC.toISOString()}`);
 
@@ -90,6 +91,7 @@ const Attendance = () => {
                 start_time: startDateObj.toISOString(), // UTC ISO
                 end_time: endDateObj ? endDateObj.toISOString() : null, // UTC ISO or null
             };
+
 
             await axios.put(`${process.env.REACT_APP_BIRCH_API_URL}attendance/${id}`, updatedData);
             fetchAttendance();
@@ -271,7 +273,7 @@ const Attendance = () => {
             <div className="header">
                 <input
                     type="date"
-                    value={date.toISOString().split("T")[0]}
+                    value={date?.toISOString().split("T")[0]}
                     onChange={(e) => setDate(new Date(e.target.value))}
                     className="date-picker"
                 />

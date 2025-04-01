@@ -771,6 +771,7 @@ const Home = () => {
         };
         axios.request(config)
             .then((response) => {
+                console.log(response)
                 const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {locked_by: is_checked ? userId : null})
                 setWorkOrders(updatedWorkOrders)
             })

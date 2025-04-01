@@ -62,7 +62,7 @@ const RevenueByDepartments = () => {
         { accessorKey: 'department', header: 'Department', enableSorting: true },
         { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
         { accessorKey: 'applied_time', header: 'Applied hour', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
-        { accessorKey: 'net_cost', header: 'Net cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
+        { accessorKey: 'net_cost', header: 'Revenue', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
         { accessorKey: 'completed_time', header: 'Completed AT', enableSorting: true },
     ], []);
 

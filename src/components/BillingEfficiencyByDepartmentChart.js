@@ -44,50 +44,43 @@ const BillingEfficiencyByDepartmentChart = ({ startDate, endDate, dateDiff, data
         return dates;
     };
 
-    const uniqueNames = [...new Set(dataSet.map((item) => item.departmen))];
+    const uniqueDepartments = [...new Set(dataSet.map((item) => item.departmen))]; // Fix typo
     const xAxis = calculateDates(startDate, endDate, dateDiff);
 
     let revMap = new Map();
 
-    uniqueNames.map((job_code_applied) => {
-        revMap.set(job_code_applied, []);
-        let filteredData = dataSet.filter((item) => item.departmen === job_code_applied);
-        let lastSum = 0;
+    uniqueDepartments.forEach((department) => {
+        revMap.set(department, []);
+        let filteredData = dataSet.filter((item) => item.departmen === department); // Fix typo
+
+        let lastUtilization = 0;
 
         xAxis.forEach((date) => {
             const currentDate = dayjs(date);
-            const invoicesBeforeOrOnDate = filteredData.filter(
-                (invoice) =>
-                    dayjs(invoice.completed_time).isBefore(currentDate) || dayjs(invoice.completed_time).isSame(currentDate)
+
+            // Filter jobs completed on or before this date
+            const relevantJobs = filteredData.filter(
+                (job) =>
+                    dayjs(job.completed_time).isBefore(currentDate) ||
+                    dayjs(job.completed_time).isSame(currentDate)
             );
 
-            if (invoicesBeforeOrOnDate.length > 0) {
-                // Compute utilization based on applied_time and estimated_time
-                lastSum = invoicesBeforeOrOnDate.reduce((sum, invoice) => {
-                    const utilization = invoice.applied_time > 0 ? (invoice.applied_time / invoice.estimated_time) * 100 : 0;
-                    return sum + utilization;
-                }, 0);
+            if (relevantJobs.length > 0) {
+                // Sum applied and estimated times
+                const totalAppliedTime = relevantJobs.reduce((sum, job) => sum + parseFloat(job.applied_time), 0);
+                const totalEstimatedTime = relevantJobs.reduce((sum, job) => sum + parseFloat(job.estimated_time), 0);
 
-                // Remove processed invoices
-                filteredData = filteredData.filter(
-                    (item) =>
-                        !invoicesBeforeOrOnDate.some(
-                            (removeItem) =>
-                                removeItem.completed_time === item.completed_time &&
-                                removeItem.applied_time === item.applied_time &&
-                                removeItem.estimated_time === item.estimated_time
-                        )
-                );
+                // Compute utilization correctly
+                lastUtilization = totalEstimatedTime > 0 ? (totalAppliedTime / totalEstimatedTime) * 100 : 0;
 
-                const values = revMap.get(job_code_applied);
-                values.push(lastSum);
-            } else {
-                const values = revMap.get(job_code_applied);
-                values.push(lastSum);
+                // Don't modify `filteredData` here, let it accumulate jobs over time
             }
+
+            revMap.get(department).push(lastUtilization);
         });
     });
 
+    console.log(revMap);
 
     // Process the dataset to calculate cumulative costs
     const newData = Array.from(revMap, ([name, data]) => ({ name, data }));

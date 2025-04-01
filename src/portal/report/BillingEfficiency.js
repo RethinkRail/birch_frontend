@@ -188,7 +188,7 @@ const BillingEfficiency = () => {
                     `${process.env.REACT_APP_BIRCH_API_URL}get_billing_efficiency_by_department`,
                     payloadDepartments
                 );
-
+                //console.log(response)
             }
 
 
@@ -229,7 +229,7 @@ const BillingEfficiency = () => {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Revenue Report');
 
         // Define filename with today's date
-        const filename = 'BIRCH Revenue Report from '+startDate.toLocaleDateString()+"  to "+endDate.toLocaleDateString()+'.xlsx' ;
+        const filename = 'BIRCH BILLING EFFICIENCY Report from '+startDate.toLocaleDateString()+"  to "+endDate.toLocaleDateString()+'.xlsx' ;
 
         // Trigger a download of the Excel file
         XLSX.writeFile(workbook, filename);

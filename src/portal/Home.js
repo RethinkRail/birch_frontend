@@ -772,8 +772,14 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 console.log(response)
-                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {locked_by: is_checked ? userId : null})
-                setWorkOrders(updatedWorkOrders)
+                if(response.status==200){
+                    const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {locked_by: is_checked ? userId : null})
+                    setWorkOrders(updatedWorkOrders)
+                }else {
+                    console.log("it has incomplete lines")
+                    alert("All lines must be completed before invoicing")
+                }
+
             })
             .catch((error) => {
                 console.log(error);

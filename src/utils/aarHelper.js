@@ -15,6 +15,7 @@ import {round2Dec} from "./NumberHelper";
  */
 
 export function printAAR(item, _wheel_detail = false, forWhom) {
+    console.log(item)
     let data = null;
     let wheel_detail = _wheel_detail;
     let record_format = {
@@ -309,6 +310,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         wheel_detail: wheel_detail,
         value: null
     };
+
     let applied_wheel_date = {
         name: 'applied_wheel_date',
         column: 195,
@@ -390,6 +392,14 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         value: null
     };
     let labor_rate = {name: 'labor_rate', column: 217, length: 5, format: 'N', wheel_detail: wheel_detail, value: null};
+    let wheel_description = {
+        name: 'wheel_description',
+        column: 195,
+        length: wheel_detail ? 22 : 0,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
     let expanded_splc = {
         name: 'expanded_splc',
         column: 222,
@@ -987,6 +997,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
     if (data.joblist != null) {
         data.joblist.forEach((item, i) => {
+            console.log(item)
             location_on_car.value = getObjComputedValue(location_on_car, item.locationcode ? item.locationcode.code : null);
             quantity.value = getObjComputedValue(quantity, item.quantity);
             condition_code.value = getObjComputedValue(condition_code, item.conditioncode ? item.conditioncode.code : null);
@@ -1020,6 +1031,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             }
             wheel_narrative.value = getObjComputedValue(wheel_narrative, item.job_description);
             labor_rate.value = getObjComputedValue(labor_rate, item.labor_rate * 100);
+
             line_number.value = getObjComputedValue(line_number, item.line_number);
             var mat_sign;
             if (item.labor_rate >= 0) {
@@ -1071,7 +1083,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 + machine_priceable_indicator.value
                 + wrong_repair_indicator.value;
 
-            console.log(machine_priceable_indicator.value)
+            // console.log(machine_priceable_indicator.value)
 
 
             wheel_narrative.value = getObjComputedValue(wheel_narrative);
@@ -1085,7 +1097,8 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_wheel_class_code.value = getObjComputedValue(removed_wheel_class_code);
             removed_side_reading.value = getObjComputedValue(removed_side_reading);
             removed_finger_reading.value = getObjComputedValue(removed_finger_reading);
-            labor_rate.value = getObjComputedValue(labor_rate);
+            labor_rate.value =  item.wheel_details?item.wheel_details+getObjComputedValue(labor_rate):""+ getObjComputedValue(labor_rate);
+            wheel_description.value = getObjComputedValue(wheel_description)
             expanded_splc.value = getObjComputedValue(expanded_splc);
             cif_repairing_party.value = getObjComputedValue(cif_repairing_party);
             cif_billing_invoicing_party.value = getObjComputedValue(cif_billing_invoicing_party);
@@ -1098,11 +1111,10 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             resubmitted_invoice_indicator.value = getObjComputedValue(resubmitted_invoice_indicator);
             original_invoice_number.value = getObjComputedValue(original_invoice_number);
             original_account_date.value = getObjComputedValue(original_account_date);
-            aar_component_id.value = getObjComputedValue(aar_component_id);
+            aar_component_id.value = getObjComputedValue(aar_component_id,item.cid);
+            console.log(aar_component_id)
             ddct_incident_id.value = getObjComputedValue(ddct_incident_id);
             reserved_for_future_crb_use_5.value = getObjComputedValue(reserved_for_future_crb_use_5);
-
-
             var narrative_detail = wheel_narrative.value;
             if (wheel_detail) {
                 narrative_detail += applied_wheel_date.value + applied_wheel_manufacture_code.value + applied_wheel_class_code.value + applied_side_reading.value + applied_finger_reading.value + removed_wheel_date.value + removed_wheel_manufacture_code.value + removed_wheel_class_code.value + removed_side_reading.value + removed_finger_reading.value;
@@ -1112,7 +1124,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
             if (forWhom == 1) {
 
-                en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
+                en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail ) + "\n";
                 //console.log(en_txt.length)
             }
             if (forWhom == 2) {
@@ -1497,6 +1509,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 }
 
 function getObjComputedValue(data, value) {
+
     const obj = data;
     var v = value;
     if (value == undefined || value == null) {
@@ -1515,6 +1528,7 @@ function getObjComputedValue(data, value) {
         v = v.replace(/[\r\n\t]+/g, " ");
         obj.value = nDigitString(v, obj.length);
     }
+
     return obj.value;
 }
 

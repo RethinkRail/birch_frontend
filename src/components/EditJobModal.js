@@ -7,9 +7,7 @@ import Select from "react-select";
 
 
 const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
-    console.log(editData)
-    console.log(commonData)
-    console.log(lineNumber)
+
 
     const [previousPart, setPreviousPart] = useState(null)
     const singleMarkUp = editData && editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
@@ -132,6 +130,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate,
         material_cost: "",
         purchase: "",
+        cid:"",
+        wheel_details:"",
     })
 
     const [purchase, setPurchase] = useState("")
@@ -186,7 +186,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     condition_code:  editData.conditioncode ? editData.conditioncode.code : "",
                     labor_time:  editData.labor_time ,
                     labor_rate:  editData.labor_rate ,
-                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)* Number(editData?.labor_rate)
+                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)* Number(editData?.labor_rate),
+                    cid:editData.cid,
+                    wheel_details:editData.wheel_details,
                 }))
                 console.log(editData.jobparts)
                 setPreviousPart(editData.jobparts)
@@ -291,7 +293,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 job_code_removed: inputValues["job_code_removed"],
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
-
+                cid:inputValues["cid"],
+                wheel_details:inputValues["wheel_details"],
                 labor_cost: Number(round2Dec(totalLabor)),
                 labor_time: Number(round2Dec(inputValues["labor_time"])),
                 labor_rate: Number(round2Dec(inputValues["labor_rate"])),
@@ -363,6 +366,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 job_description: inputValues["job_description"],
                 why_made_code: inputValues["why_made_code"],
                 job_code_removed: inputValues["job_code_removed"],
+                cid:inputValues["cid"],
+                wheel_details:inputValues["wheel_details"],
                 qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
                 responsibility_code: Number(inputValues["responsibility_code"]),
                 labor_cost: Number(round2Dec(totalLabor)),
@@ -453,6 +458,14 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 placeholder="Select an option"
                             />
                         </div>
+                        <div className='flex flex-col gap-1'>
+                            <label className='text-[12px] capitalize'>Wheel details</label>
+                            <input type="text"    disabled={workOrder.locked_by != null} className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="Wheel details" value={inputValues["wheel_details"]} onChange={(e) => handleChange("wheel_details", e.target.value)} />
+                        </div>
+                        <div className='flex flex-col gap-1'>
+                            <label className='text-[12px] capitalize'>CID</label>
+                            <input type="text"    disabled={workOrder.locked_by != null} className='p-1 rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-2' placeholder="CID" value={inputValues["cid"]} onChange={(e) => handleChange("cid", e.target.value)} />
+                        </div>
                     </div>
                     <div className="col-span-1 flex flex-col gap-1.5">
                         <div className="h-10 bg-[#DCE5FF] rounded-md px-2 w-full flex justify-center items-center">
@@ -523,6 +536,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 placeholder="Select an option"
                             />
                         </div>
+
                     </div>
                     <div className="col-span-1 flex flex-col gap-1.5">
                         <div className="h-10 bg-[#DCE5FF] rounded-md px-2 w-full flex justify-center items-center">

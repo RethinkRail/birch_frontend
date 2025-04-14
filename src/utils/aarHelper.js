@@ -15,7 +15,6 @@ import {round2Dec} from "./NumberHelper";
  */
 
 export function printAAR(item, _wheel_detail = false, forWhom) {
-    console.log(item)
     let data = null;
     let wheel_detail = _wheel_detail;
     let record_format = {
@@ -305,11 +304,20 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
     let wheel_narrative = {
         name: 'wheel_narrative',
         column: 167,
-        length: wheel_detail ? 28 : 50,
+        length: 50,
         format: 'A/N',
         wheel_detail: wheel_detail,
         value: null
     };
+    let wheel_narrative_if_wheel_details = {
+        name: 'wheel_narrative',
+        column: 167,
+        length: 28,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+
 
     let applied_wheel_date = {
         name: 'applied_wheel_date',
@@ -391,15 +399,10 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         wheel_detail: wheel_detail,
         value: null
     };
+
+
+
     let labor_rate = {name: 'labor_rate', column: 217, length: 5, format: 'N', wheel_detail: wheel_detail, value: null};
-    let wheel_description = {
-        name: 'wheel_description',
-        column: 195,
-        length: wheel_detail ? 22 : 0,
-        format: 'A/N',
-        wheel_detail: wheel_detail,
-        value: null
-    };
     let expanded_splc = {
         name: 'expanded_splc',
         column: 222,
@@ -997,14 +1000,14 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
     if (data.joblist != null) {
         data.joblist.forEach((item, i) => {
-            console.log(item)
+
             location_on_car.value = getObjComputedValue(location_on_car, item.locationcode ? item.locationcode.code : null);
             quantity.value = getObjComputedValue(quantity, item.quantity);
             condition_code.value = getObjComputedValue(condition_code, item.conditioncode ? item.conditioncode.code : null);
-            applied_job_code.value = getObjComputedValue(applied_job_code, item.jobcode_joblist_job_code_appliedTojobcode ? item.jobcode_joblist_job_code_appliedTojobcode.code : null);
+            applied_job_code.value = getObjComputedValue(applied_job_code, item.jobcode_joblist_job_code_appliedTojobcode ? item.jobcode_joblist_job_code_appliedTojobcode.code.substring(0, 4) : null);
             applied_qualifier.value = getObjComputedValue(applied_qualifier, item.qualifiercode_joblist_qualifier_applied_idToqualifiercode ? item.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code : null);
             why_made_code.value = getObjComputedValue(why_made_code, item.whymadecode ? item.whymadecode.code : null);
-            removed_job_code.value = getObjComputedValue(removed_job_code, item.jobcode_joblist_job_code_removedTojobcode ? item.jobcode_joblist_job_code_removedTojobcode.code : null);
+            removed_job_code.value = getObjComputedValue(removed_job_code, item.jobcode_joblist_job_code_removedTojobcode ? item.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4) : null);
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
@@ -1029,9 +1032,75 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             } else {
                 machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator, "Y");
             }
-            wheel_narrative.value = getObjComputedValue(wheel_narrative, item.job_description);
-            labor_rate.value = getObjComputedValue(labor_rate, item.labor_rate * 100);
+            // if(!item.wheel_details){
+            //     wheel_narrative.value = getObjComputedValue(wheel_narrative, item.job_description);
+            // }
 
+            wheel_narrative.value =  item.wheel_details?getObjComputedValue(wheel_narrative_if_wheel_details, item.job_description) :getObjComputedValue(wheel_narrative, item.job_description);
+            console.log(wheel_narrative.value.length)
+            if(item.wheel_details){
+                let offset = 0;
+
+
+                applied_wheel_date.value = getObjComputedValue(applied_wheel_date,  item.wheel_details.substring(offset,offset +  applied_wheel_date.length));
+                console.log('applied_wheel_date:', applied_wheel_date.length);
+                console.log('applied_wheel_date:', applied_wheel_date.value);
+                offset += applied_wheel_date.length;
+                console.log("offset value " +offset)
+
+                applied_wheel_manufacture_code.value = getObjComputedValue(applied_wheel_manufacture_code, item.wheel_details.substring(offset,offset +  applied_wheel_manufacture_code.length));
+                console.log('applied_wheel_manufacture_code:', item.wheel_details.substring(offset, applied_wheel_manufacture_code.length));
+                console.log('applied_wheel_manufacture_code:', applied_wheel_manufacture_code.length);
+                console.log('applied_wheel_manufacture_code:', applied_wheel_manufacture_code.value);
+                offset += applied_wheel_manufacture_code.length;
+
+                applied_wheel_class_code.value = getObjComputedValue(applied_wheel_class_code, item.wheel_details.substring(offset, offset + applied_wheel_class_code.length));
+                console.log('applied_wheel_class_code:', applied_wheel_class_code.length);
+                console.log('applied_wheel_class_code:', applied_wheel_class_code.value);
+                offset += applied_wheel_class_code.length;
+
+                applied_side_reading.value = getObjComputedValue(applied_side_reading, item.wheel_details.substring(offset,offset +  applied_side_reading.length));
+                console.log('applied_side_reading:', applied_side_reading.length);
+                console.log('applied_side_reading:', applied_side_reading.value);
+                offset += applied_side_reading.length;
+
+                applied_finger_reading.value = getObjComputedValue(applied_finger_reading, item.wheel_details.substring(offset,offset +  applied_finger_reading.length));
+                console.log('applied_finger_reading:', applied_finger_reading.length);
+                console.log('applied_finger_reading:', applied_finger_reading.value);
+                offset += applied_finger_reading.length;
+
+                removed_wheel_date.value = getObjComputedValue(removed_wheel_date, item.wheel_details.substring(offset,offset +  removed_wheel_date.length));
+                console.log('removed_wheel_date:', removed_wheel_date.length);
+                console.log('removed_wheel_date:', removed_wheel_date.value);
+                offset += removed_wheel_date.length;
+
+                removed_wheel_manufacture_code.value = getObjComputedValue(removed_wheel_manufacture_code, item.wheel_details.substring(offset, offset + removed_wheel_manufacture_code.length));
+                console.log('removed_wheel_manufacture_code:', removed_wheel_manufacture_code.length);
+                console.log('removed_wheel_manufacture_code:', removed_wheel_manufacture_code.value);
+                offset += removed_wheel_manufacture_code.length;
+
+                removed_wheel_class_code.value = getObjComputedValue(removed_wheel_class_code, item.wheel_details.substring(offset, offset + removed_wheel_class_code.length));
+                console.log('removed_wheel_class_code:', removed_wheel_class_code.length);
+                console.log('removed_wheel_class_code:', removed_wheel_class_code.value);
+                offset += removed_wheel_class_code.length;
+
+                removed_side_reading.value = getObjComputedValue(removed_side_reading, item.wheel_details.substring(offset,offset +  removed_side_reading.length));
+                console.log('removed_side_reading:', removed_side_reading.length);
+                console.log('removed_side_reading:', removed_side_reading.value);
+                offset += removed_side_reading.length;
+
+                removed_finger_reading.value = getObjComputedValue(removed_finger_reading, item.wheel_details.substring(offset,offset +  removed_finger_reading.length));
+                console.log('removed_finger_reading:', removed_finger_reading.length);
+                console.log('removed_finger_reading:', removed_finger_reading.value);
+                offset += removed_finger_reading.length;
+
+                console.log(offset)
+            }
+
+
+
+
+            labor_rate.value = getObjComputedValue(labor_rate, item.labor_rate * 100);
             line_number.value = getObjComputedValue(line_number, item.line_number);
             var mat_sign;
             if (item.labor_rate >= 0) {
@@ -1083,10 +1152,10 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 + machine_priceable_indicator.value
                 + wrong_repair_indicator.value;
 
-            // console.log(machine_priceable_indicator.value)
+            //console.log(machine_priceable_indicator.value)
 
 
-            wheel_narrative.value = getObjComputedValue(wheel_narrative);
+            wheel_narrative.value =  item.wheel_details?  getObjComputedValue(wheel_narrative_if_wheel_details):getObjComputedValue(wheel_narrative);
             applied_wheel_date.value = getObjComputedValue(applied_wheel_date);
             applied_wheel_manufacture_code.value = getObjComputedValue(applied_wheel_manufacture_code);
             applied_wheel_class_code.value = getObjComputedValue(applied_wheel_class_code);
@@ -1097,8 +1166,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_wheel_class_code.value = getObjComputedValue(removed_wheel_class_code);
             removed_side_reading.value = getObjComputedValue(removed_side_reading);
             removed_finger_reading.value = getObjComputedValue(removed_finger_reading);
-            labor_rate.value =  item.wheel_details?item.wheel_details+getObjComputedValue(labor_rate):""+ getObjComputedValue(labor_rate);
-            wheel_description.value = getObjComputedValue(wheel_description)
+            labor_rate.value = getObjComputedValue(labor_rate);
             expanded_splc.value = getObjComputedValue(expanded_splc);
             cif_repairing_party.value = getObjComputedValue(cif_repairing_party);
             cif_billing_invoicing_party.value = getObjComputedValue(cif_billing_invoicing_party);
@@ -1112,11 +1180,14 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             original_invoice_number.value = getObjComputedValue(original_invoice_number);
             original_account_date.value = getObjComputedValue(original_account_date);
             aar_component_id.value = getObjComputedValue(aar_component_id,item.cid);
-            console.log(aar_component_id)
             ddct_incident_id.value = getObjComputedValue(ddct_incident_id);
             reserved_for_future_crb_use_5.value = getObjComputedValue(reserved_for_future_crb_use_5);
+
+
             var narrative_detail = wheel_narrative.value;
-            if (wheel_detail) {
+            //console.log(wheel_narrative.value)
+            if (item.wheel_details) {
+                console.log("has wheel details")
                 narrative_detail += applied_wheel_date.value + applied_wheel_manufacture_code.value + applied_wheel_class_code.value + applied_side_reading.value + applied_finger_reading.value + removed_wheel_date.value + removed_wheel_manufacture_code.value + removed_wheel_class_code.value + removed_side_reading.value + removed_finger_reading.value;
             }
 
@@ -1124,7 +1195,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
             if (forWhom == 1) {
 
-                en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail ) + "\n";
+                en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
                 //console.log(en_txt.length)
             }
             if (forWhom == 2) {
@@ -1340,7 +1411,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
     en_txt += padStringTo500(invoice_header + "Z".repeat(19) + totals_header) + "\n";
 
     var textFileAsBlob = new Blob([en_txt], {type: 'text/plain'});
-    console.log(textFileAsBlob)
+    //console.log(textFileAsBlob)
     var fileNameToSaveAs = filename; //filename.extension
 
     var downloadLink = document.createElement("a");
@@ -1509,7 +1580,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 }
 
 function getObjComputedValue(data, value) {
-
     const obj = data;
     var v = value;
     if (value == undefined || value == null) {
@@ -1528,6 +1598,16 @@ function getObjComputedValue(data, value) {
         v = v.replace(/[\r\n\t]+/g, " ");
         obj.value = nDigitString(v, obj.length);
     }
+    return obj.value;
+}
+
+function getObjComputedValueForWheelNarrative(data, value,length) {
+    const obj = data;
+    var v = value;
+
+    v = v == null ? " " : v.toString();
+    v = v.replace(/[\r\n\t]+/g, " ");
+    obj.value = nDigitString(v, length);
 
     return obj.value;
 }

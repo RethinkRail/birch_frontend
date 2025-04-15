@@ -1179,6 +1179,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             resubmitted_invoice_indicator.value = getObjComputedValue(resubmitted_invoice_indicator);
             original_invoice_number.value = getObjComputedValue(original_invoice_number);
             original_account_date.value = getObjComputedValue(original_account_date);
+            //console.log(aar_component_id)
             aar_component_id.value = getObjComputedValue(aar_component_id,item.cid);
             ddct_incident_id.value = getObjComputedValue(ddct_incident_id);
             reserved_for_future_crb_use_5.value = getObjComputedValue(reserved_for_future_crb_use_5);
@@ -1187,7 +1188,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             var narrative_detail = wheel_narrative.value;
             //console.log(wheel_narrative.value)
             if (item.wheel_details) {
-                console.log("has wheel details")
                 narrative_detail += applied_wheel_date.value + applied_wheel_manufacture_code.value + applied_wheel_class_code.value + applied_side_reading.value + applied_finger_reading.value + removed_wheel_date.value + removed_wheel_manufacture_code.value + removed_wheel_class_code.value + removed_side_reading.value + removed_finger_reading.value;
             }
 
@@ -1213,7 +1213,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         });
 
     }
-
+    aar_component_id.value = null
     //record format=8
     record_format.value = getObjComputedValue(record_format, 8);
     record_format.value = getObjComputedValue(record_format);

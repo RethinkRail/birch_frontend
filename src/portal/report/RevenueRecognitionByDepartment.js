@@ -54,7 +54,8 @@ const RevenueByDepartments = () => {
     const [allData,setAllData] = useState([])
     const [isAllDepartment,setIsAllDepartment] = useState(false)
     const [isUSD,setIsUSD] = useState(false)
-    const [isNonInVoicedOnly,setIsNonInvoicedOnly] = useState(true)
+    const [invoiceFilter, setInvoiceFilter] = useState(1); // or 'all', 'invoiced'
+
 
     const initialColumns = useMemo(() => [
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
@@ -109,7 +110,7 @@ const RevenueByDepartments = () => {
         try {
             setLoading(true);
             const payload = {
-                is_locked:isNonInVoicedOnly,
+                is_locked:invoiceFilter,
                 departments:!isAllDepartment? selectedDepartments.filter((id) => id):departments.map(item => item.value), // Remove null values
                 startDate:modified,
                 endDate,
@@ -149,9 +150,9 @@ const RevenueByDepartments = () => {
         setIsUSD(prev => !prev);
     }
 
-    function handleSetNonInvoicedOnly() {
-        setIsNonInvoicedOnly(prev => !prev);
-    }
+    // function handleSetNonInvoicedOnly() {
+    //     setIsNonInvoicedOnly(prev => !prev);
+    // }
 
     const handleExportRows = (table,rows) => {
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
@@ -218,24 +219,34 @@ const RevenueByDepartments = () => {
 
                 <div className="flex gap-4 mb-4">
                     <label className="label cursor-pointer flex items-center">
-                        <span className="label-text mr-5">Non Invoiced</span>
+                        <span className="label-text mr-2">All</span>
                         <input
                             type="checkbox"
-                            className="toggle"
-                            checked={isNonInVoicedOnly}
-                            onChange={handleSetNonInvoicedOnly}
+                            className="checkbox"
+                            checked={invoiceFilter === 1}
+                            onChange={() => setInvoiceFilter(1)}
                         />
                     </label>
                     <label className="label cursor-pointer flex items-center">
-                        <span className="label-text mr-5">Invoiced Cars</span>
+                        <span className="label-text mr-2">Non Invoiced</span>
                         <input
                             type="checkbox"
-                            className="toggle"
-                            checked={!isNonInVoicedOnly}
-                            onChange={handleSetNonInvoicedOnly}
+                            className="checkbox"
+                            checked={invoiceFilter === 3}
+                            onChange={() => setInvoiceFilter(3)}
+                        />
+                    </label>
+                    <label className="label cursor-pointer flex items-center">
+                        <span className="label-text mr-2">Invoiced Cars</span>
+                        <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={invoiceFilter ===2}
+                            onChange={() => setInvoiceFilter(2)}
                         />
                     </label>
                 </div>
+
 
                 {/* Select Menus */}
 

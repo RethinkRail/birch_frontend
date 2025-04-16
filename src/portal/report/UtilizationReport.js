@@ -27,7 +27,7 @@ import {FaDownload} from "react-icons/fa";
 import {mkConfig} from "export-to-csv";
 import * as XLSX from "xlsx";
 import RevenueChartAllCustomer from "../../components/RevenueChartAllCustomer";
-import IndirectHourChart from "../../components/IndirectHourChart";
+
 import {round2Dec} from "../../utils/NumberHelper";
 import UtilizationChart from "../../components/UtilizationChart";
 

@@ -1,208 +1,81 @@
-/**
- * @author : Mithun Sarker
- * @mailto : mithun@ihrail.com
- * @created : 11/22/2024, Friday
- * Description:
- **/
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
 
-import React, {useRef, useState} from "react";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
-import dayjs from "dayjs";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
-dayjs.extend(isSameOrBefore);
-// Register Chart.js modules
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-ChartJS.register({
-    id: "whiteBackground",
-    beforeDraw: (chart) => {
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.fillStyle = "white"; // Set the background color to white
-        ctx.fillRect(0, 0, chart.width, chart.height);
-        ctx.restore();
-    },
-});
+const IndirectHourChart = ({ data,startDate,endDate }) => {
+    const departmentHours = data.reduce((acc, curr) => {
+        acc[curr.department_name] = (acc[curr.department_name] || 0) + curr.total_hour;
+        return acc;
+    }, {});
+
+    const colors = [
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+    ];
+
+    const borderColors = [
+        'rgba(75, 192, 192, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+    ];
+
+    const departments = Object.keys(departmentHours);
+
+    const backgroundColor = departments.map((_, i) => `hsl(${(i * 360) / departments.length}, 70%, 60%)`);
+    const borderColor = departments.map((_, i) => `hsl(${(i * 360) / departments.length}, 70%, 40%)`);
 
 
-const IndirectHourChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
-    console.log(dataSet)
-    const chartContainerRef = useRef(null);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    // Generate X-Axis dates based on the given start and end date
-    const calculateDates = (startDate, endDate, diff) => {
-        const dates = [];
-        let current = dayjs(startDate);
-        const end = dayjs(endDate);
-
-        while (current.isBefore(end) || current.isSame(end)) {
-            dates.push(current.format("MM/DD/YYYY"));
-            current = current.add(diff, "day");
-        }
-
-        return dates;
-    };
-
-    const uniqueNames = [...new Set(dataSet.map((item) => item.department_name))];
-    const xAxis = calculateDates(startDate, endDate, dateDiff);
-
-    let timeMap = new Map();
-
-    uniqueNames.map((department_name)=>{
-
-        timeMap.set(department_name,[]);
-
-        let filteredData = dataSet.filter((item) => item.department_name === department_name);
-
-        let lastSum = 0;
-        xAxis.forEach((date) => {
-
-            const currentDate = dayjs(date);
-
-            const startDateBeforeOrOnDate = filteredData.filter(
-                (item) => dayjs(item.start_date).isBefore(currentDate) || dayjs(item.start_date).isSame(currentDate)
-            );
-
-            if (startDateBeforeOrOnDate.length > 0) {
-
-                // Reset the sum to the latest invoice found on or before the current date
-                lastSum = startDateBeforeOrOnDate.reduce((sum, item) => sum + item.total_hour, 0);
-                filteredData = filteredData.filter(item =>
-                    !startDateBeforeOrOnDate.some(removeItem =>
-                        removeItem.start_date === item.start_date &&
-                        removeItem.total_hour === item.total_hour
-                    )
-                );
-                const values = timeMap.get(department_name)
-
-                values.push(lastSum)
-            } else {
-
-                const values = timeMap.get(department_name)
-
-                values.push(lastSum)
-            }
-
-        })
-
-    })
-
-    // Process the dataset to calculate cumulative costs
-    const newData = Array.from(timeMap, ([name, data]) => ({ name, data }));
     const chartData = {
-        labels: xAxis,
-        datasets: newData.map((item, index) => ({
-            label: item.name,
-            data: item.data,
-            fill: false,
-            tension: 0.0,
-            backgroundColor: `hsla(${index * 360 / Object.keys(dataSet).length}, 70%, 50%, 0.2)`,
-            borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-            borderWidth: 2,
-            pointRadius: 4,
-            spanGaps: true, // Enable skipping null values
-        })),
+        labels: Object.keys(departmentHours),
+        datasets: [
+            {
+                label: '',
+                data: Object.values(departmentHours),
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                borderWidth: 1,
+            },
+        ],
     };
 
     const options = {
         responsive: true,
         plugins: {
             legend: {
-                position: "top",
+                display: false,
             },
             title: {
                 display: true,
-                text: `Indirect hours From ${new Date(startDate).toLocaleDateString()} To ${new Date(
-                    endDate
-                ).toLocaleDateString()} in ${dateDiff} day(s) range`,
-            },
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: "Dates",
-                },
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: "Indrirect Hours",
-                },
+                text: 'Total Indirect Hours by Department from '+startDate.toLocaleDateString()+'  to  '+endDate.toLocaleDateString(),
             },
         },
     };
 
-    const toggleFullscreen = () => {
-        if (!isFullscreen) {
-            chartContainerRef.current?.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    };
-
-    const handleFullscreenChange = () => {
-        setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    React.useEffect(() => {
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        };
-    }, []);
-
-    return (
-        <div
-            ref={chartContainerRef}
-            style={{
-                position: 'relative',
-                padding: '1rem',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                background: '#fff',
-            }}
-        >
-
-            <Line data={chartData} options={options} />
-        </div>
-    );
-
+    return <Bar data={chartData} options={options} />;
 };
 
 export default IndirectHourChart;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

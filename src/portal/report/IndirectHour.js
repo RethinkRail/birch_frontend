@@ -301,7 +301,8 @@ const IndirectHour = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
 
-                        <IndirectHourChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Indirect'} />
+                        {/*<IndirectHourChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Indirect'} />*/}
+                        <IndirectHourChart startDate={startDate} endDate={endDate} data={allData}  dateDiff={parseInt(selectedDateRange)} name={'Indirect'} />
                         {/*{isAllDepartment ? (*/}
                         {/*    <RevenueChartAllCustomer data={groupAndSortByDate(allData)} startDate={startDate} endDate={endDate}  dateDiff={parseInt(selectedDateRange)} />*/}
                         {/*) : (*/}

@@ -187,7 +187,7 @@ const UtilizationReport = () => {
                     result[key].utilization = totalTime === 0 ? 0 : (result[key].direct_time * 100) / totalTime;
                 });
                 console.log(Object.values(result))
-                setAllData(Object.values(result))
+                setAllData(data)
             }else {
                 console.log(data)
                 setAllData(data)

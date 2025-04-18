@@ -1,34 +1,24 @@
-/**
- * @author : Mithun Sarker
- * @mailto : mithun@ihrail.com
- * @created : 11/22/2024, Friday
- * Description:
- **/
-
-
-import React, {useRef, useState} from "react";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import React, { useRef, useState, useEffect } from "react";
+import { Bar } from "react-chartjs-2";
 import dayjs from "dayjs";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-dayjs.extend(isSameOrBefore);
-// Register Chart.js modules
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-ChartJS.register({
-    id: "whiteBackground",
-    beforeDraw: (chart) => {
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.fillStyle = "white"; // Set the background color to white
-        ctx.fillRect(0, 0, chart.width, chart.height);
-        ctx.restore();
-    },
-});
-const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
+import {
+    Chart as ChartJS,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Title,
+    Tooltip,
+    Legend,
+} from "chart.js";
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+
+const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) => {
     console.log(dataSet)
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    // Generate X-Axis dates based on the given start and end date
+
+    // Step 1: Build x-axis dates at interval
     const calculateDates = (startDate, endDate, diff) => {
         const dates = [];
         let current = dayjs(startDate);
@@ -39,88 +29,101 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
         }
         return dates;
     };
-    const uniqueNames = [...new Set(dataSet.map((item) => item.crew_name))];
-    const xAxis = calculateDates(startDate, endDate, dateDiff);
-    let timeMap = new Map();
-    uniqueNames.map((crew_name)=>{
-        timeMap.set(crew_name,[]);
-        let filteredData = dataSet.filter((item) => item.crew_name === crew_name);
-        let lastSum = 0;
-        xAxis.forEach((date) => {
-            const currentDate = dayjs(date);
-            const startDateBeforeOrOnDate = filteredData.filter(
-                (item) => dayjs(item.date).isBefore(currentDate) || dayjs(item.date).isSame(currentDate)
-            );
 
-            if (startDateBeforeOrOnDate.length > 0) {
-                // Compute the sums of direct and indirect times
-                let sumDirectTime = startDateBeforeOrOnDate.reduce((sum, item) => sum + item.direct_time, 0);
-                let sumIndirectTime = startDateBeforeOrOnDate.reduce((sum, item) => sum + item.indirect_time, 0);
 
-                // Calculate the required value
-                lastSum = sumDirectTime > 0 ? (sumDirectTime * 100) / (sumDirectTime + sumIndirectTime) : 0;
 
-                // Remove used items
-                filteredData = filteredData.filter(item =>
-                    !startDateBeforeOrOnDate.some(removeItem =>
-                        removeItem.date === item.date &&
-                        removeItem.direct_time === item.direct_time &&
-                        removeItem.indirect_time === item.indirect_time
-                    )
-                );
+    const xAxisDates = calculateDates(startDate, endDate, dateDiff);
 
-                const values = timeMap.get(crew_name);
-                values.push(lastSum);
-            } else {
-                const values = timeMap.get(crew_name);
-                values.push(lastSum);
-            }
+    console.log("X Axis value")
+    console.log(xAxisDates)
+
+    // Step 2: Cumulative sums up to each x-axis date
+    const directPercents = [];
+    const indirectPercents = [];
+
+    let lastProcessedDate = dayjs(startDate, "MM/DD/YYYY");
+
+    xAxisDates.forEach(dateStr => {
+        const current = dayjs(dateStr, "MM/DD/YYYY");
+
+        // Filter only items in the current range (excluding already-processed)
+        const rangeItems = dataSet.filter(item => {
+            const itemDate = dayjs(item.date, "M/D/YYYY"); // Handle unpadded format from data
+            return itemDate.isSame(lastProcessedDate, 'day') ||
+                (itemDate.isAfter(lastProcessedDate, 'day') && itemDate.isSameOrBefore(current, 'day'));
         });
-    })
-    // Process the dataset to calculate cumulative costs
-    const newData = Array.from(timeMap, ([name, data]) => ({ name, data }));
+
+        console.log(`Processing range: ${lastProcessedDate.format("MM/DD/YYYY")} to ${current.format("MM/DD/YYYY")}`);
+        console.log("Matching dates:", rangeItems.map(item => item.date));
+
+        // Calculate total direct and indirect hours
+        const totalDirect = rangeItems.reduce((sum, item) => sum + (parseFloat(item.direct_time) || 0), 0);
+        const totalIndirect = rangeItems.reduce((sum, item) => sum + (parseFloat(item.indirect_time) || 0), 0);
+        const total = totalDirect + totalIndirect;
+
+        // Calculate utilization %
+        const directPercent = total > 0 ? (totalDirect * 100) / total : 0;
+        const indirectPercent = total > 0 ? (totalIndirect * 100) / total : 0;
+
+        // Push to your chart arrays
+        directPercents.push(directPercent);
+        indirectPercents.push(indirectPercent);
+
+        // Update the last processed date to the *next day* after the current range
+        lastProcessedDate = current.add(1, 'day');
+    });
+
+
+
+    // Step 3: Chart setup
     const chartData = {
-        labels: xAxis,
-        datasets: newData.map((item, index) => ({
-            label: item.name,
-            data: item.data,
-            fill: false,
-            tension: 0.0,
-            backgroundColor: `hsla(${index * 360 / Object.keys(dataSet).length}, 70%, 50%, 0.2)`,
-            borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-            borderWidth: 2,
-            pointRadius: 4,
-            spanGaps: true, // Enable skipping null values
-        })),
+        labels: xAxisDates,
+        datasets: [
+            {
+                label: "Direct Time (%)",
+                data: directPercents,
+                backgroundColor: "rgba(75, 192, 192, 0.8)",
+                stack: "utilization",
+            },
+            {
+                label: "Indirect Time (%)",
+                data: indirectPercents,
+                backgroundColor: "rgba(255, 99, 132, 0.8)",
+                stack: "utilization",
+            },
+        ],
     };
+
     const options = {
         responsive: true,
         plugins: {
-            legend: {
-                position: "top",
-            },
+            legend: { position: "top" },
             title: {
                 display: true,
-                text: `Utilization report From ${new Date(startDate).toLocaleDateString()} To ${new Date(
-                    endDate
-                ).toLocaleDateString()} in ${dateDiff} day(s) range`,
+                text: `Cumulative Utilization % from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()} (every ${dateDiff} days)`,
             },
         },
         scales: {
             x: {
+                stacked: true,
                 title: {
                     display: true,
-                    text: "Dates",
+                    text: "Date",
                 },
             },
             y: {
+                stacked: true,
                 title: {
                     display: true,
-                    text: "Utilization(%)",
+                    text: "Utilization (%)",
                 },
+                max: 100,
+                ticks: { stepSize: 20 },
             },
         },
     };
+
+    // Fullscreen logic
     const toggleFullscreen = () => {
         if (!isFullscreen) {
             chartContainerRef.current?.requestFullscreen();
@@ -128,15 +131,18 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
             document.exitFullscreen();
         }
     };
+
     const handleFullscreenChange = () => {
         setIsFullscreen(!!document.fullscreenElement);
     };
-    React.useEffect(() => {
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    useEffect(() => {
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
         };
     }, []);
+
     return (
         <div
             ref={chartContainerRef}
@@ -148,45 +154,9 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name }) => {
                 background: '#fff',
             }}
         >
-
-            <Line data={chartData} options={options} />
+            <Bar data={chartData} options={options} />
         </div>
     );
 };
+
 export default UtilizationChart;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

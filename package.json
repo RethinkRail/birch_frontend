@@ -17,6 +17,7 @@
     "axios": "^1.6.0",
     "chart.js": "^4.4.6",
     "chartjs-adapter-date-fns": "^3.0.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "datatables.net": "^2.1.5",
     "datatables.net-dt": "^2.1.5",
     "dayjs": "^1.11.13",

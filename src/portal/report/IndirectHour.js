@@ -109,6 +109,7 @@ const IndirectHour = () => {
     const handleGenerate = async () => {
         let modified = new Date(startDate);
         modified.setDate(modified.getDate() - 0);
+
         try {
             setLoading(true);
             const payload = {
@@ -116,6 +117,7 @@ const IndirectHour = () => {
                 startDate:modified,
                 endDate,
             };
+            console.log(payload)
             console.log(payload)
             console.log(departments)
             console.log(new Date(modified).toISOString())

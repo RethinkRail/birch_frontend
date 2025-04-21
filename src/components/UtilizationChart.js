@@ -1,24 +1,31 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import dayjs from "dayjs";
+
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {
     Chart as ChartJS,
     BarElement,
     CategoryScale,
     LinearScale,
-    Title,
     Tooltip,
     Legend,
-} from "chart.js";
+} from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+ChartJS.register(
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+    ChartDataLabels
+);
 
-const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) => {
-    console.log(dataSet)
+
+const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet, name, type }) => {
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // Step 1: Build x-axis dates at interval
     const calculateDates = (startDate, endDate, diff) => {
         const dates = [];
         let current = dayjs(startDate);
@@ -30,67 +37,49 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) =
         return dates;
     };
 
-
-
     const xAxisDates = calculateDates(startDate, endDate, dateDiff);
 
-    console.log("X Axis value")
-    console.log(xAxisDates)
-
-    // Step 2: Cumulative sums up to each x-axis date
-    const directPercents = [];
-    const indirectPercents = [];
+    const directHours = [];
+    const indirectHours = [];
+    const directPercentLabels = [];
 
     let lastProcessedDate = dayjs(startDate, "MM/DD/YYYY");
 
     xAxisDates.forEach(dateStr => {
         const current = dayjs(dateStr, "MM/DD/YYYY");
 
-        // Filter only items in the current range (excluding already-processed)
         const rangeItems = dataSet.filter(item => {
-            const itemDate = dayjs(item.date, "M/D/YYYY"); // Handle unpadded format from data
+            const itemDate = dayjs(item.date, "M/D/YYYY");
             return itemDate.isSame(lastProcessedDate, 'day') ||
                 (itemDate.isAfter(lastProcessedDate, 'day') && itemDate.isSameOrBefore(current, 'day'));
         });
 
-        console.log(`Processing range: ${lastProcessedDate.format("MM/DD/YYYY")} to ${current.format("MM/DD/YYYY")}`);
-        console.log("Matching dates:", rangeItems.map(item => item.date));
-
-        // Calculate total direct and indirect hours
         const totalDirect = rangeItems.reduce((sum, item) => sum + (parseFloat(item.direct_time) || 0), 0);
         const totalIndirect = rangeItems.reduce((sum, item) => sum + (parseFloat(item.indirect_time) || 0), 0);
         const total = totalDirect + totalIndirect;
 
-        // Calculate utilization %
-        const directPercent = total > 0 ? (totalDirect * 100) / total : 0;
-        const indirectPercent = total > 0 ? (totalIndirect * 100) / total : 0;
+        directHours.push(totalDirect);
+        indirectHours.push(totalIndirect);
+        directPercentLabels.push(total > 0 ? `${((totalDirect * 100) / total).toFixed(1)}%` : "0%");
 
-        // Push to your chart arrays
-        directPercents.push(directPercent);
-        indirectPercents.push(indirectPercent);
-
-        // Update the last processed date to the *next day* after the current range
         lastProcessedDate = current.add(1, 'day');
     });
 
-
-
-    // Step 3: Chart setup
     const chartData = {
         labels: xAxisDates,
         datasets: [
             {
-                label: "Direct Time (%)",
-                data: directPercents,
+                label: "Direct Hours",
+                data: directHours,
                 backgroundColor: "rgba(75, 192, 192, 0.8)",
                 stack: "utilization",
             },
             {
-                label: "Indirect Time (%)",
-                data: indirectPercents,
+                label: "Indirect Hours",
+                data: indirectHours,
                 backgroundColor: "rgba(255, 99, 132, 0.8)",
                 stack: "utilization",
-            },
+            }
         ],
     };
 
@@ -100,7 +89,25 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) =
             legend: { position: "top" },
             title: {
                 display: true,
-                text: `Cumulative Utilization % from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()} (every ${dateDiff} days)`,
+                text: `Utilization Hours from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()} (every ${dateDiff} days)`,
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            },
+            datalabels: {
+                display: true,
+                anchor: 'end',
+                align: 'end',
+                formatter: function (_, context) {
+                    // Show direct time % only on top of bars
+                    if (context.datasetIndex === 1) return ''; // Show label only once (on top stack)
+                    return directPercentLabels[context.dataIndex];
+                },
+                font: {
+                    weight: 'bold',
+                },
+                color: '#000',
             },
         },
         scales: {
@@ -115,15 +122,15 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) =
                 stacked: true,
                 title: {
                     display: true,
-                    text: "Utilization (%)",
+                    text: "Hours",
                 },
-                max: 100,
-                ticks: { stepSize: 20 },
+                ticks: {
+                    stepSize: 10,
+                },
             },
         },
     };
 
-    // Fullscreen logic
     const toggleFullscreen = () => {
         if (!isFullscreen) {
             chartContainerRef.current?.requestFullscreen();
@@ -154,9 +161,10 @@ const UtilizationChart = ({ startDate, endDate, dateDiff, dataSet,name,type }) =
                 background: '#fff',
             }}
         >
-            <Bar data={chartData} options={options} />
+            <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
         </div>
     );
 };
+
 
 export default UtilizationChart;

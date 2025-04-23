@@ -4,6 +4,7 @@ import axios from 'axios';
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import {round2Dec} from "../../utils/NumberHelper";
+import {FaArrowDown, FaMoon} from "react-icons/fa";
 const ReportDates = () => {
     const [reportType, setReportType] = useState("week");
     const [dateRanges, setDateRanges] = useState([]);
@@ -189,47 +190,68 @@ const ReportDates = () => {
 
     const processLogs = (logs) => {
         const grouped = {};
+
         logs.forEach(log => {
-            const { team_member, start_time, end_time, railcar_id,department_name,logged_time_in_seconds } = log;
+            const {
+                team_member,
+                start_time,
+                end_time,
+                railcar_id,
+                department_name,
+                logged_time_in_seconds
+            } = log;
             const start = parseISO(start_time);
-            const end = parseISO(end_time);
-            const duration = logged_time_in_seconds/ 3600;
-            if (!grouped[team_member+":"+department_name]) {
-                grouped[team_member+":"+department_name] = { totalHours: 0, breakHours: 0, weeks: {} };
+            const duration = logged_time_in_seconds / 3600;
+            const key = `${team_member}:${department_name}`;
+
+            // 1) Ensure the team/department aggregate exists
+            if (!grouped[key]) {
+                grouped[key] = { totalHours: 0, breakHours: 0, weeks: {} };
             }
-            if (railcar_id === "BREAK") {
-                console.log("calculating break")
-                console.log(duration)
-                grouped[team_member+":"+department_name].breakHours += duration;
-            } else {
-                grouped[team_member+":"+department_name].totalHours += duration;
-            }
+
+            // 2) Compute which week this log belongs to
             const weekStart = start.setDate(start.getDate() - start.getDay());
             const weekKey = format(weekStart, "yyyy-MM-dd");
-            if (!grouped[team_member+":"+department_name].weeks[weekKey]) {
-                grouped[team_member+":"+department_name].weeks[weekKey] = { logs: [], totalWeekHours: 0 };
+
+            // 3) Ensure the week bucket exists, initializing breakHours there too
+            if (!grouped[key].weeks[weekKey]) {
+                grouped[key].weeks[weekKey] = {
+                    logs: [],
+                    totalWeekHours: 0,
+                    breakHours: 0    // ← initialize here
+                };
             }
-            grouped[team_member+":"+department_name].weeks[weekKey].logs.push({ ...log, duration });
-            grouped[team_member+":"+department_name].weeks[weekKey].totalWeekHours += duration;
+
+            const weekBucket = grouped[key].weeks[weekKey];
+
+            // 4) Add to break or working totals, both at overall and per-week level
+            if (railcar_id === "BREAK") {
+                grouped[key].breakHours += duration;
+                weekBucket.breakHours += duration;      // ← increment per-week
+            } else {
+                grouped[key].totalHours += duration;
+            }
+
+            // 5) Record the log in that week
+            weekBucket.logs.push({ ...log, duration });
+            weekBucket.totalWeekHours += duration;
         });
 
+        // 6) Finalize each week’s labels and compute OT/standard
         Object.values(grouped).forEach(team => {
-            console.log(team)
             const weekKeys = Object.keys(team.weeks).sort();
-            weekKeys.forEach((weekKey, index) => {
+            weekKeys.forEach((weekKey, idx) => {
                 const week = team.weeks[weekKey];
-                console.log(week)
-                week.weekLabel = `Week ${index + 1}`;
+                week.weekLabel = `Week ${idx + 1}`;
                 week.standardHours = Math.min(40, week.totalWeekHours);
-                week.overtimeHours = Math.max(0, week.totalWeekHours - 40);
-                week.breakHours = week.breakHours
+                week.overtimeHours  = Math.max(0, week.totalWeekHours - 40);
+                // week.breakHours is already set above
             });
         });
 
-        console.log(grouped)
-
         return grouped;
     };
+
 
     const exportToExcel = (data, department) => {
         let allLogs = [];
@@ -444,6 +466,25 @@ const ReportDates = () => {
         exportToExcel3(reportRows, startDate, endDate);
     }
 
+    function isFirstLogAfterNoon(data) {
+        const weeks = data.weeks || {};
+
+        return Object.values(weeks).some(week => {
+            if (!Array.isArray(week.logs) || week.logs.length === 0) {
+                return false;
+            }
+            const utcStart = new Date(week.logs[0].start_time);
+            const localHour = utcStart.getHours(); // local timezone
+            return localHour >= 12;
+        });
+    }
+
+    function isAfterNoon(start_time){
+        const utcStart = new Date(start_time);
+        const localHour = utcStart.getHours(); // local timezone
+        return localHour >= 12;
+    }
+
     function exportToExcel3(reportRows, startDate, endDate) {
         const workbook = XLSX.utils.book_new();
 
@@ -609,6 +650,15 @@ const ReportDates = () => {
 
                         </span>
                             <div className="p-2 rounded-lg text-gray-700 flex gap-2 pt-4">
+
+                                <div className="tooltip z-[100]" data-tip="Night shift">
+                                      <span>
+                                        {isFirstLogAfterNoon(data) && (
+                                            <FaMoon style={{ color: 'black', marginRight: '20px' , marginTop:'8px'}}/>
+                                        )}
+                                      </span>
+                                </div>
+
                                 <div className="tooltip z-[100] border p-1 bg-green-500" data-tip="Regular Hours">
                                     <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span>
                                 </div>
@@ -633,16 +683,105 @@ const ReportDates = () => {
                                     Download XLS
                                 </button>
                             </span>
-                            {Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => {
-                                console.log(breakHours)
-                                console.log(logs)
-                                const dayTotalsMap = {};
-                                let currentDate = null;
+                            {/*{Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => {*/}
+                            {/*    console.log(breakHours)*/}
+                            {/*    console.log(logs)*/}
+                            {/*    const dayTotalsMap = {};*/}
+                            {/*    let currentDate = null;*/}
 
+                            {/*    return (*/}
+                            {/*        <div key={week}>*/}
+                            {/*            <h3 className="font-bold mb-5">{weekLabel} - Week of {week}</h3>*/}
+
+                            {/*            <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden mb-5">*/}
+                            {/*                <thead className="bg-gray-100 text-gray-700">*/}
+                            {/*                <tr>*/}
+                            {/*                    <th className="p-2 border">Date</th>*/}
+                            {/*                    <th className="p-2 border">Day</th>*/}
+                            {/*                    <th className="p-2 border">In</th>*/}
+                            {/*                    <th className="p-2 border">Out</th>*/}
+                            {/*                    <th className="p-2 border">Hours</th>*/}
+                            {/*                    <th className="p-2 border">Day Total</th>*/}
+                            {/*                    <th className="p-2 border">Customer</th>*/}
+                            {/*                    <th className="p-2 border">Job</th>*/}
+                            {/*                </tr>*/}
+                            {/*                </thead>*/}
+                            {/*                <tbody>*/}
+                            {/*                {logs.map((log, index) => {*/}
+                            {/*                    const dateStr = format(parseISO(log.start_time), "yyyy-MM-dd");*/}
+
+                            {/*                    // Initialize or accumulate non-break hours for the date*/}
+                            {/*                    if (!dayTotalsMap[dateStr]) {*/}
+                            {/*                        dayTotalsMap[dateStr] = 0;*/}
+                            {/*                    }*/}
+
+                            {/*                    if (log.railcar_id !== "BREAK") {*/}
+                            {/*                        dayTotalsMap[dateStr] += log.duration;*/}
+                            {/*                    }*/}
+
+                            {/*                    // Determine if this is the last log for the current date*/}
+                            {/*                    const nextLog = logs[index + 1];*/}
+                            {/*                    const nextDateStr = nextLog ? format(parseISO(nextLog.start_time), "yyyy-MM-dd") : null;*/}
+                            {/*                    const isEndOfDay = dateStr !== nextDateStr;*/}
+
+                            {/*                    return (*/}
+                            {/*                        <React.Fragment key={index}>*/}
+                            {/*                            <tr className="border">*/}
+                            {/*                                <td className="p-2 flex items-center">{dateStr}{isAfterNoon(log.start_time) && (<FaMoon style={{ color: 'black', marginLeft: '5px' , marginTop:'0px'}}/>)}</td>*/}
+                            {/*                                <td className="p-2 border">{format(parseISO(log.start_time), "EEEE")}</td>*/}
+                            {/*                                <td className="p-2 border">{format(parseISO(log.start_time), "hh:mm a")}</td>*/}
+                            {/*                                <td className="p-2 border">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>*/}
+                            {/*                                <td className="p-2 border">{log.duration.toFixed(2)}</td>*/}
+                            {/*                                <td className="p-2 border">{dayTotalsMap[dateStr].toFixed(2)}</td>*/}
+                            {/*                                <td className="p-2">*/}
+                            {/*            <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>*/}
+                            {/*                {log.railcar_id}*/}
+                            {/*            </span>*/}
+                            {/*                                </td>*/}
+                            {/*                                <td className="p-2 border">{log.job_description}</td>*/}
+                            {/*                            </tr>*/}
+
+                            {/*                            /!* 🔸 Separator Row After Each Day *!/*/}
+                            {/*                            {isEndOfDay && (*/}
+                            {/*                                <tr className="bg-gray-200">*/}
+                            {/*                                    <td colSpan="8" className="h-2 p-0"></td>*/}
+                            {/*                                </tr>*/}
+                            {/*                            )}*/}
+                            {/*                        </React.Fragment>*/}
+                            {/*                    );*/}
+                            {/*                })}*/}
+                            {/*                </tbody>*/}
+                            {/*                <tfoot>*/}
+                            {/*                <tr className="bg-gray-50">*/}
+
+                            {/*                    <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>*/}
+                            {/*                    <td className="p-2 border text-sm font-semibold">{(standardHours + overtimeHours).toFixed(2)}h</td>*/}
+                            {/*                    <td className="p-1 border text-sm font-semibold">Standard: {standardHours.toFixed(2)}h</td>*/}
+                            {/*                    <td className="p-1 border text-sm font-semibold">Overtime: {overtimeHours.toFixed(2)}h</td>*/}
+                            {/*                    <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>*/}
+
+
+                            {/*                </tr>*/}
+                            {/*                </tfoot>*/}
+                            {/*            </table>*/}
+                            {/*        </div>*/}
+                            {/*    );*/}
+                            {/*})}*/}
+
+                            {Object.entries(data.weeks).map(([week, { logs, standardHours, overtimeHours, breakHours, weekLabel }]) => {
+                                // 1) Build a map: dateStr → hasBreak?
+                                const breakPresence = {};
+                                logs.forEach(log => {
+                                    const dateStr = format(parseISO(log.start_time), "yyyy-MM-dd");
+                                    if (!breakPresence[dateStr]) breakPresence[dateStr] = false;
+                                    if (log.railcar_id === "BREAK") breakPresence[dateStr] = true;
+                                });
+
+                                // 2) Now render
+                                const dayTotalsMap = {};
                                 return (
                                     <div key={week}>
                                         <h3 className="font-bold mb-5">{weekLabel} - Week of {week}</h3>
-
                                         <table className="table-auto w-full border border-gray-300 shadow-md rounded-lg overflow-hidden mb-5">
                                             <thead className="bg-gray-100 text-gray-700">
                                             <tr>
@@ -657,41 +796,39 @@ const ReportDates = () => {
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {logs.map((log, index) => {
+                                            {logs.map((log, i) => {
                                                 const dateStr = format(parseISO(log.start_time), "yyyy-MM-dd");
+                                                // accumulate day totals
+                                                if (!dayTotalsMap[dateStr]) dayTotalsMap[dateStr] = 0;
+                                                if (log.railcar_id !== "BREAK") dayTotalsMap[dateStr] += log.duration;
 
-                                                // Initialize or accumulate non-break hours for the date
-                                                if (!dayTotalsMap[dateStr]) {
-                                                    dayTotalsMap[dateStr] = 0;
-                                                }
-
-                                                if (log.railcar_id !== "BREAK") {
-                                                    dayTotalsMap[dateStr] += log.duration;
-                                                }
-
-                                                // Determine if this is the last log for the current date
-                                                const nextLog = logs[index + 1];
-                                                const nextDateStr = nextLog ? format(parseISO(nextLog.start_time), "yyyy-MM-dd") : null;
+                                                const nextLog = logs[i + 1];
+                                                const nextDateStr = nextLog
+                                                    ? format(parseISO(nextLog.start_time), "yyyy-MM-dd")
+                                                    : null;
                                                 const isEndOfDay = dateStr !== nextDateStr;
 
+                                                // 3) Check if this date has NO breaks → highlight
+                                                const noBreaksToday = !breakPresence[dateStr];
+                                                const rowBgClass = noBreaksToday ? "bg-yellow-50" : "";
+
                                                 return (
-                                                    <React.Fragment key={index}>
-                                                        <tr className="border">
-                                                            <td className="p-2 border">{dateStr}</td>
-                                                            <td className="p-2 border">{format(parseISO(log.start_time), "EEEE")}</td>
-                                                            <td className="p-2 border">{format(parseISO(log.start_time), "hh:mm a")}</td>
-                                                            <td className="p-2 border">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
-                                                            <td className="p-2 border">{log.duration.toFixed(2)}</td>
-                                                            <td className="p-2 border">{dayTotalsMap[dateStr].toFixed(2)}</td>
+                                                    <React.Fragment key={i}>
+                                                        <tr className={`${rowBgClass} border`}>
+                                                            <td className="p-2 flex items-center">{dateStr}{isAfterNoon(log.start_time) && (<FaMoon style={{ color: 'black', marginLeft: '5px' , marginTop:'0px'}}/>)}</td>
+                                                            <td className="p-2">{format(parseISO(log.start_time), "EEEE")}</td>
+                                                            <td className="p-2">{format(parseISO(log.start_time), "hh:mm a")}</td>
+                                                            <td className="p-2">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
+                                                            <td className="p-2">{log.duration.toFixed(2)}</td>
+                                                            <td className="p-2">{dayTotalsMap[dateStr].toFixed(2)}</td>
                                                             <td className="p-2">
-                                        <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
-                                            {log.railcar_id}
-                                        </span>
+                    <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
+                      {log.railcar_id}
+                    </span>
                                                             </td>
-                                                            <td className="p-2 border">{log.job_description}</td>
+                                                            <td className="p-2">{log.job_description}</td>
                                                         </tr>
 
-                                                        {/* 🔸 Separator Row After Each Day */}
                                                         {isEndOfDay && (
                                                             <tr className="bg-gray-200">
                                                                 <td colSpan="8" className="h-2 p-0"></td>

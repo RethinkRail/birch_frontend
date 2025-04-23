@@ -27,7 +27,7 @@ ChartJS.register({
 
 
 const RecognitionChartAllDepartment = ({ startDate, endDate, dateDiff, dataSet,isUSD }) => {
-    console.log(dataSet)
+
     const chartContainerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     // Generate X-Axis dates based on the given start and end date
@@ -132,6 +132,14 @@ const RecognitionChartAllDepartment = ({ startDate, endDate, dateDiff, dataSet,i
                     endDate
                 ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },
+            datalabels: {
+                color: '#444',
+                anchor: 'end',
+                align: 'top',
+                formatter: function (value) {
+                    return value.toFixed(2);
+                }
+            }
         },
         scales: {
             x: {

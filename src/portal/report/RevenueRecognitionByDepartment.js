@@ -323,12 +323,7 @@ const RevenueByDepartments = () => {
                 {allData.length > 0 && (
                     <div className="mt-4">
 
-                        {!isAllDepartment ? (
-                            <RecognitionChartAllDepartment startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
-                        ) : (
-                            <RecognitionChart startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
-                        )}
-
+                        <RecognitionChartAllDepartment startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} isUSD ={isUSD} />
 
 
 

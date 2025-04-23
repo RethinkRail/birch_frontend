@@ -50,12 +50,18 @@ const RevenueRecognition = () => {
     const [loading, setLoading] = useState(false);
 
     const [allData,setAllData] = useState([])
+    const [graphData,setGraphata] = useState([])
 
     const initialColumns = useMemo(() => [
-        { accessorKey: 'name', header: 'Name', enableSorting: true },
-        { accessorKey: 'job_description', header: 'Job Description', enableSorting: true },
-        { accessorKey: 'completed_time', header: 'Completion time', enableSorting: true },
-        { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) }
+        { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
+        { accessorKey: 'line_number', header: 'Line', enableSorting: true },
+        { accessorKey: 'part_code', header: 'Part Code', enableSorting: true },
+        { accessorKey: 'part_title', header: 'Part title', enableSorting: true },
+        { accessorKey: 'team_member', header: 'Team member', enableSorting: true },
+        { accessorKey: 'job_description', header: 'Job description', enableSorting: true },
+        { accessorKey: 'department', header: 'Department', enableSorting: true},
+        { accessorKey: 'completed_time', header: 'Completion Time', enableSorting: true },
+        { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true,Cell: ({ cell }) => round2Dec( cell.getValue()) },
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);
@@ -64,6 +70,27 @@ const RevenueRecognition = () => {
     const handleChange = (event) => {
         setSelectedDateRange(event.target.value); // Update state variable
     };
+
+
+    function aggregateByJob(records) {
+        const map = new Map();
+
+        for (const { job_id, completed_time, material_cost } of records) {
+            if (!map.has(job_id)) {
+                // First time seeing this job_id
+                map.set(job_id, {
+                    job_id,
+                    completed_time,
+                    material_cost: Number(material_cost)
+                });
+            } else {
+                // Sum with existing material_cost
+                map.get(job_id).material_cost += Number(material_cost);
+            }
+        }
+
+        return Array.from(map.values());
+    }
     // Fetch departments from the API
 
 
@@ -92,7 +119,7 @@ const RevenueRecognition = () => {
             const data = response.data.data;
             console.log(data)
             setAllData(data)
-
+            setGraphata(aggregateByJob(data))
 
             setLoading(false);
 
@@ -183,7 +210,7 @@ const RevenueRecognition = () => {
 
                 {allData.length > 0 && (
                     <div className="mt-4">
-                        <RecognitionChartInventory startDate={startDate} endDate={endDate} dataSet={allData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} />
+                        <RecognitionChartInventory startDate={startDate} endDate={endDate} dataSet={graphData}  dateDiff={parseInt(selectedDateRange)} name={'Departments'} />
                         <div className="overflow-x-auto mt-4">
                             {allData.length >0?(
                                 <MaterialReactTable

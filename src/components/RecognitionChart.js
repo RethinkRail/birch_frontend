@@ -128,6 +128,14 @@ const RecognitionChart = ({ startDate, endDate, dateDiff, dataSet,isUSD }) => {
                     endDate
                 ).toLocaleDateString()} in ${dateDiff} day(s) range`,
             },
+            datalabels: {
+                color: '#444',
+                anchor: 'end',
+                align: 'top',
+                formatter: function (value) {
+                    return value.toFixed(2);
+                }
+            }
         },
         scales: {
             x: {
@@ -135,6 +143,12 @@ const RecognitionChart = ({ startDate, endDate, dateDiff, dataSet,isUSD }) => {
                     display: true,
                     text: "Dates",
                 },
+                ticks: {
+                    callback: function (value, index, ticks) {
+                        // Format to 2 decimal places
+                        return parseFloat(value).toFixed(2);
+                    }
+                }
             },
             y: {
                 title: {

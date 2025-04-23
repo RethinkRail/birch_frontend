@@ -45,37 +45,27 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
         "Termination"
     ]
 
-    const handleChange = (e) => {
-        const {name, value} = e.target;
-        // setWorkOrderValues(prevValues => ({
-        //     ...prevValues,
-        //     [name]: value
-        // }));
-    };
+
     function validateRailCar(input) {
-        // Check if the input length is exactly 10
-        if (input.length !== 10) {
-            return false;
-        }
+        // Must be exactly 10 characters
 
-        // Check if the first 4 characters are letters
-        const firstFourChars = input.slice(0, 4);
-        const lettersRegex = /^[A-Za-z]+$/;
+        if (input.length !== 10) return false;
 
-        if (!lettersRegex.test(firstFourChars)) {
-            return false;
-        }
+        // Pattern for the first 4 chars:
+        // - [A-Za-z]{4}      → 4 letters
+        // - [A-Za-z]{3}\s    → 3 letters + space
+        // - [A-Za-z]{2}\s{2} → 2 letters + 2 spaces
+        const prefixRegex = /^(?:[A-Za-z]{4}|[A-Za-z]{3}\s|[A-Za-z]{2}\s{2})/;
 
-        // Check if the rest of the characters are digits
-        const remainingChars = input.slice(4);
-        const digitsRegex = /^[0-9]+$/;
+        if (!prefixRegex.test(input)) return false;
 
-        if (!digitsRegex.test(remainingChars)) {
-            return false;
-        }
+        // Last 6 characters must be digits
+        const suffix = input.slice(4);
+        if (!/^\d{6}$/.test(suffix)) return false;
 
-        return true; // Valid string
+        return true;
     }
+
 
     const handleLookup = async () => {
         try {
@@ -85,6 +75,7 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
             setInputValues({})
             console.log(rfiD, "This is the cargo number")
             const railcar_id = rfiD.toUpperCase()
+            console.log(railcar_id)
             if(!validateRailCar(railcar_id)){
                 alert("Railcar ID not valid")
                 return

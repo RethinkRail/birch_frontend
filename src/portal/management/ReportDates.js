@@ -663,7 +663,7 @@ const ReportDates = () => {
                                     <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours">
-                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0).toFixed(2)}h</span>
+                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours-w.breakHours), 0).toFixed(2)}h</span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Hours">
                                     <span>{data.totalHours.toFixed(2)}h</span>
@@ -798,24 +798,37 @@ const ReportDates = () => {
                                             <tbody>
                                             {logs.map((log, i) => {
                                                 const dateStr = format(parseISO(log.start_time), "yyyy-MM-dd");
-                                                // accumulate day totals
+
+                                                // Initialize daily tracking if not done
                                                 if (!dayTotalsMap[dateStr]) dayTotalsMap[dateStr] = 0;
                                                 if (log.railcar_id !== "BREAK") dayTotalsMap[dateStr] += log.duration;
 
+                                                // Determine if this is the first log of the day
+                                                const prevLog = logs[i - 1];
+                                                const prevDateStr = prevLog
+                                                    ? format(parseISO(prevLog.start_time), "yyyy-MM-dd")
+                                                    : null;
+                                                const isFirstLogOfDay = dateStr !== prevDateStr;
+
+                                                // Determine if this is the last log of the day
                                                 const nextLog = logs[i + 1];
                                                 const nextDateStr = nextLog
                                                     ? format(parseISO(nextLog.start_time), "yyyy-MM-dd")
                                                     : null;
                                                 const isEndOfDay = dateStr !== nextDateStr;
 
-                                                // 3) Check if this date has NO breaks → highlight
                                                 const noBreaksToday = !breakPresence[dateStr];
                                                 const rowBgClass = noBreaksToday ? "bg-yellow-50" : "";
 
                                                 return (
                                                     <React.Fragment key={i}>
                                                         <tr className={`${rowBgClass} border`}>
-                                                            <td className="p-2 flex items-center">{dateStr}{isAfterNoon(log.start_time) && (<FaMoon style={{ color: 'black', marginLeft: '5px' , marginTop:'0px'}}/>)}</td>
+                                                            <td className="p-2 flex items-center">
+                                                                {dateStr}
+                                                                {isFirstLogOfDay && isAfterNoon(log.start_time) && (
+                                                                    <FaMoon style={{ color: 'black', marginLeft: '5px' }} />
+                                                                )}
+                                                            </td>
                                                             <td className="p-2">{format(parseISO(log.start_time), "EEEE")}</td>
                                                             <td className="p-2">{format(parseISO(log.start_time), "hh:mm a")}</td>
                                                             <td className="p-2">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
@@ -823,7 +836,7 @@ const ReportDates = () => {
                                                             <td className="p-2">{dayTotalsMap[dateStr].toFixed(2)}</td>
                                                             <td className="p-2">
                     <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
-                      {log.railcar_id}
+                        {log.railcar_id}
                     </span>
                                                             </td>
                                                             <td className="p-2">{log.job_description}</td>
@@ -837,14 +850,15 @@ const ReportDates = () => {
                                                     </React.Fragment>
                                                 );
                                             })}
+
                                             </tbody>
                                             <tfoot>
                                             <tr className="bg-gray-50">
 
                                                 <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>
-                                                <td className="p-2 border text-sm font-semibold">{(standardHours + overtimeHours).toFixed(2)}h</td>
+                                                <td className="p-2 border text-sm font-semibold">{(standardHours + (overtimeHours-breakHours)).toFixed(2)}h</td>
                                                 <td className="p-1 border text-sm font-semibold">Standard: {standardHours.toFixed(2)}h</td>
-                                                <td className="p-1 border text-sm font-semibold">Overtime: {overtimeHours.toFixed(2)}h</td>
+                                                <td className="p-1 border text-sm font-semibold">Overtime: {(overtimeHours-breakHours).toFixed(2)}h</td>
                                                 <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
 
 

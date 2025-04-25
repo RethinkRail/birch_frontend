@@ -663,10 +663,16 @@ const ReportDates = () => {
                                     <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours">
-                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours-w.breakHours), 0).toFixed(2)}h</span>
+                                      <span>
+                                        {Math.max(
+                                            0,
+                                            Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours - w.breakHours), 0)
+                                        ).toFixed(2)}h
+                                      </span>
                                 </div>
+
                                 <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Hours">
-                                    <span>{data.totalHours.toFixed(2)}h</span>
+                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + (w.standardHours+w.overtimeHours), 0).toFixed(2)}h</span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-white" data-tip="Break Hours">
                                     <span>{data.breakHours.toFixed(2)}h</span>

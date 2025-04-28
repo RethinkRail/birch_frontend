@@ -871,32 +871,41 @@ const DepartmentReport = () => {
         filename: 'BIRCH department Report '+new Date().toLocaleDateString()
     });
 
-    const handleExportRows = (table,rows) => {
-        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
-        //console.log(visibleColumns)
-        // Map the rows to include only the visible columns and use the column headers
+    const handleExportRows = (table, rows) => {
+        const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible());
+
         const rowData = rows.map((row) => {
             const filteredRow = {};
-            visibleColumns.forEach((column) => {
-                // Use the header as the key for the Excel, but still fetch the data using accessorKey
-                const value = row.original[column.id]; // or column.columnDef.accessorKey if needed
 
-                // Convert the value to a number only if it is a valid number
+            visibleColumns.forEach((column) => {
+                let value = row.original[column.id];
+
+                // Special handling for "comment" field if it’s an array
+                if (column.id === 'comment' && Array.isArray(value) && value.length > 0) {
+                    const firstComment = value[0];
+                    value = `${firstComment.comment || ''} at ${new Date(firstComment.update_date).toLocaleDateString()}`;
+                }
+
+                // If value is null/undefined, replace with empty string
+                if (value == null) {
+                    value = '';
+                }
+
+                // If it's a numeric string, convert it to a number
                 if (typeof value === 'string' && !isNaN(parseFloat(value)) && isFinite(value)) {
                     filteredRow[column.columnDef.header] = parseFloat(value);
                 } else {
-                    // Otherwise, keep the original value
                     filteredRow[column.columnDef.header] = value;
                 }
             });
+
             return filteredRow;
         });
 
-
-        // Generate the CSV with the filtered row data
         const csv = generateCsv(csvConfig)(rowData);
         download(csvConfig)(csv);
     };
+
     const EditableCell = ({ value, row, column }) => {
         const handleChange = (e) => {
             const newData = [...processedReport];

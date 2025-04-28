@@ -53,6 +53,7 @@ if ('serviceWorker' in navigator) {
 if (process.env.NODE_ENV === "production") {
     console.log = () => {};
     console.warn = () => {};
+    console.info = () => {};
 }
 
 

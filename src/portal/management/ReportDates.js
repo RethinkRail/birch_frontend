@@ -244,7 +244,7 @@ const ReportDates = () => {
                 const week = team.weeks[weekKey];
                 week.weekLabel = `Week ${idx + 1}`;
                 week.standardHours = Math.min(40, week.totalWeekHours);
-                week.overtimeHours  = Math.max(0, week.totalWeekHours - 40);
+                week.overtimeHours  = Math.max(0, (week.totalWeekHours - 40 -week.breakHours));
                 // week.breakHours is already set above
             });
         });
@@ -666,12 +666,12 @@ const ReportDates = () => {
                                       <span>
                                         {Math.max(
                                             0,
-                                            Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours - w.breakHours), 0)
+                                            Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours), 0)
                                         ).toFixed(2)}h
                                       </span>
                                 </div>
 
-                                <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Hours">
+                                <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Payable Hours">
                                     <span>{Object.values(data.weeks).reduce((sum, w) => sum + (w.standardHours+w.overtimeHours), 0).toFixed(2)}h</span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-white" data-tip="Break Hours">
@@ -862,9 +862,9 @@ const ReportDates = () => {
                                             <tr className="bg-gray-50">
 
                                                 <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>
-                                                <td className="p-2 border text-sm font-semibold">{(standardHours + (overtimeHours-breakHours)).toFixed(2)}h</td>
+                                                <td className="p-2 border text-sm font-semibold">{(standardHours + (overtimeHours+breakHours)).toFixed(2)}h</td>
                                                 <td className="p-1 border text-sm font-semibold">Standard: {standardHours.toFixed(2)}h</td>
-                                                <td className="p-1 border text-sm font-semibold">Overtime: {(overtimeHours-breakHours).toFixed(2)}h</td>
+                                                <td className="p-1 border text-sm font-semibold">Overtime: {overtimeHours.toFixed(2)}h</td>
                                                 <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
 
 

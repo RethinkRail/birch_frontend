@@ -57,6 +57,7 @@ const RevenueRecognition = () => {
         { accessorKey: 'line_number', header: 'Line', enableSorting: true },
         { accessorKey: 'part_code', header: 'Part Code', enableSorting: true },
         { accessorKey: 'part_title', header: 'Part title', enableSorting: true },
+        { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
         { accessorKey: 'team_member', header: 'Team member', enableSorting: true },
         { accessorKey: 'job_description', header: 'Job description', enableSorting: true },
         { accessorKey: 'department', header: 'Department', enableSorting: true},

@@ -622,6 +622,21 @@ const ReportDates = () => {
         exportToExcel3(reportRows, startDate, endDate);
     }
 
+    //working for first day is afternoon
+    // function isFirstLogAfterNoon(data) {
+    //     const weeks = data.weeks || {};
+    //
+    //     return Object.values(weeks).some(week => {
+    //         if (!Array.isArray(week.logs) || week.logs.length === 0) {
+    //             return false;
+    //         }
+    //         const utcStart = new Date(week.logs[0].start_time);
+    //         const localHour = utcStart.getHours(); // local timezone
+    //         return localHour >= 12;
+    //     });
+    // }
+
+
     function isFirstLogAfterNoon(data) {
         const weeks = data.weeks || {};
 
@@ -629,11 +644,31 @@ const ReportDates = () => {
             if (!Array.isArray(week.logs) || week.logs.length === 0) {
                 return false;
             }
-            const utcStart = new Date(week.logs[0].start_time);
-            const localHour = utcStart.getHours(); // local timezone
-            return localHour >= 12;
+
+            // Group logs by date
+            const logsByDate = {};
+
+            week.logs.forEach(log => {
+                const logDate = new Date(log.start_time);
+                const dateKey = logDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                if (!logsByDate[dateKey]) {
+                    logsByDate[dateKey] = [];
+                }
+
+                logsByDate[dateKey].push(log);
+            });
+
+            // Check first log of each day
+            return Object.values(logsByDate).some(logs => {
+                const sortedLogs = logs.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+                const firstLogDate = new Date(sortedLogs[0].start_time);
+                const localHour = firstLogDate.getHours(); // Local time
+                return localHour >= 12;
+            });
         });
     }
+
 
     function isAfterNoon(start_time){
         const utcStart = new Date(start_time);

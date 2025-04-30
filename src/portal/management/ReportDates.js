@@ -331,7 +331,8 @@ const ReportDates = () => {
                 logged_time_in_seconds
             } = log;
             const start = parseISO(start_time);
-            const duration = logged_time_in_seconds / 3600;
+
+            const duration = parseFloat((logged_time_in_seconds / 3600).toFixed(2));
             const key = `${team_member}:${department_name}`;
 
             // Track daily break/work info per team_member
@@ -443,7 +444,7 @@ const ReportDates = () => {
                         start_time: localStartTime,
                         Day: day,
                         end_time: endTime,
-                        hours:  Number(round2Dec(log.duration)),
+                        hours:  Number(log.duration.toFixed(2)),
                         jobcode: jobcode,
                         logged_in_station_name: log.logged_in_station_name,
                         logged_out_station_name: loggedOutStationName,
@@ -473,12 +474,13 @@ const ReportDates = () => {
         const grouped = {};
         // Step 1: Group logs by team member and week start
         logs.forEach(log => {
-            console.log(log)
+            //console.log(log)
             const teamMember = log.team_member;
             const date = format(parseISO(log.start_time), 'yyyy-MM-dd');
             const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-            let hours =   log.railcar_id==="BREAK"?0.0: log.logged_time_in_seconds ;
-            hours = hours/3600;
+            const hours = log.railcar_id === "BREAK" ? 0.0 : parseFloat((log.logged_time_in_seconds / 3600).toFixed(2));
+
+            //hours = parseFloat(hours/3600).toFixed(2);
 
             if (!grouped[teamMember]) grouped[teamMember] = {};
             if (!grouped[teamMember][weekStart]) grouped[teamMember][weekStart] = { daily: {}, totalHours: 0 };
@@ -564,6 +566,88 @@ const ReportDates = () => {
 
         exportToExcel2(report);
     }
+    // Working like QB
+    // function generateTypeHoursReport(logs, startDate, endDate) {
+    //     const grouped = {};
+    //
+    //     // Step 1: Group logs by team member
+    //     logs.forEach(log => {
+    //         const teamMember = log.team_member;
+    //         const department = log.department_name;
+    //         const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+    //         const logDate = format(parseISO(log.start_time), 'yyyy-MM-dd');
+    //         const isBreak = log.railcar_id === "BREAK";
+    //         const hours = isBreak ? 0 : log.logged_time_in_seconds / 3600;
+    //         const breakHours = isBreak ? log.logged_time_in_seconds / 3600 : 0;
+    //
+    //         if (!grouped[teamMember]) {
+    //             grouped[teamMember] = {
+    //                 department: department,
+    //                 weeks: {},
+    //                 breakHours: 0,
+    //                 logsByDate: {}
+    //             };
+    //         }
+    //
+    //         if (!grouped[teamMember].weeks[weekStart]) {
+    //             grouped[teamMember].weeks[weekStart] = {
+    //                 regularHours: 0,
+    //                 overtimeHours: 0,
+    //                 totalHoursInWeek: 0
+    //             };
+    //         }
+    //
+    //         grouped[teamMember].weeks[weekStart].totalHoursInWeek += hours;
+    //         grouped[teamMember].breakHours += breakHours;
+    //
+    //         // Group by date to check if BREAK is missing
+    //         if (!grouped[teamMember].logsByDate[logDate]) {
+    //             grouped[teamMember].logsByDate[logDate] = [];
+    //         }
+    //         grouped[teamMember].logsByDate[logDate].push(log);
+    //     });
+    //
+    //     const reportRows = [];
+    //
+    //     // Step 2: Process each employee
+    //     Object.entries(grouped).forEach(([teamMember, data]) => {
+    //         let employeeRegularTotal = 0;
+    //         let employeeOvertimeTotal = 0;
+    //
+    //         Object.values(data.weeks).forEach(weekData => {
+    //             const { totalHoursInWeek } = weekData;
+    //             const regular = Math.min(totalHoursInWeek, 40);
+    //             const overtime = totalHoursInWeek > 40 ? totalHoursInWeek - 40 : 0;
+    //
+    //             employeeRegularTotal += regular;
+    //             employeeOvertimeTotal += overtime;
+    //         });
+    //
+    //         const totalHours = employeeRegularTotal + employeeOvertimeTotal;
+    //
+    //         // Count days without any BREAK logs
+    //         const daysWithoutBreak = Object.values(data.logsByDate).reduce((count, dayLogs) => {
+    //             const hadBreak = dayLogs.some(log => log.railcar_id === "BREAK");
+    //             return count + (hadBreak ? 0 : 1);
+    //         }, 0);
+    //
+    //         reportRows.push({
+    //             Name: teamMember,
+    //             "Standard Hours": Number(employeeRegularTotal.toFixed(2)),
+    //             "Overtime Hours": Number(employeeOvertimeTotal.toFixed(2)),
+    //             "Total Hours": Number(totalHours.toFixed(2)),
+    //             "Break Hours": Number(data.breakHours.toFixed(2)),
+    //             "Days Without Break": daysWithoutBreak,
+    //             Department: data.department,
+    //             "Start Date": startDate,
+    //             "End Date": endDate
+    //         });
+    //     });
+    //
+    //     exportToExcel3(reportRows, startDate, endDate);
+    // }
+
+
     function generateTypeHoursReport(logs, startDate, endDate) {
         const grouped = {};
 
@@ -572,24 +656,41 @@ const ReportDates = () => {
             const teamMember = log.team_member;
             const department = log.department_name;
             const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-            const hours = log.railcar_id==="BREAK"?0:log.logged_time_in_seconds / 3600;
+            const logDate = format(parseISO(log.start_time), 'yyyy-MM-dd');
+            const isBreak = log.railcar_id === "BREAK";
+            const hours = isBreak ? 0 : parseFloat((log.logged_time_in_seconds / 3600).toFixed(2));
 
+            //const hours = parseFloat(hoursPre).toFixed(2)
+            const breakHours = isBreak ? parseFloat((log.logged_time_in_seconds / 3600).toFixed(2)) : 0;
+
+            //const breakHours = parseFloat(breakHoursPre).toFixed(2)
             if (!grouped[teamMember]) {
                 grouped[teamMember] = {
                     department: department,
-                    weeks: {}
+                    weeks: {},
+                    breakHours: 0,
+                    logsByDate: {},
+                    allLogs: []
                 };
             }
 
             if (!grouped[teamMember].weeks[weekStart]) {
                 grouped[teamMember].weeks[weekStart] = {
-                    regularHours: 0,
-                    overtimeHours: 0,
+                    logs: [],
                     totalHoursInWeek: 0
                 };
             }
 
+            grouped[teamMember].weeks[weekStart].logs.push(log);
             grouped[teamMember].weeks[weekStart].totalHoursInWeek += hours;
+            grouped[teamMember].breakHours += breakHours;
+
+            if (!grouped[teamMember].logsByDate[logDate]) {
+                grouped[teamMember].logsByDate[logDate] = [];
+            }
+            grouped[teamMember].logsByDate[logDate].push(log);
+
+            grouped[teamMember].allLogs.push(log);
         });
 
         const reportRows = [];
@@ -599,20 +700,32 @@ const ReportDates = () => {
             let employeeRegularTotal = 0;
             let employeeOvertimeTotal = 0;
 
-            Object.entries(data.weeks).forEach(([weekStart, weekData]) => {
-                const { totalHoursInWeek } = weekData;
-
-                let regular = Math.min(totalHoursInWeek, 40);
-                let overtime = totalHoursInWeek > 40 ? totalHoursInWeek - 40 : 0;
+            Object.values(data.weeks).forEach(weekData => {
+                const totalHoursInWeek = weekData.totalHoursInWeek;
+                const regular = Math.min(totalHoursInWeek, 40);
+                const overtime = totalHoursInWeek > 40 ? totalHoursInWeek - 40 : 0;
 
                 employeeRegularTotal += regular;
                 employeeOvertimeTotal += overtime;
             });
 
+            const totalHours = employeeRegularTotal + employeeOvertimeTotal;
+
+            const daysWithoutBreak = Object.values(data.logsByDate).reduce((count, dayLogs) => {
+                const hadBreak = dayLogs.some(log => log.railcar_id === "BREAK");
+                return count + (hadBreak ? 0 : 1);
+            }, 0);
+
+            const nightShift = isNightShift(data.weeks);
+
             reportRows.push({
                 Name: teamMember,
+                "Is Night Shift": nightShift ? "Yes" : "No",
                 "Standard Hours": Number(employeeRegularTotal.toFixed(2)),
                 "Overtime Hours": Number(employeeOvertimeTotal.toFixed(2)),
+                "Total Paid Hours": Number(totalHours.toFixed(2)),
+                "Break Hours": Number(data.breakHours.toFixed(2)),
+                "Days Without Break": daysWithoutBreak,
                 Department: data.department,
                 "Start Date": startDate,
                 "End Date": endDate
@@ -620,6 +733,31 @@ const ReportDates = () => {
         });
 
         exportToExcel3(reportRows, startDate, endDate);
+    }
+
+    function isNightShift(weeks) {
+        return Object.values(weeks).some(week => {
+            if (!Array.isArray(week.logs) || week.logs.length === 0) return false;
+
+            const logsByDate = {};
+
+            week.logs.forEach(log => {
+                const logDate = new Date(log.start_time);
+                const dateKey = logDate.toISOString().split('T')[0];
+
+                if (!logsByDate[dateKey]) {
+                    logsByDate[dateKey] = [];
+                }
+
+                logsByDate[dateKey].push(log);
+            });
+
+            return Object.values(logsByDate).some(dayLogs => {
+                const sortedLogs = dayLogs.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+                const firstLog = new Date(sortedLogs[0].start_time);
+                return firstLog.getHours() >= 12;
+            });
+        });
     }
 
     //working for first day is afternoon
@@ -982,7 +1120,6 @@ const ReportDates = () => {
                                     </div>
                                 );
                             })}
-
 
                         </div>
                     </div>

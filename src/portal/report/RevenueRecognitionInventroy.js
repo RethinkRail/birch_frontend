@@ -44,6 +44,9 @@ ChartJS.register(
 );
 
 const RevenueRecognition = () => {
+    const [departments, setDepartments] = useState([]);
+    const [selectedDepartments, setSelectedDepartments] = useState(Array(5).fill(null)); //
+    const [invoiceFilter, setInvoiceFilter] = useState(1); // or 'all', 'invoiced'
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
 
@@ -51,7 +54,7 @@ const RevenueRecognition = () => {
 
     const [allData,setAllData] = useState([])
     const [graphData,setGraphata] = useState([])
-
+    const [isAllDepartment,setIsAllDepartment] = useState(false)
     const initialColumns = useMemo(() => [
         { accessorKey: 'railcar_id', header: 'Railcar', enableSorting: true },
         { accessorKey: 'line_number', header: 'Line', enableSorting: true },
@@ -72,6 +75,14 @@ const RevenueRecognition = () => {
         setSelectedDateRange(event.target.value); // Update state variable
     };
 
+    function handleSetIsAllCustomers() {
+        setIsAllDepartment(prev => !prev);
+    }
+    const handleOwnerChange = (index, value) => {
+        const updatedSelectedOwners = [...selectedDepartments];
+        updatedSelectedOwners[index] = value;
+        setSelectedDepartments(updatedSelectedOwners);
+    };
 
     function aggregateByJob(records) {
         const map = new Map();
@@ -94,9 +105,6 @@ const RevenueRecognition = () => {
     }
     // Fetch departments from the API
 
-
-
-
     //original
     const handleGenerate = async () => {
         let modified = new Date(startDate);
@@ -106,6 +114,8 @@ const RevenueRecognition = () => {
             const payload = {
                 startDate:modified,
                 endDate,
+                is_locked:invoiceFilter,
+                departments:!isAllDepartment? selectedDepartments.filter((id) => id):departments.map(item => item.value), // Remove null values
             };
             console.log(payload)
             console.log(new Date(modified).toISOString())
@@ -158,9 +168,97 @@ const RevenueRecognition = () => {
         XLSX.writeFile(workbook, filename);
     };
 
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_BIRCH_API_URL}get_all_revenue_category/`
+                );
+
+                // Map API data to React Select format
+                const departmentOptions = response.data.map((department) => ({
+                    value: department.id,
+                    label: department.name,
+                }));
+
+                setDepartments(departmentOptions);
+            } catch (error) {
+                console.error('Error fetching departments:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDepartments();
+    }, []);
+
+
     return (
         <div className="py-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Revenue Recognition Inventory</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 mt-2">Material WIP</h1>
+            <div className="grid gap-1 grid-cols-5 mb-4">
+                <label className="label cursor-pointer">
+                    <span className="label-text mr-5">All Departments</span>
+                    <input
+                        type="checkbox"
+                        className="toggle"
+                        checked={isAllDepartment}
+                        onChange={handleSetIsAllCustomers}
+                    />
+                </label>
+            </div>
+
+            <div
+                className={`grid gap-1 grid-cols-5 mb-4 ${isAllDepartment ? 'hidden' : ''}`}
+            >
+                {Array.from({ length: 5 }).map((_, index) => (
+                    <div key={index} className="p-2">
+                        <Select
+                            value={
+                                departments.find(
+                                    (option) => option.value === selectedDepartments[index]
+                                ) || null
+                            } // Find the matching selected option or default to null
+                            onChange={(selectedOption) =>
+                                handleOwnerChange(index, selectedOption?.value)
+                            }
+                            options={departments}
+                            placeholder="Select Department"
+                            isClearable
+                            className="border rounded"
+                        />
+                    </div>
+                ))}
+            </div>
+            <div className="flex gap-4 mb-4">
+                <label className="label cursor-pointer flex items-center">
+                    <span className="label-text mr-2">All</span>
+                    <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={invoiceFilter === 1}
+                        onChange={() => setInvoiceFilter(1)}
+                    />
+                </label>
+                <label className="label cursor-pointer flex items-center">
+                    <span className="label-text mr-2">Non Invoiced</span>
+                    <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={invoiceFilter === 3}
+                        onChange={() => setInvoiceFilter(3)}
+                    />
+                </label>
+                <label className="label cursor-pointer flex items-center">
+                    <span className="label-text mr-2">Invoiced Cars</span>
+                    <input
+                        type="checkbox"
+                        className="checkbox"
+                        checked={invoiceFilter ===2}
+                        onChange={() => setInvoiceFilter(2)}
+                    />
+                </label>
+            </div>
+
             <div className="">
                 {/* Date Pickers */}
                 <div className="flex gap-4 mb-4">

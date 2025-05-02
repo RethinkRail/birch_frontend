@@ -38,6 +38,7 @@ import RevenueRecognitionByDepartment from "./portal/report/RevenueRecognitionBy
 import RevenueRecognitionInventroy from "./portal/report/RevenueRecognitionInventroy";
 import Attendance from "./portal/management/Attendance";
 import ReportDates from "./portal/management/ReportDates";
+import BilledCars from "./portal/report/BilledCars";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -248,6 +249,13 @@ root.render(
                 <Route path="/revenue_recognition_by_inventory" element={
                     <ProtectedRoute>
                         <RevenueRecognitionInventroy/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/billed_cars" element={
+                    <ProtectedRoute>
+                        <BilledCars/>
                     </ProtectedRoute>
                 }>
                 </Route>

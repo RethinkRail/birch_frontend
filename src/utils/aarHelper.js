@@ -15,6 +15,7 @@ import {round2Dec} from "./NumberHelper";
  */
 
 export function printAAR(item, _wheel_detail = false, forWhom) {
+    console.log(item)
     let data = null;
     let wheel_detail = _wheel_detail;
     let record_format = {

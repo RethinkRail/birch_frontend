@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { format, subWeeks, subDays,parseISO, differenceInSeconds,addDays ,isBefore,startOfWeek} from 'date-fns';
 import axios from 'axios';
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -22,6 +22,22 @@ const ReportDates = () => {
 
     const [filteredData, setFilteredData] = useState([]);
     const [dataForReport, setDataForReport] = useState([]);
+
+    const [expandAll, setExpandAll] = useState(false);
+    const collapseRefs = useRef({});
+
+    const toggleAll = () => {
+        setExpandAll(prev => {
+            const newState = !prev;
+            Object.values(collapseRefs.current).forEach(ref => {
+                if (ref?.checked !== newState) {
+                    ref.checked = newState;
+                }
+            });
+            return newState;
+        });
+    };
+
     // Fetch payroll report
     const fetchPayrollReport = async (start, end) => {
         setSelectedDepartment("all")
@@ -954,11 +970,27 @@ const ReportDates = () => {
                 </button>
             </div>
             {Object.entries(filteredData).length>0?(
-                    <div>
-                        <button className="bg-blue-500 text-white rounded-md p-2 mt-4 mb-4 mr-2" onClick={()=>generateWeeklyReport(dataForReport)}>Payroll By Day</button>
-                        <button className="bg-blue-500 text-white rounded-md p-2 mt-4 mb-4" onClick={()=>generateTypeHoursReport(dataForReport,selectedDates.start,selectedDates.end)}>Payroll Totals</button>
+                <div className="flex items-center mt-4 mb-4">
+                    <button
+                        className="bg-blue-500 text-white rounded-md p-2 mr-2"
+                        onClick={() => generateWeeklyReport(dataForReport)}
+                    >
+                        Payroll By Day
+                    </button>
+                    <button
+                        className="bg-blue-500 text-white rounded-md p-2"
+                        onClick={() => generateTypeHoursReport(dataForReport, selectedDates.start, selectedDates.end)}
+                    >
+                        Payroll Totals
+                    </button>
+                    <button
+                        className="bg-blue-500 text-white rounded-md p-2 ml-auto"
+                        onClick={toggleAll}
+                    >
+                        {expandAll ? "Collapse All" : "Expand All"}
+                    </button>
+                </div>
 
-                    </div>
 
             ):""}
 
@@ -967,7 +999,7 @@ const ReportDates = () => {
 
                 return (
                     <div key={name} className="collapse border collapse-plus mb-2 bg-white">
-                        <input type="checkbox" className="peer" />
+                        <input type="checkbox" className="peer"     ref={(el) => collapseRefs.current[name] = el} />
                         <div className="collapse-title flex justify-between">
                         <span className="pt-4">
                             <span className="font-semibold text-lg mr-2">{name.split(":")[0]}</span>

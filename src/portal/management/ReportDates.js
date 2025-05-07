@@ -40,6 +40,11 @@ const ReportDates = () => {
 
     // Fetch payroll report
     const fetchPayrollReport = async (start, end) => {
+        start = new Date(start);
+        start.setHours(0, 0, 0, 0); // Set to 00:00:00.000
+
+        end = new Date(end);
+        end.setHours(23, 59, 59, 999); // Set to 23:59:59.999
         setSelectedDepartment("all")
         setSelectedTeamMember("all")
         try {

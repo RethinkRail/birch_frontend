@@ -32,8 +32,8 @@ const Attendance = () => {
         const endOfDayLocal = new Date(localDate.setHours(23, 59, 59, 999));
 
         // Convert to UTC
-        const startOfDayUTC = new Date(startOfDayLocal.getTime() + startOfDayLocal.getTimezoneOffset() * 60000);
-        const endOfDayUTC = new Date(endOfDayLocal.getTime() + endOfDayLocal.getTimezoneOffset() * 60000);
+        const startOfDayUTC = new Date(startOfDayLocal.getTime() - startOfDayLocal.getTimezoneOffset() * 50000);
+        const endOfDayUTC = new Date(endOfDayLocal.getTime() - endOfDayLocal.getTimezoneOffset() * 50000);
         console.warn(startOfDayUTC)
         console.warn(endOfDayUTC)
         try {

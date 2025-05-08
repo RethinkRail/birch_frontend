@@ -396,16 +396,19 @@ const TimeApproval = () =>{
 
             try {
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'insert_time_log/', params);
-                console.log('Time log inserted successfully:', response.data);
-                alert("Time added successfully")
-                setSelectedCrewsToAddTime('')
-                setSelectedCarToAddTimeLog('')
-                setJobToAddTime('')
-                setInTimeToAddJob(new Date())
-                setOutTimeToAddJob(new Date())
-                setTotalSecondToAddTime(0)
 
-
+                if(response.status==201){
+                    alert("Time is overlapping")
+                }else {
+                    console.log('Time log inserted successfully:', response.data);
+                    alert("Time added successfully")
+                    setSelectedCrewsToAddTime('')
+                    setSelectedCarToAddTimeLog('')
+                    setJobToAddTime('')
+                    setInTimeToAddJob(new Date())
+                    setOutTimeToAddJob(new Date())
+                    setTotalSecondToAddTime(0)
+                }
             } catch (error) {
                 setSelectedCrewsToAddTime('')
                 setSelectedCarToAddTimeLog('')
@@ -644,12 +647,18 @@ const TimeApproval = () =>{
 
     // Handle editing a log with web service call
     const handleLogEdit = async (editedData) => {
+        console.log(editedData)
         try {
             // Call your web service to update the log here
             const response = await axios.post(
                 `${process.env.REACT_APP_BIRCH_API_URL}update_a_time_log`,
                 editedData
             );
+
+            if(response.status==201){
+                alert("Times are overlapping")
+                return
+            }
 
             // Assume response.data contains the updated log
             const updatedLog = response.data.data; // Use response data for the latest log

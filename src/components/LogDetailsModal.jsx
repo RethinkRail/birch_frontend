@@ -38,6 +38,7 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                             <th className="px-4 py-2 border">Hours</th>
                             <th className="px-4 py-2 border">Customer</th>
                             <th className="px-4 py-2 border">Job Description</th>
+                            <th className="px-4 py-2 border">Notes</th>
                             <th className="px-4 py-2 border">MHR</th>
                             <th className="px-4 py-2 border">Actions</th>
                         </tr>
@@ -62,6 +63,7 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                                 </td>
                                 <td className="border px-4 py-2">{entry.railcar_id}</td>
                                 <td className="border px-4 py-2">{entry.job_description}</td>
+                                <td className="border px-4 py-2">{entry.notes}</td>
                                 <td className="border px-4 py-2">
                                     {round2Dec((entry.mhe - entry.approved_time_in_line) / 3600)}
                                 </td>

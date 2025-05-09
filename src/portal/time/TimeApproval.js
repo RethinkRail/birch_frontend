@@ -303,17 +303,17 @@ const TimeApproval = () =>{
             let qbResponse;
             let birchResponse;
             try {
-                const responseQB = await axios.get(
-                    'https://pmw8inl43f.execute-api.us-east-2.amazonaws.com/default/qb_time_with_emp_id',
-                    {
-                        params: {
-                            start_date: start_date,
-                            end_date: end_date
-                        }
-                    }
-                );
-                qbResponse = responseQB.data;
-                console.log(qbResponse)
+                // const responseQB = await axios.get(
+                //     'https://pmw8inl43f.execute-api.us-east-2.amazonaws.com/default/qb_time_with_emp_id',
+                //     {
+                //         params: {
+                //             start_date: start_date,
+                //             end_date: end_date
+                //         }
+                //     }
+                // );
+                // qbResponse = responseQB.data;
+                // console.log(qbResponse)
                 const responseBirch = await axios.get(process.env.REACT_APP_BIRCH_API_URL+'get_timelog_in_date/', {
                     params: {
                         start_time: start_date,
@@ -328,7 +328,7 @@ const TimeApproval = () =>{
                 birchResponse =  responseBirch.data
                 console.log(birchResponse);
 
-                const combinedData =  combineData(qbResponse, birchResponse)
+                const combinedData =  combineData(birchResponse)
                 console.log(combinedData)
                 setMergedData(combinedData);
 
@@ -422,7 +422,8 @@ const TimeApproval = () =>{
             alert("All fields are reqired")
         }
     }
-    const combineData = (qbData, birchData) => {
+    const combineData = ( birchData) => {
+        console.log(birchData)
         // Group birchData by employee_number with logs and total logged time
         const groupedData = birchData.reduce((acc, entry) => {
             const key = String(entry.employee_number); // Ensure employee_number is treated as a string
@@ -441,17 +442,17 @@ const TimeApproval = () =>{
         console.log("Grouped Data in BIRCH:", groupedData);
 
         // Create a map from qbData, using employee_number as a string
-        const qbDataMap = new Map(
-            qbData.map(qb => [String(qb.employee_number), qb])
-        );
+        // const qbDataMap = new Map(
+        //     qbData.map(qb => [String(qb.employee_number), qb])
+        // );
 
         // Combine data ensuring all birchData employees are included
         const result = Object.entries(groupedData).map(([employeeNumber, employeeLogs]) => {
-            const qbEntry = qbDataMap.get(employeeNumber) || {}; // Retrieve qbEntry or default to empty object
+            //const qbEntry = qbDataMap.get(employeeNumber) || {}; // Retrieve qbEntry or default to empty object
             return {
-                employee_name: qbEntry.employee_name || employeeLogs.employee_name, // Prefer qbData name if available
+                employee_name:  employeeLogs.employee_name, // Prefer qbData name if available
                 employee_number: employeeNumber, // Use the correct variable here
-                time_in_qb: qbEntry.time_in_qb || 0, // Default to 0 if not in qbData
+
                 total_logged_time: employeeLogs.total_logged_time,
                 logs: employeeLogs.logs
             };
@@ -465,14 +466,6 @@ const TimeApproval = () =>{
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
         { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
-        { name: 'QB Time (hrs)', selector: row =>  row.time_in_qb > 6 * 3600
-                ? round2Dec( (row.time_in_qb - (30 * 60)) / 3600)
-                : round2Dec( row.time_in_qb / 3600), sortable: true },
-        {
-            name: 'Utilization (%)',
-            selector: row =>   row.time_in_qb==0?'Not in QB' : ((row.total_logged_time * 100) / row.time_in_qb).toFixed(2),
-            sortable: true
-        },
         {
             name: 'Actions',
             cell: row => (

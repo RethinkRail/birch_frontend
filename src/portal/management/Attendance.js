@@ -23,6 +23,11 @@ const Attendance = () => {
 
     // Fetch attendance data from the server
     const fetchAttendance = async () => {
+        if(!date){
+            alert("Please select date")
+            return
+        }
+
         setLoading(true);
         setData([])
         const localDate = new Date(date.toLocaleDateString());

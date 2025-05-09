@@ -26,14 +26,15 @@ const Attendance = () => {
         setLoading(true);
         setData([])
         const localDate = new Date(date.toLocaleDateString());
-
+        console.log(date)
+        console.log(localDate)
         // Get start and end of the local day
         const startOfDayLocal = new Date(localDate.setHours(0, 0, 0, 0));
         const endOfDayLocal = new Date(localDate.setHours(23, 59, 59, 999));
 
         // Convert to UTC
-        const startOfDayUTC = new Date(startOfDayLocal.getTime() );
-        const endOfDayUTC = new Date(endOfDayLocal.getTime());
+        const startOfDayUTC = new Date(startOfDayLocal.getTime() + startOfDayLocal.getTimezoneOffset() * 60000);
+        const endOfDayUTC = new Date(endOfDayLocal.getTime() + endOfDayLocal.getTimezoneOffset() * 60000);
         console.warn(startOfDayUTC)
         console.warn(endOfDayUTC)
         try {
@@ -269,12 +270,13 @@ const Attendance = () => {
     document.head.insertAdjacentHTML("beforeend", `<style>${styles}</style>`);
 
     return (
-        <div className="container">
+        <div className="py-6">
             <div className="header">
                 <input
                     type="date"
                     value={date?.toISOString().split("T")[0]}
                     onChange={(e) => setDate(new Date(e.target.value))}
+                    max={new Date().toISOString().split("T")[0]}
                     className="date-picker"
                 />
                 <button className="btn btn-fetch" onClick={fetchAttendance} disabled={loading}>

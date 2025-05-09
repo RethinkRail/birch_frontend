@@ -754,6 +754,7 @@ const TimeApproval = () =>{
                             }
                             showYearDropdown
                             dateFormat="yyyy-MM-dd"
+                            maxDate={new Date()}
                         />
 
                         <p className='mt-4'> To Date</p>
@@ -765,7 +766,7 @@ const TimeApproval = () =>{
                                 newDate => setToDateToTimeRetrive(newDate)
                             }
                             minDate={fromDateToTimeRetrieve ? new Date(fromDateToTimeRetrieve) : null}
-                            maxDate={fromDateToTimeRetrieve ? new Date(new Date(fromDateToTimeRetrieve).getTime() + 4 * 24 * 60 * 60 * 1000) : null}
+                            maxDate={fromDateToTimeRetrieve ? new Date() : null}
                             showYearDropdown
                             disabled ={isToDateDisabled}
                             dateFormat="yyyy-MM-dd"

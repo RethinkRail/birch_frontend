@@ -671,7 +671,7 @@ const ReportDates = () => {
         logs.forEach(log => {
             const teamMember = log.team_member;
             const department = log.department_name;
-            const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+            const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 0 }), 'yyyy-MM-dd');
             const logDate = format(parseISO(log.start_time), 'yyyy-MM-dd');
             const isBreak = log.railcar_id === "BREAK";
             const hours = isBreak ? 0 : parseFloat((log.logged_time_in_seconds / 3600).toFixed(2));
@@ -710,6 +710,8 @@ const ReportDates = () => {
         });
 
         const reportRows = [];
+
+        console.log(grouped)
 
         // Step 2: Process each employee
         Object.entries(grouped).forEach(([teamMember, data]) => {

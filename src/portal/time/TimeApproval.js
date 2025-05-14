@@ -649,7 +649,8 @@ const TimeApproval = () =>{
             );
 
             if(response.status==201){
-                alert("Times are overlapping")
+                console.log(response)
+                alert("Times are overlapping with car number "+response.data.overlap.railcar_id+ "  start time "+ new Date(response.data.overlap.start_time).toLocaleString())
                 return
             }
 

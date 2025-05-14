@@ -12,7 +12,21 @@ import {round2Dec} from "../utils/NumberHelper";
 
 const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditClick }) => {
     if (!log) return null;
-    console.log(log)
+    function formatNotes(notes) {
+        if (!notes) return '';
+
+        // Regex to match ISO datetime strings
+        const isoRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g;
+
+        return notes.replace(isoRegex, match => {
+            try {
+                const date = new Date(match);
+                return date.toLocaleString(); // You can customize locale and options if needed
+            } catch (e) {
+                return match; // fallback to original string if parsing fails
+            }
+        });
+    }
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded shadow-lg w-full max-h-[80vh] overflow-y-auto m-10">
@@ -63,7 +77,7 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                                 </td>
                                 <td className="border px-4 py-2">{entry.railcar_id}</td>
                                 <td className="border px-4 py-2">{entry.job_description}</td>
-                                <td className="border px-4 py-2">{entry.notes}</td>
+                                <td className="border px-4 py-2">{formatNotes(entry.notes)}</td>
                                 <td className="border px-4 py-2">
                                     {round2Dec((entry.mhe - entry.approved_time_in_line) / 3600)}
                                 </td>

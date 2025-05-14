@@ -398,7 +398,7 @@ const TimeApproval = () =>{
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'insert_time_log/', params);
 
                 if(response.status==201){
-                    alert("Time is overlapping")
+                    alert("Times are overlapping with car number "+response.data.overlap.railcar_id+ "  start time "+ new Date(response.data.overlap.start_time).toLocaleString())
                 }else {
                     console.log('Time log inserted successfully:', response.data);
                     alert("Time added successfully")

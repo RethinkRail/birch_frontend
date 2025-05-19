@@ -793,7 +793,44 @@ const ReportDates = () => {
     // }
 
 
+    // function isFirstLogAfterNoon(data) {
+    //     console.log(data)
+    //     const weeks = data.weeks || {};
+    //
+    //     return Object.values(weeks).some(week => {
+    //         if (!Array.isArray(week.logs) || week.logs.length === 0) {
+    //             return false;
+    //         }
+    //
+    //         // Group logs by date
+    //         const logsByDate = {};
+    //
+    //         week.logs.forEach(log => {
+    //             const logDate = new Date(log.start_time);
+    //             const dateKey = logDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    //
+    //             if (!logsByDate[dateKey]) {
+    //                 logsByDate[dateKey] = [];
+    //             }
+    //
+    //             logsByDate[dateKey].push(log);
+    //         });
+    //
+    //         console.log(logsByDate)
+    //
+    //         // Check first log of each day
+    //         return Object.values(logsByDate).some(logs => {
+    //             const sortedLogs = logs.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+    //             const firstLogDate = new Date(sortedLogs[0].start_time);
+    //             const localHour = firstLogDate.getHours(); // Local time
+    //             return localHour >= 12;
+    //         });
+    //     });
+    // }
+
+
     function isFirstLogAfterNoon(data) {
+        console.log(data);
         const weeks = data.weeks || {};
 
         return Object.values(weeks).some(week => {
@@ -801,12 +838,11 @@ const ReportDates = () => {
                 return false;
             }
 
-            // Group logs by date
             const logsByDate = {};
 
             week.logs.forEach(log => {
                 const logDate = new Date(log.start_time);
-                const dateKey = logDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const dateKey = logDate.toLocaleDateString('en-CA'); // YYYY-MM-DD local
 
                 if (!logsByDate[dateKey]) {
                     logsByDate[dateKey] = [];
@@ -815,11 +851,17 @@ const ReportDates = () => {
                 logsByDate[dateKey].push(log);
             });
 
-            // Check first log of each day
+            console.log("Grouped Logs:", logsByDate);
+
             return Object.values(logsByDate).some(logs => {
-                const sortedLogs = logs.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+                const sortedLogs = logs.slice().sort(
+                    (a, b) => new Date(a.start_time) - new Date(b.start_time)
+                );
                 const firstLogDate = new Date(sortedLogs[0].start_time);
-                const localHour = firstLogDate.getHours(); // Local time
+                const localHour = firstLogDate.getHours();
+
+                console.log(`First log at: ${firstLogDate.toString()} -> Hour: ${localHour}`);
+
                 return localHour >= 12;
             });
         });

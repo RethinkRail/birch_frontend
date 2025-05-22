@@ -67,7 +67,7 @@ const Navbar = () => {
                         { title: 'Billing Efficiency', path: '/billing_efficiency' },
                         { title: 'Utilization', path: '/utilization_report' },
                         { title: 'POD Accuracy', path: '#' },
-                        { title: 'Days in Status', path: '#' }
+                        { title: 'Days in Status', path: '/dis_report' }
                     ]
                 },
                 {

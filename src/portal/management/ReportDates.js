@@ -24,6 +24,7 @@ const ReportDates = () => {
     const [dataForReport, setDataForReport] = useState([]);
 
     const [expandAll, setExpandAll] = useState(false);
+    const [hhMMFormat, sethhMMFormat] = useState(false);
     const collapseRefs = useRef({});
 
     const toggleAll = () => {
@@ -460,7 +461,7 @@ const ReportDates = () => {
                         start_time: localStartTime,
                         Day: day,
                         end_time: endTime,
-                        hours:  Number(log.duration.toFixed(2)),
+                        hours:  hhMMFormat?decimalToHHMM(log.duration.toFixed(2)): Number(log.duration.toFixed(2)),
                         jobcode: jobcode,
                         logged_in_station_name: log.logged_in_station_name,
                         logged_out_station_name: loggedOutStationName,
@@ -495,6 +496,7 @@ const ReportDates = () => {
             const date = format(parseISO(log.start_time), 'yyyy-MM-dd');
             const weekStart = format(startOfWeek(parseISO(log.start_time), { weekStartsOn: 1 }), 'yyyy-MM-dd');
             const hours = log.railcar_id === "BREAK" ? 0.0 : parseFloat((log.logged_time_in_seconds / 3600).toFixed(2));
+
 
             //hours = parseFloat(hours/3600).toFixed(2);
 
@@ -552,9 +554,17 @@ const ReportDates = () => {
                         Name: teamMember,
                         WeekStart: weekStart,
                         Date: date,
-                        RegularHours: Number(regular.toFixed(2)),
-                        OvertimeHours: Number(overtime.toFixed(2)),
-                        TotalHours: Number(total.toFixed(2)),
+                        RegularHours: hhMMFormat
+                            ? decimalToHHMM(regular)
+                            : Number(regular.toFixed(2)) + 'h',
+
+                        OvertimeHours: hhMMFormat
+                            ? decimalToHHMM(overtime)
+                            : Number(overtime.toFixed(2)) + 'h',
+
+                        TotalHours: hhMMFormat
+                            ? decimalToHHMM(total)
+                            : Number(total.toFixed(2)) + 'h'
                     });
                 });
             });
@@ -564,9 +574,17 @@ const ReportDates = () => {
                 Name: `${teamMember} - Totals`,
                 WeekStart: '',
                 Date: '',
-                RegularHours: Number(employeeRegularTotal.toFixed(2)),
-                OvertimeHours: Number(employeeOvertimeTotal.toFixed(2)),
-                TotalHours: Number(employeeTotalHours.toFixed(2)),
+                RegularHours: hhMMFormat
+                    ? decimalToHHMM(employeeRegularTotal)
+                    : Number(employeeRegularTotal.toFixed(2)),
+
+                OvertimeHours: hhMMFormat
+                    ? decimalToHHMM(employeeOvertimeTotal)
+                    : Number(employeeOvertimeTotal.toFixed(2)),
+
+                TotalHours: hhMMFormat
+                    ? decimalToHHMM(employeeTotalHours)
+                    : Number(employeeTotalHours.toFixed(2))
             });
 
             // Step 4: Add an empty row for spacing
@@ -739,10 +757,21 @@ const ReportDates = () => {
             reportRows.push({
                 Name: teamMember,
                 "Is Night Shift": nightShift ? "Yes" : "No",
-                "Standard Hours": Number(employeeRegularTotal.toFixed(2)),
-                "Overtime Hours": Number(employeeOvertimeTotal.toFixed(2)),
-                "Total Paid Hours": Number(totalHours.toFixed(2)),
-                "Break Hours": Number(data.breakHours.toFixed(2)),
+                "Standard Hours": hhMMFormat
+                    ? decimalToHHMM(employeeRegularTotal)
+                    : Number(employeeRegularTotal.toFixed(2)) + 'h',
+
+                "Overtime Hours": hhMMFormat
+                    ? decimalToHHMM(employeeOvertimeTotal)
+                    : Number(employeeOvertimeTotal.toFixed(2)) + 'h',
+
+                "Total Paid Hours": hhMMFormat
+                    ? decimalToHHMM(totalHours)
+                    : Number(totalHours.toFixed(2)) + 'h',
+
+                "Break Hours": hhMMFormat
+                    ? decimalToHHMM(data.breakHours)
+                    : Number(data.breakHours.toFixed(2)) + 'h',
                 "Days Without Break": daysWithoutBreak,
                 Department: data.department,
                 "Start Date": startDate,
@@ -751,6 +780,12 @@ const ReportDates = () => {
         });
 
         exportToExcel3(reportRows, startDate, endDate);
+    }
+
+    function decimalToHHMM(decimalHours) {
+        const hours = Math.floor(decimalHours);
+        const minutes = Math.round((decimalHours - hours) * 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     }
 
     function isNightShift(weeks) {
@@ -1004,7 +1039,24 @@ const ReportDates = () => {
                         ))}
                     </select>
                 </div>
-
+                <div className="mt-4 flex">
+                    <label className="flex items-center mr-2">
+                        <input
+                            type="checkbox"
+                            checked={!hhMMFormat}
+                            onChange={() => sethhMMFormat(false)}
+                        />
+                        <span className="ml-2">Decimal</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            checked={hhMMFormat}
+                            onChange={() => sethhMMFormat(true)}
+                        />
+                        <span>HH:mm</span>
+                    </label>
+                </div>
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
@@ -1062,23 +1114,53 @@ const ReportDates = () => {
                                 </div>
 
                                 <div className="tooltip z-[100] border p-1 bg-green-500" data-tip="Regular Hours">
-                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h</span>
+                                      <span>
+                                        {hhMMFormat
+                                            ? decimalToHHMM(Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0))
+                                            : `${Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h`}
+                                      </span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours">
                                       <span>
-                                        {Math.max(
-                                            0,
-                                            Object.values(data.weeks).reduce((sum, w) => sum + (w.overtimeHours), 0)
-                                        ).toFixed(2)}h
+                                        {hhMMFormat
+                                            ? decimalToHHMM(
+                                                Math.max(
+                                                    0,
+                                                    Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0)
+                                                )
+                                            )
+                                            : `${Math.max(
+                                                0,
+                                                Object.values(data.weeks).reduce((sum, w) => sum + w.overtimeHours, 0)
+                                            ).toFixed(2)}h`}
                                       </span>
                                 </div>
 
+
                                 <div className="tooltip z-[100] border p-1 bg-gray-200" data-tip="Total Payable Hours">
-                                    <span>{Object.values(data.weeks).reduce((sum, w) => sum + (w.standardHours+w.overtimeHours), 0).toFixed(2)}h</span>
+                                      <span>
+                                        {hhMMFormat
+                                            ? decimalToHHMM(
+                                                Object.values(data.weeks).reduce(
+                                                    (sum, w) => sum + w.standardHours + w.overtimeHours,
+                                                    0
+                                                )
+                                            )
+                                            : `${Object.values(data.weeks).reduce(
+                                                (sum, w) => sum + w.standardHours + w.overtimeHours,
+                                                0
+                                            ).toFixed(2)}h`}
+                                      </span>
                                 </div>
+
                                 <div className="tooltip z-[100] border p-1 bg-white" data-tip="Break Hours">
-                                    <span>{data.breakHours.toFixed(2)}h</span>
+                                      <span>
+                                        {hhMMFormat
+                                            ? decimalToHHMM(data.breakHours)
+                                            : `${data.breakHours.toFixed(2)}h`}
+                                      </span>
                                 </div>
+
 
                                 <div className="tooltip z-[200] border p-1 bg-yellow-50" data-tip="without break">
                                     <span>{Object.values(data.weeks).reduce((sum, w) => sum + w.daysWithoutBreak, 0)}D</span>
@@ -1163,8 +1245,8 @@ const ReportDates = () => {
                                                             <td className="p-2">{format(parseISO(log.start_time), "EEEE")}</td>
                                                             <td className="p-2">{format(parseISO(log.start_time), "hh:mm a")}</td>
                                                             <td className="p-2">{log.end_time ? format(parseISO(log.end_time), "hh:mm a") : ""}</td>
-                                                            <td className="p-2">{log.duration.toFixed(2)}</td>
-                                                            <td className="p-2">{dayTotalsMap[dateStr].toFixed(2)}</td>
+                                                            <td className="p-2">{ hhMMFormat?decimalToHHMM(log.duration.toFixed(2)):log.duration.toFixed(2)}</td>
+                                                            <td className="p-2">{hhMMFormat?decimalToHHMM(dayTotalsMap[dateStr].toFixed(2)):dayTotalsMap[dateStr].toFixed(2)}</td>
                                                             <td className="p-2">
                                                                 <span className={`${log.railcar_id === "BREAK" ? "border border-yellow-500 p-1" : ""}`}>
                                                                     {log.railcar_id}
@@ -1186,11 +1268,22 @@ const ReportDates = () => {
                                             <tfoot>
                                                 <tr className="bg-gray-50">
                                                     <td colSpan="4" className="p-2 border text-right font-semibold">Totals:</td>
-                                                    <td className="p-2 border text-sm font-semibold">{(standardHours + (overtimeHours+breakHours)).toFixed(2)}h</td>
-                                                    <td className="p-1 border text-sm font-semibold">Standard: {standardHours.toFixed(2)}h</td>
-                                                    <td className="p-1 border text-sm font-semibold">Overtime: {overtimeHours.toFixed(2)}h</td>
-                                                    <td className="p-2 border text-sm font-semibold">Break: {breakHours ? breakHours.toFixed(2) : "0.0"}h</td>
+                                                    <td className="p-2 border text-sm font-semibold">
+                                                        {hhMMFormat
+                                                            ? decimalToHHMM(standardHours + overtimeHours + breakHours)
+                                                            : `${(standardHours + overtimeHours + breakHours).toFixed(2)}h`}
+                                                    </td>
+                                                    <td className="p-1 border text-sm font-semibold">
+                                                        Standard: {hhMMFormat ? decimalToHHMM(standardHours) : `${standardHours.toFixed(2)}h`}
+                                                    </td>
+                                                    <td className="p-1 border text-sm font-semibold">
+                                                        Overtime: {hhMMFormat ? decimalToHHMM(overtimeHours) : `${overtimeHours.toFixed(2)}h`}
+                                                    </td>
+                                                    <td className="p-2 border text-sm font-semibold">
+                                                        Break: {hhMMFormat ? decimalToHHMM(breakHours || 0) : `${(breakHours || 0).toFixed(2)}h`}
+                                                    </td>
                                                 </tr>
+
                                             </tfoot>
                                         </table>
                                     </div>

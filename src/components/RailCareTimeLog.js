@@ -15,7 +15,7 @@ import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 import * as XLSX from 'xlsx';
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboorHRSEST }) => {
-
+    //console.log(railcarLog)
     const [datePickers, setDatePickers] = useState({
         crewChecked: {},
         managerChecked: {},
@@ -202,7 +202,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         {
             name: 'JOB DESCRIPTION',
             selector: row => row.job_description,
-            width: "38%",
+            width: "28%",
             cell: row => (
                 <div
                     title={row.job_description}
@@ -264,6 +264,13 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                     />
                 </span>
             ),
+            width: "10%",
+        },
+
+        {
+            name: 'COMPLETED BY',
+            selector: row => row.crew_name,
+            sortable: true,
             width: "10%",
         },
         {

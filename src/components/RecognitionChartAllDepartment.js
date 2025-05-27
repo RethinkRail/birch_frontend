@@ -107,18 +107,24 @@ const RecognitionChartAllDepartment = ({ startDate, endDate, dateDiff, dataSet,i
     const newData = Array.from(recognitionMap, ([name, data]) => ({ name, data }));
     const chartData = {
         labels: xAxis,
-        datasets: newData.map((item, index) => ({
-            label: item.name,
-            data: item.data,
-            fill: false,
-            tension: 0.0,
-            backgroundColor: `hsla(${index * 360 / Object.keys(dataSet).length}, 70%, 50%, 0.2)`,
-            borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-            borderWidth: 2,
-            pointRadius: 4,
-            spanGaps: true, // Enable skipping null values
-        })),
+        datasets: newData.map((item, index) => {
+            const totalItems = newData.length;
+            const hue = Math.floor((index / totalItems) * 360); // Evenly distribute hues
+
+            return {
+                label: item.name,
+                data: item.data,
+                fill: false,
+                tension: 0.0,
+                backgroundColor: `hsla(${hue}, 70%, 50%, 0.2)`,
+                borderColor: `hsl(${hue}, 70%, 50%)`,
+                borderWidth: 2,
+                pointRadius: 4,
+                spanGaps: true,
+            };
+        }),
     };
+
 
     const options = {
         responsive: true,

@@ -7,7 +7,7 @@ import Select from "react-select";
 
 
 const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
-
+    console.log(workOrder)
 
     const [previousPart, setPreviousPart] = useState(null)
     const singleMarkUp = editData && editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
@@ -750,7 +750,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     </div>
                 </div>
                 <div className="flex flex-row items-center gap-2">
-                    {!workOrder.locked_by && (
+                    {(!workOrder.locked_by && Number(workOrder.locked_for_time_clocking) !== 1) && (
                         <button
                             className='bg-[#002e54] text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center'
                             onClick={handleSave}
@@ -759,7 +759,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </button>
                     )}
 
-                    {editData && !workOrder.locked_by && (
+
+
+                    {(!workOrder.locked_by &&  Number(workOrder.locked_for_time_clocking) !== 1) && (
                         <button
                             className={`text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center 
                             ${editData.time_log.length > 0 ? 'bg-gray-300 tooltip tooltip-top before:whitespace-pre-wrap before:content-[attr(data-tip)]' : 'bg-[#002e54]'}`}

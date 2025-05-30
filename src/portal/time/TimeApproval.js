@@ -26,6 +26,7 @@ const TimeApproval = () =>{
 
     const toastId = useRef(null)
     const [crewsForTimeRetrieve, setCrewsForTimeRetrieve] = useState([]);
+    const [allCrews, setAllCrews] = useState([]);
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     const [crewsToAddTime, setCrewsToAddTime] = useState([]);
 
@@ -143,7 +144,35 @@ const TimeApproval = () =>{
             }
         });
 
-        setUnApprovedTimeLogs(unapprovedLogs);
+        console.log(crewsForTimeRetrieve)
+        console.log(selectedDepartmentToTimeRetrieve)
+        let departmentWiseCrew ;
+
+        if(selectedDepartmentToTimeRetrieve.value==0){
+            departmentWiseCrew = allCrews
+        }else {
+            departmentWiseCrew = allCrews.filter(
+                item => item.job_or_revenue_category?.id === selectedDepartmentToTimeRetrieve.value
+            );
+        }
+
+        console.log(unapprovedLogs)
+
+        const timeLogMap = new Map(unapprovedLogs.map(log => [log.employee_number, log]));
+
+        // Generate the full time log list
+        const fullTimeLogs = departmentWiseCrew.map(emp => {
+            const existingLog = timeLogMap.get(emp.employee_id);
+            return existingLog || {
+                employee_name: emp.name,
+                employee_number: emp.employee_id,
+                total_logged_time: 0,
+                logs: []
+            };
+        });
+
+
+        setUnApprovedTimeLogs(fullTimeLogs);
         setApprovedTimeLogs(approvedLogs);
     };
 
@@ -153,6 +182,9 @@ const TimeApproval = () =>{
             try {
                 setIsButtonDisabled(true)
                 const crewsResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'crews');
+                const activeEmployees = crewsResponse.data.filter(emp => emp.is_active === 1);
+                setAllCrews(activeEmployees)
+                console.log(crewsResponse)
                 const activeCarResponse = await axios.get(process.env.REACT_APP_BIRCH_API_URL + 'get_car_for_time_operation');
                 console.log(activeCarResponse)
                 const activeCars= [
@@ -465,7 +497,14 @@ const TimeApproval = () =>{
 
     const columns = [
         { name: 'Name', selector: row => row.employee_name, sortable: true },
-        { name: 'Birch Time (hrs)', selector: row => (row.total_logged_time / 3600).toFixed(2), sortable: true },
+        {
+            name: 'Birch Time (hrs)',
+            selector: row =>
+                row.logs && row.logs.length === 0
+                    ? 'ABSENT'
+                    : (row.total_logged_time / 3600).toFixed(2),
+            sortable: true
+        },
         {
             name: 'Actions',
             cell: row => (

@@ -759,8 +759,6 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </button>
                     )}
 
-
-
                     {(!workOrder.locked_by &&  Number(workOrder.locked_for_time_clocking) !== 1) && (
                         <button
                             className={`text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center 

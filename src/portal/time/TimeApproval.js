@@ -171,8 +171,14 @@ const TimeApproval = () =>{
             };
         });
 
+        console.log("hi")
+        console.log(selectedCrewsToTimeRetrieve)
+        if(selectedCrewsToTimeRetrieve.value==0){
+            setUnApprovedTimeLogs(fullTimeLogs);
+        }else {
+            setUnApprovedTimeLogs(unapprovedLogs)
+        }
 
-        setUnApprovedTimeLogs(fullTimeLogs);
         setApprovedTimeLogs(approvedLogs);
     };
 

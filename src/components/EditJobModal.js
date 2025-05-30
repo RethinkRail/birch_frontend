@@ -8,7 +8,7 @@ import Select from "react-select";
 
 const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
     console.log(workOrder)
-
+    console.log(editData)
     const [previousPart, setPreviousPart] = useState(null)
     const singleMarkUp = editData && editData.jobparts && editData.jobparts.length > 0 ? editData.jobparts[0].markup_percent : null;
     console.log(singleMarkUp)
@@ -764,10 +764,10 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     {(!workOrder.locked_by &&  Number(workOrder.locked_for_time_clocking) !== 1) && (
                         <button
                             className={`text-white text-[12px] px-2.5 py-1.5 flex rounded-md justify-center items-center 
-                            ${editData.time_log.length > 0 ? 'bg-gray-300 tooltip tooltip-top before:whitespace-pre-wrap before:content-[attr(data-tip)]' : 'bg-[#002e54]'}`}
+                            ${editData?.time_log.length > 0 ? 'bg-gray-300 tooltip tooltip-top before:whitespace-pre-wrap before:content-[attr(data-tip)]' : 'bg-[#002e54]'}`}
                             onClick={handleDelete}
-                            disabled={editData.time_log.length > 0}
-                            data-tip={editData.time_log.length > 0 ? "Can't delete, time is logged in this line" : ""}
+                            disabled={editData?.time_log.length > 0}
+                            data-tip={editData?.time_log.length > 0 ? "Can't delete, time is logged in this line" : ""}
                         >
                             DELETE
                         </button>

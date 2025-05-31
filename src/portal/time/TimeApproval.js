@@ -171,14 +171,15 @@ const TimeApproval = () =>{
             };
         });
 
-        console.log("hi")
-        console.log(selectedCrewsToTimeRetrieve)
-        if(selectedCrewsToTimeRetrieve.value==0){
-            setUnApprovedTimeLogs(fullTimeLogs);
-        }else {
-            setUnApprovedTimeLogs(unapprovedLogs)
-        }
+        // console.log("hi")
+        // console.log(selectedCrewsToTimeRetrieve)
+        // if(selectedCrewsToTimeRetrieve.value==0){
+        //     setUnApprovedTimeLogs(fullTimeLogs);
+        // }else {
+        //     setUnApprovedTimeLogs(unapprovedLogs)
+        // }
 
+        setUnApprovedTimeLogs(unapprovedLogs)
         setApprovedTimeLogs(approvedLogs);
     };
 
@@ -514,13 +515,13 @@ const TimeApproval = () =>{
         {
             name: 'Actions',
             cell: row =>
-                row.logs && row.logs.length > 0 ? (
+               (
                     <button
                         onClick={() => handleViewDetails(row)}
                         className="bg-blue-500 text-white px-4 py-2 rounded">
                         View Details
                     </button>
-                ) : null
+                )
         }
     ];
 

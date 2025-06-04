@@ -104,21 +104,9 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
                         </button>
                     </form>
                 </div>
-                <div className='mt-[65px]'/>
-                {Object.values(groupedItems).map((groupedItem, index) => (
-                    <div key={index} className="border my-2 rounded  border-[#D0D5DD] p-[14px] mx-[24px]">
-                        <h2 className='font-semibold text-black-300'>{groupedItem.status_id + " : " + groupedItem.title}</h2>
-                        {groupedItem.names.map((name, i) => (
-                            <div className='flex justify-between my-1 text-[16px]'>
-                                <span className='w-1/4'><h6 className='font-medium'>{name}</h6> <span
-                                    className='font-normal italic '>{groupedItem.comment_date}</span></span>
-                                <span className='w-3/4 font-light'> {groupedItem.comments[i]}</span>
-                            </div>
-                        ))}
-                    </div>
-                ))}
 
-                <div className="mx-[24px] mb-[28px] mt-[24px] ">
+
+                <div className="mx-[24px] mb-[8px] mt-[72px] ">
                     <p className='text-[14px] font-medium mb-[3px]'>Add New Comment</p>
                     <input type="text" className='input w-full input-bordered' id="new_comment" ref={statusTextArea}/>
                 </div>
@@ -139,6 +127,20 @@ const CommentModal = ({data, work_id, updateWorkUpdates}) => {
                         Save
                     </button>
                 </div>
+                <div className='mt-[32px]'/>
+                {Object.values(groupedItems).map((groupedItem, index) => (
+                    <div key={index} className="border my-2 rounded  border-[#D0D5DD] p-[14px] mx-[24px]">
+                        <h2 className='font-semibold text-black-300'>{groupedItem.status_id + " : " + groupedItem.title}</h2>
+                        {groupedItem.names.map((name, i) => (
+                            <div className='flex justify-between my-1 text-[16px]'>
+                                <span className='w-1/4'><h6 className='font-medium'>{name}</h6> <span
+                                    className='font-normal italic '>{groupedItem.comment_date}</span></span>
+                                <span className='w-3/4 font-light'> {groupedItem.comments[i]}</span>
+                            </div>
+                        ))}
+                    </div>
+                ))}
+
             </div>
         </dialog>
     );

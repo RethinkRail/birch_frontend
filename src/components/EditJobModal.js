@@ -272,7 +272,10 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
     const handleSave = async () => {
         // The logic to call the end point will be here
-
+        if(!inputValues["location_code"]){
+            alert("Put location code")
+            return
+        }
         if(!editData) {
             console.log(inputValues, "This is the input values")
             let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number( markupPercent), availability: 1}))

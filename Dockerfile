@@ -4,7 +4,8 @@ FROM node:19-bullseye AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --force
+# Use retry logic to reduce issues with transient 503 errors
+RUN npm install --force || npm install --force
 
 COPY . .
 RUN npm run build

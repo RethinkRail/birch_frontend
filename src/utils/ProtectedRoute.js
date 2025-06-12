@@ -11,9 +11,7 @@ const ProtectedRoute = (props) => {
     let token
     console.log("In protected screen")
     const handleGetUser = async () => {
-        // Disable the following line when google is back again
-        setIsLoggedIn(true)
-        return
+
         auth.onAuthStateChanged(async (user) => {
 
             if (user == null) {

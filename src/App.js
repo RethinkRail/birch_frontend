@@ -28,6 +28,10 @@ function App() {
     //     .catch((err) => console.log('Failed to receive message: ', err));
 
     const handleGetUser = async () => {
+        // Disable the following line when google is back again
+        setIsLoggedIn(true)
+        return
+
         auth.onAuthStateChanged(async (user) => {
             if (user == null) {
                 setIsLoggedIn(false)

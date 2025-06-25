@@ -33,19 +33,65 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
     const [timeLogs, setTimeLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [utilization,setUtilization]= useState()
+    const [categoryWiseUtilization,setCategoryWiseUtilication]= useState([])
 
 
     const calculateUtilazation = (workOrder) =>{
+        console.log("workorder in railcar time log")
+        console.log(workOrder)
         const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
         setUtilization(percentage)
     }
 
+    const calculateLoggedCategoryHoursWithPercent = (workOrder) => {
+        if (!workOrder.joblist || !Array.isArray(workOrder.joblist)) return {};
+
+        const categoryHours = {};
+
+        workOrder.joblist.forEach(job => {
+            const category = job.jobcode_joblist_job_code_appliedTojobcode?.job_or_revenue_category?.name || "Uncategorized";
+
+            // Actual logged time
+            const loggedSeconds = Array.isArray(job.time_log)
+                ? job.time_log.reduce((acc, t) => acc + (t.logged_time_in_seconds || 0), 0)
+                : 0;
+
+            const loggedHours = loggedSeconds / 3600;
+
+            // Estimated labor time
+            const estimatedHours = (job.labor_time || 0) * (job.quantity || 1);
+
+            if (!categoryHours[category]) {
+                categoryHours[category] = {
+                    loggedHours: 0,
+                    estimatedHours: 0
+                };
+            }
+
+            categoryHours[category].loggedHours += loggedHours;
+            categoryHours[category].estimatedHours += estimatedHours;
+        });
+
+        // Add utilization percentage: applied / estimated
+        Object.keys(categoryHours).forEach(category => {
+            const { loggedHours, estimatedHours } = categoryHours[category];
+            const percentage = estimatedHours === 0 ? 0 : (loggedHours / estimatedHours) * 100;
+            categoryHours[category].percentage = Number(percentage.toFixed(2));
+        });
+
+
+
+        setCategoryWiseUtilication(categoryHours)
+    };
+
+
     useEffect(()=>{
         setIsInVoiced(workOrder.locked_by != null)
         setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
         calculateUtilazation(workOrder)
+        calculateLoggedCategoryHoursWithPercent(workOrder)
     },[workOrder])
 
     const showModal = async (row) => {
@@ -399,27 +445,47 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                 />
             </div>
 
-            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-5 gap-x-64 mb-[24px]" >
+            <div className="w-full bg-white p-[25px]  mt-[24px] border rounded  grid grid-cols-5 gap-x-32 mb-[24px]" >
                 <div className="">
-                    <h2 className='text-[12px] font-normal '>TOTAL HOURS ESTIMATED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(laboorHRSEST)} Hrs</p>
+                    <h2 className='text-[11px] font-normal '>TOTAL HOURS ESTIMATED</h2>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(laboorHRSEST)} </p>
+                    {/* Breakdown */}
+                    <div className="mt-2 space-y-1">
+                        {Object.entries(categoryWiseUtilization).map(([category, data]) => (
+                            <div key={category} className="text-[10px] text-gray-600 flex justify-between">
+                                <span>{category}</span>
+                                <span>{round2Dec(data.estimatedHours)} </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
                 <div className="">
-                    <h2 className='text-[12px] font-normal '>TOTAL HOURS APPLIED</h2>
-                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursApplied)}</p>
+                    <h2 className='text-[11px] font-normal '>TOTAL HOURS APPLIED</h2>
+                    <p className='text-[#979C9E] mt-[2px]'>{round2Dec(totalHoursApplied)} </p>
+
+                    <div className="mt-2 space-y-1">
+                        {Object.entries(categoryWiseUtilization).map(([category, data]) => (
+                            <div key={category} className="text-[10px] text-gray-600 flex justify-between">
+                                <span>{category}</span>
+                                <span>{round2Dec(data.loggedHours)}  ({data.percentage}%)</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
                 <div className="">
-                    <h2 className='text-[12px] font-normal '>TOTAL REWORK</h2>
+                    <h2 className='text-[11px] font-normal '>TOTAL REWORK</h2>
                     <p className='text-[#979C9E] mt-[2px]'> {round2Dec(totalRework)}</p>
                 </div>
                 <div className="]">
-                    <h2 className='text-[12px] font-normal '>Difference</h2>
+                    <h2 className='text-[11px] font-normal '>Difference</h2>
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(round2Dec(laboorHRSEST)-(totalHoursApplied+totalRework))}</p>
                 </div>
 
                 <div className="]">
-                    <h2 className='text-[12px] font-normal '>LHR</h2>
+                    <h2 className='text-[11px] font-normal '>LHR </h2>
                     <p className='text-[#979C9E] mt-[2px]'>{round2Dec(utilization)+"%"}</p>
+
+
                 </div>
             </div>
 

@@ -27,6 +27,7 @@ const  SummaryReportMaterial = () => {
     const [shipped, setShipped] = useState(false);
     const initialColumns = useMemo(() => [
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
+        { accessorKey: 'reason_to_come', header: 'REASON', enableSorting: true },
         { accessorKey: 'status', header: 'Status', enableSorting: true,columnFilterModeOptions: ['between','lessThan', 'greaterThan'] },
         { accessorKey: 'last_comment', header: 'Last Comment', enableSorting: true },
         { accessorKey: 'qa_date', header: 'QA Date', enableSorting: true },
@@ -293,15 +294,16 @@ const  SummaryReportMaterial = () => {
                             },
 
                             columnVisibility: {
-                                dis: false,
+                                dis: true,
                                 rfid: true,
+                                reason_to_come: true,
                                 status: true,
                                 last_comment: true,
-                                qa_date: true,
+                                qa_date: false,
                                 projected_out_date: true,
                                 total_cost: true,
-                                owner: false,
-                                lessee: false,
+                                owner: true,
+                                lessee: true,
                                 month_to_invoice: false,
                                 mo_wk: false,
                                 mhr_applied: false,

@@ -177,7 +177,7 @@ const WorkOrderDataTable = ({
                 'projected_out_date': workOrder.projected_out_date ,
                 'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
                 'last_content': workOrder.railcar.products.name,
-                'status': workOrder.workupdates[0].status_id,
+                'status': workOrder.workupdates[0]?.status_id,
                 'comment': workOrder.workupdates,
                 'material_eta': workOrder.material_eta,
                 'finalized': workOrder.locked_by,

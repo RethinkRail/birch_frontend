@@ -14,6 +14,7 @@ import { round2Dec } from "../utils/NumberHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import CustomDateInput from "./CustomDateInput";
 import * as XLSX from 'xlsx';
+import {hasRole} from "../utils/CommonHelper";
 const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboorHRSEST }) => {
     //console.log(railcarLog)
     const [datePickers, setDatePickers] = useState({
@@ -22,6 +23,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         qaChecked: {}
     });
     const [isDatePickerDisabled,setIsDatePickerDisabled]= useState(false)
+    const [isQADatePickerDisabled,setIsQADatePickerDisabled]= useState(false)
     const [totalHoursEstimated, setTotalHoursEstimated] = useState(0);
     const [totalHoursApplied, setTotalHoursApplied] = useState(0);
     const [totalRework, setTotalRework] = useState(0);
@@ -90,6 +92,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
     useEffect(()=>{
         setIsInVoiced(workOrder.locked_by != null)
         setIsDatePickerDisabled(locked_for_time_clockinhg== 1?true:false)
+        setIsQADatePickerDisabled(!hasRole("QA"))
         calculateUtilazation(workOrder)
         calculateLoggedCategoryHoursWithPercent(workOrder)
     },[workOrder])
@@ -188,8 +191,10 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
 
             try {
                 console.log(date)
+                console.log(workOrder.id)
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
                     job_id: jobId,
+                    work_id: workOrder.id,
                     user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
                     field: type,  // Specify that all fields are being updated
                     updated_date: date,
@@ -223,6 +228,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                 console.log(date)
                 const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_job_check_log', {
                     job_id: jobId,
+                    work_id: workOrder.id,
                     user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
                     field: type,
                     updated_date: date,
@@ -306,7 +312,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                         portalId="orderDetailsModal"
                         dateFormat="MM-dd-yyyy"
                         isClearable={!isInnoiced &&  datePickers.crewChecked[row.job_id]!==null}
-                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
+                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null || isQADatePickerDisabled}
                     />
                 </span>
             ),
@@ -356,7 +362,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
                             type="checkbox"
                             checked={isChecked}
                             onChange={handleCheckboxChange}
-                            disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id] == null}
+                            disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id] == null || isQADatePickerDisabled}
                         />
                     </div>
                 );

@@ -341,24 +341,29 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         },
         {
             name: 'QA TIME',
-            cell: row => (
-                <span className="w-full items-start align-top p-2">
-                    <DatePicker
-                        customInput={<CustomDateInputFullWidth
-                            value={datePickers.qaChecked[row.job_id] ?
-                                datePickers.qaChecked[row.job_id].toLocaleDateString() : null}/>}
-                        selected={datePickers.qaChecked[row.job_id] || null}
-                        onChange={(date) => handleDateChange('qaChecked', row.job_id, date)}
-                        placeholderText="Select date"
-                        portalId="orderDetailsModal"
-                        dateFormat="MM-dd-yyyy"
-                        isClearable ={!isDatePickerDisabled}
-                        disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id]==null}
-                    />
-                </span>
-            ),
+            cell: row => {
+                const isChecked = !!datePickers.qaChecked[row.job_id];
+
+                const handleCheckboxChange = (e) => {
+                    const checked = e.target.checked;
+                    const currentDate = checked ? new Date() : null;
+                    handleDateChange('qaChecked', row.job_id, currentDate);
+                };
+
+                return (
+                    <div className="flex items-center justify-center">
+                        <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={handleCheckboxChange}
+                            disabled={isDatePickerDisabled || datePickers.crewChecked[row.job_id] == null}
+                        />
+                    </div>
+                );
+            },
             width: "10%",
         }
+
     ];
 
     const myStyles = {

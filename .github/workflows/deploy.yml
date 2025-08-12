@@ -54,9 +54,9 @@ jobs:
           script: |
             aws ecr get-login-password --region us-east-2 | sudo docker login --username AWS --password-stdin 018772930825.dkr.ecr.us-east-2.amazonaws.com
             sudo docker pull 018772930825.dkr.ecr.us-east-2.amazonaws.com/birch_frontend:latest
-            sudo docker stop trackage_v2 || true
-            sudo docker rm trackage_v2 || true
-            sudo docker run -d --name trackage_v2 -p 5000:5000 \
+            sudo docker stop birch_frontend || true
+            sudo docker rm birch_frontend || true
+            sudo docker run -d --name birch_frontend -p 5000:5000 \
               --env-file /home/ubuntu/.env \
               018772930825.dkr.ecr.us-east-2.amazonaws.com/birch_frontend:latest
             rm /home/ubuntu/.env

@@ -33,7 +33,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t $ECR_REPO_URI:latest .
 
-      - name: Push Docker image to ECR
+      - name: Push Docker image to ECRclea
         run: docker push $ECR_REPO_URI:latest
 
       - name: Upload .env to EC2

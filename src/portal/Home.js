@@ -25,7 +25,7 @@ const Home = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [skip, setSkip] = useState(0);
-    const take = 350;
+    const take = 50;
     // For pagination
     const [activeTasks, setActiveTask] = useState([])
     const [statusCodes, setStatusCodes] = useState([])

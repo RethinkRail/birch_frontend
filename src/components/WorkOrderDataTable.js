@@ -59,6 +59,7 @@ const WorkOrderDataTable = ({
                                 updateBillToLesseForAJob
                             }) => {
     const orderDetailsModalRef = useRef(null);
+    const [searchTermHistory, setSearchTermHistory] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
     // Debounced function to handle search
@@ -71,22 +72,22 @@ const WorkOrderDataTable = ({
     );
 
     const handleSearchClick = () => {
-        // alert(`Search clicked with term: ${searchTerm}`);
-        searchCar(searchTerm.toUpperCase())
-        setSearchTerm(''); // Clear the search box
+        // alert(`Search clicked with term: ${searchTermHistory}`);
+        searchCar(searchTermHistory.toUpperCase())
+        setSearchTermHistory(''); // Clear the search box
     };
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
-            //alert(`Enter pressed with term: ${searchTerm}`);
-            searchCar(searchTerm)
-            setSearchTerm(''); // Clear the search box
+            //alert(`Enter pressed with term: ${searchTermHistory}`);
+            searchCar(searchTermHistory)
+            setSearchTermHistory(''); // Clear the search box
         }
     };
 
     const handleChange = (event) => {
         const value = event.target.value.toUpperCase();
-        setSearchTerm(value);
+        setSearchTermHistory(value);
         debouncedSearch(value); // Call debounced search function
     };
 
@@ -517,25 +518,45 @@ const WorkOrderDataTable = ({
     return (
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
-                <div className="flex justify-between items-center mt-[10px] uppercase">
+                <div className="flex justify-between items-center mt-[10px] uppercase mb-5">
                     <h2 className="text-[18px]  font-semibold">Work Orders</h2>
-                    <div className='relative mr-1' >
+                </div>
+                {/* Search Bar Above DataTable */}
+                <div className="flex justify-between mb-3">
+                    {/* Left Search (Work Orders) */}
+                    <div className="flex items-center ml-1">
                         <input
-                            type='text'
-                            placeholder='Search history car ..'
+                            type="text"
+                            placeholder="Search active work orders..."
                             value={searchTerm}
-                            onChange={handleChange}
-                            onKeyDown={handleKeyDown}
-                            className='w-full h-[24px] px-[18px] py-[18px] text-[14px] font-medium border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-[40px]'
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-[32px] px-[10px] text-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-
                     </div>
 
+                    {/* Right Search (History Car) */}
+                    <div className="flex items-center">
+                        <input
+                            type="text"
+                            placeholder="Search history car .."
+                            value={searchTermHistory}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
+                            className="h-[32px] px-[10px] text-[14px] font-medium border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
                 </div>
+
                 <div className="mt-5 ml-1 mx-auto border rounded-lg mb-10 p-2 sm:px-1 sm:py-1 sm:w-full md:w-full lg:w-full xl:w-full">
                     <DataTable
                         columns={workOrdersTableColumn}
-                        data={woForDT}
+                        data={
+                            woForDT.filter(row =>
+                                Object.values(row).some(val =>
+                                    String(val).toLowerCase().includes(searchTerm.toLowerCase())
+                                )
+                            )
+                        }
                         conditionalRowStyles={conditionalRowStyles}
                         striped={false}
                         dense={true}
@@ -546,9 +567,15 @@ const WorkOrderDataTable = ({
                         className="compact stripe"
                         customStyles={myStyles}
                         noDataComponent={
-                            <div className="no-data-message text-center py-5 text-gray-500">
-                                Preparing Result
-                            </div>
+                           searchTerm ? (
+                                <div className="no-data-message text-center py-5 text-gray-500">
+                                    No matching results
+                                </div>
+                            ) : (
+                                <div className="no-data-message text-center py-5 text-gray-500">
+                                    Loading results...
+                                </div>
+                            )
                         }
                     />
                 </div>

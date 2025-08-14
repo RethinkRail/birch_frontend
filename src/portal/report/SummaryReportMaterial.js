@@ -40,15 +40,12 @@ const  SummaryReportMaterial = () => {
         },
         { accessorKey: 'total_cost', header: 'Total Cost', enableSorting: true },
         { accessorKey: 'dis', header: 'DIS', enableSorting: true, size: 50 },
-
         { accessorKey: 'owner', header: 'Owner', enableSorting: true },
         { accessorKey: 'lessee', header: 'Lessee', enableSorting: true },
-
         { accessorKey: 'month_to_invoice', header: 'Month to Invoice', enableSorting: true },
         { accessorKey: 'mo_wk', header: 'MO WK', enableSorting: true },
         { accessorKey: 'mhr_applied', header: 'MHR Applied', enableSorting: true },
         { accessorKey: 'mhr_estimated', header: 'MHR Estimated', enableSorting: true },
-
         { accessorKey: 'last_content', header: 'Last Content', enableSorting: true },
         { accessorKey: 'railcar_type', header: 'Railcar Type', enableSorting: true },
         { accessorKey: 'material_cost', header: 'Material Cost', enableSorting: true },
@@ -63,6 +60,7 @@ const  SummaryReportMaterial = () => {
         { accessorKey: 'valve_date', header: 'Valve Date', enableSorting: true },
         { accessorKey: 'pd_date', header: 'PD Date', enableSorting: true },
         { accessorKey: 'final_date', header: 'Final Date', enableSorting: true },
+        { accessorKey: 'invoice_date_modified', header: 'Invoice Date', enableSorting: true },
         { accessorKey: 'shipped_date', header: 'Shipped Date', enableSorting: true },
         { accessorKey: 'sp', header: 'Special Process', enableSorting: true },
         { accessorKey: 'tq', header: 'Tank Qualification', enableSorting: true },
@@ -74,9 +72,11 @@ const  SummaryReportMaterial = () => {
     const [data, setData] = useState([]);
 
     const formatDate = (sqlDate) => {
+        //console.log(sqlDate);
         if (sqlDate === process.env.REACT_APP_DEFAULT_DATE) {
             return null; // Return empty string if equal to the default date
         }
+
         return new Date(sqlDate).toLocaleDateString(); // Format as needed
     };
 
@@ -89,7 +89,8 @@ const  SummaryReportMaterial = () => {
     const handleShippedToggle = () => {
         setShipped(prev => !prev);
     };
-
+    const isValidDate = (dateStr) =>
+        dateStr && dateStr !== '1900-01-01T00:00:00.000Z';
     const transformData = (data) => {
         console.log(data)
 
@@ -108,8 +109,26 @@ const  SummaryReportMaterial = () => {
 
             const isValidArrivalDate = !isNaN(arrivalDate.getTime()) && item.arrival_date !== '1900-01-01T00:00:00.000Z';
 
-            const dis = isValidArrivalDate ? Math.floor((todayDate - arrivalDateDate) / (1000 * 60 * 60 * 24)) : 0;
 
+            let chosenInvoiceDate = process.env.REACT_APP_DEFAULT_DATE;
+
+            if (isValidDate(item.invoice_date) && isValidDate(item.secondary_owner_info?.invoice_date)) {
+                chosenInvoiceDate =
+                    new Date(item.invoice_date) > new Date(item.secondary_owner_info.invoice_date)
+                        ? new Date(item.invoice_date)
+                        : new Date(item.secondary_owner_info.invoice_date);
+            } else if (isValidDate(item.invoice_date)) {
+                chosenInvoiceDate = new Date(item.invoice_date);
+            } else if (isValidDate(item.secondary_owner_info?.invoice_date)) {
+                chosenInvoiceDate = new Date(item.secondary_owner_info.invoice_date);
+            }
+
+            let dis = 0;
+            if (chosenInvoiceDate) {
+                dis = Math.floor((chosenInvoiceDate - arrivalDateDate) / (1000 * 60 * 60 * 24));
+            } else if (isValidArrivalDate) {
+                dis = Math.floor((todayDate - arrivalDateDate) / (1000 * 60 * 60 * 24));
+            }
 
             const mhr_applied = joblist.reduce((sum, job) => {
                 const jobTime = job.time_log.reduce((logSum, log) => logSum + (log.logged_time_in_seconds || 0), 0);
@@ -123,10 +142,10 @@ const  SummaryReportMaterial = () => {
             const total_cost = material_cost + labor_cost;
             //console.log(workupdates[0].user.name)
             return {
-
                 rfid: railcar.rfid,
                 dis,
                 owner: railcar.owner_railcar_owner_idToowner.name,
+                invoice_date_modified:chosenInvoiceDate,
                 lessee: railcar.owner_railcar_lessee_idToowner.name,
                 railcar_type: railcar.railcartype.name,
                 last_content: railcar.products.name,
@@ -166,6 +185,7 @@ const  SummaryReportMaterial = () => {
                     final_date: formatDate(item.final_date),
                     qa_date: formatDate(item.qa_date),
                     month_to_invoice: formatDate(item.month_to_invoice),
+                    invoice_date_modified: formatDate(item.invoice_date_modified),
                     shipped_date: formatDate(item.shipped_date),
                     mhr_applied: round2Dec(item.mhr_applied),
                     mhr_estimated: round2Dec(item.mhr_estimated),
@@ -322,6 +342,7 @@ const  SummaryReportMaterial = () => {
                                 valve_date: false,
                                 pd_date: false,
                                 final_date: false,
+                                invoice_date_modified:false,
                                 shipped_date: false,
                                 sp: false,
                                 tq: false,

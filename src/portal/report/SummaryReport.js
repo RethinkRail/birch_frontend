@@ -75,6 +75,7 @@ const SummaryReport = () => {
     const handleGenerate = async () => {
         try {
             const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+'get_summary_report'); // Replace with your actual API URL
+            console.log(response.data);
             const formattedData = response.data.map(item => {
                 return {
                     ...item,

@@ -124,7 +124,7 @@ const  SummaryReportMaterial = () => {
             }
 
             let dis = 0;
-            if (chosenInvoiceDate) {
+            if (chosenInvoiceDate != process.env.REACT_APP_DEFAULT_DATE) {
                 dis = Math.floor((chosenInvoiceDate - arrivalDateDate) / (1000 * 60 * 60 * 24));
             } else if (isValidArrivalDate) {
                 dis = Math.floor((todayDate - arrivalDateDate) / (1000 * 60 * 60 * 24));

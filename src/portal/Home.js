@@ -152,7 +152,10 @@ const Home = () => {
                 loadMoreWorkOrders(skip + take); // Load next batch
             } else {
                 setIsLoading(false)
-                toast.success(`All work orders loaded. Total: ${skip + newOrders.length}`);
+                toast.success(
+                    `All work orders loaded. Total: ${skip + newOrders.length}`,
+                    { autoClose: 1000 }
+                );
                 console.log(`All work orders loaded. Total: ${skip + newOrders.length}`)
             }
         } catch (error) {

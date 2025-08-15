@@ -141,13 +141,13 @@ export const showToastMessage = (message, type) => {
  */
 export function replaceItemInArray(arr, newItem) {
     const index = arr.findIndex(item => item.id === newItem.id);
+
     if(index == -1){
         return null
     }
     if (index !== -1) {
         arr[index] = newItem;
     }
-    //console.log(arr[index])
     return arr;
 }
 

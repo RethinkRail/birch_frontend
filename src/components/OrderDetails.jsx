@@ -58,12 +58,9 @@ const OrderDetails = ({
                           handleStorageUpdate,
                           handIsLockedForTimeClocking,
                           updateBillToLesseForAJob,
-                          orderDetailsModalRef
+                          orderDetailsModalRef,
+                          onClose
                       }) => {
-    console.log(workOrder)
-    // console.log(workOrder.reason_to_come)
-    // console.log(commonData)
-
 
     // Method to show update and cancel button when purchase order, invoice number, invoice date, due date changes
 
@@ -83,7 +80,7 @@ const OrderDetails = ({
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
     const [partReport, setPartReport] = useState([])
 
-    //const [joblist,setJobList] =useState([])
+
 
 
     const containerRef = useRef();
@@ -214,7 +211,7 @@ const OrderDetails = ({
             //console.warn("workOrder is null or undefined");
             return;
         }
-
+        console.log(workOrder)
         // const element = document.getElementById('car_info');
         // element?.scrollIntoView({ behavior: 'smooth' });
         // window.scrollBy(0, -50);
@@ -338,8 +335,11 @@ const OrderDetails = ({
     const closeModal = () => {
         if (orderDetailsModalRef.current) {
             orderDetailsModalRef.current.close();
+            onClose()
         }
-    }
+
+    };
+
     function scrollToTop() {
         const modalContent = document.getElementById('orderDetailsModal');
         if (modalContent) {

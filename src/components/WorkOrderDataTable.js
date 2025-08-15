@@ -13,7 +13,7 @@ import OrderDetails from "./OrderDetails";
 import CustomDateInput from "./CustomDateInput";
 import ReorderableTable from "./ReorderableTable";
 import debounce from 'lodash/debounce';
-import {hasRole} from "../utils/CommonHelper";
+import {hasRole, replaceItemInArray} from "../utils/CommonHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 
 const qs = require('qs');
@@ -116,88 +116,72 @@ const WorkOrderDataTable = ({
     }, []);
 
     useEffect(() => {
-        const handleChanges = () => {
-           // console.log("Work orders changed from data table", workOrders)
-            //console.log(workOrderToView)
-            if(workOrderToView) {
-                if(workOrders.length>0){
+        const handleChanges = async () => {
+            if (workOrderToView) {
+                if (workOrders.length > 0) {
                     const updated = workOrders.find(work => work.id == workOrderToView.id)
-                    if(updated){
-                        setWorkOrderToView(updated)
-                    }else {
+                    if (updated) {
+                        let config = {
+                            method: 'get',
+                            maxBodyLength: Infinity,
+                            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(workOrderToView.id),
+                            headers: {}
+                        };
+
+                        await axios.request(config)
+                            .then((response) => {
+                                setWorkOrderToView(response.data)
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+
+                    } else {
                         setWorkOrderToView(null)
                     }
                 }
-
-
             }
         }
         handleChanges()
     }, [workOrders])
-    useEffect(() => {
-        const handleChanges = () => {
-//            console.log("Wawuuuu", workOrderToView)
-        }
-        handleChanges()
-    }, [workOrderToView])
 
-    useEffect(() => {
-        if (workOrderToView != null) {
-            const wo = workOrders.find(obj => obj['id'] === workOrderToView.id)
-            setWorkOrderToView(wo)
 
-        }
-//        console.log("in action")
-    }, [workOrders])
 
 
     useEffect(() => {
 
         workOrderData=[]
         workOrders.forEach((workOrder, index) => {
-            const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
-            const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
-            const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
             var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
-
             const workOrderObject = {
-                'workOrder': workOrder,
-                'estimated_time': round2Dec(laborHours),
-                'labor_hours': round2Dec(durationHours),
-                'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
                 'dif': actual_dif,
                 'railcar_id': workOrder.railcar_id,
-                'arrival_date': workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.arrival_date),
-                'inspected_date': workOrder.inspected_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.inspected_date),
-                'clean_date': workOrder.clean_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.clean_date),
-                'repair_schedule_date': workOrder.repair_schedule_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_schedule_date),
-                'paint_date': workOrder.paint_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.paint_date),
-                'repair_date': workOrder.repair_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_date),
-                'final_date': workOrder.final_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.final_date),
-                'qa_date': workOrder.qa_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.qa_date),
-                'projected_out_date': workOrder.projected_out_date ,
-                'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
                 'last_content': workOrder.railcar.products.name,
                 'status': workOrder.workupdates[0]?.status_id,
                 'comment': workOrder.workupdates,
                 'material_eta': workOrder.material_eta,
                 'finalized': workOrder.locked_by,
                 'shipped': workOrder.shipped_date,
+                'projected_out_date': workOrder.projected_out_date,
                 'work_id': workOrder.id,
-                'is_storage': workOrder.is_storage,
                 'index': index
             }
-            // console.log(workOrderObject.material_eta)
-            // console.log(workOrderObject.projected_out_date)
             workOrderData.push(workOrderObject)
         })
-        console.log()
-        workOrderData.sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date));
         setWoForDT(workOrderData)
-//        console.log("in action")
     }, [workOrders])
 
-
+    useEffect(() => {
+        if (workOrderToView && orderDetailsModalRef.current) {
+            orderDetailsModalRef.current.showModal();
+        }
+    }, [workOrderToView]);
+    const handleShowOrderDetails = (row) => {
+        setWorkOrderToView(row);
+    };
+    const handleCloseOrderDetails = () => {
+        setWorkOrderToView(null);
+    };
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -258,25 +242,12 @@ const WorkOrderDataTable = ({
             });
     };
     const workOrdersTableColumn = [
-        {
-            name: "LHR",
-            selector: row => row.lhr,
-            sortable: true,
-            width: '4%',
-            cell: (row) => (
-                <span
-                    className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
-                    data-tip={`Estimated Hour: ${row.estimated_time}\nHours Applied: ${row.labor_hours}`}
-                >
-                {row.lhr}
-            </span>
-            ),
-        },
+
         {
             name: "DIF",
             selector: row => row.dif,
             sortable: true,
-            width: '5%',
+            width: '4%',
             cell: (row) => (
                 <span className="whitespace-pre-line text-xs ">
                 {row.dif > 0 ? row.dif : "-"}
@@ -287,7 +258,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '10%',
+            width: '8%',
         },
         {
             name: "LAST CONTENT",
@@ -298,12 +269,12 @@ const WorkOrderDataTable = ({
                 {row.last_content}
             </span>
             ),
-            width: "11%",
+            width: "12%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "13%",
+            width: "20%",
             cell: (row) => (
                 <select
                     onChange={(e) => handleDropdownChange(e, row.work_id)}
@@ -322,7 +293,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "17%",
+            width: "19%",
             cell: (row) => (
                 <span
                     onClick={() => {
@@ -433,9 +404,25 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span
                     className="align-middle cursor-pointer mt-[10px]"
-                    onClick={() => {
-                        setWorkOrderToView(row.workOrder);
-                        handleShowOrderDetails(row.workOrder);
+                    onClick={async () => {
+                        let config = {
+                            method: 'get',
+                            maxBodyLength: Infinity,
+                            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(row.work_id),
+                            headers: {}
+                        };
+
+                        await axios.request(config)
+                            .then((response) => {
+                                console.log(response.data)
+                                handleShowOrderDetails(response.data);
+
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+
+
                     }}
                 >
                 {/* Eye Icon SVG */}
@@ -506,15 +493,7 @@ const WorkOrderDataTable = ({
         }
         return null;
     };
-    const handleShowOrderDetails = async (row) => {
-        setWorkOrderToView(null)
-        await setWorkOrderToView(() => row)
-        orderDetailsModalRef.current.showModal();
-    };
 
-    const closeModal = () => {
-        orderDetailsModalRef.current.close();
-    };
     return (
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
@@ -644,11 +623,10 @@ const WorkOrderDataTable = ({
                         handIsLockedForTimeClocking={handIsLockedForTimeClocking}
                         updateBillToLesseForAJob={updateBillToLesseForAJob}
                         orderDetailsModalRef={orderDetailsModalRef}
+                        onClose={handleCloseOrderDetails}
                     />
                 ) : null}
-                {/*<OrderDetails*/}
-                {/*    workOrder={workOrderToView}*/}
-                {/*/>*/}
+
             </div>
         </React.Fragment>
     )

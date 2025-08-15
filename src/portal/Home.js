@@ -40,34 +40,26 @@ const Home = () => {
     //CLoud messaging
 
     onMessage(messaging, (payload) => {
-        console.log(payload)
-
-        if(!isLoading){
-            if(payload.data.type === 'new_order'){
-                getActiveTasks()
-                getWorkOrderById(parseInt(payload.data.value))
-            }else if(payload.data.type === 'updated_wo'){
-                console.log("Push received wo updated")
-                getWorkOrderById(parseInt(payload.data.value))
-            } else if(payload.data.type === 'routing'){
-                getActiveTasks()
-            }else if(payload.data.type ==='deleted_order'){
-                console.log("deleted order")
-                const updatedArray = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
-
-                const originalLength = workOrders.length;
-                const filteredWorkOrders = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
-                const isDeleted = originalLength > filteredWorkOrders.length;
-                if (isDeleted) {
-                    setWorkOrders(updatedArray)
-                    // toast.info(
-                    //     "A order has been deleted"
-                    // );
-                } else {
-                    console.log("No items were deleted.");
-                }
+        if(payload.data.type === 'new_order'){
+            getActiveTasks()
+            getWorkOrderById(parseInt(payload.data.value))
+        }else if(payload.data.type === 'updated_wo'){
+            console.log("Push received wo updated")
+            getWorkOrderById(parseInt(payload.data.value))
+        } else if(payload.data.type === 'routing'){
+            getActiveTasks()
+        }else if(payload.data.type ==='deleted_order'){
+            const updatedArray = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
+            const originalLength = workOrders.length;
+            const filteredWorkOrders = workOrders.filter(obj => obj.id !== parseInt(payload.data.value));
+            const isDeleted = originalLength > filteredWorkOrders.length;
+            if (isDeleted) {
+                setWorkOrders(updatedArray)
+            } else {
+                console.log("No items were deleted.");
             }
         }
+
 
     })
 
@@ -96,25 +88,19 @@ const Home = () => {
     }
 
     const getWorkOrderById = async (work_id) => {
-        console.log("getting wo by id")
+
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
-            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(work_id),
+            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id_simplified?work_id=' + parseInt(work_id),
             headers: {}
         };
 
         await axios.request(config)
             .then((response) => {
-                console.log(response.data)
-                // const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
-                // setWorkOrders(updatedWorkOrders)
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
                 if(new_work_orders != null){
-                    console.log("replace")
-                    console.log(new_work_orders)
                     setWorkOrders([...new_work_orders]);
-
                 }else {
                     const  newLyAdded = workOrders.concat(response.data)
                     setWorkOrders(newLyAdded)
@@ -135,29 +121,13 @@ const Home = () => {
 
     }
 
-    const loadMoreWorkOrders = async (skip = 0) => {
+    const loadMoreWorkOrders = async () => {
         setIsLoading(true)
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder?skip=${skip}&take=${take}`);
-            const newOrders = response.data.active_workorder;
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder_simplified`);
+            const allWorkOrders = response.data.active_workorder;
 
-            if (newOrders.length === 0) {
-                toast.success(`All work orders loaded. Total: ${skip}`);
-                return;
-            }
-
-            setWorkOrders(prevOrders => [...prevOrders, ...newOrders]);
-
-            if (newOrders.length === take) {
-                loadMoreWorkOrders(skip + take); // Load next batch
-            } else {
-                setIsLoading(false)
-                toast.success(
-                    `All work orders loaded. Total: ${skip + newOrders.length}`,
-                    { autoClose: 1000 }
-                );
-                console.log(`All work orders loaded. Total: ${skip + newOrders.length}`)
-            }
+            setWorkOrders(allWorkOrders);
         } catch (error) {
             console.error("Error loading work orders:", error);
         }
@@ -1183,7 +1153,6 @@ const Home = () => {
 
     useEffect(() => {
         localStorage.removeItem("jobsToBePasted", null)
-        console.log("calling active task")
         getActiveTasks();
     }, []);
 
@@ -1202,8 +1171,8 @@ const Home = () => {
 
     useEffect(() => {
         getAllStatusCode()
-            .then(() => loadMoreWorkOrders(0)) // Start recursive loading
-            .then(() => getAllCommonData())
+            .then(() => getAllCommonData()) // Start recursive loading
+            .then(() => loadMoreWorkOrders())
             .catch(error => console.error("Error during sequential execution:", error));
     }, []);
     return (

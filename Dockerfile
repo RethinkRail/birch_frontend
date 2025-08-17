@@ -13,4 +13,4 @@ RUN npm run build
 RUN npm install -g serve
 EXPOSE 5001
 ENV NODE_ENV=production
-CMD ["serve", "-s", "build", "-l", "5000"]
+CMD ["serve", "-s", "build", "-l", "5001"]

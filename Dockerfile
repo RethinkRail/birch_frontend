@@ -6,8 +6,7 @@ COPY package*.json ./
 RUN npm install --force
 
 COPY . .
-RUN docker build --progress=plain --no-cache .
-
+RUN npm run build
 
 
 # Install `serve` and use it to serve the build

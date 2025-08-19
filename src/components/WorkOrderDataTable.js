@@ -101,12 +101,17 @@ const WorkOrderDataTable = ({
     let workOrderData = [];
     const [woForDT, setWoForDT] = useState([])
     const statusCommentDropDown = useRef(null);
-    // const orderDetailsModal = document.getElementById('orderDetailsModal');
-    //orderDetailsModal.close()
 
-    const orderDetailsModal = document.getElementById('orderDetailsModal');
 
     const [canFinalized, setCanFinalized] = useState(false);
+
+    //for checklist
+    const [isDepartmentChecklistModalOpen, setIsDepartmentChecklistModalOpen] = useState(false);
+    const [currentChecklist, setCurrentChecklist] = useState([]);
+    const [checklistState, setChecklistState] = useState({});
+    const [selectedWorkId, setSelectedWorkId] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
+    const [oldStatus, setOldStatus] = useState(null);
 
     useEffect(() => {
         const userToken = localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE);
@@ -149,7 +154,6 @@ const WorkOrderDataTable = ({
 
 
     useEffect(() => {
-
         workOrderData=[]
         workOrders.forEach((workOrder, index) => {
             var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
@@ -193,9 +197,26 @@ const WorkOrderDataTable = ({
             transform: 'translate(-50%, -50%)',
         },
     };
-    const handleDropdownChange = (e, workId) => {
+    const handleDropdownChange = (e, workId,status) => {
+       setOldStatus(status);
         e.preventDefault()
-        openStatusDialog(workId, e.target.value)
+        const selectedStatusObj = statusCode.find(sc => String(sc.code) === String(status));
+        if (selectedStatusObj?.department_id_for_checklist && selectedStatusObj.job_or_revenue_category) {
+            // build checklist state
+            const checklistItems = selectedStatusObj.job_or_revenue_category.department_checklist || [];
+            const initState = {};
+            checklistItems.forEach((item, idx) => {
+                initState[idx] = false;
+            });
+            setChecklistState(initState);
+            setCurrentChecklist(checklistItems);
+            setSelectedWorkId(workId);
+            setSelectedStatus(e.target.value);
+            setIsDepartmentChecklistModalOpen(true);
+        }else {
+            openStatusDialog(workId, e.target.value)
+        }
+
     }
     const openStatusDialog = (workId, new_status) => {
         setupdatedStatusCode(new_status)
@@ -277,19 +298,21 @@ const WorkOrderDataTable = ({
             width: "20%",
             cell: (row) => (
                 <select
-                    onChange={(e) => handleDropdownChange(e, row.work_id)}
+                    value={row.status} // controlled select
+                    onChange={(e) => handleDropdownChange(e, row.work_id, row.status)}
                     disabled={row.finalized > 0}
                     className={`w-full placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'} sm:text-xs md:text-sm`}
                 >
                     {statusCode.map((sc) => (
-                        <option key={sc.code} selected={row.status === sc.code}>
-                            {sc.code + ":" + sc.title}
+                        <option key={sc.code} value={sc.code}>
+                            {sc.code}:{sc.title}
                         </option>
                     ))}
                 </select>
             ),
             sortable: true,
-        },
+        }
+        ,
         {
             name: "COMMENT",
             selector: row => row.comment,
@@ -582,6 +605,82 @@ const WorkOrderDataTable = ({
                     <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                             onClick={postStatus}>SUBMIT
                     </button>
+                </Modal>
+
+
+
+                <Modal
+                    isOpen={isDepartmentChecklistModalOpen}
+                    onRequestClose={() => setIsDepartmentChecklistModalOpen(false)}
+                    contentLabel="POST COMMENT"
+                    style={customStylesForCommentModal}
+                >
+                    <h2 className="text-lg font-bold mb-3">Department Checklist</h2>
+
+                    {/* Checklist */}
+                    {currentChecklist.map((item, idx) => (
+                        <div key={idx} className="flex items-center mb-2">
+                            <input
+                                type="checkbox"
+                                checked={checklistState[idx] || false}
+                                onChange={() =>
+                                    setChecklistState(prev => ({ ...prev, [idx]: !prev[idx] }))
+                                }
+                                className="mr-2"
+                            />
+                            <label>{item.checklist}</label>
+                        </div>
+                    ))}
+
+                    <p>
+                        {
+                            commonData?.sworn_statement?.statement
+                                ? commonData.sworn_statement.statement.replace(
+                                    "{NAME}",
+                                    JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE) || "{}")?.name || ""
+                                )
+                                : ""
+                        }
+                    </p>
+
+
+                    {/* Buttons */}
+                    <div className="flex justify-end gap-2 mt-4">
+                        <button
+                            className="bg-gray-300 text-black font-bold py-2 px-4 rounded"
+                            onClick={() => {
+                                setWoForDT(prev => {
+                                    const newArr = prev.map(w => {
+                                        if (w.work_id == selectedWorkId) {
+                                            return { ...w, status: oldStatus };
+                                        }
+                                        return w;
+                                    });
+
+                                    return newArr;
+                                });
+                                setIsDepartmentChecklistModalOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            className={`font-bold py-2 px-4 rounded text-white ${
+                                Object.values(checklistState).every(Boolean)
+                                    ? "bg-blue-500 hover:bg-blue-700"
+                                    : "bg-gray-400 cursor-not-allowed"
+                            }`}
+                            disabled={!Object.values(checklistState).every(Boolean)}
+                            onClick={() => {
+                                //alert("Checklist submitted successfully!");
+                                setIsDepartmentChecklistModalOpen(false);
+                                openStatusDialog(selectedWorkId, selectedStatus);
+                            }}
+                        >
+                            Submit
+                        </button>
+                    </div>
                 </Modal>
 
 

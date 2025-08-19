@@ -133,7 +133,14 @@ const OrderDetails = ({
 
     const [isBilledToLessee, setIsBilledToLessee] = useState(false)
 
-
+    //for checklist
+    const [currentWorkOrderStatus, setCurrentWorkOrderStatus] = useState(null)
+    const [isDepartmentChecklistModalOpen, setIsDepartmentChecklistModalOpen] = useState(false);
+    const [currentChecklist, setCurrentChecklist] = useState([]);
+    const [checklistState, setChecklistState] = useState({});
+    const [selectedWorkId, setSelectedWorkId] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
+    const [oldStatus, setOldStatus] = useState(null);
 
     const checkBillingInformationChangedForOwner = () => {
         console.log("called")
@@ -211,14 +218,8 @@ const OrderDetails = ({
             //console.warn("workOrder is null or undefined");
             return;
         }
-        console.log(workOrder)
-        // const element = document.getElementById('car_info');
-        // element?.scrollIntoView({ behavior: 'smooth' });
-        // window.scrollBy(0, -50);
-        //console.log("use effect in orderdetails");
+
         setReasonToCome(workOrder.reason_to_come ?? "");
-        // console.log(workOrder);
-        // console.log(workOrder.joblist);
         setJobs(workOrder.joblist ?? []);
         setIsStatusDropDownModalOpenInDetails(false);
 
@@ -280,6 +281,7 @@ const OrderDetails = ({
         setIsBilledToLessee(
             secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
         );
+        setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id)
         calculateJobCosts(workOrder.joblist ?? []);
 
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
@@ -304,7 +306,6 @@ const OrderDetails = ({
 
     const getRailCarTimeLog =async () => {
         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
-//        console.log(response)
         setRailcarLog(response.data)
     }
     const formatDateToSQL = (date) => {
@@ -313,10 +314,41 @@ const OrderDetails = ({
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    const handleDropdownChangeInDetails = (e, workId) => {
-        setupdatedStatusCode(e.target.value)
-        setIsStatusDropDownModalOpenInDetails(true)
+    // const handleDropdownChangeInDetails = (e, workId) => {
+    //     setupdatedStatusCode(e.target.value)
+    //     setIsStatusDropDownModalOpenInDetails(true)
+    // }
+
+    const handleDropdownChangeInDetails = (e, workId,status) => {
+        setOldStatus(status);
+        e.preventDefault()
+        console.log(e.target.value);
+        console.log(e.target.value.split(":")[0]);
+        console.log(status);
+        const selectedStatusObj = statusCode.find(sc => String(sc.code) === String(status));
+        console.log(selectedStatusObj);
+        if (selectedStatusObj?.department_id_for_checklist && selectedStatusObj.job_or_revenue_category) {
+            // build checklist state
+            const checklistItems = selectedStatusObj.job_or_revenue_category.department_checklist || [];
+            const initState = {};
+            checklistItems.forEach((item, idx) => {
+                initState[idx] = false;
+            });
+            setupdatedStatusCode(e.target.value.split(":")[0])
+            setChecklistState(initState);
+            setCurrentChecklist(checklistItems);
+            setSelectedWorkId(workId);
+            setSelectedStatus(e.target.value.split(":")[0]);
+            setOldStatus(status)
+            setIsDepartmentChecklistModalOpen(true);
+        }else {
+            //openStatusDialog(workId, e.target.value)
+            setupdatedStatusCode(e.target.value.split(":")[0])
+            setIsStatusDropDownModalOpenInDetails(true)
+        }
+
     }
+
 
     const customStylesForCommentModal = {
         content: {
@@ -612,7 +644,7 @@ const OrderDetails = ({
         let data = qs.stringify({
             'work_id': workOrder.id,
             'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'],
-            'status_id': updatedStatusCode.split(":")[0],
+            'status_id': updatedStatusCode,
             'source': "order_details",
             'comment': comment
         });
@@ -643,8 +675,6 @@ const OrderDetails = ({
     }
 
     function sumOfDayDifferences(storageInformation) {
-        console.log("sss")
-        console.log(storageInformation)
         const today = new Date();
 
         const sum = storageInformation.reduce((acc, item) => {
@@ -662,7 +692,7 @@ const OrderDetails = ({
             }
             return acc;
         }, 0);
-        console.log(sum)
+
         return (sum % 1 > 0.5) ? Math.ceil(sum) : 0;
     }
 
@@ -684,28 +714,6 @@ const OrderDetails = ({
     const handleOwnerPurchaseOrderChange = (event) => {
         const value = event.target.value.toString()
         setOwnerPurchaseOrder(() => value)
-
-        // console.log(value)
-        // console.log(workOrder.purchase_order)
-        // if (value !==  workOrder.purchase_order.toString().toLowerCase()) {
-        //     console.log("Here called")
-        //     setTimeout(() => {
-        //         setOwnerPurchaseOrder(()=>value)
-        //         console.log(ownerPurchaseOrder)
-        //         setPurchaseOrderChangedForOwner(() => true)// This will log the updated state value
-        //         console.log(purchaseorderChangedForOwner)
-        //     }, 100);
-        //
-        // } else {
-        //     console.log("Here called no change")
-        //     setTimeout(() => {
-        //         setOwnerPurchaseOrder(()=>workOrder.purchase_order)
-        //         setPurchaseOrderChangedForOwner(() => false) // This will log the updated state value
-        //     }, 100);
-        //
-        //
-        //     console.log(purchaseorderChangedForOwner)
-        // }
         checkBillingInformationChangedForOwner()
     }
     const handleLesseePurchaseOrderChange = (event) => {
@@ -755,15 +763,6 @@ const OrderDetails = ({
         } else {
             setLesseeInvoiceNetDays(dayDifference)
         }
-    }
-
-
-    const cancelOwnerBillingInformationChange = () => {
-        setOwnerInvoiceDate(convertSqlToFormattedDate(workOrder.invoice_date))
-        setOwnerInvoiceNumber(workOrder.invoice_number)
-        setOwnerInvoiceNetDays(workOrder.invoice_net_days)
-        setOwnerPurchaseOrder(workOrder.purchase_order)
-        setIsBillingInformationChangedForOwner(false)
     }
 
     const updateBillingInformation = async (isForOwner) => {
@@ -1750,16 +1749,19 @@ const OrderDetails = ({
                                             <div className='p-1'>
                                                 <p className='text-xs font-normal'>Status</p>
                                                 <span>
-                                                <select onChange={(e) => handleDropdownChangeInDetails(e, workOrder.id)}
-                                                        disabled={workOrder.locked_by > 0}
-                                                        className={`w-full placeholder-opacity-90 mr-4 py-2 ${workOrder.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}>
-                                                    {statusCode.map((sc) => (
-                                                        <option className={'w-29'} key={sc.code}
-                                                                selected={workOrder.workupdates[0].status_id === sc.code}>
-                                                            {sc.code + ":" + sc.title}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                      <select
+                                                          value={currentWorkOrderStatus} // 👈 controlled select
+                                                          onChange={(e) => handleDropdownChangeInDetails(e, workOrder.id, workOrder.workupdates[0].status_id)}
+                                                          disabled={workOrder.locked_by > 0}
+                                                          className={`w-full placeholder-opacity-90 mr-4 py-2 ${workOrder.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'}`}
+                                                      >
+                                                          {statusCode.map((sc) => (
+                                                              <option key={sc.code} value={sc.code} className="w-29">
+                                                                  {sc.code}:{sc.title}
+                                                              </option>
+                                                          ))}
+                                                      </select>
+
                                                 </span>
                                             </div>
 
@@ -2276,12 +2278,7 @@ const OrderDetails = ({
 
 
                         </div>
-                        {/*<dialog id="statusModalInDetails" className="modal rounded-md max-h-[100vh]">*/}
-                        {/*    <textarea id="statusUpdateMessageFromDropDown" rows="2" ref={statusCommentDropDown}*/}
-                        {/*              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 my-4"*/}
-                        {/*              placeholder="Write your comments here..."></textarea>*/}
-                        {/*    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={postStatusFromDetails}>SUBMIT</button>*/}
-                        {/*</dialog>*/}
+
 
                         <Modal
                             isOpen={isStatusDropDownModalOpenInDetails}
@@ -2304,6 +2301,76 @@ const OrderDetails = ({
                                     onClick={postStatusFromDetails}>SUBMIT
                             </button>
                         </Modal>
+                        <Modal
+                            isOpen={isDepartmentChecklistModalOpen}
+                            onRequestClose={() => setIsDepartmentChecklistModalOpen(false)}
+                            contentLabel="POST COMMENT"
+                            parentSelector={() => document.querySelector('#orderDetailsModal')}
+                            style={customStylesForCommentModal}
+                        >
+                            <h2 className="text-lg font-bold mb-3">Department Checklist</h2>
+
+                            {/* Checklist */}
+                            {currentChecklist.map((item, idx) => (
+                                <div key={idx} className="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={checklistState[idx] || false}
+                                        onChange={() =>
+                                            setChecklistState(prev => ({ ...prev, [idx]: !prev[idx] }))
+                                        }
+                                        className="mr-2"
+                                    />
+                                    <label>{item.checklist}</label>
+                                </div>
+                            ))}
+
+                            <p>
+                                {
+                                    commonData?.sworn_statement?.statement
+                                        ? commonData.sworn_statement.statement.replace(
+                                            "{NAME}",
+                                            JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE) || "{}")?.name || ""
+                                        )
+                                        : ""
+                                }
+                            </p>
+
+
+                            {/* Buttons */}
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    className="bg-gray-300 text-black font-bold py-2 px-4 rounded"
+                                    onClick={() => {
+                                        console.log(oldStatus)
+                                        setCurrentWorkOrderStatus(oldStatus)
+                                        setIsDepartmentChecklistModalOpen(false);
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    className={`font-bold py-2 px-4 rounded text-white ${
+                                        Object.values(checklistState).every(Boolean)
+                                            ? "bg-blue-500 hover:bg-blue-700"
+                                            : "bg-gray-400 cursor-not-allowed"
+                                    }`}
+                                    disabled={!Object.values(checklistState).every(Boolean)}
+                                    onClick={() => {
+                                        //alert("Checklist submitted successfully!");
+                                        setIsDepartmentChecklistModalOpen(false);
+                                        //openStatusDialog(selectedWorkId, selectedStatus);
+                                        setIsStatusDropDownModalOpenInDetails(true)
+                                    }}
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        </Modal>
+
+
+
                     </div>
                 </dialog>
             }

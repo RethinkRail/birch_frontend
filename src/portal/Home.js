@@ -88,7 +88,7 @@ const Home = () => {
     }
 
     const getWorkOrderById = async (work_id) => {
-
+        console.log(work_id)
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -98,7 +98,9 @@ const Home = () => {
 
         await axios.request(config)
             .then((response) => {
+
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
+
                 if(new_work_orders != null){
                     setWorkOrders([...new_work_orders]);
                 }else {
@@ -1171,7 +1173,7 @@ const Home = () => {
 
     useEffect(() => {
         getAllStatusCode()
-            .then(() => getAllCommonData()) // Start recursive loading
+            .then(() => getAllCommonData())
             .then(() => loadMoreWorkOrders())
             .catch(error => console.error("Error during sequential execution:", error));
     }, []);

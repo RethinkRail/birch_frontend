@@ -13,7 +13,7 @@ import OrderDetails from "./OrderDetails";
 import CustomDateInput from "./CustomDateInput";
 import ReorderableTable from "./ReorderableTable";
 import debounce from 'lodash/debounce';
-import {hasRole} from "../utils/CommonHelper";
+import {hasRole, replaceItemInArray} from "../utils/CommonHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 
 const qs = require('qs');
@@ -101,12 +101,17 @@ const WorkOrderDataTable = ({
     let workOrderData = [];
     const [woForDT, setWoForDT] = useState([])
     const statusCommentDropDown = useRef(null);
-    // const orderDetailsModal = document.getElementById('orderDetailsModal');
-    //orderDetailsModal.close()
 
-    const orderDetailsModal = document.getElementById('orderDetailsModal');
 
     const [canFinalized, setCanFinalized] = useState(false);
+
+    //for checklist
+    const [isDepartmentChecklistModalOpen, setIsDepartmentChecklistModalOpen] = useState(false);
+    const [currentChecklist, setCurrentChecklist] = useState([]);
+    const [checklistState, setChecklistState] = useState({});
+    const [selectedWorkId, setSelectedWorkId] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
+    const [oldStatus, setOldStatus] = useState(null);
 
     useEffect(() => {
         const userToken = localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE);
@@ -116,88 +121,71 @@ const WorkOrderDataTable = ({
     }, []);
 
     useEffect(() => {
-        const handleChanges = () => {
-           // console.log("Work orders changed from data table", workOrders)
-            //console.log(workOrderToView)
-            if(workOrderToView) {
-                if(workOrders.length>0){
+        const handleChanges = async () => {
+            if (workOrderToView) {
+                if (workOrders.length > 0) {
                     const updated = workOrders.find(work => work.id == workOrderToView.id)
-                    if(updated){
-                        setWorkOrderToView(updated)
-                    }else {
+                    if (updated) {
+                        let config = {
+                            method: 'get',
+                            maxBodyLength: Infinity,
+                            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(workOrderToView.id),
+                            headers: {}
+                        };
+
+                        await axios.request(config)
+                            .then((response) => {
+                                setWorkOrderToView(response.data)
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+
+                    } else {
                         setWorkOrderToView(null)
                     }
                 }
-
-
             }
         }
         handleChanges()
     }, [workOrders])
-    useEffect(() => {
-        const handleChanges = () => {
-//            console.log("Wawuuuu", workOrderToView)
-        }
-        handleChanges()
-    }, [workOrderToView])
 
-    useEffect(() => {
-        if (workOrderToView != null) {
-            const wo = workOrders.find(obj => obj['id'] === workOrderToView.id)
-            setWorkOrderToView(wo)
 
-        }
-//        console.log("in action")
-    }, [workOrders])
 
 
     useEffect(() => {
-
         workOrderData=[]
         workOrders.forEach((workOrder, index) => {
-            const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
-            const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
-            const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
             var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
-
             const workOrderObject = {
-                'workOrder': workOrder,
-                'estimated_time': round2Dec(laborHours),
-                'labor_hours': round2Dec(durationHours),
-                'lhr': !isNaN(percentage) && isFinite(percentage) ? round2Dec(percentage) + "%" : "0.00%",
                 'dif': actual_dif,
                 'railcar_id': workOrder.railcar_id,
-                'arrival_date': workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.arrival_date),
-                'inspected_date': workOrder.inspected_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.inspected_date),
-                'clean_date': workOrder.clean_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.clean_date),
-                'repair_schedule_date': workOrder.repair_schedule_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_schedule_date),
-                'paint_date': workOrder.paint_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.paint_date),
-                'repair_date': workOrder.repair_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.repair_date),
-                'final_date': workOrder.final_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.final_date),
-                'qa_date': workOrder.qa_date == process.env.REACT_APP_DEFAULT_DATE ? null : convertSqlToFormattedDate(workOrder.qa_date),
-                'projected_out_date': workOrder.projected_out_date ,
-                'month_to_invoice': workOrder.month_to_invoice !== process.env.REACT_APP_DEFAULT_DATE ? convertSqlToFormattedDate(workOrder.month_to_invoice) : null,
                 'last_content': workOrder.railcar.products.name,
                 'status': workOrder.workupdates[0]?.status_id,
                 'comment': workOrder.workupdates,
                 'material_eta': workOrder.material_eta,
                 'finalized': workOrder.locked_by,
                 'shipped': workOrder.shipped_date,
+                'projected_out_date': workOrder.projected_out_date,
                 'work_id': workOrder.id,
-                'is_storage': workOrder.is_storage,
                 'index': index
             }
-            // console.log(workOrderObject.material_eta)
-            // console.log(workOrderObject.projected_out_date)
             workOrderData.push(workOrderObject)
         })
-        console.log()
-        workOrderData.sort((a, b) => new Date(b.arrival_date) - new Date(a.arrival_date));
         setWoForDT(workOrderData)
-//        console.log("in action")
     }, [workOrders])
 
-
+    useEffect(() => {
+        if (workOrderToView && orderDetailsModalRef.current) {
+            orderDetailsModalRef.current.showModal();
+        }
+    }, [workOrderToView]);
+    const handleShowOrderDetails = (row) => {
+        setWorkOrderToView(row);
+    };
+    const handleCloseOrderDetails = () => {
+        setWorkOrderToView(null);
+    };
     const customStylesForCommentModal = {
         content: {
             top: '50%',
@@ -209,9 +197,26 @@ const WorkOrderDataTable = ({
             transform: 'translate(-50%, -50%)',
         },
     };
-    const handleDropdownChange = (e, workId) => {
+    const handleDropdownChange = (e, workId,status) => {
+       setOldStatus(status);
         e.preventDefault()
-        openStatusDialog(workId, e.target.value)
+        const selectedStatusObj = statusCode.find(sc => String(sc.code) === String(status));
+        if (selectedStatusObj?.department_id_for_checklist && selectedStatusObj.job_or_revenue_category) {
+            // build checklist state
+            const checklistItems = selectedStatusObj.job_or_revenue_category.department_checklist || [];
+            const initState = {};
+            checklistItems.forEach((item, idx) => {
+                initState[idx] = false;
+            });
+            setChecklistState(initState);
+            setCurrentChecklist(checklistItems);
+            setSelectedWorkId(workId);
+            setSelectedStatus(e.target.value);
+            setIsDepartmentChecklistModalOpen(true);
+        }else {
+            openStatusDialog(workId, e.target.value)
+        }
+
     }
     const openStatusDialog = (workId, new_status) => {
         setupdatedStatusCode(new_status)
@@ -258,25 +263,12 @@ const WorkOrderDataTable = ({
             });
     };
     const workOrdersTableColumn = [
-        {
-            name: "LHR",
-            selector: row => row.lhr,
-            sortable: true,
-            width: '4%',
-            cell: (row) => (
-                <span
-                    className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
-                    data-tip={`Estimated Hour: ${row.estimated_time}\nHours Applied: ${row.labor_hours}`}
-                >
-                {row.lhr}
-            </span>
-            ),
-        },
+
         {
             name: "DIF",
             selector: row => row.dif,
             sortable: true,
-            width: '5%',
+            width: '4%',
             cell: (row) => (
                 <span className="whitespace-pre-line text-xs ">
                 {row.dif > 0 ? row.dif : "-"}
@@ -287,7 +279,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '10%',
+            width: '8%',
         },
         {
             name: "LAST CONTENT",
@@ -298,31 +290,33 @@ const WorkOrderDataTable = ({
                 {row.last_content}
             </span>
             ),
-            width: "11%",
+            width: "12%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "13%",
+            width: "20%",
             cell: (row) => (
                 <select
-                    onChange={(e) => handleDropdownChange(e, row.work_id)}
+                    value={row.status} // controlled select
+                    onChange={(e) => handleDropdownChange(e, row.work_id, row.status)}
                     disabled={row.finalized > 0}
                     className={`w-full placeholder-opacity-90 ${row.index % 2 === 0 ? '' : 'bg-[#F7F9FF]'} sm:text-xs md:text-sm`}
                 >
                     {statusCode.map((sc) => (
-                        <option key={sc.code} selected={row.status === sc.code}>
-                            {sc.code + ":" + sc.title}
+                        <option key={sc.code} value={sc.code}>
+                            {sc.code}:{sc.title}
                         </option>
                     ))}
                 </select>
             ),
             sortable: true,
-        },
+        }
+        ,
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "17%",
+            width: "19%",
             cell: (row) => (
                 <span
                     onClick={() => {
@@ -433,9 +427,25 @@ const WorkOrderDataTable = ({
             cell: (row) => (
                 <span
                     className="align-middle cursor-pointer mt-[10px]"
-                    onClick={() => {
-                        setWorkOrderToView(row.workOrder);
-                        handleShowOrderDetails(row.workOrder);
+                    onClick={async () => {
+                        let config = {
+                            method: 'get',
+                            maxBodyLength: Infinity,
+                            url: process.env.REACT_APP_BIRCH_API_URL + 'get_workorder_by_id?work_id=' + parseInt(row.work_id),
+                            headers: {}
+                        };
+
+                        await axios.request(config)
+                            .then((response) => {
+                                console.log(response.data)
+                                handleShowOrderDetails(response.data);
+
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+
+
                     }}
                 >
                 {/* Eye Icon SVG */}
@@ -506,15 +516,7 @@ const WorkOrderDataTable = ({
         }
         return null;
     };
-    const handleShowOrderDetails = async (row) => {
-        setWorkOrderToView(null)
-        await setWorkOrderToView(() => row)
-        orderDetailsModalRef.current.showModal();
-    };
 
-    const closeModal = () => {
-        orderDetailsModalRef.current.close();
-    };
     return (
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
@@ -606,6 +608,93 @@ const WorkOrderDataTable = ({
                 </Modal>
 
 
+
+                <Modal
+                    isOpen={isDepartmentChecklistModalOpen}
+                    onRequestClose={() => setIsDepartmentChecklistModalOpen(false)}
+                    contentLabel="POST COMMENT"
+                    style={customStylesForCommentModal}
+                >
+                    <h2 className="text-lg font-bold mb-3">Department Checklist</h2>
+
+                    {/* Checklist */}
+                    {currentChecklist.map((item, idx) => (
+                        <div key={idx} className="flex items-center mb-2">
+                            <input
+                                type="checkbox"
+                                checked={checklistState[idx] || false}
+                                onChange={() =>
+                                    setChecklistState(prev => ({ ...prev, [idx]: !prev[idx] }))
+                                }
+                                className="mr-2"
+                            />
+                            <label>{item.checklist}</label>
+                        </div>
+                    ))}
+
+                    <p>
+                        {
+                            commonData?.sworn_statement?.statement
+                                ? commonData.sworn_statement.statement.replace(
+                                    "{NAME}",
+                                    JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE) || "{}")?.name || ""
+                                )
+                                : ""
+                        }
+                    </p>
+
+
+                    {/* Buttons */}
+                    <div className="flex justify-end gap-2 mt-4">
+                        <button
+                            className="bg-gray-300 text-black font-bold py-2 px-4 rounded"
+                            onClick={() => {
+                                setWoForDT(prev => {
+                                    const newArr = prev.map(w => {
+                                        if (w.work_id == selectedWorkId) {
+                                            return { ...w, status: oldStatus };
+                                        }
+                                        return w;
+                                    });
+
+                                    return newArr;
+                                });
+                                setIsDepartmentChecklistModalOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            className={`font-bold py-2 px-4 rounded text-white ${
+                                Object.values(checklistState).every(Boolean)
+                                    ? "bg-blue-500 hover:bg-blue-700"
+                                    : "bg-gray-400 cursor-not-allowed"
+                            }`}
+                            disabled={!Object.values(checklistState).every(Boolean)}
+                            onClick={async () => {
+                                //alert("Checklist submitted successfully!");
+
+                                try {
+                                    await axios.post(process.env.REACT_APP_BIRCH_API_URL+"post_department_checklist/", {
+                                        work_id: selectedWorkId,
+                                        status_code: parseInt(selectedStatus),
+                                        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))?.id
+                                    });
+
+                                    setIsDepartmentChecklistModalOpen(false);
+                                    openStatusDialog(selectedWorkId, selectedStatus);
+                                } catch (error) {
+                                    console.error("Error submitting checklist:", error);
+                                }
+                            }}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </Modal>
+
+
                 {workOrderToView !== null ? (
                     <OrderDetails
                         commonData={commonData}
@@ -644,11 +733,10 @@ const WorkOrderDataTable = ({
                         handIsLockedForTimeClocking={handIsLockedForTimeClocking}
                         updateBillToLesseForAJob={updateBillToLesseForAJob}
                         orderDetailsModalRef={orderDetailsModalRef}
+                        onClose={handleCloseOrderDetails}
                     />
                 ) : null}
-                {/*<OrderDetails*/}
-                {/*    workOrder={workOrderToView}*/}
-                {/*/>*/}
+
             </div>
         </React.Fragment>
     )

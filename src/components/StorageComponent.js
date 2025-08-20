@@ -18,7 +18,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
     if (!entry) {
         return null; // Handle undefined entry gracefully
     }
-    console.log(entry)
+
     const handleDateChange = (key, date) => {
         const updatedEntry = { ...entry, [key]: date };
         onChange(updatedEntry);
@@ -96,7 +96,7 @@ const EntryRow = ({ entry, onChange, onDelete }) => {
 
 const StorageComponent = ({ initialEntries, railcar_id, work_order }) => {
     const [entries, setEntries] = useState([]);
-    console.log(initialEntries)
+
     useEffect(() => {
         const mappedEntries = initialEntries.map((entry) => ({
             id: entry.id,

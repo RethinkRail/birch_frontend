@@ -32,7 +32,7 @@ docker push $ECR_IMAGE_URI
 
 # 6. Run container from local image (already tagged/pushed)
 echo "Running container..."
-docker run -d --name $LOCAL_IMAGE_NAME -p 5001:5001 $LOCAL_IMAGE_NAME:latest
+docker run -d --name $LOCAL_IMAGE_NAME -p 5000:5000 $LOCAL_IMAGE_NAME:latest
 
 # 7. Save logs
 docker logs $LOCAL_IMAGE_NAME >& ${LOCAL_IMAGE_NAME}.log

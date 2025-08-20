@@ -672,10 +672,21 @@ const WorkOrderDataTable = ({
                                     : "bg-gray-400 cursor-not-allowed"
                             }`}
                             disabled={!Object.values(checklistState).every(Boolean)}
-                            onClick={() => {
+                            onClick={async () => {
                                 //alert("Checklist submitted successfully!");
-                                setIsDepartmentChecklistModalOpen(false);
-                                openStatusDialog(selectedWorkId, selectedStatus);
+
+                                try {
+                                    await axios.post(process.env.REACT_APP_BIRCH_API_URL+"post_department_checklist/", {
+                                        work_id: selectedWorkId,
+                                        status_code: parseInt(selectedStatus),
+                                        user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))?.id
+                                    });
+
+                                    setIsDepartmentChecklistModalOpen(false);
+                                    openStatusDialog(selectedWorkId, selectedStatus);
+                                } catch (error) {
+                                    console.error("Error submitting checklist:", error);
+                                }
                             }}
                         >
                             Submit

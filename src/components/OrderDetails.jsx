@@ -2,16 +2,13 @@ import React, {useEffect, useRef, useState} from 'react';
 import Modal from "react-modal";
 import qs from "qs";
 import {toast} from "react-toastify";
-import CustomDateInput from "./CustomDateInput";
 import axios from "axios";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
 import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
-import {convertSqlToFormattedDate, convertSqlToFormattedDateTime,} from "../utils/DateTimeHelper";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
 import JoblistTable from "./JoblistTable";
-import PartsTable from "./PartsTable";
 import {round2Dec} from "../utils/NumberHelper";
 import StorageComponent from "./StorageComponent";
 import RailCareTimeLog from "./RailCareTimeLog";
@@ -79,25 +76,12 @@ const OrderDetails = ({
     const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
     const [partReport, setPartReport] = useState([])
-
-
-
-
-    const containerRef = useRef();
-
-
     const [jobs, setJobs] = useState([])
     const statusCommentDropDownInDetails = useRef(null);
-
-
     const [reasonToCome, setReasonToCome] = useState(null);
-
     const [isStatusDropDownModalOpenInDetails, setIsStatusDropDownModalOpenInDetails] = useState(null);
-
     const [updatedStatusCode, setupdatedStatusCode] = useState(null)
     const [isReasonToComeChanged, setIsReasonToComeChanged] = useState(false)
-
-
     const [isBillingInformationChangedForOwner, setIsBillingInformationChangedForOwner] = useState(false)
     const [isBillingInformationChangedForLessee, setIsBillingInformationChangedForLessee] = useState(false)
 
@@ -155,16 +139,6 @@ const OrderDetails = ({
             setIsBillingInformationChangedForOwner(false)
         }
     }
-
-    const checkBillingInformationChangedForLessee = () => {
-        if (purchaseorderChangedForLessee || invoiceChangedForLessee || invoiceNetDaysChangedForLessee || invoiceDateChangedForLessee) {
-            setIsBillingInformationChangedForLessee(true)
-        } else {
-            setIsBillingInformationChangedForLessee(false)
-        }
-    }
-
-
     const reasonToComeRef = useRef(null);
     const mowkRef = useRef(null);
     const spRef = useRef(null);
@@ -249,8 +223,6 @@ const OrderDetails = ({
         setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
         setInvoiceNetDaysChangedForOwner(false);
         setInvoiceNetDaysChangedForLessee(false);
-
-//        console.log(workOrder.secondary_owner_info);
         setOwnerInvoiceDate(workOrder.invoice_date ?? null);
         setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
 
@@ -267,8 +239,6 @@ const OrderDetails = ({
 
         setInvoiceDateChangedForOwner(false);
         setInvoiceDateChangedForLessee(false);
-
-//        console.log(lesseeInvoiceDate);
         setMo_wk(workOrder.mo_wk ?? 0);
         setSP(workOrder.sp ?? 0);
         setTQ(workOrder.tq ?? 0);
@@ -283,7 +253,6 @@ const OrderDetails = ({
         );
         setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id)
         calculateJobCosts(workOrder.joblist ?? []);
-
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
         getRailCarTimeLog();
         setStorageInformation(workOrder.storage_information ?? {});
@@ -314,10 +283,6 @@ const OrderDetails = ({
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    // const handleDropdownChangeInDetails = (e, workId) => {
-    //     setupdatedStatusCode(e.target.value)
-    //     setIsStatusDropDownModalOpenInDetails(true)
-    // }
 
     const handleDropdownChangeInDetails = (e, workId,status) => {
         setOldStatus(status);
@@ -362,8 +327,6 @@ const OrderDetails = ({
         },
     };
 
-    //const statusTextArea = useRef(null);
-
     const closeModal = () => {
         if (orderDetailsModalRef.current) {
             orderDetailsModalRef.current.close();
@@ -372,12 +335,6 @@ const OrderDetails = ({
 
     };
 
-    function scrollToTop() {
-        const modalContent = document.getElementById('orderDetailsModal');
-        if (modalContent) {
-            modalContent.scrollTop = 0; // Scroll to the top
-        }
-    }
     const postMOWKUpdate = () => {
         updateMOWK(workOrder.id, mo_wk)
     }
@@ -437,7 +394,6 @@ const OrderDetails = ({
             if (days != ownerInvoiceNetDays) {
                 console.log(days)
                 setOwnerInvoiceNetDays(days)
-                // setInvoiceNetDaysChangedForOwner(true)
                 checkBillingInformationChangedForOwner()
             }
 
@@ -446,7 +402,6 @@ const OrderDetails = ({
                 setLesseeInvoiceNetDays(days)
                 setLesseeInvoiceNetDays(days)
                 setInvoiceNetDaysChangedForLessee(true)
-                //checkBillingInformationChangedForOwner()
             }
         }
     }
@@ -613,24 +568,6 @@ const OrderDetails = ({
     const getValueByIdStatusCommentDropDown = (id) => {
         const element = statusCommentDropDownInDetails.current;
         if (element && element.id === id) {
-            return element.value;
-        }
-        return null;
-    };
-
-    const getValueByIdReasonToCome = (id) => {
-        const element = reasonToComeRef.current;
-        if (element && element.id === id) {
-            return element.value;
-        }
-        return null;
-    };
-
-    const getValueByIdMOWK = (id) => {
-        const element = mowkRef.current;
-        console.log(element)
-        if (element && element.id === id) {
-            setMo_wk(element.value)
             return element.value;
         }
         return null;
@@ -2357,8 +2294,13 @@ const OrderDetails = ({
                                             : "bg-gray-400 cursor-not-allowed"
                                     }`}
                                     disabled={!Object.values(checklistState).every(Boolean)}
-                                    onClick={() => {
-                                        //alert("Checklist submitted successfully!");
+                                    onClick={async () => {
+                                        await axios.post(process.env.REACT_APP_BIRCH_API_URL + "post_department_checklist/", {
+                                            work_id: selectedWorkId,
+                                            status_code: parseInt(selectedStatus),
+                                            user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))?.id
+                                        });
+
                                         setIsDepartmentChecklistModalOpen(false);
                                         //openStatusDialog(selectedWorkId, selectedStatus);
                                         setIsStatusDropDownModalOpenInDetails(true)

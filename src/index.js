@@ -7,7 +7,7 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Auth from "./auth/Auth";
 import Login from "./auth/login/Login";
-import Home from "./portal/Home";
+import AllOrders from "./portal/Home/AllOrders";
 import Database from "./portal/database/Database";
 import DepartmentReport from "./portal/report/DepartmentReport";
 import TableComponent from "./components/TableComponent";
@@ -41,6 +41,10 @@ import ReportDates from "./portal/management/ReportDates";
 import BilledCars from "./portal/report/BilledCars";
 import DISReport from "./portal/report/DISReport";
 import DepartmentChecklistReport from "./components/DepartmentChecklistReport";
+import ActiveOrders from "./portal/Home/ActiveOrders";
+import MaintenanceOrders from "./portal/Home/MaintenanceOrders";
+import TemplateOrders from "./portal/Home/TemplateOrders";
+import EnRouteDispoOrders from "./portal/Home/EnRouteDispoOrders";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -88,12 +92,39 @@ root.render(
             </Route>
 
             <Route path="/" element={<App/>}>
-                <Route path="" element={
+                <Route path="/all_orders" element={
                     <ProtectedRoute>
-                        <Home/>
+                        <AllOrders/>
                     </ProtectedRoute>
                 }>
                 </Route>
+
+                <Route path="" element={
+                    <ProtectedRoute>
+                        <ActiveOrders/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+                <Route path="/maintenance" element={
+                    <ProtectedRoute>
+                        <MaintenanceOrders/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/template" element={
+                    <ProtectedRoute>
+                        <TemplateOrders/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+                <Route path="/enoute_dispo" element={
+                    <ProtectedRoute>
+                        <EnRouteDispoOrders/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
 
                 <Route path="/database" element={
                     <ProtectedRoute>

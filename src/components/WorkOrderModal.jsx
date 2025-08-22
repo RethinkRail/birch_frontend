@@ -6,28 +6,6 @@ const WorkOrderModal = ({setWorkOrderModalShowing, routingMatrix, createWO}) => 
     const [workOrderResponse, setWorkOrderResponse] = useState()
     // This manages the current value the user picked
     const [workOrderValues, setWorkOrderValues] = useState()
-    //
-    // useEffect(() => {
-    //     const handleFetch = async () => {
-    //         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}dummy-workorder`)
-    //         console.log(response.data.workOrder, "This is the work order response")
-    //         // Initialize workOrderValues with default values
-    //         const initialValues = {};
-    //         for (const key in response.data.workOrder) {
-    //             if (Array.isArray(response.data.workOrder[key])) {
-    //                 initialValues[key] = response.data.workOrder[key][0]; // Set the first entry of the array as the default value
-    //             } else {
-    //                 initialValues[key] = response.data.workOrder[key]; // Set the value directly if it's not an array
-    //             }
-    //         }
-    //
-    //         console.log(initialValues, "The initial values is   ")
-    //
-    //         setWorkOrderResponse(response.data.workOrder);
-    //         setWorkOrderValues(initialValues);
-    //     }
-    //     //handleFetch()
-    // }, [])
 
     return (
         <>

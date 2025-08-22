@@ -21,7 +21,16 @@ const Navbar = () => {
     };
 
     const navItems = [
-        { title: 'Work Order', path: '/' },
+        {
+            title: 'Work Orders',
+            children: [
+                { title: 'Active Orders', path: '/' },
+                { title: 'Maintenance', path: '/maintenance' },
+                { title: 'Template', path: '/template' },
+                { title: 'Enroute & Dispo', path: '/enoute_dispo' },
+                { title: 'All Orders', path: '/all_orders' }
+            ]
+        },
         { title: 'Database', path: '/database' },
         {
             title: 'Management',

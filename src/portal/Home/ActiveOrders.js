@@ -1,19 +1,19 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
-import TaskRow from "../components/TaskRow";
-import WorkOrderDataTable from "../components/WorkOrderDataTable";
+import TaskRow from "../../components/TaskRow";
+import WorkOrderDataTable from "../../components/WorkOrderDataTable";
 import {
     replaceItemInArray,
     showToastMessage,
     updateObjectByIdInsideArray,
     updateSecondaryBillToId
-} from "../utils/CommonHelper";
+} from "../../utils/CommonHelper";
 import Modal from "react-modal";
 import {toast} from "react-toastify";
-import WorkOrderModal from "../components/WorkOrderModal";
-import Plus from "../components/Plus";
+import WorkOrderModal from "../../components/WorkOrderModal";
+import Plus from "../../components/Plus";
 import { onMessage} from "firebase/messaging";
-import {messaging} from "../firebase";
+import {messaging} from "../../firebase";
 
 
 const qs = require('qs');
@@ -21,12 +21,6 @@ const Home = () => {
     //const messaging = getMessaging();
     const forceUpdate = React.useReducer(() => ({}), {})[1];
     const [workOrders, setWorkOrders] = useState([]);
-    // For pagination
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
-    const [skip, setSkip] = useState(0);
-    const take = 50;
-    // For pagination
     const [activeTasks, setActiveTask] = useState([])
     const [statusCodes, setStatusCodes] = useState([])
     const [commonData, setCommonData] = useState(null)
@@ -40,10 +34,7 @@ const Home = () => {
     //CLoud messaging
 
     onMessage(messaging, (payload) => {
-        if(payload.data.type === 'new_order'){
-            getActiveTasks()
-            getWorkOrderById(parseInt(payload.data.value))
-        }else if(payload.data.type === 'updated_wo'){
+       if(payload.data.type === 'updated_wo'){
             console.log("Push received wo updated")
             getWorkOrderById(parseInt(payload.data.value))
         } else if(payload.data.type === 'routing'){
@@ -59,8 +50,6 @@ const Home = () => {
                 console.log("No items were deleted.");
             }
         }
-
-
     })
 
     //CLoud messaging
@@ -124,9 +113,8 @@ const Home = () => {
     }
 
     const loadMoreWorkOrders = async () => {
-        setIsLoading(true)
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder_simplified`);
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder_simplified_home_screen`);
             const allWorkOrders = response.data.active_workorder;
 
             setWorkOrders(allWorkOrders);
@@ -1255,6 +1243,7 @@ const Home = () => {
                         handleStorageUpdate = {handleStorageUpdate}
                         handIsLockedForTimeClocking = {handIsLockedForTimeClocking}
                         updateBillToLesseForAJob = {updateBillToLesseForAJob}
+                        title={"Active Orders"}
                     />
                 ) : null}
             </div>

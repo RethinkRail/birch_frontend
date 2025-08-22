@@ -56,7 +56,8 @@ const WorkOrderDataTable = ({
                                 deleteJob,
                                 handleStorageUpdate,
                                 handIsLockedForTimeClocking,
-                                updateBillToLesseForAJob
+                                updateBillToLesseForAJob,
+                                title
                             }) => {
     const orderDetailsModalRef = useRef(null);
     const [searchTermHistory, setSearchTermHistory] = useState('');
@@ -521,7 +522,7 @@ const WorkOrderDataTable = ({
         <React.Fragment>
             <div className="overflow-x-hidden w-full mx-auto  mt-[-1px] text-[14px] font-medium">
                 <div className="flex justify-between items-center mt-[10px] uppercase mb-5">
-                    <h2 className="text-[18px]  font-semibold">Work Orders</h2>
+                    <h2 className="text-[18px]  font-semibold">{title}</h2>
                 </div>
                 {/* Search Bar Above DataTable */}
                 <div className="flex justify-between mb-3">

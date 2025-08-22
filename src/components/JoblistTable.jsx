@@ -50,6 +50,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     }, [isBilledToLessee]);
 
     useEffect(() => {
+        console.log(jobs)
         const jobListData = jobs.map((job) => ({
             id: job.id,
             action: job,
@@ -68,8 +69,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
             secondary_bill_to_id: job.secondary_bill_to_id
         }));
-        console.log("SSS")
-        console.log(isBilledToLessee)
+
 
         setTableData(jobListData);
     }, [jobs]);
@@ -203,8 +203,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     const handleJobBillToLessee = async (job_id,is_checked) =>{
         //onChange={(e) => updateLockForTimeClocking(e.target.checked)}
        //secondary_bill_to_id,job_id,workId
-        const response =    await updateBillToLesseForAJob(is_checked?workOrder.railcar.owner_railcar_lessee_idToowner.id:null,job_id,workOrder.id)
-        console.log(response)
+        await updateBillToLesseForAJob(is_checked?workOrder.railcar.owner_railcar_lessee_idToowner.id:null,job_id,workOrder.id)
     }
 
     const [copiedJob, setCopiedJob] = useState([])

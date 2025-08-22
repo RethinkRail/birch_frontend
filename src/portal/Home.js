@@ -1137,13 +1137,14 @@ const Home = () => {
             work_id:workId ,
         };
 
+        console.log(requestData)
         return axios.patch(process.env.REACT_APP_BIRCH_API_URL+`update_lessee_billing/${job_id}`, requestData)
             .then(response => {
                 // Handle success
                 console.log('Success:', response.data);
-                const updatedWo = updateSecondaryBillToId(workOrders,workId,job_id,secondary_bill_to_id)
-                setWorkOrders(updatedWo)
-                return true
+                // const updatedWo = updateSecondaryBillToId(workOrders,workId,job_id,secondary_bill_to_id)
+                // setWorkOrders(updatedWo)
+                getWorkOrderById(workId)
             })
             .catch(error => {
                 // Handle error

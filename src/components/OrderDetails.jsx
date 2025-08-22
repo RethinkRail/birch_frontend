@@ -192,7 +192,7 @@ const OrderDetails = ({
             //console.warn("workOrder is null or undefined");
             return;
         }
-
+        //console.log(workOrder)
         setReasonToCome(workOrder.reason_to_come ?? "");
         setJobs(workOrder.joblist ?? []);
         setIsStatusDropDownModalOpenInDetails(false);
@@ -669,9 +669,7 @@ const OrderDetails = ({
     }
 
     const handleOwnerInvoiceDateChanged = (value) => {
-        console.log(value)
-        console.log(value.toLocaleString())
-        console.log(toSqlDatetime(value))
+
         setOwnerInvoiceDate(value)
     }
 

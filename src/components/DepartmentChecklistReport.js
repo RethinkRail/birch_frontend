@@ -31,6 +31,8 @@ const DepartmentChecklistReport = () => {
 
         try {
             toastId.current = toast.loading("Fetching data...");
+            console.log(startDate)
+            console.log(endDate)
             const response = await axios.get(
                 process.env.REACT_APP_BIRCH_API_URL + "department_checklist_report",
                 {

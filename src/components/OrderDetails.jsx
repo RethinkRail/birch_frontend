@@ -2277,7 +2277,7 @@ const OrderDetails = ({
                                 <button
                                     className="bg-gray-300 text-black font-bold py-2 px-4 rounded"
                                     onClick={() => {
-                                        console.log(oldStatus)
+
                                         setCurrentWorkOrderStatus(oldStatus)
                                         setIsDepartmentChecklistModalOpen(false);
                                     }}
@@ -2295,7 +2295,7 @@ const OrderDetails = ({
                                     onClick={async () => {
                                         await axios.post(process.env.REACT_APP_BIRCH_API_URL + "post_department_checklist/", {
                                             work_id: selectedWorkId,
-                                            status_code: parseInt(selectedStatus),
+                                            status_code: parseInt(oldStatus),
                                             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))?.id
                                         });
 

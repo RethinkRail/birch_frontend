@@ -25,9 +25,9 @@ const Navbar = () => {
             title: 'Work Orders',
             children: [
                 { title: 'Active Orders', path: '/' },
-                { title: 'Maintenance', path: '/maintenance' },
-                { title: 'Template', path: '/template' },
                 { title: 'Enroute & Dispo', path: '/enoute_dispo' },
+                { title: 'Template', path: '/template' },
+                { title: 'Maintenance', path: '/maintenance' },
                 { title: 'All Orders', path: '/all_orders' }
             ]
         },

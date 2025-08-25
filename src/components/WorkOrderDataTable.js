@@ -15,6 +15,7 @@ import ReorderableTable from "./ReorderableTable";
 import debounce from 'lodash/debounce';
 import {hasRole, replaceItemInArray} from "../utils/CommonHelper";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
+import LHRCell from "./LHRCell";
 
 const qs = require('qs');
 
@@ -160,6 +161,7 @@ const WorkOrderDataTable = ({
             var actual_dif = workOrder.arrival_date == process.env.REACT_APP_DEFAULT_DATE ? 0 : differenceBetweenTwoTimeStamp(new Date().toISOString().slice(0, 19), workOrder.arrival_date)["days"]
             const workOrderObject = {
                 'dif': actual_dif,
+                'work_order': workOrder.work_order,
                 'railcar_id': workOrder.railcar_id,
                 'last_content': workOrder.railcar.products.name,
                 'status': workOrder.workupdates[0]?.status_id,
@@ -264,12 +266,18 @@ const WorkOrderDataTable = ({
             });
     };
     const workOrdersTableColumn = [
-
+        {
+            name: "LHR",
+            selector: row => row.lhr, // still keep a selector for sorting
+            sortable: true,
+            width: '4%',
+            cell: (row) => <LHRCell workOrder={row.work_order} workId={row.work_id} />,
+        },
         {
             name: "DIF",
             selector: row => row.dif,
             sortable: true,
-            width: '4%',
+            width: '5%',
             cell: (row) => (
                 <span className="whitespace-pre-line text-xs ">
                 {row.dif > 0 ? row.dif : "-"}
@@ -280,7 +288,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '14%',
+            width: '10%',
         },
         {
             name: "LAST CONTENT",
@@ -291,12 +299,12 @@ const WorkOrderDataTable = ({
                 {row.last_content}
             </span>
             ),
-            width: "12%",
+            width: "11%",
         },
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "17%",
+            width: "13%",
             cell: (row) => (
                 <select
                     value={row.status} // controlled select

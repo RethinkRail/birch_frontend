@@ -280,7 +280,7 @@ const WorkOrderDataTable = ({
             name: "CAR",
             selector: row => row.railcar_id,
             sortable: true,
-            width: '8%',
+            width: '14%',
         },
         {
             name: "LAST CONTENT",
@@ -296,7 +296,7 @@ const WorkOrderDataTable = ({
         {
             name: "STATUS",
             selector: row => row.status,
-            width: "20%",
+            width: "17%",
             cell: (row) => (
                 <select
                     value={row.status} // controlled select
@@ -317,7 +317,7 @@ const WorkOrderDataTable = ({
         {
             name: "COMMENT",
             selector: row => row.comment,
-            width: "19%",
+            width: "16%",
             cell: (row) => (
                 <span
                     onClick={() => {

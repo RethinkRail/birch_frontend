@@ -287,9 +287,6 @@ const OrderDetails = ({
     const handleDropdownChangeInDetails = (e, workId,status) => {
         setOldStatus(status);
         e.preventDefault()
-        console.log(e.target.value);
-        console.log(e.target.value.split(":")[0]);
-        console.log(status);
         const selectedStatusObj = statusCode.find(sc => String(sc.code) === String(status));
         console.log(selectedStatusObj);
         if (selectedStatusObj?.department_id_for_checklist && selectedStatusObj.job_or_revenue_category) {
@@ -585,7 +582,6 @@ const OrderDetails = ({
             'source': "order_details",
             'comment': comment
         });
-        console.log(data)
         let config = {
             method: 'post',
             maxBodyLength: Infinity,

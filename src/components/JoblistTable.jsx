@@ -464,7 +464,54 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     )}
                 </div>
 
+
+                <div className="absolute top-2/3 right-4 hidden lg:block">
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
+
+                        {tableData.length>0 &&(
+
+                            <li className='flex h-fit text-[10px] p-0'onClick={handleCopyAllJobs} >
+                                <span className="p-1">
+
+                                    Copy all the jobs
+                                </span>
+                            </li>
+                        )}
+
+
+                        {(workOrder.locked_by == null && jobsToBePasted != null) && (
+
+                            <li className='flex h-fit text-[10px] p-0'  onClick={handlePasteJob} >
+                                <span className="p-1">
+
+                                     Paste Job
+                                </span>
+                            </li>
+                        )}
+
+
+                        {workOrder.locked_by ==null && (
+
+
+
+                            <li className='flex h-fit text-[10px] p-0' onClick={() => {
+                                    setEditData(null);
+                                    setModalShowing(true);
+
+                            }}>
+                            <span className="p-1">
+
+                                Add Job
+                            </span>
+                            </li>
+                        )}
+
+                    </ul>
+                </div>
+
+
             </div>
+
 
 
             <MaterialReactTable

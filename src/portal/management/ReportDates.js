@@ -1108,15 +1108,15 @@ const ReportDates = () => {
                 <div className="mt-6 mb-6 flex justify-end">
                     <div className="bg-gray-50 shadow rounded-xl px-6 py-4 flex gap-6 text-sm text-gray-800">
                         <div className="flex flex-col items-end">
-                            <span className="font-semibold text-green-600">Total Regular Hours</span>
+                            <span className="font-semibold text-green-500">Total Regular Hours</span>
                             <span>{round2Dec(grandTotals.standard)}</span>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="font-semibold text-red-500">Total Overtime Hours</span>
+                            <span className="font-semibold text-red-300">Total Overtime Hours</span>
                             <span>{round2Dec(grandTotals.overtime)}</span>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="font-semibold text-blue-600">Total Payable Hours</span>
+                            <span className="font-semibold text-black-200">Total Payable Hours</span>
                             <span>{round2Dec(grandTotals.payable)}</span>
                         </div>
                         <div className="flex flex-col items-end">

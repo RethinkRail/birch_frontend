@@ -27,6 +27,45 @@ const ReportDates = () => {
     const [hhMMFormat, sethhMMFormat] = useState(false);
     const collapseRefs = useRef({});
 
+
+    const [totalStandardHours, setTotalStandardHours] = useState(0);
+    const [totalOverTimeHours, setTotalOverTimeHours] = useState(0);
+    const [totalBreakHours, setTotalBreakHours] = useState(0);
+
+    const [grandTotals, setGrandTotals] = useState({
+        standard: 0,
+        overtime: 0,
+        break: 0,
+        payable: 0,
+    });
+
+    useEffect(() => {
+        if (filteredData) {
+            let totalStandard = 0;
+            let totalOvertime = 0;
+            let totalBreak = 0;
+
+            Object.values(filteredData).forEach((data) => {
+                totalStandard += Object.values(data.weeks).reduce(
+                    (sum, w) => sum + w.standardHours,
+                    0
+                );
+                totalOvertime += Object.values(data.weeks).reduce(
+                    (sum, w) => sum + w.overtimeHours,
+                    0
+                );
+                totalBreak += data.breakHours || 0;
+            });
+
+            setGrandTotals({
+                standard: totalStandard,
+                overtime: totalOvertime,
+                break: totalBreak,
+                payable: totalStandard + totalOvertime,
+            });
+        }
+    }, [filteredData]);
+
     const toggleAll = () => {
         setExpandAll(prev => {
             const newState = !prev;
@@ -1065,7 +1104,30 @@ const ReportDates = () => {
                     Submit
                 </button>
             </div>
+
+            <div className="mt-6 mb-6 flex justify-end">
+                <div className="bg-gray-50 shadow rounded-xl px-6 py-4 flex gap-6 text-sm text-gray-800">
+                    <div className="flex flex-col items-end">
+                        <span className="font-semibold text-green-600">Total Regular Hours</span>
+                        <span>{round2Dec(grandTotals.standard)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="font-semibold text-red-500">Total Overtime Hours</span>
+                        <span>{round2Dec(grandTotals.overtime)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="font-semibold text-blue-600">Total Payable Hours</span>
+                        <span>{round2Dec(grandTotals.payable)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="font-semibold text-yellow-600">Total Break Hours</span>
+                        <span>{round2Dec(grandTotals.break)}</span>
+                    </div>
+                </div>
+            </div>
+
             {Object.entries(filteredData).length>0?(
+
                 <div className="flex items-center mt-4 mb-4">
                     <button
                         className="bg-blue-500 text-white rounded-md p-2 mr-2"
@@ -1117,7 +1179,9 @@ const ReportDates = () => {
                                       <span>
                                         {hhMMFormat
                                             ? decimalToHHMM(Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0))
-                                            : `${Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h`}
+                                            : `${Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h`
+
+                                        }
                                       </span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours">

@@ -410,7 +410,6 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     return (
         <div className='fixed p-2 flex flex-col h-[100vh] overflow-y-auto bg-[#2e2b2b40] backdrop-blur-sm top-0 left-0 w-full justify-center items-center z-[100]' onClick={() => {
             setModalShowing(true)
-
         }}>
             <div className="bg-white drop-shadow-md rounded-md w-[95%] overflow-y-auto max-w-[1600px] p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
                 {editData ? "Edit line number: "+editData.line_number : "ADD A JOB"}

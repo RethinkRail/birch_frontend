@@ -89,19 +89,13 @@ const Home = () => {
             .then((response) => {
 
                 const new_work_orders = replaceItemInArray(workOrders, response.data)
-
+                console.log(new_work_orders)
                 if(new_work_orders != null){
                     setWorkOrders([...new_work_orders]);
-                }else {
+                }
+                else {
                     const  newLyAdded = workOrders.concat(response.data)
                     setWorkOrders(newLyAdded)
-                    toast.success(
-                        <>
-                            {response.data.railcar_id}
-                            <br />
-                            Order created
-                        </>
-                    );
 
                 }
 

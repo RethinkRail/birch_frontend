@@ -100,8 +100,6 @@ const Home = () => {
                 }else {
                     const  newLyAdded = workOrders.concat(response.data)
                     setWorkOrders(newLyAdded)
-
-
                 }
 
             })

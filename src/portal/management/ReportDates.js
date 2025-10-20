@@ -527,6 +527,8 @@ const ReportDates = () => {
     };
 
     function generateWeeklyReport(logs) {
+        console.log(logs);
+
         const grouped = {};
         // Step 1: Group logs by team member and week start
         logs.forEach(log => {
@@ -986,6 +988,145 @@ const ReportDates = () => {
     }
 
 
+
+    /**
+     * Export flat log array to weekly Excel report with header/footer
+     * @param {Array} logs - Flat array of log objects
+     */
+    function exportToExcelFromFlatLogs(logs) {
+        const rows = [];
+
+        // --- Group logs by employee
+        const employees = {};
+        logs.forEach((log) => {
+            const name = log.team_member;
+            if (!employees[name]) employees[name] = [];
+            employees[name].push(log);
+        });
+
+        // --- For each employee
+        for (const [employee, empLogs] of Object.entries(employees)) {
+            // Group logs by ISO week (Monday as start)
+            const weeks = {};
+
+            empLogs.forEach((log) => {
+                const date = new Date(log.start_time);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const day = date.getDate();
+
+                // Get ISO week number (simple)
+                const weekStart = new Date(date);
+                const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday
+                const monday = new Date(date);
+                monday.setDate(day - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                const weekKey = monday.toISOString().split("T")[0];
+
+                if (!weeks[weekKey]) weeks[weekKey] = [];
+                weeks[weekKey].push(log);
+            });
+
+            // --- For each week
+            for (const [weekStart, weekLogs] of Object.entries(weeks)) {
+                // Compute totals
+                let totalHours = 0;
+                let breakHours = 0;
+                let standardHours = 0;
+
+                weekLogs.forEach((log) => {
+                    const duration = (new Date(log.end_time) - new Date(log.start_time)) / 3600000; // hours
+                    if (log.railcar_id === "BREAK") {
+                        breakHours += duration;
+                    } else {
+                        totalHours += duration;
+                    }
+                });
+
+                standardHours = totalHours;
+                const overtime = Math.max(0, totalHours - 40);
+                const displayStandard = standardHours - overtime;
+
+                const department = weekLogs[0]?.department_name || "";
+
+                // --- Header
+                rows.push([`${employee}   ${department}`]);
+                // rows.push([`${displayStandard.toFixed(2)}h`]);
+                // rows.push([`0.00h`]);
+                // rows.push([`${displayStandard.toFixed(2)}h`]);
+                // rows.push([`${breakHours.toFixed(2)}h`]);
+                // rows.push([`0D`]);
+                rows.push([]);
+
+                // --- Week title
+                rows.push([`Week of ${weekStart}`]);
+                rows.push([]);
+
+                // --- Table headers
+                rows.push(["Date", "Day", "In", "Out", "Hours", "Day Total", "Customer", "Job"]);
+
+                let dayTotal = 0;
+                weekLogs
+                    .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+                    .forEach((log) => {
+                        const date = new Date(log.start_time);
+                        const dateStr = date.toISOString().split("T")[0];
+                        const day = date.toLocaleString("en-US", { weekday: "long" });
+
+                        const inTime = new Date(log.start_time).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                        });
+                        const outTime = new Date(log.end_time).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                        });
+
+                        const duration = (new Date(log.end_time) - new Date(log.start_time)) / 3600000;
+
+                        if (log.railcar_id !== "BREAK") dayTotal += duration;
+
+                        rows.push([
+                            dateStr,
+                            day,
+                            inTime,
+                            outTime,
+                            duration.toFixed(2),
+                            dayTotal.toFixed(2),
+                            log.railcar_id,
+                            log.job_description,
+                        ]);
+                    });
+
+                // --- Footer
+                rows.push([]);
+                rows.push([
+                    `Totals: ${totalHours.toFixed(2)}h`,
+                    `Standard: ${displayStandard.toFixed(2)}h`,
+                    `Overtime: ${overtime.toFixed(2)}h`,
+                    `Break: ${breakHours.toFixed(2)}h`,
+                ]);
+
+                rows.push([]);
+                rows.push([]);
+            }
+        }
+
+        // --- Create worksheet & workbook
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Complete Report");
+
+        // --- Save Excel
+        XLSX.writeFile(wb, "complete_report.xlsx");
+
+    }
+
+
+
+
+
     return (
         <div>
             <div className="p-4 w-full max-w-xl flex flex-col gap-4">
@@ -1143,14 +1284,24 @@ const ReportDates = () => {
                     >
                         Payroll Totals
                     </button>
+
+
+
                     <button
-                        className="bg-blue-500 text-white rounded-md p-2 ml-auto"
+                        className="bg-blue-500 text-white rounded-md p-2 ml-auto mr-2"
+                        onClick={()=>exportToExcelFromFlatLogs(dataForReport)}
+
+                    >
+                        Export to Excel
+                    </button>
+
+                    <button
+                        className="bg-blue-500 text-white rounded-md p-2 "
                         onClick={toggleAll}
                     >
                         {expandAll ? "Collapse All" : "Expand All"}
                     </button>
                 </div>
-
 
             ):""}
 

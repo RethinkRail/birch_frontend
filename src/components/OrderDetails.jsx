@@ -166,7 +166,7 @@ const OrderDetails = ({
 
         jobs.forEach(job => {
 
-            const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+            const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
             totalLaborCost += Number(round2Dec(laborCost));
 
             // Calculate labor hours

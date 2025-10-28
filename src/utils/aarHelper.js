@@ -821,20 +821,11 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             number_of_jobs++;
 
 
-            // total_hour += (myjob.labor_time * myjob.quantity)
-            // labor_cost += myjob.labor_cost
-            // material_cost += myjob.material_cost
-            // myjob.jobparts.forEach(function (item) {
-            //     var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-            //     total_material_cost += Number(round2Dec(single_mat_cost))
-            // });
-
-
-            const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+            const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
             labor_cost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+            const laborHours = Number(myjob.labor_time_aar) * myjob.quantity;
             total_hour += Number(round2Dec(laborHours));
 
             // Calculate material cost
@@ -852,19 +843,12 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         workorder.joblist.forEach((myjob, i) => {
             if (myjob.secondary_bill_to_id == null) {
                 number_of_jobs++;
-                // total_hour += (myjob.labor_time * myjob.quantity)
-                // labor_cost += myjob.labor_cost
-                // material_cost += myjob.material_cost
-                // myjob.jobparts.forEach(function (item) {
-                //     var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-                //     total_material_cost += Number(round2Dec(single_mat_cost))
-                // });
 
-                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+                const laborHours = Number(myjob.labor_time_aar) * myjob.quantity;
                 total_hour += Number(round2Dec(laborHours));
 
                 // Calculate material cost
@@ -882,19 +866,12 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         workorder.joblist.forEach((myjob, i) => {
             if (myjob.secondary_bill_to_id !== null) {
                 number_of_jobs++;
-                // total_hour += (myjob.labor_time * myjob.quantity)
-                // labor_cost += myjob.labor_cost
-                // material_cost += myjob.material_cost
-                // myjob.jobparts.forEach(function (item) {
-                //     var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-                //     total_material_cost += Number(round2Dec(single_mat_cost))
-                // });
 
-                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(round2Dec(myjob.labor_time)) * Number(round2Dec(myjob.quantity));
+                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round2Dec(myjob.labor_time)) * myjob.quantity;
+                const laborHours = Number(myjob.labor_time_aar) * myjob.quantity;
                 total_hour += Number(round2Dec(laborHours));
 
                 // Calculate material cost
@@ -1011,7 +988,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
-            const laborCost = Number(round2Dec(item.labor_rate)) * Number(round2Dec(item.labor_time)) * Number(round2Dec(item.quantity));
+            const laborCost = Number(round2Dec(item.labor_rate)) * Number(item.labor_time_aar) * Number(round2Dec(item.quantity));
 
             labor_charge.value = getObjComputedValue(labor_charge, Math.abs(laborCost) * 100);
 

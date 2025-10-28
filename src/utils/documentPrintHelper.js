@@ -64,7 +64,7 @@ export function printATask(workOrder) {
         var manager_checked_time = myjob.manager_checked_time == null ? "" : convertSqlWithTZToFormattedDate(myjob.manager_checked_time);
 
 
-        var hour = p * parseFloat(myjob.quantity) * parseFloat(myjob.labor_time);
+        var hour = p * parseFloat(myjob.quantity) * parseFloat(myjob.labor_time_aar);
         var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.line_number + "</td><td style='width: 20px'>" + myjob.locationcode.code + "</td>";
         row_html += "<td>" + myjob.job_description + "</td>";
         row_html += "<td>" + myjob.quantity + "</td>";
@@ -347,16 +347,13 @@ export function printInvoice(workorder, forWhom) {
     workorder.joblist.forEach((job)=>{
         if(forWhom ==3){
             if(job.secondary_bill_to_id != null){
-                // labor_cost+= job.labor_cost;
-                // material_cost+= job.material_cost;
-                // net_cost+= (labor_cost+material_cost)
-                // total_hour+= job.labor_time
 
-                const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+
+                const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+                const laborHours = Number(job.labor_time_aar) * job.quantity;
                 total_hour += Number(round2Dec(laborHours));
 
                 let mat_cost_for_a_job =0
@@ -371,11 +368,11 @@ export function printInvoice(workorder, forWhom) {
             }
         }else if(forWhom==2){
             if(job.secondary_bill_to_id == null){
-                const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+                const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
-                const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+                const laborHours = Number(job.labor_time_aar) * job.quantity;
                 total_hour += Number(round2Dec(laborHours));
 
                 let mat_cost_for_a_job =0
@@ -388,11 +385,11 @@ export function printInvoice(workorder, forWhom) {
                 net_cost +=Number(round2Dec((labor_cost+material_cost)))
             }
         }else {
-            const laborCost = Number(round2Dec(job.labor_rate)) * Number(round2Dec(job.labor_time)) * Number(round2Dec(job.quantity));
+            const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
             labor_cost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+            const laborHours = Number(job.labor_time_aar) * job.quantity;
             total_hour += Number(round2Dec(laborHours));
 
             let mat_cost_for_a_job =0

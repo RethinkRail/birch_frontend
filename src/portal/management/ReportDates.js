@@ -104,7 +104,7 @@ const ReportDates = () => {
             if (selectedDates.start && selectedDates.end) {
                 const result = await fetchPayrollReport(selectedDates.start, selectedDates.end);
                 setPayrollData(result);
-
+                console.log(result)
                 // Get unique departments
                 const uniqueDepartments = [...new Set(result.map(item => item.department_name))];
                 setDepartments(uniqueDepartments);

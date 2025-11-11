@@ -351,7 +351,7 @@ export function printInvoice(workorder, forWhom) {
 
                 const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
                 labor_cost += Number(round2Dec(laborCost));
-
+                console.log(laborCost);
                 // Calculate labor hours
                 const laborHours = Number(job.labor_time_aar) * job.quantity;
                 total_hour += Number(round2Dec(laborHours));
@@ -385,9 +385,10 @@ export function printInvoice(workorder, forWhom) {
                 net_cost +=Number(round2Dec((labor_cost+material_cost)))
             }
         }else {
+
             const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
             labor_cost += Number(round2Dec(laborCost));
-
+            console.log(laborCost)
             // Calculate labor hours
             const laborHours = Number(job.labor_time_aar) * job.quantity;
             total_hour += Number(round2Dec(laborHours));
@@ -515,10 +516,10 @@ export function printInvoice(workorder, forWhom) {
             if(myjob.secondary_bill_to_id != null){
                 if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
                     }
                 }
             }
@@ -526,20 +527,20 @@ export function printInvoice(workorder, forWhom) {
             if(myjob.secondary_bill_to_id ==null){
                 if (myjob.labor_cost > 0) {
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) +( Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
                     }
                 }
             }
         }else {
             if (myjob.labor_cost > 0) {
                 if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + myjob.labor_cost;
+                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
                     revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                 } else {
-                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, myjob.labor_cost)
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
                 }
             }
         }

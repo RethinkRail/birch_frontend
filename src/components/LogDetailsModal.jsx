@@ -14,11 +14,21 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
     console.log(log);
     if (!log) return null;
 
-    function concatEndShiftNotes(logData) {
+    // function concatEndShiftNotes(logData) {
+    //     return logData.logs
+    //         .map(log => log.end_shift_note)      // extract end_shift_note// remove null/undefined
+    //         .join(' ');                          // join with space (or any separator)
+    // }
+
+    function concatEndShiftNotesWithDate(logData) {
         return logData.logs
-            .map(log => log.end_shift_note)      // extract end_shift_note// remove null/undefined
-            .join(' ');                          // join with space (or any separator)
+            .filter(log => log.end_shift_note) // only logs with a note
+            .map(log => {
+                const date = new Date(log.start_time).toLocaleDateString(); // format the date
+                return `${date}: ${log.end_shift_note}`;
+            });
     }
+
 
     function formatNotes(notes) {
         if (!notes) return '';
@@ -127,8 +137,13 @@ const LogDetailsModal = ({ log, onClose, onApprove,onUnApprove,onDelete, onEditC
                 </div>
                 <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
                     <span className="font-semibold text-gray-700">Employee Notes:</span>
-                    <span className="ml-2 text-gray-600">{concatEndShiftNotes(log)}</span>
+                    <div className="mt-2 text-gray-600 space-y-1">
+                        {concatEndShiftNotesWithDate(log).map((note, index) => (
+                            <div key={index}>{note}</div>
+                        ))}
+                    </div>
                 </div>
+
 
                 {/* Footer */}
                 <div className="flex justify-end p-4 border-t">

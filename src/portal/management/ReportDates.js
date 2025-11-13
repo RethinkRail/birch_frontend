@@ -27,6 +27,45 @@ const ReportDates = () => {
     const [hhMMFormat, sethhMMFormat] = useState(false);
     const collapseRefs = useRef({});
 
+
+    const [totalStandardHours, setTotalStandardHours] = useState(0);
+    const [totalOverTimeHours, setTotalOverTimeHours] = useState(0);
+    const [totalBreakHours, setTotalBreakHours] = useState(0);
+
+    const [grandTotals, setGrandTotals] = useState({
+        standard: 0,
+        overtime: 0,
+        break: 0,
+        payable: 0,
+    });
+
+    useEffect(() => {
+        if (filteredData) {
+            let totalStandard = 0;
+            let totalOvertime = 0;
+            let totalBreak = 0;
+
+            Object.values(filteredData).forEach((data) => {
+                totalStandard += Object.values(data.weeks).reduce(
+                    (sum, w) => sum + w.standardHours,
+                    0
+                );
+                totalOvertime += Object.values(data.weeks).reduce(
+                    (sum, w) => sum + w.overtimeHours,
+                    0
+                );
+                totalBreak += data.breakHours || 0;
+            });
+
+            setGrandTotals({
+                standard: totalStandard,
+                overtime: totalOvertime,
+                break: totalBreak,
+                payable: totalStandard + totalOvertime,
+            });
+        }
+    }, [filteredData]);
+
     const toggleAll = () => {
         setExpandAll(prev => {
             const newState = !prev;
@@ -65,7 +104,7 @@ const ReportDates = () => {
             if (selectedDates.start && selectedDates.end) {
                 const result = await fetchPayrollReport(selectedDates.start, selectedDates.end);
                 setPayrollData(result);
-
+                console.log(result)
                 // Get unique departments
                 const uniqueDepartments = [...new Set(result.map(item => item.department_name))];
                 setDepartments(uniqueDepartments);
@@ -488,6 +527,8 @@ const ReportDates = () => {
     };
 
     function generateWeeklyReport(logs) {
+        console.log(logs);
+
         const grouped = {};
         // Step 1: Group logs by team member and week start
         logs.forEach(log => {
@@ -947,6 +988,145 @@ const ReportDates = () => {
     }
 
 
+
+    /**
+     * Export flat log array to weekly Excel report with header/footer
+     * @param {Array} logs - Flat array of log objects
+     */
+    function exportToExcelFromFlatLogs(logs) {
+        const rows = [];
+
+        // --- Group logs by employee
+        const employees = {};
+        logs.forEach((log) => {
+            const name = log.team_member;
+            if (!employees[name]) employees[name] = [];
+            employees[name].push(log);
+        });
+
+        // --- For each employee
+        for (const [employee, empLogs] of Object.entries(employees)) {
+            // Group logs by ISO week (Monday as start)
+            const weeks = {};
+
+            empLogs.forEach((log) => {
+                const date = new Date(log.start_time);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const day = date.getDate();
+
+                // Get ISO week number (simple)
+                const weekStart = new Date(date);
+                const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday
+                const monday = new Date(date);
+                monday.setDate(day - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+                const weekKey = monday.toISOString().split("T")[0];
+
+                if (!weeks[weekKey]) weeks[weekKey] = [];
+                weeks[weekKey].push(log);
+            });
+
+            // --- For each week
+            for (const [weekStart, weekLogs] of Object.entries(weeks)) {
+                // Compute totals
+                let totalHours = 0;
+                let breakHours = 0;
+                let standardHours = 0;
+
+                weekLogs.forEach((log) => {
+                    const duration = (new Date(log.end_time) - new Date(log.start_time)) / 3600000; // hours
+                    if (log.railcar_id === "BREAK") {
+                        breakHours += duration;
+                    } else {
+                        totalHours += duration;
+                    }
+                });
+
+                standardHours = totalHours;
+                const overtime = Math.max(0, totalHours - 40);
+                const displayStandard = standardHours - overtime;
+
+                const department = weekLogs[0]?.department_name || "";
+
+                // --- Header
+                rows.push([`${employee}   ${department}`]);
+                // rows.push([`${displayStandard.toFixed(2)}h`]);
+                // rows.push([`0.00h`]);
+                // rows.push([`${displayStandard.toFixed(2)}h`]);
+                // rows.push([`${breakHours.toFixed(2)}h`]);
+                // rows.push([`0D`]);
+                rows.push([]);
+
+                // --- Week title
+                rows.push([`Week of ${weekStart}`]);
+                rows.push([]);
+
+                // --- Table headers
+                rows.push(["Date", "Day", "In", "Out", "Hours", "Day Total", "Customer", "Job"]);
+
+                let dayTotal = 0;
+                weekLogs
+                    .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+                    .forEach((log) => {
+                        const date = new Date(log.start_time);
+                        const dateStr = date.toISOString().split("T")[0];
+                        const day = date.toLocaleString("en-US", { weekday: "long" });
+
+                        const inTime = new Date(log.start_time).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                        });
+                        const outTime = new Date(log.end_time).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                        });
+
+                        const duration = (new Date(log.end_time) - new Date(log.start_time)) / 3600000;
+
+                        if (log.railcar_id !== "BREAK") dayTotal += duration;
+
+                        rows.push([
+                            dateStr,
+                            day,
+                            inTime,
+                            outTime,
+                            duration.toFixed(2),
+                            dayTotal.toFixed(2),
+                            log.railcar_id,
+                            log.job_description,
+                        ]);
+                    });
+
+                // --- Footer
+                rows.push([]);
+                rows.push([
+                    `Totals: ${totalHours.toFixed(2)}h`,
+                    `Standard: ${displayStandard.toFixed(2)}h`,
+                    `Overtime: ${overtime.toFixed(2)}h`,
+                    `Break: ${breakHours.toFixed(2)}h`,
+                ]);
+
+                rows.push([]);
+                rows.push([]);
+            }
+        }
+
+        // --- Create worksheet & workbook
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Complete Report");
+
+        // --- Save Excel
+        XLSX.writeFile(wb, "complete_report.xlsx");
+
+    }
+
+
+
+
+
     return (
         <div>
             <div className="p-4 w-full max-w-xl flex flex-col gap-4">
@@ -1066,6 +1246,31 @@ const ReportDates = () => {
                 </button>
             </div>
             {Object.entries(filteredData).length>0?(
+                <div className="mt-6 mb-6 flex justify-end">
+                    <div className="bg-gray-50 shadow rounded-xl px-6 py-4 flex gap-6 text-sm text-gray-800">
+                        <div className="flex flex-col items-end">
+                            <span className="font-semibold text-green-500">Total Regular Hours</span>
+                            <span>{round2Dec(grandTotals.standard)}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="font-semibold text-red-300">Total Overtime Hours</span>
+                            <span>{round2Dec(grandTotals.overtime)}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="font-semibold text-black-200">Total Payable Hours</span>
+                            <span>{round2Dec(grandTotals.payable)}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="font-semibold text-yellow-600">Total Break Hours</span>
+                            <span>{round2Dec(grandTotals.break)}</span>
+                        </div>
+                    </div>
+                </div>
+            ):""}
+
+
+            {Object.entries(filteredData).length>0?(
+
                 <div className="flex items-center mt-4 mb-4">
                     <button
                         className="bg-blue-500 text-white rounded-md p-2 mr-2"
@@ -1079,14 +1284,24 @@ const ReportDates = () => {
                     >
                         Payroll Totals
                     </button>
+
+
+
                     <button
-                        className="bg-blue-500 text-white rounded-md p-2 ml-auto"
+                        className="bg-blue-500 text-white rounded-md p-2 ml-auto mr-2"
+                        onClick={()=>exportToExcelFromFlatLogs(dataForReport)}
+
+                    >
+                        Export to Excel
+                    </button>
+
+                    <button
+                        className="bg-blue-500 text-white rounded-md p-2 "
                         onClick={toggleAll}
                     >
                         {expandAll ? "Collapse All" : "Expand All"}
                     </button>
                 </div>
-
 
             ):""}
 
@@ -1117,7 +1332,9 @@ const ReportDates = () => {
                                       <span>
                                         {hhMMFormat
                                             ? decimalToHHMM(Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0))
-                                            : `${Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h`}
+                                            : `${Object.values(data.weeks).reduce((sum, w) => sum + w.standardHours, 0).toFixed(2)}h`
+
+                                        }
                                       </span>
                                 </div>
                                 <div className="tooltip z-[100] border p-1 bg-red-300" data-tip="Overtime Hours">

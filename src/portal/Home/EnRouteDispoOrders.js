@@ -100,13 +100,7 @@ const Home = () => {
                 }else {
                     const  newLyAdded = workOrders.concat(response.data)
                     setWorkOrders(newLyAdded)
-                    toast.success(
-                        <>
-                            {response.data.railcar_id}
-                            <br />
-                            Order created
-                        </>
-                    );
+
 
                 }
 

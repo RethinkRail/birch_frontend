@@ -79,22 +79,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
         // Determine if the update is for a field within `parts` or directly in `jobPart`
         let updatedPart;
-        // if (field in part.parts) {
-        //     console.log("sas")
-        //     updatedPart = {
-        //         ...part,
-        //         parts: {
-        //             ...part.parts,
-        //             [field]: value
-        //         }
-        //     };
-        // } else {
-        //     console.log("sassssss")
-        //     updatedPart = {
-        //         ...part,
-        //         [field]: field === "quantity" || field === "purchase_cost" ? Number(value) : value
-        //     };
-        // }
+
 
         updatedPart = {
             ...part,
@@ -127,6 +112,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         qualifier_code_removed: "",
         labor_cost: "",
         labor_time: 0,
+        labor_time_aar: 0,
         labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate,
         material_cost: "",
         purchase: "",
@@ -155,13 +141,14 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     }, [purchase, markupPercent])
 
     useEffect(() => {
-        setTotalNet(Number(totalLabor) + Number(totalMaterial))
+        setTotalNet(Number(round2Dec(totalLabor)) + Number(round2Dec(totalMaterial)))
+
     }, [totalLabor, totalMaterial])
 
     useEffect(() => {
         const handleInputValuesChange = () => {
-            console.log(inputValues["labor_rate"], inputValues["labor_time"], inputValues["quantity"])
-            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time"]) *  Number(inputValues["quantity"]))
+            console.log(inputValues["labor_rate"], inputValues["labor_time_aar"], inputValues["quantity"])
+            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time_aar"]) *  Number(inputValues["quantity"]))
         }
         handleInputValuesChange()
     }, [inputValues])
@@ -185,8 +172,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     responsibility_code: editData.responsibilitycode ? editData.responsibilitycode.code : "",
                     condition_code:  editData.conditioncode ? editData.conditioncode.code : "",
                     labor_time:  editData.labor_time ,
+                    labor_time_aar:  editData.labor_time_aar ,
                     labor_rate:  editData.labor_rate ,
-                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time)* Number(editData?.labor_rate),
+                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time_aar)* Number(editData?.labor_rate),
                     cid:editData.cid,
                     wheel_details:editData.wheel_details,
                 }))
@@ -215,6 +203,11 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     labor_time: (() => {
                         const job = commonData.job_codes.find(job_code => job_code.code == value);
                         return job?.time_custom || job?.time_standard ;
+                    })(),
+
+                    labor_time_aar: (() => {
+                        const job = commonData.job_codes.find(job_code => job_code.code == value);
+                        return job?.time_standard_aar || job?.time_standard_aar ;
                     })(),
 
                     job_code_removed: (() => {
@@ -300,6 +293,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 wheel_details:inputValues["wheel_details"],
                 labor_cost: Number(round2Dec(totalLabor)),
                 labor_time: Number(round2Dec(inputValues["labor_time"])),
+                labor_time_aar: Number(inputValues["labor_time_aar"]),
                 labor_rate: Number(round2Dec(inputValues["labor_rate"])),
                 material_cost: Number(round2Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
@@ -375,6 +369,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 responsibility_code: Number(inputValues["responsibility_code"]),
                 labor_cost: Number(round2Dec(totalLabor)),
                 labor_time: Number(round2Dec(inputValues["labor_time"])),
+                labor_time_aar: Number(inputValues["labor_time_aar"]),
                 labor_rate: Number(round2Dec(inputValues["labor_rate"])),
                 material_cost: Number(round2Dec(totalMaterial)),
                 // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
@@ -409,8 +404,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     }
     return (
         <div className='fixed p-2 flex flex-col h-[100vh] overflow-y-auto bg-[#2e2b2b40] backdrop-blur-sm top-0 left-0 w-full justify-center items-center z-[100]' onClick={() => {
-            setModalShowing((prev) => (!prev))
-            setEditData()
+            setModalShowing(true)
         }}>
             <div className="bg-white drop-shadow-md rounded-md w-[95%] overflow-y-auto max-w-[1600px] p-4 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
                 {editData ? "Edit line number: "+editData.line_number : "ADD A JOB"}
@@ -659,98 +653,147 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             </div>
                         ))}
                     </div>
-                    <div className="grid grid-cols-5 gap-4 mt-4">
-                        <div className="col-span-3 flex flex-col gap-1.5">
-                            <label className="capitalize text-[12px]">Description of Repair</label>
-                            <textarea rows={5} disabled={workOrder.locked_by != null} className="text-[12px] w-full border-[1px] rounded-md border-[#002e54] p-1 px-2 outline-none" value={inputValues["job_description"]} onChange={(e) => handleChange("job_description", e.target.value)} placeholder="Enter description of repair"></textarea>
+                    <div className="grid grid-cols-5 gap-6 mt-4">
+                        {/* Description Section */}
+                        <div className="col-span-3 flex flex-col gap-2">
+                            <label className="capitalize text-[12px] font-medium text-[#002e54]">
+                                Description of Repair
+                            </label>
+                            <textarea
+                                rows={6}
+                                disabled={workOrder.locked_by != null}
+                                className="text-[12px] w-full border border-[#002e54] rounded-md p-2 outline-none resize-none focus:ring-1 focus:ring-[#002e54]"
+                                value={inputValues["job_description"]}
+                                onChange={(e) => handleChange("job_description", e.target.value)}
+                                placeholder="Enter description of repair"
+                            ></textarea>
                         </div>
-                        <div className="col-span-2 grid grid-cols-3 gap-1">
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">ST. Time (HR)</label>
+
+                        {/* Right-Side Form Fields */}
+                        <div className="col-span-2 grid grid-cols-12 gap-3">
+                            {/* Row 1: Labor */}
+                            <div className="flex flex-col col-span-3">
+                                <label className="text-[12px] capitalize text-[#002e54]">ST. Time (HR)</label>
                                 <input
                                     type="number"
                                     step={0.001}
                                     disabled={workOrder.locked_by != null}
-                                    name=""
-                                    id=""
-                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
                                     value={inputValues["labor_time"]}
                                     onChange={(e) => {
                                         let value = parseFloat(e.target.value);
-                                        // Check if the value has more than 2 decimal places
                                         if (value && value.toString().split(".")[1]?.length > 2) {
-                                            // Round to 2 decimal places if necessary
                                             value = parseFloat(value.toFixed(2));
                                         }
                                         handleChange("labor_time", value);
                                     }}
                                 />
-
                             </div>
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Rate ($/HR)</label>
+
+                            <div className="flex flex-col col-span-3">
+                                <label className="text-[12px] capitalize text-[#002e54]">ST. Time AAR(HR)</label>
+                                <input
+                                    type="number"
+                                    step={0.001}
+                                    disabled={workOrder.locked_by != null}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
+                                    value={inputValues["labor_time_aar"]}
+                                    onChange={(e) => {
+                                        let value = parseFloat(e.target.value);
+                                        if (value && value.toString().split(".")[1]?.length > 3) {
+                                            value = parseFloat(value.toFixed(3));
+                                        }
+                                        handleChange("labor_time_aar", value);
+                                    }}
+                                />
+                            </div>
+
+                            <div className="flex flex-col col-span-3">
+                                <label className="text-[12px] capitalize text-[#002e54]">Rate ($/HR)</label>
                                 <input
                                     type="number"
                                     step={0.1}
                                     disabled={workOrder.locked_by != null}
-                                    name=""
-                                    id=""
-                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
                                     value={inputValues["labor_rate"]}
                                     onChange={(e) => {
                                         let value = parseFloat(e.target.value);
-                                        // Check if the value has more than 2 decimal places
                                         if (value && value.toString().split(".")[1]?.length > 2) {
-                                            // If more than 2 decimal places, round it to 2 decimals
                                             value = parseFloat(value.toFixed(2));
                                         }
                                         handleChange("labor_rate", value);
                                     }}
                                 />
+                            </div>
 
+                            <div className="flex flex-col col-span-3">
+                                <label className="text-[12px] capitalize text-[#002e54]">Total Labor ($)</label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                    value={round2Dec(totalLabor)}
+                                    readOnly
+                                />
                             </div>
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Total Labor ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalLabor)} readOnly />
+
+                            {/* Row 2: Material */}
+                            <div className="flex flex-col col-span-4">
+                                <label className="text-[12px] capitalize text-[#002e54]">Purchase ($)</label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                    value={round2Dec(purchase)}
+                                    readOnly
+                                />
                             </div>
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Purchase ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(purchase)} onChange={(e) => setPurchase(round2Dec(purchase))} />
-                            </div>
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Markup (%)</label>
+
+                            <div className="flex flex-col col-span-4">
+                                <label className="text-[12px] capitalize text-[#002e54]">Markup (%)</label>
                                 <input
                                     type="number"
                                     disabled={workOrder.locked_by != null}
-                                    name=""
-                                    id=""
-                                    className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1"
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
                                     value={markupPercent}
                                     onChange={(e) => {
                                         const value = parseFloat(e.target.value);
-                                        // Check if the value has more than 2 decimal places
                                         if (value && value.toString().split(".")[1]?.length > 2) {
-                                            // If more than 2 decimal places, round it to 2 decimals
                                             setMarkupPercent(value.toFixed(2));
                                         } else {
                                             setMarkupPercent(e.target.value);
                                         }
                                     }}
                                 />
+                            </div>
 
+                            <div className="flex flex-col col-span-4">
+                                <label className="text-[12px] capitalize text-[#002e54]">Total Material ($)</label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                    value={round2Dec(totalMaterial)}
+                                    readOnly
+                                />
                             </div>
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Total Material ($)</label>
-                                <input type="text" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalMaterial)} readOnly />
-                            </div>
-                            <div className="col-span-1" />
-                            <div className="col-span-1" />
-                            <div className="flex flex-col col-span-1">
-                                <label className="text-[12px] capitalize">Total Net ($)</label>
-                                <input type="number" disabled name="" id="" className="p-[2px] rounded-md border-[1px] border-solid border-[#002e54] outline-none text-[12px] px-1" value={round2Dec(totalNet)} readOnly />
+
+                            {/* Row 3: Total Net */}
+                            <div className="flex flex-col col-span-12 items-end mt-2">
+                                <div className="w-1/3">
+                                    <label className="text-[12px] capitalize text-[#002e54]">Total Net ($)</label>
+                                    <input
+                                        type="number"
+                                        disabled
+                                        className="w-full p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                        value={round2Dec(totalNet)}
+                                        readOnly
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
                 <div className="flex flex-row items-center gap-2">
                     {(!workOrder.locked_by && Number(workOrder.locked_for_time_clocking) !== 1) && (

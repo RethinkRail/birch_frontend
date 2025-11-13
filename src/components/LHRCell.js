@@ -32,13 +32,14 @@ const LHRCell = ({ workOrder, workId }) => {
             className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
             data-tip={
                 data
-                    ? `Estimated Hour: ${data.totalEstimatedHours.toFixed(2)}\nHours Applied: ${data.totalAppliedHours.toFixed(2)}`
+                    ? `Estimated Hour: ${(data.totalEstimatedHours ?? 0).toFixed(2)}\nHours Applied: ${(data.totalAppliedHours ?? 0).toFixed(2)}`
                     : "Loading..."
             }
         >
-      {loading ? "..." : `${data.percentage.toFixed(2)}%`}
-    </span>
+    {loading ? "..." : `${(data?.percentage ?? 0).toFixed(2)}%`}
+  </span>
     );
+
 };
 
 export default LHRCell;

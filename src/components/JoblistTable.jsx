@@ -25,7 +25,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             description: job.job_description,
             wmc: job.whymadecode.code,
             labor_time: round2Dec(job.labor_time),
-            labor: round2Dec(parseFloat(job.labor_time) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
+            labor_time_aar: round2Dec(job.labor_time_aar),
+            labor: round2Dec(parseFloat(job.labor_time_aar) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
             material: job.material_cost,
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
@@ -63,7 +64,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             description: job.job_description,
             wmc: job.whymadecode.code,
             labor_time: round2Dec(job.labor_time),
-            labor: round2Dec(job.labor_time * job.labor_rate*job.quantity),
+            labor_time_aar: (job.labor_time_aar),
+            labor: round2Dec(job.labor_time_aar * job.labor_rate*job.quantity),
             material: round2Dec(job.material_cost),
             net: round2Dec(job.labor_cost + job.material_cost),
             rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
@@ -130,6 +132,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             responsibility_code: jobToCopy.responsibilitycode?.code,
             labor_cost: jobToCopy.labor_cost,
             labor_time: jobToCopy.labor_time,
+            labor_time_aar: jobToCopy.labor_time_aar,
             labor_rate: jobToCopy.labor_rate,
             material_cost: Number(round2Dec(jobToCopy.material_cost)),
             jobPartsData: jobToCopy.jobparts.map(({ id, parts, ...rest }) => rest),
@@ -165,6 +168,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 responsibility_code: job.responsibilitycode?.code,
                 labor_cost: job.labor_cost,
                 labor_time: job.labor_time,
+                labor_time_aar: job.labor_time_aar,
                 labor_rate: job.labor_rate,
                 material_cost: Number(round2Dec(job.material_cost)),
                 jobPartsData: job.jobparts.map(({ id, parts, ...rest }) => rest),
@@ -464,7 +468,54 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     )}
                 </div>
 
+
+                <div className="absolute top-2/3 right-4 hidden lg:block">
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">
+
+                        {tableData.length>0 &&(
+
+                            <li className='flex h-fit text-[10px] p-0'onClick={handleCopyAllJobs} >
+                                <span className="p-1">
+
+                                    Copy all the jobs
+                                </span>
+                            </li>
+                        )}
+
+
+                        {(workOrder.locked_by == null && jobsToBePasted != null) && (
+
+                            <li className='flex h-fit text-[10px] p-0'  onClick={handlePasteJob} >
+                                <span className="p-1">
+
+                                     Paste Job
+                                </span>
+                            </li>
+                        )}
+
+
+                        {workOrder.locked_by ==null && (
+
+
+
+                            <li className='flex h-fit text-[10px] p-0' onClick={() => {
+                                    setEditData(null);
+                                    setModalShowing(true);
+
+                            }}>
+                            <span className="p-1">
+
+                                Add Job
+                            </span>
+                            </li>
+                        )}
+
+                    </ul>
+                </div>
+
+
             </div>
+
 
 
             <MaterialReactTable

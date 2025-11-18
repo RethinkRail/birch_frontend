@@ -8,30 +8,85 @@ import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
 
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
-
+    console.log(jobs)
     useEffect(() => {
 
         jobs.sort((a, b) => a.line_number - b.line_number)
 
-        const jobListData = jobs.map((job) => ({
-            id: job.id,
-            action: job,
-            ln: job.line_number,
-            loc: job.locationcode.code,
-            qty: job.quantity,
-            cc: job.conditioncode.code,
-            jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
-            aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null ? '' : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
-            description: job.job_description,
-            wmc: job.whymadecode.code,
-            labor_time: round2Dec(job.labor_time),
-            labor_time_aar: round2Dec(job.labor_time_aar),
-            labor: round2Dec(parseFloat(job.labor_time_aar) * parseFloat(job.labor_rate)*parseFloat(job.quantity)),
-            material: job.material_cost,
-            net: round2Dec(job.labor_cost + job.material_cost),
-            rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            secondary_bill_to_id: job.secondary_bill_to_id
-        }));
+        // const jobListData = jobs.map((job) => ({
+        //     id: job.id,
+        //     action: job,
+        //     ln: job.line_number,
+        //     loc: job.locationcode.code,
+        //     qty: job.quantity,
+        //     cc: job.conditioncode.code,
+        //     jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
+        //     aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null ? '' : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
+        //     description: job.job_description,
+        //     wmc: job.whymadecode.code,
+        //     resposibility_code: job.responsibilitycode.code,
+        //     labor_time: round2Dec(job.labor_time),
+        //     labor_time_aar: round2Dec(job.labor_time_aar),
+        //     variable_labor_time:round2Dec(job.variable_labor_time),
+        //     variable_labor_rate:round2Dec(job.variable_labor_rate),
+        //     labor: round2Dec(parseFloat(job.labor_time_aar) * parseFloat(job.labor_rate)*parseFloat(job.quantity))
+        //         + round2Dec(parseFloat(job.variable_labor_time) * parseFloat(job.variable_labor_rate)*parseFloat(job.quantity)),
+        //     material: job.material_cost,
+        //     net: round2Dec(job.labor_cost + job.material_cost),
+        //     rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
+        //     secondary_bill_to_id: job.secondary_bill_to_id
+        // }));
+
+        const jobListData = jobs.map((job) => {
+            const laborTimeAar = parseFloat(job.labor_time_aar);
+            const laborRate = parseFloat(job.labor_rate);
+            const varLaborTime = parseFloat(job.variable_labor_time);
+            const varLaborRate = parseFloat(job.variable_labor_rate);
+            const qty = parseFloat(job.quantity);
+
+            const today = new Date();
+            const cutoffDate = new Date("2025-11-01");
+
+            let laborCost = 0;
+
+            if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+                // New rule
+                laborCost =
+                    1 * laborTimeAar * laborRate +
+                    Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+            } else {
+                // Old rule
+                laborCost = laborTimeAar * laborRate * qty;
+            }
+
+            laborCost = round2Dec(laborCost);
+
+            return {
+                id: job.id,
+                action: job,
+                ln: job.line_number,
+                loc: job.locationcode.code,
+                qty: job.quantity,
+                cc: job.conditioncode.code,
+                jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
+                aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null
+                    ? ''
+                    : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
+                description: job.job_description,
+                wmc: job.whymadecode.code,
+                resposibility_code: job.responsibilitycode.code,
+                labor_time: round2Dec(job.labor_time),
+                labor_time_aar: round2Dec(job.labor_time_aar),
+                variable_labor_time: round2Dec(job.variable_labor_time),
+                variable_labor_rate: round2Dec(job.variable_labor_rate),
+                labor: laborCost,
+                material: job.material_cost,
+                net: round2Dec(laborCost + job.material_cost),
+                rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
+                secondary_bill_to_id: job.secondary_bill_to_id
+            };
+        });
+
 
         console.log("Updated jobListData from the joblist table:", jobListData);
         setTableData(jobListData);
@@ -51,30 +106,62 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     }, [isBilledToLessee]);
 
     useEffect(() => {
-        console.log(jobs)
-        const jobListData = jobs.map((job) => ({
-            id: job.id,
-            action: job,
-            ln: job.line_number,
-            loc: job.locationcode.code,
-            qty: job.quantity,
-            cc: job.conditioncode.code,
-            jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
-            aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?'':job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
-            description: job.job_description,
-            wmc: job.whymadecode.code,
-            labor_time: round2Dec(job.labor_time),
-            labor_time_aar: (job.labor_time_aar),
-            labor: round2Dec(job.labor_time_aar * job.labor_rate*job.quantity),
-            material: round2Dec(job.material_cost),
-            net: round2Dec(job.labor_cost + job.material_cost),
-            rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-            secondary_bill_to_id: job.secondary_bill_to_id
-        }));
+        console.log(jobs);
 
+        const today = new Date();
+        const cutoffDate = new Date("2025-11-01");
+
+        const jobListData = jobs.map((job) => {
+
+            const laborTimeAar = parseFloat(job.labor_time_aar);
+            const laborRate = parseFloat(job.labor_rate);
+            const varLaborTime = parseFloat(job.variable_labor_time);
+            const varLaborRate = parseFloat(job.variable_labor_rate);
+            const qty = parseFloat(job.quantity);
+
+            let laborCost = 0;
+
+            // New rule: responsibility code = 3 AND today > 2025-11-01
+            if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+                laborCost =
+                    1 * laborTimeAar * laborRate +
+                    Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+            } else {
+                // Old rule
+                laborCost = laborTimeAar * laborRate * qty;
+            }
+
+            laborCost = round2Dec(laborCost);
+
+            return {
+                id: job.id,
+                action: job,
+                ln: job.line_number,
+                loc: job.locationcode.code,
+                qty: job.quantity,
+                cc: job.conditioncode.code,
+                jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
+                aq:
+                    job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null
+                        ? ""
+                        : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
+                description: job.job_description,
+                wmc: job.whymadecode.code,
+                labor_time: round2Dec(job.labor_time),
+                labor_time_aar: job.labor_time_aar,
+                variable_labor_time: round2Dec(job.variable_labor_time),
+                variable_labor_rate: round2Dec(job.variable_labor_rate),
+                labor: laborCost,
+                material: round2Dec(job.material_cost),
+                net: round2Dec(laborCost + job.material_cost),
+                rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
+                secondary_bill_to_id: job.secondary_bill_to_id
+            };
+        });
 
         setTableData(jobListData);
     }, [jobs]);
+
 
     const [jobsToBePasted, setJobsToBePasted] = useState(() => {
         // Initialize state from localStorage
@@ -105,17 +192,40 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     }, [jobsToBePasted]);
 
 
+    const calculateLaborCost = (job) => {
+        const today = new Date();
+        const cutoffDate = new Date("2025-11-01");
+
+        const laborTimeAar = parseFloat(job.labor_time_aar);
+        const laborRate = parseFloat(job.labor_rate);
+        const varLaborTime = parseFloat(job.variable_labor_time);
+        const varLaborRate = parseFloat(job.variable_labor_rate);
+        const qty = parseFloat(job.quantity);
+
+        let laborCost = 0;
+
+        if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+            // new rule
+            laborCost =
+                1 * laborTimeAar * laborRate +
+                Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+        } else {
+            // old rule
+            laborCost = laborTimeAar * laborRate * qty;
+        }
+
+        return round2Dec(laborCost);
+    };
+
 
     const handleCopyJob = (jobToCopyId) => {
-        localStorage.setItem("jobsToBePasted", null)
+        localStorage.setItem("jobsToBePasted", null);
 
         const jobToCopy = jobs.find(job => job.id == jobToCopyId) || null;
-        setCopiedJob(jobs.find(job => job.id == jobToCopyId) || null)
-        // if(!copiedJob){
-        //     return
-        // }
-        console.log(jobToCopy)
-        let jobToBePasted = []
+        setCopiedJob(jobToCopy);
+
+        const labor_cost = calculateLaborCost(jobToCopy);
+
         const copiedJobFormatted = {
             work_id: workOrder.id,
             work_order: workOrder.work_order,
@@ -124,35 +234,43 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             quantity: jobToCopy.quantity,
             condition_code: jobToCopy.conditioncode.code,
             job_code_applied: jobToCopy.jobcode_joblist_job_code_appliedTojobcode.code,
-            qualifier_applied_id: jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
+            qualifier_applied_id:
+                jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null
+                    ? null
+                    : jobToCopy.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
             job_description: jobToCopy.job_description,
             why_made_code: jobToCopy.whymadecode.code,
             job_code_removed: jobToCopy.jobcode_joblist_job_code_removedTojobcode.code,
-            qualifier_removed_id: jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
+            qualifier_removed_id:
+                jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode == null
+                    ? null
+                    : jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
             responsibility_code: jobToCopy.responsibilitycode?.code,
-            labor_cost: jobToCopy.labor_cost,
+            labor_cost,
             labor_time: jobToCopy.labor_time,
             labor_time_aar: jobToCopy.labor_time_aar,
             labor_rate: jobToCopy.labor_rate,
+            variable_labor_time: jobToCopy.variable_labor_time,
+            variable_labor_rate: jobToCopy.variable_labor_rate,
             material_cost: Number(round2Dec(jobToCopy.material_cost)),
             jobPartsData: jobToCopy.jobparts.map(({ id, parts, ...rest }) => rest),
             user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
-        }
-        console.log(copiedJobFormatted)
-        jobToBePasted.push(copiedJobFormatted)
-        setCopiedJob(copiedJobFormatted)
-        setJobsToBePasted(jobToBePasted)
-        localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
-    }
+        };
+
+        setCopiedJob(copiedJobFormatted);
+        setJobsToBePasted([copiedJobFormatted]);
+        localStorage.setItem("jobsToBePasted", JSON.stringify([copiedJobFormatted]));
+    };
+
+
 
     const handleCopyAllJobs = () => {
-        localStorage.setItem("jobsToBePasted", null)
-        let jobToBePasted = []
-        let i= 0
-        jobs.map((job)=>{
-            i++
-            console.log(job)
-            const copiedJobFormatted = {
+        localStorage.setItem("jobsToBePasted", null);
+
+        const jobToBePasted = jobs.map(job => {
+            const labor_cost = calculateLaborCost(job);
+
+            return {
                 work_id: workOrder.id,
                 work_order: workOrder.work_order,
                 line_number: Number(jobs.line_number),
@@ -160,40 +278,52 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 quantity: job.quantity,
                 condition_code: job.conditioncode.code,
                 job_code_applied: job.jobcode_joblist_job_code_appliedTojobcode.code,
-                qualifier_applied_id: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode==null?null: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
+                qualifier_applied_id:
+                    job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null
+                        ? null
+                        : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id,
                 job_description: job.job_description,
                 why_made_code: job.whymadecode.code,
                 job_code_removed: job.jobcode_joblist_job_code_removedTojobcode.code,
-                qualifier_removed_id: job.qualifiercode_joblist_qualifier_removed_idToqualifiercode==null?null: job.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
+                qualifier_removed_id:
+                    job.qualifiercode_joblist_qualifier_removed_idToqualifiercode == null
+                        ? null
+                        : job.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
                 responsibility_code: job.responsibilitycode?.code,
-                labor_cost: job.labor_cost,
+                labor_cost,
                 labor_time: job.labor_time,
                 labor_time_aar: job.labor_time_aar,
                 labor_rate: job.labor_rate,
+                variable_labor_time: job.variable_labor_time,
+                variable_labor_rate: job.variable_labor_rate,
                 material_cost: Number(round2Dec(job.material_cost)),
                 jobPartsData: job.jobparts.map(({ id, parts, ...rest }) => rest),
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
-            }
-            jobToBePasted.push(copiedJobFormatted)
-        })
+            };
+        });
 
-        console.log(jobToBePasted)
-        setCopiedJob(jobToBePasted)
-        setJobsToBePasted(jobToBePasted)
-        localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted))
-    }
+        setCopiedJob(jobToBePasted);
+        setJobsToBePasted(jobToBePasted);
+        localStorage.setItem("jobsToBePasted", JSON.stringify(jobToBePasted));
+    };
+
 
     const handlePasteJob = async () => {
-        const copiedJobs=  JSON.parse(localStorage.getItem("jobsToBePasted"))
-        const modifiledJobs = updateArray(copiedJobs,workOrder.id,workOrder.work_order,jobs.length)
-        console.log(modifiledJobs)
-        const response = await  handlePaste(modifiledJobs)
-        if(response.status!==200){
-            // localStorage.setItem("jobsToBePasted", null)
-            // setJobsToBePasted(null)
-            alert("Job pasting was not successful")
+        const copiedJobs = JSON.parse(localStorage.getItem("jobsToBePasted"));
+        const modifiledJobs = updateArray(
+            copiedJobs,
+            workOrder.id,
+            workOrder.work_order,
+            jobs.length
+        );
+
+        const response = await handlePaste(modifiledJobs);
+
+        if (response.status !== 200) {
+            alert("Job pasting was not successful");
         }
-    }
+    };
+
 
     const updateArray = (data, newWorkId, newWorkOrder, startingLineNumber) => {
         return data.map((item, index) => ({
@@ -259,7 +389,26 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             { accessorKey: 'aq', header: 'AQ', size: 3 },
             { accessorKey: 'description', header: 'Description of Repair', size: 15 },
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
-            { accessorKey: 'labor_time', header: 'Labor Hrs', size: 2 },
+            {
+                accessorKey: 'labor_time',
+                header: 'Labor Hrs',
+                size: 2,
+                Cell: ({ row  }) => {
+                    const v = row.original.variable_labor_time;       // (V)
+                    const f = row.original.labor_time_aar;   // (F)
+
+                    // Assuming your data has labor_time like:
+                    // { v: 1.00, f: 2.00 }
+                    // Or adjust accordingly
+                    return (
+                        <div className="leading-tight">
+                            <div>(V) {round2Dec(v)}</div>
+                            <div>(F) {round2Dec(f)}</div>
+                        </div>
+                    );
+                },
+            },
+
             { accessorKey: 'labor', header: 'Labor cost$', size: 2 },
             { accessorKey: 'material', header: 'Material', size: 2 },
             { accessorKey: 'net', header: 'Net Cost', size: 2 },

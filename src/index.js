@@ -45,6 +45,7 @@ import ActiveOrders from "./portal/Home/ActiveOrders";
 import MaintenanceOrders from "./portal/Home/MaintenanceOrders";
 import TemplateOrders from "./portal/Home/TemplateOrders";
 import EnRouteDispoOrders from "./portal/Home/EnRouteDispoOrders";
+import DepartmentAccumulationReport from "./components/DepartmentAccumulationReport";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -319,6 +320,13 @@ root.render(
                     </ProtectedRoute>
                 }>
                 </Route>
+                <Route path="/department_time_remaining_report" element={
+                    <ProtectedRoute>
+                        <DepartmentAccumulationReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
             </Route>
 
         </Routes>

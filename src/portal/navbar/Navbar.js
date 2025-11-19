@@ -77,7 +77,8 @@ const Navbar = () => {
                         { title: 'Utilization', path: '/utilization_report' },
                         { title: 'POD Accuracy', path: '#' },
                         { title: 'Days in Status', path: '/dis_report' },
-                        { title: 'Department Sign Off', path: '/department_checklist_report' }
+                        { title: 'Department Sign Off', path: '/department_checklist_report' },
+                        { title: 'Department Time Remaining', path: '/department_time_remaining_report' }
                     ]
                 },
                 {

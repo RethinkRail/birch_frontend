@@ -201,18 +201,29 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 const today = new Date();
                 const cutoffDate = new Date("2025-11-01");
 
-                const laborTimeAar = parseFloat(editData?.labor_time_aar || 0);
-                const laborRate = parseFloat(editData?.labor_rate || 0);
-                const varLaborTime = parseFloat(editData?.variable_labor_time || 0);
-                const varLaborRate = parseFloat(editData?.variable_labor_rate || 0);
+                let laborTimeAar;
+                let laborRate;
+                let varLaborTime;
+                let varLaborRate;
+
+
                 const qty = parseFloat(editData?.quantity || 1);
 
                 let laborCost = 0;
+                let laborTime =0
+
 
                 if (
                     parseInt(editData?.responsibilitycode?.code) === 3 &&
                     today > cutoffDate
                 ) {
+
+                    laborTimeAar = 0;
+                    laborRate = 0;
+                    varLaborTime = parseFloat(editData?.labor_time_aar || 0);
+                    varLaborRate = parseFloat(editData?.labor_rate || 0);
+
+
                     if(qty === 1) {
                         laborCost =
                             1 * laborTimeAar * laborRate +
@@ -224,6 +235,10 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     }
 
                 } else {
+                    laborTimeAar = parseFloat(editData?.labor_time_aar || 0);;
+                    laborRate = parseFloat(editData?.labor_rate || 0);
+                    varLaborTime = parseFloat(editData?.variable_labor_time || 0);
+                    varLaborRate = parseFloat(editData?.variable_labor_rate || 0);
                     laborCost = laborTimeAar * laborRate * qty;
                 }
 
@@ -257,12 +272,12 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     condition_code: editData.conditioncode
                         ? editData.conditioncode.code
                         : "",
-                    labor_time: editData.labor_time,
-                    labor_time_aar: editData.labor_time_aar,
-                    labor_rate: editData.labor_rate,
+                    labor_time: today>cutoffDate?0: editData.labor_time,
+                    labor_time_aar:today>cutoffDate?0: editData.labor_time_aar,
+                    labor_rate: today>cutoffDate?0:editData.labor_rate,
 
-                    variable_labor_rate: editData.variable_labor_rate,
-                    variable_labor_time: editData.variable_labor_time,
+                    variable_labor_rate:today>cutoffDate?editData.labor_rate: editData.variable_labor_rate,
+                    variable_labor_time:today>cutoffDate?editData.labor_time_aar: editData.variable_labor_time,
 
                     // 🔥 Apply new labor cost logic
                     labor_cost: laborCost,

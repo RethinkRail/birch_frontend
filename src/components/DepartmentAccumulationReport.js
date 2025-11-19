@@ -28,8 +28,8 @@ const DepartmentAccumulationReport = () => {
     }, []);
 
     const columns = [
-        { accessorKey: "department_id", header: "Dept ID" },
         { accessorKey: "department_name", header: "Department" },
+        { accessorKey: "crew_count", header: "Team Members" },
         {
             accessorKey: "total_estimated_hour",
             header: "Estimated (hr)",
@@ -52,8 +52,9 @@ const DepartmentAccumulationReport = () => {
             Cell: ({ row }) => {
                 const remaining =
                     row.original.total_estimated_hour - row.original.total_logged_hour;
+                const number_of_crews = row.original.crew_count;
                 return divider > 0
-                    ? round2Dec(remaining / divider)
+                    ? round2Dec(remaining / (number_of_crews*divider))
                     : round2Dec(remaining);
             },
         },
@@ -64,8 +65,8 @@ const DepartmentAccumulationReport = () => {
             <h1 className="font-bold mt-10 mb-10">
                 Department Time Remaining Report
             </h1>
-            <div className="flex items-center space-x-6 p-6 bg-white rounded-lg shadow-md">
-                <div className="p-4">
+            <div className="flex items-center space-x-6 p-2 bg-white rounded-lg shadow-md ">
+                <div className="p-4 w-[99%]">
                     <div className="mb-4">
                         <label className="block text-sm font-semibold mb-1">
                             Hours per Day

@@ -168,20 +168,22 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             if (rc === 3) {
                 if (qty === 1) {
                     // Case: responsibility_code = 3 AND quantity = 1
-                    setTotalLabor(laborRate * laborTime * qty);
-                    setTotalVariableLabor(variableRate * variableTime * qty);
+                    setTotalLabor(round2Dec(laborRate * laborTime) * qty);
+                    setTotalVariableLabor(round2Dec(variableRate * variableTime)* qty);
                 } else if (qty > 1) {
                     console.log("hhhhh")
                     console.log(laborRate)
                     console.log(laborTime)
+                    console.log(perItemLaborVariable)
+                    console.log(perItemLaborFixed)
                     // Case: responsibility_code = 3 AND quantity > 1
-                    setTotalLabor(laborRate * laborTime * 1);
-                    setTotalVariableLabor(variableRate * variableTime * (qty));
+                    setTotalLabor(round2Dec(laborRate * laborTime) * 1);
+                    setTotalVariableLabor(round2Dec(variableRate * variableTime)* (qty));
                 }
             } else {
                 // DEFAULT CASE
                 setTotalLabor(0);
-                setTotalVariableLabor(variableRate * variableTime * qty);
+                setTotalVariableLabor(round2Dec(variableRate * variableTime) * qty);
             }
         };
 
@@ -231,12 +233,12 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
                     if(qty === 1) {
                         laborCost =
-                            1 * laborTimeAar * laborRate +
-                           1 * varLaborTime * varLaborRate;
+                            1 * round2Dec(laborTimeAar )*round2Dec( laborRate) +
+                           1 * round2Dec(varLaborTime) * round2Dec(varLaborRate);
                     }else {
                         laborCost =
-                            1 * laborTimeAar * laborRate +
-                            Math.max(qty , 0) * varLaborTime * varLaborRate;
+                            1 * round2Dec(laborTimeAar) * round2Dec(laborRate) +
+                            qty * round2Dec(varLaborTime )* (varLaborRate);
                     }
 
                 } else {
@@ -244,7 +246,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     laborRate = parseFloat(editData?.labor_rate || 0);
                     varLaborTime = parseFloat(editData?.variable_labor_time || 0);
                     varLaborRate = parseFloat(editData?.variable_labor_rate || 0);
-                    laborCost = laborTimeAar * laborRate * qty;
+                    laborCost = round2Dec(round2Dec(laborTimeAar * laborRate) * qty)+round2Dec(qty*round2Dec(varLaborTime*varLaborRate)) ;
                 }
 
                 laborCost = round2Dec(laborCost);
@@ -277,14 +279,14 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     condition_code: editData.conditioncode
                         ? editData.conditioncode.code
                         : "",
-                    labor_time: today>cutoffDate?0: editData.labor_time,
-                    labor_time_aar:today>cutoffDate?0: editData.labor_time_aar,
-                    labor_rate: today>cutoffDate?0:editData.labor_rate,
+                    labor_time: editData.labor_time,
+                    labor_time_aar:editData.labor_time_aar,
+                    labor_rate: editData.labor_rate,
 
-                    variable_labor_rate:today>cutoffDate?editData.labor_rate: editData.variable_labor_rate,
-                    variable_labor_time:today>cutoffDate?editData.labor_time_aar: editData.variable_labor_time,
+                    variable_labor_rate:today>cutoffDate && editData.responsibilitycode.code!==3?editData.labor_rate: editData.variable_labor_rate,
+                    variable_labor_time:today>cutoffDate  && editData.responsibilitycode.code!==3?editData.labor_time_aar: editData.variable_labor_time,
 
-                    // 🔥 Apply new labor cost logic
+
                     labor_cost: laborCost,
 
                     cid: editData.cid,
@@ -492,6 +494,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
             populatedJobPart = processPartsArray(populatedJobPart);
 
+            console.log(inputValues["variable_labor_time"]);
+            console.log(inputValues["variable_labor_rate"]);
+
             const dataToBackend = {
                 work_id: workOrder.id,
                 work_order: workOrder.work_order,
@@ -527,8 +532,9 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 labor_rate: responsibility === 3 ? laborRate : 0,
 
 
-                variable_labor_time: Number(round2Dec(inputValues["variable_labor_time"])),
-                variable_labor_rate: Number(round2Dec(inputValues["variable_labor_rate"])),
+
+                variable_labor_time: Number(inputValues["variable_labor_time"]),
+                variable_labor_rate: Number(inputValues["variable_labor_rate"]),
 
                 material_cost: Number(round2Dec(totalMaterial)),
                 jobPartsData: populatedJobPart,
@@ -606,8 +612,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 labor_time: Number(round2Dec(inputValues["labor_time"])),
                 labor_time_aar: laborTimeAar,
                 labor_rate: laborRate,
-                variable_labor_time: Number(round2Dec(inputValues["variable_labor_time"])),
-                variable_labor_rate: Number(round2Dec(inputValues["variable_labor_rate"])),
+                variable_labor_time: Number(inputValues["variable_labor_time"]),
+                variable_labor_rate: Number(inputValues["variable_labor_rate"]),
                 material_cost: Number(round2Dec(totalMaterial)),
                 jobPartsToAdd,
                 jobPartsToDelete,

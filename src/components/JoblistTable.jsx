@@ -9,88 +9,8 @@ import axios, {all} from "axios";
 
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
     console.log(jobs)
-    useEffect(() => {
-
-        jobs.sort((a, b) => a.line_number - b.line_number)
-
-        // const jobListData = jobs.map((job) => ({
-        //     id: job.id,
-        //     action: job,
-        //     ln: job.line_number,
-        //     loc: job.locationcode.code,
-        //     qty: job.quantity,
-        //     cc: job.conditioncode.code,
-        //     jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
-        //     aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null ? '' : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
-        //     description: job.job_description,
-        //     wmc: job.whymadecode.code,
-        //     resposibility_code: job.responsibilitycode.code,
-        //     labor_time: round2Dec(job.labor_time),
-        //     labor_time_aar: round2Dec(job.labor_time_aar),
-        //     variable_labor_time:round2Dec(job.variable_labor_time),
-        //     variable_labor_rate:round2Dec(job.variable_labor_rate),
-        //     labor: round2Dec(parseFloat(job.labor_time_aar) * parseFloat(job.labor_rate)*parseFloat(job.quantity))
-        //         + round2Dec(parseFloat(job.variable_labor_time) * parseFloat(job.variable_labor_rate)*parseFloat(job.quantity)),
-        //     material: job.material_cost,
-        //     net: round2Dec(job.labor_cost + job.material_cost),
-        //     rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-        //     secondary_bill_to_id: job.secondary_bill_to_id
-        // }));
-
-        const jobListData = jobs.map((job) => {
-            const laborTimeAar = parseFloat(job.labor_time_aar);
-            const laborRate = parseFloat(job.labor_rate);
-            const varLaborTime = parseFloat(job.variable_labor_time);
-            const varLaborRate = parseFloat(job.variable_labor_rate);
-            const qty = parseFloat(job.quantity);
-
-            const today = new Date();
-            const cutoffDate = new Date("2025-11-01");
-
-            let laborCost = 0;
-
-            if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
-                // New rule
-                laborCost =
-                    1 * laborTimeAar * laborRate +
-                    Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
-            } else {
-                // Old rule
-                laborCost = laborTimeAar * laborRate * qty;
-            }
-
-            laborCost = round2Dec(laborCost);
-
-            return {
-                id: job.id,
-                action: job,
-                ln: job.line_number,
-                loc: job.locationcode.code,
-                qty: job.quantity,
-                cc: job.conditioncode.code,
-                jobcode: job.jobcode_joblist_job_code_appliedTojobcode.code,
-                aq: job.qualifiercode_joblist_qualifier_applied_idToqualifiercode == null
-                    ? ''
-                    : job.qualifiercode_joblist_qualifier_applied_idToqualifiercode.code,
-                description: job.job_description,
-                wmc: job.whymadecode.code,
-                resposibility_code: job.responsibilitycode.code,
-                labor_time: round2Dec(job.labor_time),
-                labor_time_aar: round2Dec(job.labor_time_aar),
-                variable_labor_time: round2Dec(job.variable_labor_time),
-                variable_labor_rate: round2Dec(job.variable_labor_rate),
-                labor: laborCost,
-                material: job.material_cost,
-                net: round2Dec(laborCost + job.material_cost),
-                rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-                secondary_bill_to_id: job.secondary_bill_to_id
-            };
-        });
 
 
-        console.log("Updated jobListData from the joblist table:", jobListData);
-        setTableData(jobListData);
-    }, [workOrder, jobs]);
 
     // ParentModal related stuffs can be found below
     const [modalShowing, setModalShowing] = useState(false)
@@ -107,7 +27,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
     useEffect(() => {
         console.log(jobs);
-
+        jobs.sort((a, b) => a.line_number - b.line_number)
         const today = new Date();
         const cutoffDate = new Date("2025-11-01");
 
@@ -125,14 +45,14 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
                 laborCost =
                     1 * laborTimeAar * laborRate +
-                    Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+                    Math.max(qty, 0) * varLaborTime * varLaborRate;
             } else {
                 // Old rule
                 laborCost = laborTimeAar * laborRate * qty;
             }
 
             laborCost = round2Dec(laborCost);
-
+            const net = parseFloat(job.material_cost)+parseFloat(laborCost);
             return {
                 id: job.id,
                 action: job,
@@ -153,12 +73,12 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 variable_labor_rate: round2Dec(job.variable_labor_rate),
                 labor: laborCost,
                 material: round2Dec(job.material_cost),
-                net: round2Dec(laborCost + job.material_cost),
+                net: round2Dec(net),
                 rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
                 secondary_bill_to_id: job.secondary_bill_to_id
             };
         });
-
+        console.log(jobListData);
         setTableData(jobListData);
     }, [jobs]);
 

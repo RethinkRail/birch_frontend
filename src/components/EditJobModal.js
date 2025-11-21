@@ -127,6 +127,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     const [totalLabor, setTotalLabor] = useState("")
     const [totalVariableLabor, setTotalVariableLabor] = useState("")
     const [totalMaterial, setTotalMaterial] = useState("")
+    const [perItemLaborFixed,setPerItemLaborFixed] = useState(0)
+    const [perItemLaborVariable, setPerItemLaborVariable] = useState(0)
     const [totalNet, setTotalNet] = useState("")
     const [showFixedRate,setShowFixedRate] = useState(false);
 
@@ -161,7 +163,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             const variableTime = Number(inputValues["variable_labor_time"]);
             const qty = Number(inputValues["quantity"]);
             const rc = Number(inputValues["responsibility_code"]);
-
+            setPerItemLaborVariable(variableRate * variableTime )
+            setPerItemLaborFixed(variableRate * variableTime )
             if (rc === 3) {
                 if (qty === 1) {
                     // Case: responsibility_code = 3 AND quantity = 1
@@ -173,7 +176,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     console.log(laborTime)
                     // Case: responsibility_code = 3 AND quantity > 1
                     setTotalLabor(laborRate * laborTime * 1);
-                    setTotalVariableLabor(variableRate * variableTime * (qty - 1));
+                    setTotalVariableLabor(variableRate * variableTime * (qty));
                 }
             } else {
                 // DEFAULT CASE
@@ -181,6 +184,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 setTotalVariableLabor(variableRate * variableTime * qty);
             }
         };
+
+
 
         handleInputValuesChange();
     }, [inputValues]);
@@ -231,7 +236,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     }else {
                         laborCost =
                             1 * laborTimeAar * laborRate +
-                            Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+                            Math.max(qty , 0) * varLaborTime * varLaborRate;
                     }
 
                 } else {
@@ -461,7 +466,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 // Case: responsibility = 3 AND qty > 1
                 calculatedLabor =
                     (1 * laborTimeAar * laborRate) +
-                    ((qty - 1) * varLaborTime * varLaborRate);
+                    ((qty ) * varLaborTime * varLaborRate);
                 console.log(calculatedLabor);
             }
         } else {
@@ -1027,7 +1032,25 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                         />
                                     </div>
 
-                                    <div className="flex flex-col col-span-4">
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">(Item/Labor)$</label>
+                                        <input
+                                            type="number"
+                                            step={0.1}
+                                            disabled={true}
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54]"
+                                            value={round2Dec(perItemLaborFixed)}
+                                            onChange={(e) => {
+                                                let value = parseFloat(e.target.value);
+                                                if (value && value.toString().split(".")[1]?.length > 2) {
+                                                    value = parseFloat(value.toFixed(2));
+                                                }
+                                                handleChange("labor_rate", value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col col-span-2">
                                         <label className="text-[12px] capitalize text-[#002e54]">Total Labor ($)</label>
                                         <input
                                             type="text"
@@ -1128,7 +1151,19 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 />
                             </div>
 
-                            <div className="flex flex-col col-span-4"  >
+                            <div className="flex flex-col col-span-2" >
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>(Item/Labor)$</label>
+                                <input
+                                    type="number"
+                                    step={0.1}
+                                    disabled={true}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54]"
+                                    value={round2Dec(perItemLaborVariable)}
+
+                                />
+                            </div>
+
+                            <div className="flex flex-col col-span-2"  >
                                 <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>Total labor (hr)</label>
                                 <input
                                     type="text"
@@ -1149,7 +1184,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
                         {/* This div spans all 5 columns and pushes content to the right */}
                         <div className="col-span-5 flex justify-end">
-                            <div className="w-[19.2%]">
+                            <div className="w-[9%]">
                                 <label className="text-[12px] capitalize text-[#002e54]">Total Net ($)</label>
                                 <input
                                     type="number"

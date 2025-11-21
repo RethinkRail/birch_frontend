@@ -1158,7 +1158,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                     step={0.1}
                                     disabled={true}
                                     className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54]"
-                                    value={round2Dec(perItemLaborVariable)}
+                                    value={round2Dec(perItemLaborFixed)}
 
                                 />
                             </div>

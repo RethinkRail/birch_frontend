@@ -38,17 +38,18 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             const varLaborTime = parseFloat(job.variable_labor_time);
             const varLaborRate = parseFloat(job.variable_labor_rate);
             const qty = parseFloat(job.quantity);
-
+            const perItemFixed = round2Dec(laborTimeAar)*round2Dec(laborRate);
+            const perItemVariable = round2Dec(varLaborRate*varLaborTime);
             let laborCost = 0;
 
             // New rule: responsibility code = 3 AND today > 2025-11-01
             if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
                 laborCost =
-                    1 * laborTimeAar * laborRate +
-                    Math.max(qty, 0) * varLaborTime * varLaborRate;
+                    1 * perItemFixed +
+                    Math.max(qty, 0) * perItemVariable;
             } else {
                 // Old rule
-                laborCost = laborTimeAar * laborRate * qty;
+                laborCost = perItemFixed * qty;
             }
 
             laborCost = round2Dec(laborCost);

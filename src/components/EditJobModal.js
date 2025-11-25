@@ -163,27 +163,23 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             const variableTime = Number(inputValues["variable_labor_time"]);
             const qty = Number(inputValues["quantity"]);
             const rc = Number(inputValues["responsibility_code"]);
-            setPerItemLaborVariable(variableRate * variableTime )
-            setPerItemLaborFixed(laborRate * laborTime )
+            setPerItemLaborVariable(round2Dec(variableRate*variableTime) )
+            setPerItemLaborFixed(round2Dec(laborRate) * round2Dec(laborTime) )
             if (rc === 3) {
                 if (qty === 1) {
                     // Case: responsibility_code = 3 AND quantity = 1
-                    setTotalLabor(round2Dec(laborRate * laborTime) * qty);
-                    setTotalVariableLabor(round2Dec(variableRate * variableTime)* qty);
+                    setTotalLabor(round2Dec(laborRate) * round2Dec(laborTime) * qty);
+                    setTotalVariableLabor(round2Dec(variableRate*variableTime) * qty);
                 } else if (qty > 1) {
-                    console.log("hhhhh")
-                    console.log(laborRate)
-                    console.log(laborTime)
-                    console.log(perItemLaborVariable)
-                    console.log(perItemLaborFixed)
+
                     // Case: responsibility_code = 3 AND quantity > 1
-                    setTotalLabor(round2Dec(laborRate * laborTime) * 1);
-                    setTotalVariableLabor(round2Dec(variableRate * variableTime)* (qty));
+                    setTotalLabor(round2Dec(laborRate) * round2Dec(laborTime)* 1);
+                    setTotalVariableLabor(round2Dec(variableRate*variableTime)* (qty));
                 }
             } else {
                 // DEFAULT CASE
                 setTotalLabor(0);
-                setTotalVariableLabor(round2Dec(variableRate * variableTime) * qty);
+                setTotalVariableLabor(round2Dec(variableRate*variableTime)* qty);
             }
         };
 
@@ -461,20 +457,20 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             if (qty === 1) {
                 // Case: responsibility = 3 AND qty = 1
                 calculatedLabor =
-                    (qty * laborTimeAar * laborRate) +
-                    (qty * varLaborTime * varLaborRate);
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
                 console.log(calculatedLabor);
             } else if (qty > 1) {
                 // Case: responsibility = 3 AND qty > 1
                 calculatedLabor =
-                    (1 * laborTimeAar * laborRate) +
-                    ((qty ) * varLaborTime * varLaborRate);
+                    (1 * perItemLaborFixed) +
+                    ((qty ) * perItemLaborVariable);
                 console.log(calculatedLabor);
             }
         } else {
             // DEFAULT CASE
             calculatedLabor =
-                0 + (qty * varLaborTime * varLaborRate);
+                0 + (qty * perItemLaborVariable);
             console.log(calculatedLabor);
         }
         console.log(calculatedLabor);
@@ -968,7 +964,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                                 step={0.001}
                                                 disabled={workOrder.locked_by != null}
                                                 className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54] w-10/12"
-                                                value={inputValues.labor_time}
+                                                value={inputValues.labor_time_aar}
                                                 onChange={(e) => {
                                                     let value = parseFloat(e.target.value);
 

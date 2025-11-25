@@ -64,7 +64,7 @@ export function printATask(workOrder) {
         var manager_checked_time = myjob.manager_checked_time == null ? "" : convertSqlWithTZToFormattedDate(myjob.manager_checked_time);
 
 
-        var hour = p * parseFloat(myjob.quantity) * parseFloat(myjob.labor_time_aar);
+        var hour = p * calculateLaborHours(myjob);
         var row_html = "<tr style='line-height: 36px;'><td style='width: 20px;text-align: center'>" + myjob.line_number + "</td><td style='width: 20px'>" + myjob.locationcode.code + "</td>";
         row_html += "<td>" + myjob.job_description + "</td>";
         row_html += "<td>" + myjob.quantity + "</td>";
@@ -329,6 +329,71 @@ export function printBRC(workOrder,forWhom) {
     saveDivII(sTable, tbl_title, tbl_name, true);
 }
 
+
+function calculateLaborCost(job) {
+    const qty = Number(job.quantity);
+
+    const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+    const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
+
+    let calculatedLabor = 0;
+
+    // Responsibility = 3 → use special formula
+    if (Number(job.responsibilitycode?.code) === 3) {
+
+        if (qty === 1) {
+            calculatedLabor =
+                (qty * perItemLaborFixed) +
+                (qty * perItemLaborVariable);
+
+        } else if (qty > 1) {
+            calculatedLabor =
+                (1 * perItemLaborFixed) +        // fixed only once
+                (qty * perItemLaborVariable);    // variable applied to all qty
+        }
+
+    } else {
+        // Normal logic for responsibility != 3
+        calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+    }
+
+    return round2Dec(calculatedLabor);
+}
+
+function calculateLaborHours(myjob) {
+    console.log(myjob)
+    const qty = parseFloat(myjob.quantity) || 0;
+    const fixedTime = parseFloat(myjob.labor_time_aar) || 0;
+    const variableTime = parseFloat(myjob.variable_labor_time) || 0;
+    const responsibility = Number(myjob.responsibilitycode?.code);
+
+    let totalHours = 0;
+
+    // --- CASE: Responsibility Code = 3 ---
+    if (responsibility === 3) {
+        if (qty === 1) {
+            // qty = 1
+            totalHours =
+                (fixedTime * 1) +
+                (variableTime * 1);
+        } else if (qty > 1) {
+            // qty > 1
+            totalHours =
+                (fixedTime * 1) +
+                (variableTime * (qty - 1));
+        }
+    }
+    // --- CASE: Other Responsibility Codes ---
+    else {
+
+        totalHours = fixedTime * qty;
+    }
+    console.log(myjob.line_number);
+    console.log(myjob.variable_labor_time);
+    console.log(totalHours);
+    return totalHours;
+}
+
 /**
  *  This method will generate invoice
  * @param item  the work order
@@ -345,15 +410,16 @@ export function printInvoice(workorder, forWhom) {
     let net_cost= 0
     let total_hour= 0
     workorder.joblist.forEach((job)=>{
+        console.log(job)
         if(forWhom ==3){
             if(job.secondary_bill_to_id != null){
 
 
-                const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
+                const laborCost =calculateLaborCost(job);
                 labor_cost += Number(round2Dec(laborCost));
                 console.log(laborCost);
                 // Calculate labor hours
-                const laborHours = Number(job.labor_time_aar) * job.quantity;
+                const laborHours = calculateLaborHours(job);
                 total_hour += Number(round2Dec(laborHours));
 
                 let mat_cost_for_a_job =0
@@ -368,7 +434,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else if(forWhom==2){
             if(job.secondary_bill_to_id == null){
-                const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
+                const laborCost = calculateLaborCost(job);
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
@@ -386,7 +452,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else {
 
-            const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
+            const laborCost = calculateLaborCost(job);
             labor_cost += Number(round2Dec(laborCost));
             console.log(laborCost)
             // Calculate labor hours

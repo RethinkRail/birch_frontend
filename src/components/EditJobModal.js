@@ -164,16 +164,16 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             const qty = Number(inputValues["quantity"]);
             const rc = Number(inputValues["responsibility_code"]);
             setPerItemLaborVariable(round2Dec(variableRate*variableTime) )
-            setPerItemLaborFixed(round2Dec(laborRate) * round2Dec(laborTime) )
+            setPerItemLaborFixed(round2Dec(laborRate) * laborTime )
             if (rc === 3) {
                 if (qty === 1) {
                     // Case: responsibility_code = 3 AND quantity = 1
-                    setTotalLabor(round2Dec(laborRate) * round2Dec(laborTime) * qty);
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime * qty));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime) * qty);
                 } else if (qty > 1) {
 
                     // Case: responsibility_code = 3 AND quantity > 1
-                    setTotalLabor(round2Dec(laborRate) * round2Dec(laborTime)* 1);
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime* 1));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime)* (qty));
                 }
             } else {
@@ -1008,8 +1008,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                             disabled={true}
                                             className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2"
                                             value={
-                                                inputValues.labor_time !== "" && inputValues.labor_time !== null
-                                                    ? Number(inputValues.labor_time).toFixed(3)
+                                                inputValues.labor_time_aar !== "" && inputValues.labor_time_aar !== null
+                                                    ? Number(inputValues.labor_time_aar).toFixed(3)
                                                     : ""
                                             }
                                         />

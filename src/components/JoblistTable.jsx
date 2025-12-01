@@ -38,7 +38,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             const varLaborTime = parseFloat(job.variable_labor_time);
             const varLaborRate = parseFloat(job.variable_labor_rate);
             const qty = parseFloat(job.quantity);
-            const perItemFixed = round2Dec(laborTimeAar)*round2Dec(laborRate);
+            const perItemFixed = round2Dec(laborTimeAar*round2Dec(laborRate));
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
             let laborCost = 0;
 
@@ -49,7 +49,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     Math.max(qty, 0) * perItemVariable;
             } else {
                 // Old rule
-                laborCost = perItemFixed * qty;
+                laborCost = perItemVariable * qty;
             }
 
             laborCost = round2Dec(laborCost);

@@ -279,16 +279,18 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     labor_time_aar:editData.labor_time_aar,
                     labor_rate: editData.labor_rate,
 
-                    variable_labor_rate:today>cutoffDate && editData.responsibilitycode.code!==3?editData.labor_rate: editData.variable_labor_rate,
-                    variable_labor_time:today>cutoffDate  && editData.responsibilitycode.code!==3?editData.labor_time_aar: editData.variable_labor_time,
+                    // variable_labor_rate:today>cutoffDate && editData.responsibilitycode.code!==3?editData.variable_labor_rate: editData.variable_labor_rate,
+                    // variable_labor_time:today>cutoffDate  && editData.responsibilitycode.code!==3?editData.variable_labor_time: editData.variable_labor_time,
 
+                    variable_labor_rate:editData.variable_labor_rate,
+                    variable_labor_time:editData.variable_labor_time,
 
                     labor_cost: laborCost,
 
                     cid: editData.cid,
                     wheel_details: editData.wheel_details,
                 }));
-
+                console.log(inputValues)
                 console.log(editData.jobparts);
                 setPreviousPart(editData.jobparts);
                 setJobParts(editData.jobparts);

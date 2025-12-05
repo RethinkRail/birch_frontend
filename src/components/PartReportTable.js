@@ -182,7 +182,17 @@ const PartReportTable = ({ initialData }) => {
             {/* --- Estimated Quantity Popup (independent) --- */}
             {estimatedPopupOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] pointer-events-auto">
-                    <div className="bg-white rounded-lg p-6 w-1/2 max-h-[70vh] overflow-y-auto shadow-lg">
+                    <div className="bg-white rounded-lg p-6 w-1/2 max-h-[70vh] overflow-y-auto shadow-lg relative">
+
+                        {/* ❌ Bottom Close Button Removed */}
+                        {/* ✔ Top-Right X Button */}
+                        <button
+                            className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl"
+                            onClick={closeEstimatedPopup}
+                        >
+                            ✕
+                        </button>
+
                         <h2 className="text-lg font-semibold mb-4">Estimated Quantity Report</h2>
 
                         {estimatedLoading ? (
@@ -202,7 +212,14 @@ const PartReportTable = ({ initialData }) => {
                                 {estimatedData.map(item => (
                                     <tr key={item.railcar_id + item.pod}>
                                         <td className="border p-2">{item.railcar_id}</td>
-                                        <td className="border p-2">{item.pod == "1900-01-01T00:00:00.000Z"?"":new Date(item.pod).toLocaleDateString()}</td>
+
+                                        <td className="border p-2">
+                                            {item.pod === "1900-01-01T00:00:00.000Z"
+                                                ? ""
+                                                : new Date(item.pod).toLocaleDateString()
+                                            }
+                                        </td>
+
                                         <td className="border p-2">{item.quantity}</td>
                                     </tr>
                                 ))}
@@ -210,14 +227,6 @@ const PartReportTable = ({ initialData }) => {
                             </table>
                         )}
 
-                        <div className="flex justify-end mt-4">
-                            <button
-                                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
-                                onClick={closeEstimatedPopup}
-                            >
-                                Close
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}

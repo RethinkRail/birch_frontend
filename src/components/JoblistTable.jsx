@@ -129,7 +129,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             // new rule
             laborCost =
                 1 * laborTimeAar * laborRate +
-                Math.max(qty - 1, 0) * varLaborTime * varLaborRate;
+               qty * varLaborTime * varLaborRate;
         } else {
             // old rule
             laborCost = laborTimeAar * laborRate * qty;
@@ -167,7 +167,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     ? null
                     : jobToCopy.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
             responsibility_code: jobToCopy.responsibilitycode?.code,
-            labor_cost,
+            labor_cost:Number(labor_cost),
             labor_time: jobToCopy.labor_time,
             labor_time_aar: jobToCopy.labor_time_aar,
             labor_rate: jobToCopy.labor_rate,

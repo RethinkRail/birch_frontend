@@ -137,8 +137,8 @@ const PartReportTable = ({ initialData }) => {
                             <table className="w-full border-collapse border border-gray-300">
                                 <thead>
                                 <tr>
-                                    <th className="border p-2">Part Code</th>
-                                    <th className="border p-2">Title</th>
+                                    <th className="border p-2 w-40 whitespace-nowrap">Part Code</th>
+                                    <th className="border p-2 w-64 whitespace-nowrap">Title</th>
                                     <th className="border p-2">Price</th>
                                     <th className="border p-2">Qty On Hand</th>
                                     <th className="border p-2">Qty Applied</th>
@@ -151,17 +151,19 @@ const PartReportTable = ({ initialData }) => {
                                 <tbody>
                                 {stockData.map(item => (
                                     <tr key={item.part_code + item.title}>
-                                        <td className="border p-2">{item.part_code}</td>
-                                        <td className="border p-2">{item.title}</td>
+                                        <td className="border p-2 w-40 whitespace-nowrap">{item.part_code}</td>
+                                        <td className="border p-2 w-64 whitespace-nowrap">{item.title}</td>
                                         <td className="border p-2">{item.price}</td>
                                         <td className="border p-2">{item.qty_on_hand}</td>
                                         <td className="border p-2">{item.qty_applied}</td>
+
                                         <td
                                             className="border p-2 text-green-600 cursor-pointer"
                                             onClick={() => fetchEstimatedByWorkOrder(item.part_code)}
                                         >
                                             {item.qty_estimated}
                                         </td>
+
                                         <td className="border p-2">{item.qty_on_po}</td>
                                         <td className="border p-2">{item.qty_available}</td>
                                         <td className="border p-2">{item.inventory_value}</td>
@@ -169,6 +171,7 @@ const PartReportTable = ({ initialData }) => {
                                 ))}
                                 </tbody>
                             </table>
+
                         )}
                         <div className="flex justify-end mt-4">
                             <button className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" onClick={closeStockPopup}>

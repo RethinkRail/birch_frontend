@@ -219,10 +219,15 @@ const PartReportTable = ({ initialData }) => {
                                         <td className="border p-2">
                                             {item.pod === "1900-01-01T00:00:00.000Z"
                                                 ? ""
-                                                : new Date(item.pod).toLocaleDateString()
+                                                : (() => {
+                                                    const d = new Date(item.pod);
+                                                    const day = String(d.getDate()).padStart(2, "0");
+                                                    const month = String(d.getMonth() + 1).padStart(2, "0"); // months are 0-indexed
+                                                    const year = d.getFullYear();
+                                                    return `${day}/${month}/${year}`;
+                                                })()
                                             }
                                         </td>
-
                                         <td className="border p-2">{item.quantity}</td>
                                     </tr>
                                 ))}

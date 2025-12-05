@@ -127,7 +127,7 @@ const PartReportTable = ({ initialData }) => {
             {/* --- Stock Status Popup --- */}
             {stockPopupOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-2/3 max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-lg p-6 w-3/4 max-h-[80vh] overflow-y-auto">
                         <h2 className="text-lg font-semibold mb-4">Stock Status Report</h2>
                         {stockLoading ? (
                             <p>Loading...</p>
@@ -224,7 +224,7 @@ const PartReportTable = ({ initialData }) => {
                                                     const day = String(d.getDate()).padStart(2, "0");
                                                     const month = String(d.getMonth() + 1).padStart(2, "0"); // months are 0-indexed
                                                     const year = d.getFullYear();
-                                                    return `${day}/${month}/${year}`;
+                                                    return `${month}/${day}/${year}`;
                                                 })()
                                             }
                                         </td>

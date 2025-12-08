@@ -166,14 +166,19 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             setPerItemLaborVariable(round2Dec(variableRate*variableTime) )
             setPerItemLaborFixed(round2Dec(laborRate) * laborTime )
             if (rc === 3) {
-                if (qty === 1) {
+                if (qty > 1) {
                     // Case: responsibility_code = 3 AND quantity = 1
+
+
+
                     setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime * qty));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime) * qty);
-                } else if (qty > 1) {
+
+
+                } else  {
 
                     // Case: responsibility_code = 3 AND quantity > 1
-                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime* 1));
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime* qty));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime)* (qty));
                 }
             } else {
@@ -227,14 +232,26 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     varLaborRate = parseFloat(editData?.labor_rate || 0);
 
 
-                    if(qty === 1) {
-                        laborCost =
-                            1 * round2Dec(laborTimeAar )*round2Dec( laborRate) +
-                           1 * round2Dec(varLaborTime) * round2Dec(varLaborRate);
-                    }else {
+                    // if(qty === 1) {
+                    //     laborCost =
+                    //         1 * round2Dec(laborTimeAar )*round2Dec( laborRate) +
+                    //        1 * round2Dec(varLaborTime) * round2Dec(varLaborRate);
+                    // }else {
+                    //     laborCost =
+                    //         1 * round2Dec(laborTimeAar) * round2Dec(laborRate) +
+                    //         qty * round2Dec(varLaborTime )* (varLaborRate);
+                    // }
+
+                    if(qty > 1) {
                         laborCost =
                             1 * round2Dec(laborTimeAar) * round2Dec(laborRate) +
                             qty * round2Dec(varLaborTime )* (varLaborRate);
+
+                    }else {
+                        laborCost =
+                            qty * round2Dec(laborTimeAar )*round2Dec( laborRate) +
+                            qty * round2Dec(varLaborTime) * round2Dec(varLaborRate);
+                        console.log(laborCost)
                     }
 
                 } else {
@@ -456,17 +473,18 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         let calculatedLabor = 0;
 
         if (responsibility === 3) {
-            if (qty === 1) {
+            if (qty > 1) {
                 // Case: responsibility = 3 AND qty = 1
-                calculatedLabor =
-                    (qty * perItemLaborFixed) +
-                    (qty * perItemLaborVariable);
-                console.log(calculatedLabor);
-            } else if (qty > 1) {
-                // Case: responsibility = 3 AND qty > 1
                 calculatedLabor =
                     (1 * perItemLaborFixed) +
                     ((qty ) * perItemLaborVariable);
+
+                console.log(calculatedLabor);
+            } else {
+                // Case: responsibility = 3 AND qty > 1
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
                 console.log(calculatedLabor);
             }
         } else {

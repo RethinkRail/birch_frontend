@@ -165,12 +165,40 @@ const OrderDetails = ({
         let totalMaterialCost = 0;
 
         jobs.forEach(job => {
+            const laborTimeAar = parseFloat(job.labor_time_aar);
+            const laborRate = parseFloat(job.labor_rate);
+            const varLaborTime = parseFloat(job.variable_labor_time);
+            const varLaborRate = parseFloat(job.variable_labor_rate);
+            const qty = parseFloat(job.quantity);
+            const perItemFixed = round2Dec(laborTimeAar*round2Dec(laborRate));
+            const perItemVariable = round2Dec(varLaborRate*varLaborTime);
+            let laborCost;
+            if (parseInt(job.responsibilitycode.code) === 3 ) {
+                laborCost =
+                    1 * perItemFixed +
+                    Math.max(qty, 0) * perItemVariable;
+            } else {
+                // Old rule
+                laborCost = perItemVariable * qty;
+            }
 
-            const laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
+
+
+            //laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
             totalLaborCost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
-            const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+            //const laborHours = Number(round2Dec(job.labor_time)) * job.quantity;
+            let laborHours;
+            if (parseInt(job.responsibilitycode.code) === 3 ) {
+                laborHours = (1*job.labor_time_aar) + (qty*job.variable_labor_time);
+                console.log(laborHours);
+            } else {
+                // Old rule
+                laborHours =  qty*job.variable_labor_time;
+            }
+            console.log(laborHours);
+
             totalLaborHours += Number(round2Dec(laborHours));
 
             // Calculate material cost

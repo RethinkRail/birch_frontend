@@ -14,6 +14,36 @@ import {round2Dec} from "./NumberHelper";
  * @param forWhom 1 - combined , 2 for owner , 3 lessee
  */
 
+function calculateLaborCost(job) {
+    const qty = Number(job.quantity);
+
+    const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+    const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
+
+    let calculatedLabor = 0;
+
+    // Responsibility = 3 → use special formula
+    if (Number(job.responsibilitycode?.code) === 3) {
+
+        if (qty === 1) {
+            calculatedLabor =
+                (qty * perItemLaborFixed) +
+                (qty * perItemLaborVariable);
+
+        } else if (qty > 1) {
+            calculatedLabor =
+                (1 * perItemLaborFixed) +        // fixed only once
+                (qty * perItemLaborVariable);    // variable applied to all qty
+        }
+
+    } else {
+        // Normal logic for responsibility != 3
+        calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+    }
+
+    return round2Dec(calculatedLabor);
+}
+
 export function printAAR(item, _wheel_detail = false, forWhom) {
     let data = null;
     let wheel_detail = _wheel_detail;
@@ -821,7 +851,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             number_of_jobs++;
 
 
-            const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
+            const laborCost = calculateLaborCost(myjob);
             labor_cost += Number(round2Dec(laborCost));
 
             // Calculate labor hours
@@ -844,7 +874,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             if (myjob.secondary_bill_to_id == null) {
                 number_of_jobs++;
 
-                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
+                const laborCost = calculateLaborCost(myjob);
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
@@ -867,7 +897,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             if (myjob.secondary_bill_to_id !== null) {
                 number_of_jobs++;
 
-                const laborCost = Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity));
+                const laborCost = calculateLaborCost(myjob);
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
@@ -988,7 +1018,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
-            const laborCost = Number(round2Dec(item.labor_rate)) * Number(item.labor_time_aar) * Number(round2Dec(item.quantity));
+            const laborCost = calculateLaborCost(item);
 
             labor_charge.value = getObjComputedValue(labor_charge, Math.abs(laborCost) * 100);
 

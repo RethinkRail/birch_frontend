@@ -114,6 +114,8 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         labor_time: 0,
         labor_time_aar: 0,
         labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate,
+        variable_labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate,
+        variable_labor_time: 0,
         material_cost: "",
         purchase: "",
         cid:"",
@@ -123,8 +125,12 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     const [purchase, setPurchase] = useState("")
 
     const [totalLabor, setTotalLabor] = useState("")
+    const [totalVariableLabor, setTotalVariableLabor] = useState("")
     const [totalMaterial, setTotalMaterial] = useState("")
+    const [perItemLaborFixed,setPerItemLaborFixed] = useState(0)
+    const [perItemLaborVariable, setPerItemLaborVariable] = useState(0)
     const [totalNet, setTotalNet] = useState("")
+    const [showFixedRate,setShowFixedRate] = useState(false);
 
     useEffect(() => {
         console.log("Input value or job part changed")
@@ -141,110 +147,275 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     }, [purchase, markupPercent])
 
     useEffect(() => {
-        setTotalNet(Number(round2Dec(totalLabor)) + Number(round2Dec(totalMaterial)))
+        const netLabor = Number(round2Dec(totalLabor)) || 0;
+        const netVariableLabor = Number(round2Dec(totalVariableLabor)) || 0;
+        const netMaterial = Number(round2Dec(totalMaterial)) || 0;
 
-    }, [totalLabor, totalMaterial])
+        setTotalNet(netLabor + netVariableLabor + netMaterial);
+    }, [totalLabor, totalVariableLabor, totalMaterial]);
+
 
     useEffect(() => {
         const handleInputValuesChange = () => {
-            console.log(inputValues["labor_rate"], inputValues["labor_time_aar"], inputValues["quantity"])
-            setTotalLabor(Number(inputValues["labor_rate"]) * Number(inputValues["labor_time_aar"]) *  Number(inputValues["quantity"]))
-        }
-        handleInputValuesChange()
-    }, [inputValues])
+            const laborRate = Number(inputValues["labor_rate"]);
+            const laborTime = Number(inputValues["labor_time_aar"]);
+            const variableRate = Number(inputValues["variable_labor_rate"]);
+            const variableTime = Number(inputValues["variable_labor_time"]);
+            const qty = Number(inputValues["quantity"]);
+            const rc = Number(inputValues["responsibility_code"]);
+            setPerItemLaborVariable(round2Dec(variableRate*variableTime) )
+            setPerItemLaborFixed(round2Dec(laborRate) * laborTime )
+            if (rc === 3) {
+                if (qty === 1) {
+                    // Case: responsibility_code = 3 AND quantity = 1
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime * qty));
+                    setTotalVariableLabor(round2Dec(variableRate*variableTime) * qty);
+                } else if (qty > 1) {
+
+                    // Case: responsibility_code = 3 AND quantity > 1
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime* 1));
+                    setTotalVariableLabor(round2Dec(variableRate*variableTime)* (qty));
+                }
+            } else {
+                // DEFAULT CASE
+                setTotalLabor(0);
+                setTotalVariableLabor(round2Dec(variableRate*variableTime)* qty);
+            }
+        };
+
+
+
+        handleInputValuesChange();
+    }, [inputValues]);
+
 
     useEffect(() => {
         const handleEditData = () => {
-            if(editData) {
-                console.log(editData, "Edit data exists")
-                setInputValues(prev => ({
+            if (editData) {
+                console.log(editData, "Edit data exists");
+
+                if(editData.responsibilitycode.code==3){
+                    setShowFixedRate(true);
+                }else {
+                    setShowFixedRate(false);
+                }
+
+                // ---- Labor Cost Logic (same as other sections) ----
+                const today = new Date();
+                const cutoffDate = new Date("2025-11-01");
+
+                let laborTimeAar;
+                let laborRate;
+                let varLaborTime;
+                let varLaborRate;
+
+
+                const qty = parseFloat(editData?.quantity || 1);
+
+                let laborCost = 0;
+                let laborTime =0
+
+
+                if (
+                    parseInt(editData?.responsibilitycode?.code) === 3 &&
+                    today > cutoffDate
+                ) {
+
+                    laborTimeAar = 0;
+                    laborRate = 0;
+                    varLaborTime = parseFloat(editData?.labor_time_aar || 0);
+                    varLaborRate = parseFloat(editData?.labor_rate || 0);
+
+
+                    if(qty === 1) {
+                        laborCost =
+                            1 * round2Dec(laborTimeAar )*round2Dec( laborRate) +
+                           1 * round2Dec(varLaborTime) * round2Dec(varLaborRate);
+                    }else {
+                        laborCost =
+                            1 * round2Dec(laborTimeAar) * round2Dec(laborRate) +
+                            qty * round2Dec(varLaborTime )* (varLaborRate);
+                    }
+
+                } else {
+                    laborTimeAar = parseFloat(editData?.labor_time_aar || 0);;
+                    laborRate = parseFloat(editData?.labor_rate || 0);
+                    varLaborTime = parseFloat(editData?.variable_labor_time || 0);
+                    varLaborRate = parseFloat(editData?.variable_labor_rate || 0);
+                    laborCost = round2Dec(round2Dec(laborTimeAar * laborRate) * qty)+round2Dec(qty*round2Dec(varLaborTime*varLaborRate)) ;
+                }
+
+                laborCost = round2Dec(laborCost);
+                // ----------------------------------------------------
+
+                setInputValues((prev) => ({
                     ...prev,
                     location_code: editData.locationcode ? editData.locationcode.code : "",
-                    qualifier_code: editData.qualifiercode_joblist_qualifier_applied_idToqualifiercode ? editData.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id : "",
-                    qualifier_code_removed: editData.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? editData.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id : ""
-                    ,
-                    job_code: editData.jobcode_joblist_job_code_appliedTojobcode ? editData.jobcode_joblist_job_code_appliedTojobcode.code : "",
-                    job_code_removed: editData.jobcode_joblist_job_code_removedTojobcode ? editData.jobcode_joblist_job_code_removedTojobcode.code : "",
-                    job_description: editData.job_description ? editData.job_description : "",
-                    material_cost: editData.material_cost ? editData.material_cost : "",
-                    quantity: editData.quantity ? editData.quantity : "",
+                    qualifier_code:
+                        editData.qualifiercode_joblist_qualifier_applied_idToqualifiercode
+                            ? editData.qualifiercode_joblist_qualifier_applied_idToqualifiercode.id
+                            : "",
+                    qualifier_code_removed:
+                        editData.qualifiercode_joblist_qualifier_removed_idToqualifiercode
+                            ? editData.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id
+                            : "",
+                    job_code: editData.jobcode_joblist_job_code_appliedTojobcode
+                        ? editData.jobcode_joblist_job_code_appliedTojobcode.code
+                        : "",
+                    job_code_removed: editData.jobcode_joblist_job_code_removedTojobcode
+                        ? editData.jobcode_joblist_job_code_removedTojobcode.code
+                        : "",
+                    job_description: editData.job_description || "",
+                    material_cost: editData.material_cost || "",
+                    quantity: editData.quantity || "",
                     why_made_code: editData.whymadecode ? editData.whymadecode.code : "",
-                    responsibility_code: editData.responsibilitycode ? editData.responsibilitycode.code : "",
-                    condition_code:  editData.conditioncode ? editData.conditioncode.code : "",
-                    labor_time:  editData.labor_time ,
-                    labor_time_aar:  editData.labor_time_aar ,
-                    labor_rate:  editData.labor_rate ,
-                    labor_cost:  Number(editData?.quantity) * Number(editData?.labor_time_aar)* Number(editData?.labor_rate),
-                    cid:editData.cid,
-                    wheel_details:editData.wheel_details,
-                }))
-                console.log(editData.jobparts)
-                setPreviousPart(editData.jobparts)
-                setJobParts(editData.jobparts)
+                    responsibility_code: editData.responsibilitycode
+                        ? editData.responsibilitycode.code
+                        : "",
+                    condition_code: editData.conditioncode
+                        ? editData.conditioncode.code
+                        : "",
+                    labor_time: editData.labor_time,
+                    labor_time_aar:editData.labor_time_aar,
+                    labor_rate: editData.labor_rate,
+
+                    // variable_labor_rate:today>cutoffDate && editData.responsibilitycode.code!==3?editData.variable_labor_rate: editData.variable_labor_rate,
+                    // variable_labor_time:today>cutoffDate  && editData.responsibilitycode.code!==3?editData.variable_labor_time: editData.variable_labor_time,
+
+                    variable_labor_rate:editData.variable_labor_rate,
+                    variable_labor_time:editData.variable_labor_time,
+
+                    labor_cost: laborCost,
+
+                    cid: editData.cid,
+                    wheel_details: editData.wheel_details,
+                }));
+                console.log(inputValues)
+                console.log(editData.jobparts);
+                setPreviousPart(editData.jobparts);
+                setJobParts(editData.jobparts);
             }
-        }
-        handleEditData()
-    }, [])
+        };
+
+        handleEditData();
+    }, []);
+
+
+
+    // const handleChange = (field, value) => {
+    //
+    //     switch (field) {
+    //         case 'job_code':
+    //             setInputValues(prev => ({
+    //                 ...prev,
+    //                 [field]: parseInt(value),
+    //                 job_description: (() => {
+    //                     const job = commonData.job_codes.find(job_code => job_code.code == value);
+    //                     return job?.description || job?.title || "";
+    //                 })(),
+    //                 labor_time: (() => {
+    //                     const job = commonData.job_codes.find(job_code => job_code.code == value);
+    //                     return job?.time_custom || job?.time_standard ;
+    //                 })(),
+    //
+    //                 labor_time_aar: (() => {
+    //                     const job = commonData.job_codes.find(job_code => job_code.code == value);
+    //                     return job?.time_standard_aar || job?.time_standard_aar ;
+    //                 })(),
+    //
+    //                 job_code_removed: (() => {
+    //                     const job = commonData.job_codes.find(job_code => job_code.code == value);
+    //                     return job?.code  ;
+    //                 })(),
+    //                 qualifier_code_removed: (() => {
+    //                     return '' ;
+    //                 })(),
+    //                 qualifier_code: (()=>{
+    //                     return ''
+    //                 })()
+    //             }))
+    //
+    //         case 'qualifier_code':
+    //             setInputValues(prev => ({
+    //                 ...prev,
+    //                 [field]: parseInt(value),
+    //
+    //                 qualifier_code_removed: (() => {
+    //                     const job = commonData.qualifier_codes.find(job_code => job_code.id == value);
+    //                     return job?.id  ;
+    //                 })()
+    //             }))
+    //         case 'condition_code':
+    //             setInputValues(prev => ({
+    //                 ...prev,
+    //                 [field]: parseInt(value)
+    //             }))
+    //         default:
+    //             setInputValues(prev => ({
+    //                 ...prev,
+    //                 [field]: value
+    //             }))
+    //     }
+    //     console.log(field, value, "Input value changed")
+    // }
 
 
     const handleChange = (field, value) => {
-        console.log(field)
-        console.log(value)
+        setInputValues(prev => {
+            let updated = { ...prev };
+            console.log(field, value);
+            if (field === "responsibility_code") {
+                setShowFixedRate(Number(value) === 3);
+            }
 
-        switch (field) {
-            case 'job_code':
-                setInputValues(prev => ({
-                    ...prev,
-                    [field]: parseInt(value),
-                    job_description: (() => {
-                        const job = commonData.job_codes.find(job_code => job_code.code == value);
-                        return job?.description || job?.title || "";
-                    })(),
-                    labor_time: (() => {
-                        const job = commonData.job_codes.find(job_code => job_code.code == value);
-                        return job?.time_custom || job?.time_standard ;
-                    })(),
+            // --------------------------
+            // 1. BASE FIELD ASSIGNMENT
+            // --------------------------
+            if (field === "labor_time") {
+                // Enforce max 3 decimals
+                if (value && value.toString().includes(".")) {
+                    const decimals = value.toString().split(".")[1].length;
+                    if (decimals > 3) {
+                        value = parseFloat(value.toFixed(3));
+                    }
+                }
+                console.log(value)
+                updated.labor_time = value;
+                updated.labor_time_aar = value; // AAR always mirrors full value
+            }
+            else {
+                updated[field] = value;
+            }
 
-                    labor_time_aar: (() => {
-                        const job = commonData.job_codes.find(job_code => job_code.code == value);
-                        return job?.time_standard_aar || job?.time_standard_aar ;
-                    })(),
+            // --------------------------
+            // 2. JOB CODE LOGIC
+            // --------------------------
+            if (field === "job_code") {
+                const job = commonData.job_codes.find(j => j.code == value);
 
-                    job_code_removed: (() => {
-                        const job = commonData.job_codes.find(job_code => job_code.code == value);
-                        return job?.code  ;
-                    })(),
-                    qualifier_code_removed: (() => {
-                        return '' ;
-                    })(),
-                    qualifier_code: (()=>{
-                        return ''
-                    })()
-                }))
+                updated.job_description = job?.description || job?.title || "";
+                updated.labor_time = job?.time_standard_aar || job?.time_standard || 0;
+                updated.labor_time_aar = job?.time_standard_aar || 0;
+                updated.variable_labor_time = job?.time_standard_aar || 0;
+                updated.job_code_removed = job?.code || "";
+                updated.qualifier_code = "";
+                updated.qualifier_code_removed = "";
+            }
 
-            case 'qualifier_code':
-                setInputValues(prev => ({
-                    ...prev,
-                    [field]: parseInt(value),
+            // --------------------------
+            // 3. QUALIFIER CODE LOGIC
+            // --------------------------
+            if (field === "qualifier_code") {
+                const qc = commonData.qualifier_codes.find(q => q.id == value);
+                updated.qualifier_code_removed = qc?.id || "";
+            }
 
-                    qualifier_code_removed: (() => {
-                        const job = commonData.qualifier_codes.find(job_code => job_code.id == value);
-                        return job?.id  ;
-                    })()
-                }))
-            case 'condition_code':
-                setInputValues(prev => ({
-                    ...prev,
-                    [field]: parseInt(value)
-                }))
-            default:
-                setInputValues(prev => ({
-                    ...prev,
-                    [field]: value
-                }))
-        }
-        console.log(field, value, "Input value changed")
-    }
+            return updated;
+        });
+
+        console.log(field, value, "Input value changed");
+    };
+
     function processPartsArray(dataArray) {
         console.log(dataArray)
         return dataArray.map(item => {
@@ -264,74 +435,136 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
 
     const handleSave = async () => {
-        // The logic to call the end point will be here
-        if(!inputValues["location_code"]){
+
+        if (!inputValues["location_code"]) {
             alert("Put location code")
-            return
+            return;
         }
-        if(!editData) {
-            console.log(inputValues, "This is the input values")
-            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number( markupPercent), availability: 1}))
-            console.log(populatedJobPart)
-            populatedJobPart = processPartsArray(populatedJobPart)
-            console.log(populatedJobPart)
+
+        // -----------------------------
+        // LABOR COST CALCULATION LOGIC
+        // -----------------------------
+        const responsibility = Number(inputValues["responsibility_code"]);
+        const qty = Number(inputValues["quantity"]);
+        const laborTimeAar = Number(inputValues["labor_time_aar"]);
+        const laborRate = Number(inputValues["labor_rate"]);
+        const varLaborTime = Number(inputValues["variable_labor_time"]);
+        const varLaborRate = Number(inputValues["variable_labor_rate"]);
+
+
+
+        let calculatedLabor = 0;
+
+        if (responsibility === 3) {
+            if (qty === 1) {
+                // Case: responsibility = 3 AND qty = 1
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
+                console.log(calculatedLabor);
+            } else if (qty > 1) {
+                // Case: responsibility = 3 AND qty > 1
+                calculatedLabor =
+                    (1 * perItemLaborFixed) +
+                    ((qty ) * perItemLaborVariable);
+                console.log(calculatedLabor);
+            }
+        } else {
+            // DEFAULT CASE
+            calculatedLabor =
+                0 + (qty * perItemLaborVariable);
+            console.log(calculatedLabor);
+        }
+        console.log(calculatedLabor);
+        calculatedLabor = round2Dec(Number(calculatedLabor));
+        console.log(calculatedLabor);
+
+        // ------------------------------------
+        // CREATE MODE
+        // ------------------------------------
+        if (!editData) {
+            console.log("here")
+            let populatedJobPart = jobParts.map(jobPt => ({
+                ...jobPt,
+                markup_percent: Number(markupPercent),
+                availability: 1
+            }));
+
+            populatedJobPart = processPartsArray(populatedJobPart);
+
+            console.log(inputValues["variable_labor_time"]);
+            console.log(inputValues["variable_labor_rate"]);
+
             const dataToBackend = {
                 work_id: workOrder.id,
                 work_order: workOrder.work_order,
                 line_number: Number(lineNumber),
                 location_code: inputValues["location_code"],
-                quantity: Number(round2Dec(inputValues["quantity"])),
+                quantity: qty,
                 condition_code: inputValues["condition_code"],
                 job_code_applied: inputValues["job_code"],
-                qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
+                qualifier_applied_id:
+                    Number(inputValues["qualifier_code"]) > 0
+                        ? Number(inputValues["qualifier_code"])
+                        : null,
                 job_description: inputValues["job_description"],
                 why_made_code: inputValues["why_made_code"],
                 job_code_removed: inputValues["job_code_removed"],
-                qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
-                responsibility_code: Number(inputValues["responsibility_code"]),
-                cid:inputValues["cid"],
-                wheel_details:inputValues["wheel_details"],
-                labor_cost: Number(round2Dec(totalLabor)),
-                labor_time: Number(round2Dec(inputValues["labor_time"])),
-                labor_time_aar: Number(inputValues["labor_time_aar"]),
-                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
+                qualifier_removed_id:
+                    Number(inputValues["qualifier_code_removed"]) > 0
+                        ? Number(inputValues["qualifier_code_removed"])
+                        : null,
+                responsibility_code: responsibility,
+                cid: inputValues["cid"],
+                wheel_details: inputValues["wheel_details"],
+
+                // ⬇️ UPDATED LABOR COST
+                labor_cost: Number(calculatedLabor),
+
+                // labor_time: Number(round2Dec(inputValues["labor_time"])),
+                // labor_time_aar: laborTimeAar,
+                // labor_rate: laborRate,
+
+                labor_time: responsibility === 3 ? Number(round2Dec(inputValues["labor_time_aar"])) : 0,
+                labor_time_aar: responsibility === 3 ? laborTimeAar : 0,
+                labor_rate: responsibility === 3 ? laborRate : 0,
+
+
+
+                variable_labor_time: Number(inputValues["variable_labor_time"]),
+                variable_labor_rate: Number(inputValues["variable_labor_rate"]),
+
                 material_cost: Number(round2Dec(totalMaterial)),
-                // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
                 jobPartsData: populatedJobPart,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
-            }
-            console.log(populatedJobPart)
-            console.log(dataToBackend)
-            console.log(dataToBackend, "This is the data to be sent to the backend.")
-            //console.log(`${process.env.REACT_APP_BB_API_URL}create_job/`, "This is the backen url")
-            //const response = await axios.post(`${process.env.REACT_APP_BIRCH_API_URL}create_job/`, dataToBackend)
-            const response = await  createAjob(dataToBackend)
-            console.log(response)
-            if(response.status == 200){
+            };
+            console.log(dataToBackend);
+            //return;
+            const response = await createAjob(dataToBackend);
+            if (response.status === 200) setModalShowing(false);
 
-                setModalShowing(false)
-
-            }else {
-
-            }
         } else {
-            console.log(editData)
-            console.log("here")
-            let populatedJobPart = jobParts.map(jobPt => ({ ...jobPt, markup_percent: Number(markupPercent), availability: 1}))
-            console.log(populatedJobPart)
-            populatedJobPart = processPartsArray(populatedJobPart)
-            console.log(populatedJobPart)
-            const jobPartsToDelete = previousPart.filter(part => deleted.includes(part.part_id))
-            const jobPartsToUpdate = populatedJobPart.filter((currentPart) => {
-                const originalPart = previousPart.find(part => part.part_id === currentPart.part_id);
-                console.log(originalPart)
-                if (!originalPart){
-                    console.log("No original part")
-                    return false;
-                } // New part, not an update
-                console.log(currentPart)
-                console.log(originalPart)
-                // Check if any field has changed
+            // ------------------------------------
+            // UPDATE MODE
+            // ------------------------------------
+            let populatedJobPart = jobParts.map(jobPt => ({
+                ...jobPt,
+                markup_percent: Number(markupPercent),
+                availability: 1
+            }));
+
+            populatedJobPart = processPartsArray(populatedJobPart);
+
+            const jobPartsToDelete = previousPart.filter(part =>
+                deleted.includes(part.part_id)
+            );
+
+            const jobPartsToUpdate = populatedJobPart.filter(currentPart => {
+                const originalPart = previousPart.find(
+                    part => part.part_id === currentPart.part_id
+                );
+                if (!originalPart) return false;
+
                 return (
                     currentPart.quantity !== originalPart.quantity ||
                     currentPart.total_cost !== originalPart.total_cost ||
@@ -341,57 +574,58 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                 );
             });
 
-            const  jobPartsToAdd = populatedJobPart.filter((currentPart) => {
-                const originalPart = previousPart.find(part => part.part_id === currentPart.part_id)
-                if(!originalPart) return currentPart
-                return false
-            })
-            //
-            // jobPartsToAdd = jobPartsToAdd= jobPartsToAdd.map((jp)=>{
-            //     jp.job_id = editData.id
-            // })
+            const jobPartsToAdd = populatedJobPart.filter(currentPart => {
+                const originalPart = previousPart.find(
+                    part => part.part_id === currentPart.part_id
+                );
+                return !originalPart;
+            });
 
             const dataToBackend = {
                 work_order: workOrder.work_order,
                 work_id: workOrder.id,
                 line_number: Number(editData.line_number),
                 location_code: inputValues["location_code"],
-                quantity: Number(round2Dec(inputValues["quantity"])),
+                quantity: qty,
                 condition_code: inputValues["condition_code"],
-                job_code_applied:inputValues["job_code"],
-                qualifier_applied_id: Number(inputValues["qualifier_code"])>0?Number(inputValues["qualifier_code"]):null,
+                job_code_applied: inputValues["job_code"],
+                qualifier_applied_id:
+                    Number(inputValues["qualifier_code"]) > 0
+                        ? Number(inputValues["qualifier_code"])
+                        : null,
                 job_description: inputValues["job_description"],
                 why_made_code: inputValues["why_made_code"],
                 job_code_removed: inputValues["job_code_removed"],
-                cid:inputValues["cid"],
-                wheel_details:inputValues["wheel_details"],
-                qualifier_removed_id: Number(inputValues["qualifier_code_removed"])>0?Number(inputValues["qualifier_code_removed"]):null,
-                responsibility_code: Number(inputValues["responsibility_code"]),
-                labor_cost: Number(round2Dec(totalLabor)),
+                cid: inputValues["cid"],
+                wheel_details: inputValues["wheel_details"],
+                qualifier_removed_id:
+                    Number(inputValues["qualifier_code_removed"]) > 0
+                        ? Number(inputValues["qualifier_code_removed"])
+                        : null,
+                responsibility_code: responsibility,
+
+
+                labor_cost: Number(calculatedLabor),
+
                 labor_time: Number(round2Dec(inputValues["labor_time"])),
-                labor_time_aar: Number(inputValues["labor_time_aar"]),
-                labor_rate: Number(round2Dec(inputValues["labor_rate"])),
+                labor_time_aar: laborTimeAar,
+                labor_rate: laborRate,
+                variable_labor_time: Number(inputValues["variable_labor_time"]),
+                variable_labor_rate: Number(inputValues["variable_labor_rate"]),
                 material_cost: Number(round2Dec(totalMaterial)),
-                // this is the job parts data, I've filled everyone on the UI, it remains availability, it's not on the UI
-                jobPartsToAdd: jobPartsToAdd,
+                jobPartsToAdd,
                 jobPartsToDelete,
                 jobPartsToUpdate,
                 user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"]
-            }
+            };
 
-            console.log(dataToBackend)
-            // the job
-            console.log(dataToBackend, "This is the data to backend from the update")
-            const response = await  updateAJob(dataToBackend, editData.id)
-            console.log(response)
-            if(response.status == 200){
-                setModalShowing(false)
-            }else {
-
-            }
-            console.log(response, "This is the response from the backend")
+            const response = await updateAJob(dataToBackend, editData.id);
+            if (response.status === 200) setModalShowing(false);
         }
-    }
+    };
+
+
+
     const handleDelete = async () =>{
 
         const response = await  deleteJob(workOrder.id,editData.id)
@@ -655,7 +889,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                     </div>
                     <div className="grid grid-cols-5 gap-6 mt-4">
                         {/* Description Section */}
-                        <div className="col-span-3 flex flex-col gap-2">
+                        <div className="col-span-2 flex flex-col gap-2">
                             <label className="capitalize text-[12px] font-medium text-[#002e54]">
                                 Description of Repair
                             </label>
@@ -670,72 +904,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         </div>
 
                         {/* Right-Side Form Fields */}
-                        <div className="col-span-2 grid grid-cols-12 gap-3">
-                            {/* Row 1: Labor */}
-                            <div className="flex flex-col col-span-3">
-                                <label className="text-[12px] capitalize text-[#002e54]">ST. Time (HR)</label>
-                                <input
-                                    type="number"
-                                    step={0.001}
-                                    disabled={workOrder.locked_by != null}
-                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
-                                    value={inputValues["labor_time"]}
-                                    onChange={(e) => {
-                                        let value = parseFloat(e.target.value);
-                                        if (value && value.toString().split(".")[1]?.length > 2) {
-                                            value = parseFloat(value.toFixed(2));
-                                        }
-                                        handleChange("labor_time", value);
-                                    }}
-                                />
-                            </div>
-
-                            <div className="flex flex-col col-span-3">
-                                <label className="text-[12px] capitalize text-[#002e54]">ST. Time AAR(HR)</label>
-                                <input
-                                    type="number"
-                                    step={0.001}
-                                    disabled={workOrder.locked_by != null}
-                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
-                                    value={inputValues["labor_time_aar"]}
-                                    onChange={(e) => {
-                                        let value = parseFloat(e.target.value);
-                                        if (value && value.toString().split(".")[1]?.length > 3) {
-                                            value = parseFloat(value.toFixed(3));
-                                        }
-                                        handleChange("labor_time_aar", value);
-                                    }}
-                                />
-                            </div>
-
-                            <div className="flex flex-col col-span-3">
-                                <label className="text-[12px] capitalize text-[#002e54]">Rate ($/HR)</label>
-                                <input
-                                    type="number"
-                                    step={0.1}
-                                    disabled={workOrder.locked_by != null}
-                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
-                                    value={inputValues["labor_rate"]}
-                                    onChange={(e) => {
-                                        let value = parseFloat(e.target.value);
-                                        if (value && value.toString().split(".")[1]?.length > 2) {
-                                            value = parseFloat(value.toFixed(2));
-                                        }
-                                        handleChange("labor_rate", value);
-                                    }}
-                                />
-                            </div>
-
-                            <div className="flex flex-col col-span-3">
-                                <label className="text-[12px] capitalize text-[#002e54]">Total Labor ($)</label>
-                                <input
-                                    type="text"
-                                    disabled
-                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
-                                    value={round2Dec(totalLabor)}
-                                    readOnly
-                                />
-                            </div>
+                        <div className="col-span-3 grid grid-cols-12 gap-3">
 
                             {/* Row 2: Material */}
                             <div className="flex flex-col col-span-4">
@@ -778,21 +947,261 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 />
                             </div>
 
-                            {/* Row 3: Total Net */}
-                            <div className="flex flex-col col-span-12 items-end mt-2">
-                                <div className="w-1/3">
-                                    <label className="text-[12px] capitalize text-[#002e54]">Total Net ($)</label>
+                            {showFixedRate && (
+                                <>
+                                    {/* Row 1: Labor fixed */}
+                                    <div className="flex flex-col col-span-2">
+                                        <label
+                                            className="text-[12px] capitalize text-[#002e54] mx-5"
+
+                                        >
+                                            ST. Time (HR)
+                                        </label>
+
+                                        <div className="flex items-center gap-1">
+                                            <div className="text-[12px] font-semibold">(F)</div>
+
+                                            <input
+                                                type="number"
+                                                step={0.001}
+                                                disabled={workOrder.locked_by != null}
+                                                className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54] w-10/12"
+                                                value={inputValues.labor_time_aar}
+                                                onChange={(e) => {
+                                                    let value = parseFloat(e.target.value);
+
+                                                    // enforce max 3 decimal places
+                                                    if (value && value.toString().includes(".")) {
+                                                        const decimals = value.toString().split(".")[1].length;
+                                                        if (decimals > 3) {
+                                                            value = parseFloat(value.toFixed(3));
+                                                        }
+                                                    }
+
+                                                    handleChange("labor_time", value);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+
+                                    {/* Box 2 — Truncated to 2 decimals */}
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">ST. Time (HR)</label>
+                                        <input
+                                            type="number"
+                                            step={0.01}
+                                            disabled={true}
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2"
+                                            value={
+                                                inputValues.labor_time !== "" && inputValues.labor_time !== null
+                                                    ? Number(inputValues.labor_time).toFixed(2)
+                                                    : ""
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* Box 3 — Full 3 decimals (AAR) */}
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">ST. Time AAR (HR)</label>
+                                        <input
+                                            type="number"
+                                            step={0.001}
+                                            disabled={true}
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2"
+                                            value={
+                                                inputValues.labor_time_aar !== "" && inputValues.labor_time_aar !== null
+                                                    ? Number(inputValues.labor_time_aar).toFixed(3)
+                                                    : ""
+                                            }
+                                        />
+                                    </div>
+
+
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">Rate ($/HR)</label>
+                                        <input
+                                            type="number"
+                                            step={0.1}
+                                            disabled={workOrder.locked_by != null}
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
+                                            value={inputValues["labor_rate"]}
+                                            onChange={(e) => {
+                                                let value = parseFloat(e.target.value);
+                                                if (value && value.toString().split(".")[1]?.length > 2) {
+                                                    value = parseFloat(value.toFixed(2));
+                                                }
+                                                handleChange("labor_rate", value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">(Item/Labor)$</label>
+                                        <input
+                                            type="number"
+                                            step={0.1}
+                                            disabled={true}
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54]"
+                                            value={round2Dec(perItemLaborFixed)}
+                                            onChange={(e) => {
+                                                let value = parseFloat(e.target.value);
+                                                if (value && value.toString().split(".")[1]?.length > 2) {
+                                                    value = parseFloat(value.toFixed(2));
+                                                }
+                                                handleChange("labor_rate", value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col col-span-2">
+                                        <label className="text-[12px] capitalize text-[#002e54]">Total Labor ($)</label>
+                                        <input
+                                            type="text"
+                                            disabled
+                                            className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                            value={round2Dec(totalLabor)}
+                                            readOnly
+                                        />
+                                    </div>
+                                </>
+                        )}
+
+
+                            {/* Row 1: Labor variable */}
+
+                            <div className="flex flex-col col-span-2">
+                                <label
+                                    className="text-[12px] capitalize text-[#002e54] mx-5"
+                                    hidden={showFixedRate}
+                                >
+                                    Time
+                                </label>
+
+                                <div className="flex items-center gap-1">
+                                    <div className="text-[12px] font-semibold">(V)</div>
+
                                     <input
                                         type="number"
-                                        disabled
-                                        className="w-full p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
-                                        value={round2Dec(totalNet)}
-                                        readOnly
+                                        step={0.001}
+                                        disabled={workOrder.locked_by != null}
+                                        className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54] w-10/12"
+                                        value={inputValues.variable_labor_time}
+                                        onChange={(e) => {
+                                            let value = parseFloat(e.target.value);
+
+                                            if (value && value.toString().includes(".")) {
+                                                const decimals = value.toString().split(".")[1].length;
+                                                if (decimals > 3) {
+                                                    value = parseFloat(value.toFixed(3));
+                                                }
+                                            }
+
+                                            handleChange("variable_labor_time", value);
+                                        }}
                                     />
                                 </div>
                             </div>
+
+
+                            {/* Box 2 — Truncated to 2 decimals */}
+                            <div className="flex flex-col col-span-2">
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>ST. Time (HR)</label>
+                                <input
+                                    type="number"
+                                    step={0.01}
+                                    disabled={true}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2"
+                                    value={
+                                        inputValues.variable_labor_time !== "" && inputValues.variable_labor_time !== null
+                                            ? Number(inputValues.variable_labor_time).toFixed(2)
+                                            : ""
+                                    }
+                                />
+                            </div>
+
+                            {/* Box 3 — Full 3 decimals */}
+                            <div className="flex flex-col col-span-2">
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>AAR. Time (HR)</label>
+                                <input
+                                    type="number"
+                                    step={0.001}
+                                    disabled={true}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2"
+                                    value={
+                                        inputValues.variable_labor_time !== "" && inputValues.variable_labor_time !== null
+                                            ? Number(inputValues.variable_labor_time).toFixed(3)
+                                            : ""
+                                    }
+                                />
+                            </div>
+
+
+                            <div className="flex flex-col col-span-2" >
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>Rate ($/hr)</label>
+                                <input
+                                    type="number"
+                                    step={0.1}
+                                    disabled={workOrder.locked_by != null}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 focus:ring-1 focus:ring-[#002e54]"
+                                    value={inputValues["variable_labor_rate"]}
+                                    onChange={(e) => {
+                                        let value = parseFloat(e.target.value);
+                                        if (value && value.toString().split(".")[1]?.length > 2) {
+                                            value = parseFloat(value.toFixed(2));
+                                        }
+                                        handleChange("variable_labor_rate", value);
+                                    }}
+                                />
+                            </div>
+
+                            <div className="flex flex-col col-span-2" >
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>(Item/Labor)$</label>
+                                <input
+                                    type="number"
+                                    step={0.1}
+                                    disabled={true}
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px]  focus:ring-1 focus:ring-[#002e54]"
+                                    value={round2Dec(perItemLaborVariable)}
+
+                                />
+                            </div>
+
+                            <div className="flex flex-col col-span-2"  >
+                                <label className="text-[12px] capitalize text-[#002e54]" hidden={showFixedRate}>Total labor (hr)</label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    className="p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                    value={round2Dec(totalVariableLabor)}
+                                    readOnly
+                                />
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-6">
+                        {/* Other grid items would be here */}
+
+                        {/* This div spans all 5 columns and pushes content to the right */}
+                        <div className="col-span-5 flex justify-end">
+                            <div className="w-[9%]">
+                                <label className="text-[12px] capitalize text-[#002e54]">Total Net ($)</label>
+                                <input
+                                    type="number"
+                                    disabled
+                                    className="w-full p-1 rounded-md border border-[#002e54] outline-none text-[12px] px-2 bg-gray-100"
+                                    value={round2Dec(totalNet)}
+                                    readOnly
+                                />
+                            </div>
                         </div>
                     </div>
+
+
 
                 </div>
                 <div className="flex flex-row items-center gap-2">

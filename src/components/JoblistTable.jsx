@@ -40,17 +40,17 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             const qty = parseFloat(job.quantity);
             const perItemFixed = round2Dec(laborTimeAar*round2Dec(laborRate));
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
-            let laborCost = 0;
+            let laborCost = calculateLaborCost(job);
 
             // New rule: responsibility code = 3 AND today > 2025-11-01
-            if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
-                laborCost =
-                    1 * perItemFixed +
-                    Math.max(qty, 0) * perItemVariable;
-            } else {
-                // Old rule
-                laborCost = perItemVariable * qty;
-            }
+            // if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+            //     laborCost =
+            //         1 * perItemFixed +
+            //         Math.max(qty, 0) * perItemVariable;
+            // } else {
+            //     // Old rule
+            //     laborCost = perItemVariable * qty;
+            // }
 
             laborCost = round2Dec(laborCost);
             const net = parseFloat(job.material_cost)+parseFloat(laborCost);
@@ -124,12 +124,24 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         const qty = parseFloat(job.quantity);
 
         let laborCost = 0;
-
+        console.log(job.quantity);
         if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
-            // new rule
-            laborCost =
-                1 * laborTimeAar * laborRate +
-               qty * varLaborTime * varLaborRate;
+
+            if (qty > 1) {
+                // Case: responsibility_code = 3 AND quantity = 1
+                laborCost =
+                    1 * laborTimeAar * laborRate +
+                    qty * varLaborTime * varLaborRate;
+
+            } else  {
+
+                laborCost =
+                    qty * laborTimeAar * laborRate +
+                    qty * varLaborTime * varLaborRate;
+
+            }
+
+            console.log(laborCost)
         } else {
             // old rule
             laborCost = laborTimeAar * laborRate * qty;

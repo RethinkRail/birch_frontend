@@ -341,15 +341,18 @@ function calculateLaborCost(job) {
     // Responsibility = 3 → use special formula
     if (Number(job.responsibilitycode?.code) === 3) {
 
-        if (qty === 1) {
-            calculatedLabor =
-                (qty * perItemLaborFixed) +
-                (qty * perItemLaborVariable);
+        if (qty >1) {
 
-        } else if (qty > 1) {
             calculatedLabor =
                 (1 * perItemLaborFixed) +        // fixed only once
                 (qty * perItemLaborVariable);    // variable applied to all qty
+
+
+
+        } else {
+            calculatedLabor =
+                (qty * perItemLaborFixed) +
+                (qty * perItemLaborVariable);
         }
 
     } else {
@@ -367,30 +370,32 @@ function calculateLaborHours(myjob) {
     const variableTime = parseFloat(myjob.variable_labor_time) || 0;
     const responsibility = Number(myjob.responsibilitycode?.code);
 
-    let totalHours = 0;
+    let totalHours = (qty*fixedTime)+(qty*variableTime);
 
-    // --- CASE: Responsibility Code = 3 ---
-    if (responsibility === 3) {
-        if (qty === 1) {
-            // qty = 1
-            totalHours =
-                (fixedTime * 1) +
-                (variableTime * 1);
-        } else if (qty > 1) {
-            // qty > 1
-            totalHours =
-                (fixedTime * 1) +
-                (variableTime * (qty - 1));
-        }
-    }
-    // --- CASE: Other Responsibility Codes ---
-    else {
-
-        totalHours = fixedTime * qty;
-    }
-    console.log(myjob.line_number);
-    console.log(myjob.variable_labor_time);
-    console.log(totalHours);
+    // // --- CASE: Responsibility Code = 3 ---
+    // if (responsibility === 3) {
+    //     if (qty >1) {
+    //         totalHours =
+    //             (fixedTime * 1) +
+    //             (variableTime * (qty - 1));
+    //
+    //
+    //     } else  {
+    //         // qty = 1
+    //         totalHours =
+    //             (fixedTime * 1) +
+    //             (variableTime * 1);
+    //
+    //     }
+    // }
+    // // --- CASE: Other Responsibility Codes ---
+    // else {
+    //
+    //     totalHours = fixedTime * qty;
+    // }
+    // console.log(myjob.line_number);
+    // console.log(myjob.variable_labor_time);
+    // console.log(totalHours);
     return totalHours;
 }
 
@@ -401,7 +406,7 @@ function calculateLaborHours(myjob) {
  */
 export function printInvoice(workorder, forWhom) {
 
-    console.log("Print invoice clicked" + forWhom)
+    //console.log("Print invoice clicked" + forWhom)
 
     //var my_new_order = json_item;
     let revenuewMap = new Map();
@@ -410,12 +415,12 @@ export function printInvoice(workorder, forWhom) {
     let net_cost= 0
     let total_hour= 0
     workorder.joblist.forEach((job)=>{
-        console.log(job)
+        //console.log(job)
         if(forWhom ==3){
             if(job.secondary_bill_to_id != null){
 
 
-                const laborCost =calculateLaborCost(job);
+                const laborCost =job.labor_cost;
                 labor_cost += Number(round2Dec(laborCost));
                 console.log(laborCost);
                 // Calculate labor hours
@@ -434,7 +439,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else if(forWhom==2){
             if(job.secondary_bill_to_id == null){
-                const laborCost = calculateLaborCost(job);
+                const laborCost = job.labor_cost;
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
@@ -452,9 +457,10 @@ export function printInvoice(workorder, forWhom) {
             }
         }else {
 
-            const laborCost = calculateLaborCost(job);
+            const laborCost = job.labor_cost;
+            console.log(laborCost);
             labor_cost += Number(round2Dec(laborCost));
-            console.log(laborCost)
+            //console.log(laborCost)
             // Calculate labor hours
             const laborHours = Number(job.labor_time_aar) * job.quantity;
             total_hour += Number(round2Dec(laborHours));
@@ -668,23 +674,59 @@ export function printInvoice(workorder, forWhom) {
         return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
 
+    // all_parts_for_sort.forEach(function (item) {
+    //     console.log(item)
+    //     //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
+    //     //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
+    //     const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
+    //     const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
+    //     const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+    //
+    //     //console.log(single_mat_cost)
+    //
+    //     total_material_cost += Number(round2Dec(single_mat_cost))
+    //     detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
+    //         item.parts.title + '</td><td style="text-align: right;">' +
+    //         round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
+    //         dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
+    //         dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
+    // });
+
+
+    const grouped = {};
+
+    all_parts_for_sort.forEach(item => {
+        const key = `${item.parts.code}__${item.rev_primary}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                ...item,
+                quantity: Number(item.quantity)
+            };
+        } else {
+            grouped[key].quantity += Number(item.quantity);
+        }
+    });
+
+// Replace original list with grouped list
+    all_parts_for_sort = Object.values(grouped);
+
     all_parts_for_sort.forEach(function (item) {
-        //console.log(item)
-        //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-        //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
+        console.log(item)
+
         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
 
-        //console.log(single_mat_cost)
-
         total_material_cost += Number(round2Dec(single_mat_cost))
+
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
             item.parts.title + '</td><td style="text-align: right;">' +
             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
     });
+
 
 
     detailedTable += '<tr><td style="white-space: nowrap;">Labor Cost(Average labor rate:' + round2Dec(rate_per_line / total_job_line) + ')</td><td>' + labor_category +

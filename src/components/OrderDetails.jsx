@@ -172,31 +172,12 @@ const OrderDetails = ({
             const qty = parseFloat(job.quantity);
             const perItemFixed = round2Dec(laborTimeAar*round2Dec(laborRate));
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
-            // let laborCost;
-            // if (parseInt(job.responsibilitycode.code) === 3 ) {
-            //     if(qty>1){
-            //         laborCost =
-            //             1 * perItemFixed +
-            //             qty * perItemVariable;
-            //     }else {
-            //         laborCost =
-            //             qty * perItemFixed +
-            //             qty * perItemVariable;
-            //     }
-            //
-            //
-            // } else {
-            //     // Old rule
-            //     laborCost = perItemVariable * qty;
-            // }
 
-
-
-            //laborCost = Number(round2Dec(job.labor_rate)) * Number(job.labor_time_aar) * Number(round2Dec(job.quantity));
             totalLaborCost += Number(round2Dec(job.labor_cost));
 
             // Calculate labor hours
             const laborHours = (Number(round2Dec(job.labor_time_aar)) * job.quantity) +(Number(round2Dec(job.variable_labor_time)) * job.quantity);
+            console.log(totalLaborHours)
             // let laborHours;
             // if (parseInt(job.responsibilitycode.code) === 3 ) {
             //     if(qty>1){
@@ -210,7 +191,7 @@ const OrderDetails = ({
             //     // Old rule
             //     laborHours =  qty*job.variable_labor_time;
             // }
-            console.log(laborHours);
+            //console.log(laborHours);
 
             totalLaborHours += Number(round2Dec(laborHours));
 

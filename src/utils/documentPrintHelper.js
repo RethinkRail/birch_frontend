@@ -587,32 +587,37 @@ export function printInvoice(workorder, forWhom) {
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
                 if (myjob.labor_cost > 0) {
+                    const laborCost = calculateLaborCost(myjob);
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
+
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + Number(laborCost);
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(laborCost))
                     }
                 }
             }
         }else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
                 if (myjob.labor_cost > 0) {
+                    const laborCost = calculateLaborCost(myjob);
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) +( Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) +Number(laborCost);
                         revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                     } else {
-                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(laborCost))
                     }
                 }
             }
         }else {
             if (myjob.labor_cost > 0) {
+                const laborCost = calculateLaborCost(myjob);
+                console.log(laborCost)
                 if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
-                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + (Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)));
+                    var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) +Number(laborCost);
                     revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
                 } else {
-                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(round2Dec(myjob.labor_rate)) * Number(myjob.labor_time_aar) * Number(round2Dec(myjob.quantity)))
+                    revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,Number(laborCost))
                 }
             }
         }
@@ -621,7 +626,7 @@ export function printInvoice(workorder, forWhom) {
     console.log(revenuewMap)
     let labor_category = "";
     for (let [key, value] of revenuewMap) {
-        //console.log(key + " = " + value);
+        console.log(key + " = " + value);
         labor_category += key + " - " + value + "( " + ((value * 100) / total_labor_cost).toFixed(2) + "% )<br/>"
     }
 
@@ -694,49 +699,6 @@ export function printInvoice(workorder, forWhom) {
             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
     });
 
-
-// ---- GROUP BY code + rev_primary + purchase_cost + markup_percent ----
-//     const grouped = {};
-//
-//     all_parts_for_sort.forEach(item => {
-//         const key = `${item.parts.code}__${item.rev_primary}__${item.purchase_cost}__${item.markup_percent}`;
-//
-//         if (!grouped[key]) {
-//             grouped[key] = {
-//                 ...item,
-//                 quantity: Number(item.quantity)
-//             };
-//         } else {
-//             grouped[key].quantity += Number(item.quantity);
-//         }
-//     });
-//
-// // Replace with grouped list
-//     all_parts_for_sort = Object.values(grouped);
-//
-//
-// // ---- YOUR ORIGINAL BLOCK (with no formula change) ----
-//     all_parts_for_sort.forEach(function (item) {
-//         console.log(item);
-//
-//         // purchase cost for total quantity
-//         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
-//
-//         // markup based on purchaseCost
-//         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
-//
-//         // final cost after markup
-//         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
-//
-//         total_material_cost += Number(round2Dec(single_mat_cost));
-//
-//         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
-//             item.parts.title + '</td><td style="text-align: right;">' +
-//             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
-//             dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
-//             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
-//     });
-//
 
 
 

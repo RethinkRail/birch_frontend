@@ -223,7 +223,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         ? null
                         : job.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
                 responsibility_code: job.responsibilitycode?.code,
-                labor_cost,
+                labor_cost:Number(labor_cost),
                 labor_time: job.labor_time,
                 labor_time_aar: job.labor_time_aar,
                 labor_rate: job.labor_rate,

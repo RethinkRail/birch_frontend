@@ -712,7 +712,7 @@ export function printInvoice(workorder, forWhom) {
     all_parts_for_sort = Object.values(grouped);
 
     all_parts_for_sort.forEach(function (item) {
-        console.log(item)
+
 
         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));

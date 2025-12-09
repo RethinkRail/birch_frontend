@@ -144,7 +144,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             console.log(laborCost)
         } else {
             // old rule
-            laborCost = laborTimeAar * laborRate * qty;
+            laborCost = varLaborTime * varLaborRate * qty;
         }
 
         return round2Dec(laborCost);

@@ -640,6 +640,7 @@ export function printInvoice(workorder, forWhom) {
     var rate_per_line = 0;
     var total_job_line = 0;
     var all_parts_for_sort = [];
+    console.log("hi");
     workorder.joblist.forEach((myjob, i) => {
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
@@ -660,8 +661,9 @@ export function printInvoice(workorder, forWhom) {
                 });
             }
         }else {
+            console.log(forWhom);
             myjob.jobparts.forEach(function (item) {
-                rate_per_line += myjob.labor_rate;
+                rate_per_line += myjob.variable_labor_rate;
                 total_job_line++;
                 item.rev_primary = myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
                 all_parts_for_sort.push(item)
@@ -674,58 +676,67 @@ export function printInvoice(workorder, forWhom) {
         return (a.parts.code > b.parts.code) ? 1 : ((b.parts.code > a.parts.code) ? -1 : 0);
     }))
 
-    // all_parts_for_sort.forEach(function (item) {
-    //     console.log(item)
-    //     //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
-    //     //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
-    //     const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
-    //     const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
-    //     const single_mat_cost = Number(round2Dec(purchaseCost + markup));
-    //
-    //     //console.log(single_mat_cost)
-    //
-    //     total_material_cost += Number(round2Dec(single_mat_cost))
-    //     detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
-    //         item.parts.title + '</td><td style="text-align: right;">' +
-    //         round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
-    //         dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
-    //         dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
-    // });
-
-
-    const grouped = {};
-
-    all_parts_for_sort.forEach(item => {
-        const key = `${item.parts.code}__${item.rev_primary}`;
-
-        if (!grouped[key]) {
-            grouped[key] = {
-                ...item,
-                quantity: Number(item.quantity)
-            };
-        } else {
-            grouped[key].quantity += Number(item.quantity);
-        }
-    });
-
-// Replace original list with grouped list
-    all_parts_for_sort = Object.values(grouped);
-
     all_parts_for_sort.forEach(function (item) {
-
-
+        console.log(item)
+        //var single_mat_cost = round2Dec(item.quantity) * (round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))
+        //var single_mat_cost = item.quantity * round2Dec(item.purchase_cost) * (1 +item.markup_percent * 1)
         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
 
-        total_material_cost += Number(round2Dec(single_mat_cost))
+        //console.log(single_mat_cost)
 
+        total_material_cost += Number(round2Dec(single_mat_cost))
         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
             item.parts.title + '</td><td style="text-align: right;">' +
             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
     });
+
+
+// ---- GROUP BY code + rev_primary + purchase_cost + markup_percent ----
+//     const grouped = {};
+//
+//     all_parts_for_sort.forEach(item => {
+//         const key = `${item.parts.code}__${item.rev_primary}__${item.purchase_cost}__${item.markup_percent}`;
+//
+//         if (!grouped[key]) {
+//             grouped[key] = {
+//                 ...item,
+//                 quantity: Number(item.quantity)
+//             };
+//         } else {
+//             grouped[key].quantity += Number(item.quantity);
+//         }
+//     });
+//
+// // Replace with grouped list
+//     all_parts_for_sort = Object.values(grouped);
+//
+//
+// // ---- YOUR ORIGINAL BLOCK (with no formula change) ----
+//     all_parts_for_sort.forEach(function (item) {
+//         console.log(item);
+//
+//         // purchase cost for total quantity
+//         const purchaseCost = Number(round2Dec(item.purchase_cost)) * item.quantity;
+//
+//         // markup based on purchaseCost
+//         const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(item.markup_percent));
+//
+//         // final cost after markup
+//         const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+//
+//         total_material_cost += Number(round2Dec(single_mat_cost));
+//
+//         detailedTable += '<tr><td style="white-space: nowrap;">' + item.parts.code + '</td><td>' +
+//             item.parts.title + '</td><td style="text-align: right;">' +
+//             round2Dec(item.quantity) + '</td><td style="text-align: right;">' +
+//             dollarFormated(round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td style="text-align: right;">' +
+//             dollarFormated(round2Dec(item.quantity) * round2Dec(round2Dec(item.purchase_cost) * (1 + round2Dec(item.markup_percent) * 1))) + '</td><td>' + item.rev_primary + '</td></tr>';
+//     });
+//
 
 
 

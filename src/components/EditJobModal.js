@@ -167,17 +167,13 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
             setPerItemLaborFixed(round2Dec(laborRate) * laborTime )
             if (rc === 3) {
                 if (qty > 1) {
-                    // Case: responsibility_code = 3 AND quantity = 1
-
-
-
-                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime * qty));
+                    setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime * 1));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime) * qty);
 
 
                 } else  {
 
-                    // Case: responsibility_code = 3 AND quantity > 1
+
                     setTotalLabor(round2Dec(round2Dec(laborRate) * laborTime* qty));
                     setTotalVariableLabor(round2Dec(variableRate*variableTime)* (qty));
                 }

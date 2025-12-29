@@ -267,7 +267,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         },
         {
             name: 'HOURS ESTIMATED',
-            selector: row => round2Dec(row.labor_time*row.quantity),
+            selector: row => round2Dec(row.variable_labor_time*row.quantity)+round2Dec(row.labor_time_aar*row.quantity),
             sortable: true,
             width: "10%",
         },

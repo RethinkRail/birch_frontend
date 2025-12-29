@@ -702,23 +702,23 @@ export function printInvoice(workorder, forWhom) {
 
 
     // ---- GROUP BY code + rev_primary + purchase_cost + markup_percent ----
-    const grouped = {};
-
-    all_parts_for_sort.forEach(item => {
-        const key = `${item.parts.code}__${item.rev_primary}__${round2Dec(item.purchase_cost)}__${round2Dec(item.markup_percent)}`;
-
-        if (!grouped[key]) {
-            grouped[key] = {
-                ...item,
-                quantity: Number(item.quantity)
-            };
-        } else {
-            grouped[key].quantity += Number(item.quantity);
-        }
-    });
+    // const grouped = {};
+    //
+    // all_parts_for_sort.forEach(item => {
+    //     const key = `${item.parts.code}__${item.rev_primary}__${round2Dec(item.purchase_cost)}__${round2Dec(item.markup_percent)}`;
+    //
+    //     if (!grouped[key]) {
+    //         grouped[key] = {
+    //             ...item,
+    //             quantity: Number(item.quantity)
+    //         };
+    //     } else {
+    //         grouped[key].quantity += Number(item.quantity);
+    //     }
+    // });
 
 // Replace with grouped list
-    all_parts_for_sort = Object.values(grouped);
+    //all_parts_for_sort = Object.values(grouped);
 
 
 // ---- YOUR ORIGINAL BLOCK (with no formula change) ----

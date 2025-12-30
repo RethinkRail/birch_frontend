@@ -38,7 +38,8 @@ function calculateLaborCost(job) {
 
     } else {
         // Normal logic for responsibility != 3
-        calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        calculatedLabor = (qty * perItemLaborVariable);
     }
 
     return round2Dec(calculatedLabor);

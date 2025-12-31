@@ -182,7 +182,7 @@ export function printBRC(workOrder,forWhom) {
     var laborCost = 0.0;
     var materialCost = 0.0;
     workOrder.joblist.forEach((myjob, i) => {
-
+        const laborCostCalculated = Number(calculateLaborCost(myjob));
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
                 var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
@@ -201,7 +201,7 @@ export function printBRC(workOrder,forWhom) {
                 row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
                 row_html += "<td>" + rq + "</td>";
                 row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
-                row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+                row_html += "<td>" + dollarFormated(laborCostCalculated) + "</td>";
 
                 //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
                 var mat_cost_single_job = 0.0;
@@ -216,9 +216,9 @@ export function printBRC(workOrder,forWhom) {
                 });
 
                 row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
-                row_html += "<td>" + dollarFormated(Number(round2Dec(myjob.labor_cost + mat_cost_single_job))) + "</td></tr>";
-                netCost += round2Dec(myjob.labor_cost + mat_cost_single_job)
-                laborCost += Number(round2Dec(myjob.labor_cost))
+                row_html += "<td>" + dollarFormated(Number(round2Dec(laborCostCalculated + mat_cost_single_job))) + "</td></tr>";
+                netCost += round2Dec(laborCostCalculated + mat_cost_single_job)
+                laborCost += Number(round2Dec(laborCostCalculated))
                 //var rounded_mat_cost = round2Dec(mat_cost_single_job)
                 materialCost += Number(round2Dec(mat_cost_single_job))
                 job_table += row_html;
@@ -241,7 +241,7 @@ export function printBRC(workOrder,forWhom) {
                 row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
                 row_html += "<td>" + rq + "</td>";
                 row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
-                row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+                row_html += "<td>" + dollarFormated(laborCostCalculated) + "</td>";
 
                 //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
                 var mat_cost_single_job = 0.0;
@@ -256,9 +256,9 @@ export function printBRC(workOrder,forWhom) {
                 });
 
                 row_html += "<td>" + dollarFormated(Number(round2Dec(mat_cost_single_job))) + "</td>";
-                row_html += "<td>" + dollarFormated(myjob.labor_cost + mat_cost_single_job) + "</td></tr>";
-                netCost += round2Dec(Number(round2Dec(myjob.labor_cost + mat_cost_single_job)))
-                laborCost += Number(round2Dec(myjob.labor_cost))
+                row_html += "<td>" + dollarFormated(laborCostCalculated + mat_cost_single_job) + "</td></tr>";
+                netCost += round2Dec(Number(round2Dec(laborCostCalculated + mat_cost_single_job)))
+                laborCost += Number(round2Dec(laborCostCalculated))
                 //var rounded_mat_cost = round2Dec(mat_cost_single_job)
                 materialCost += Number(round2Dec(mat_cost_single_job))
                 job_table += row_html;
@@ -280,7 +280,7 @@ export function printBRC(workOrder,forWhom) {
             row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
             row_html += "<td>" + rq + "</td>";
             row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
-            row_html += "<td>" + dollarFormated(myjob.labor_cost) + "</td>";
+            row_html += "<td>" + dollarFormated(laborCostCalculated) + "</td>";
 
             //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
             var mat_cost_single_job = 0.0;
@@ -294,9 +294,9 @@ export function printBRC(workOrder,forWhom) {
             });
 
             row_html += "<td>" + dollarFormated(mat_cost_single_job) + "</td>";
-            row_html += "<td>" + dollarFormated(Number(round2Dec(myjob.labor_cost + mat_cost_single_job) ))+ "</td></tr>";
-            netCost += round2Dec(Number(round2Dec(myjob.labor_cost + mat_cost_single_job)))
-            laborCost += Number(round2Dec(myjob.labor_cost))
+            row_html += "<td>" + dollarFormated(Number(round2Dec(laborCostCalculated+ mat_cost_single_job) ))+ "</td></tr>";
+            netCost += round2Dec(Number(round2Dec(laborCostCalculated + mat_cost_single_job)))
+            laborCost += Number(round2Dec(laborCostCalculated))
             //var rounded_mat_cost = round2Dec(mat_cost_single_job)
             materialCost += Number(round2Dec(mat_cost_single_job))
             job_table += row_html;
@@ -341,23 +341,21 @@ function calculateLaborCost(job) {
     // Responsibility = 3 → use special formula
     if (Number(job.responsibilitycode?.code) === 3) {
 
-        if (qty >1) {
-
-            calculatedLabor =
-                (1 * perItemLaborFixed) +        // fixed only once
-                (qty * perItemLaborVariable);    // variable applied to all qty
-
-
-
-        } else {
+        if (qty === 1) {
             calculatedLabor =
                 (qty * perItemLaborFixed) +
                 (qty * perItemLaborVariable);
+
+        } else if (qty > 1) {
+            calculatedLabor =
+                (1 * perItemLaborFixed) +        // fixed only once
+                (qty * perItemLaborVariable);    // variable applied to all qty
         }
 
     } else {
         // Normal logic for responsibility != 3
-        calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        calculatedLabor = (qty * perItemLaborVariable);
     }
 
     return round2Dec(calculatedLabor);
@@ -420,7 +418,7 @@ export function printInvoice(workorder, forWhom) {
             if(job.secondary_bill_to_id != null){
 
 
-                const laborCost =job.labor_cost;
+                const laborCost =calculateLaborCost(job);
                 labor_cost += Number(round2Dec(laborCost));
                 console.log(laborCost);
                 // Calculate labor hours
@@ -439,7 +437,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else if(forWhom==2){
             if(job.secondary_bill_to_id == null){
-                const laborCost = job.labor_cost;
+                const laborCost = calculateLaborCost(job)
                 labor_cost += Number(round2Dec(laborCost));
 
                 // Calculate labor hours
@@ -457,7 +455,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else {
 
-            const laborCost = job.labor_cost;
+            const laborCost = calculateLaborCost(job);
             console.log(laborCost);
             labor_cost += Number(round2Dec(laborCost));
             //console.log(laborCost)
@@ -583,10 +581,10 @@ export function printInvoice(workorder, forWhom) {
     let yard_bank_info = workorder.yard.billing_address;
 
     workorder.joblist.forEach((myjob, i) => {
-
+        const laborCostCalculated = calculateLaborCost(myjob);
         if(forWhom==3){
             if(myjob.secondary_bill_to_id != null){
-                if (myjob.labor_cost > 0) {
+                if (laborCostCalculated > 0) {
                     const laborCost = calculateLaborCost(myjob);
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
 
@@ -599,7 +597,7 @@ export function printInvoice(workorder, forWhom) {
             }
         }else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
-                if (myjob.labor_cost > 0) {
+                if (laborCostCalculated > 0) {
                     const laborCost = calculateLaborCost(myjob);
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
                         var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) +Number(laborCost);
@@ -610,7 +608,7 @@ export function printInvoice(workorder, forWhom) {
                 }
             }
         }else {
-            if (myjob.labor_cost > 0) {
+            if (laborCostCalculated > 0) {
                 const laborCost = calculateLaborCost(myjob);
                 console.log(laborCost)
                 if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {

@@ -158,7 +158,36 @@ const OrderDetails = ({
     const [totalLaborCost,setTotalLaborCost]= useState()
     const [totalMatCost,setTotalMatCost]= useState()
 
+    const calculateLaborCostForASingleJob = (job) => {
+        const qty = Number(job.quantity);
 
+        const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+        const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
+
+        let calculatedLabor = 0;
+
+        // Responsibility = 3 → use special formula
+        if (Number(job.responsibilitycode?.code) === 3) {
+
+            if (qty === 1) {
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
+
+            } else if (qty > 1) {
+                calculatedLabor =
+                    (1 * perItemLaborFixed) +        // fixed only once
+                    (qty * perItemLaborVariable);    // variable applied to all qty
+            }
+
+        } else {
+            // Normal logic for responsibility != 3
+            //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+            calculatedLabor = (qty * perItemLaborVariable);
+        }
+
+        return round2Dec(calculatedLabor);
+    };
     const calculateJobCosts = (jobs) => {
         let totalLaborCost = 0;
         let totalLaborHours = 0;
@@ -173,25 +202,10 @@ const OrderDetails = ({
             const perItemFixed = round2Dec(laborTimeAar*round2Dec(laborRate));
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
 
-            totalLaborCost += Number(round2Dec(job.labor_cost));
+            totalLaborCost += Number(calculateLaborCostForASingleJob(job));
 
             // Calculate labor hours
             const laborHours = (Number(round2Dec(job.labor_time_aar)) * job.quantity) +(Number(round2Dec(job.variable_labor_time)) * job.quantity);
-            console.log(totalLaborHours)
-            // let laborHours;
-            // if (parseInt(job.responsibilitycode.code) === 3 ) {
-            //     if(qty>1){
-            //         laborHours = (1*job.labor_time_aar) + (qty*job.variable_labor_time);
-            //     }else {
-            //         laborHours = (qty*job.labor_time_aar) + (qty*job.variable_labor_time);
-            //     }
-            //
-            //     console.log(laborHours);
-            // } else {
-            //     // Old rule
-            //     laborHours =  qty*job.variable_labor_time;
-            // }
-            //console.log(laborHours);
 
             totalLaborHours += Number(round2Dec(laborHours));
 

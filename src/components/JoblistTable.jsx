@@ -114,40 +114,34 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
 
     const calculateLaborCost = (job) => {
-        const today = new Date();
-        const cutoffDate = new Date("2025-11-01");
+        const qty = Number(job.quantity);
 
-        const laborTimeAar = parseFloat(job.labor_time_aar);
-        const laborRate = parseFloat(job.labor_rate);
-        const varLaborTime = parseFloat(job.variable_labor_time);
-        const varLaborRate = parseFloat(job.variable_labor_rate);
-        const qty = parseFloat(job.quantity);
+        const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+        const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
 
-        let laborCost = 0;
-        console.log(job.quantity);
-        if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+        let calculatedLabor = 0;
 
-            if (qty > 1) {
-                // Case: responsibility_code = 3 AND quantity = 1
-                laborCost =
-                    1 * laborTimeAar * laborRate +
-                    qty * varLaborTime * varLaborRate;
+        // Responsibility = 3 → use special formula
+        if (Number(job.responsibilitycode?.code) === 3) {
 
-            } else  {
+            if (qty === 1) {
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
 
-                laborCost =
-                    qty * laborTimeAar * laborRate +
-                    qty * varLaborTime * varLaborRate;
-
+            } else if (qty > 1) {
+                calculatedLabor =
+                    (1 * perItemLaborFixed) +        // fixed only once
+                    (qty * perItemLaborVariable);    // variable applied to all qty
             }
 
-            console.log(laborCost)
         } else {
-            // old rule
-            laborCost = varLaborTime * varLaborRate * qty;
+            // Normal logic for responsibility != 3
+            //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+            calculatedLabor = (qty * perItemLaborVariable);
         }
 
-        return round2Dec(laborCost);
+        return round2Dec(calculatedLabor);
     };
 
 

@@ -272,79 +272,6 @@ const  SummaryReportMaterial = () => {
 
 
 
-    // const handleExportRows = (table, rows) => {
-    //     const visibleColumns = table
-    //         .getAllColumns()
-    //         .filter(col => col.getIsVisible());
-    //
-    //     const rowData = rows.map(row => {
-    //         const filteredRow = {};
-    //
-    //         visibleColumns.forEach(column => {
-    //             const header = column.columnDef.header;
-    //             const meta = column.columnDef.meta || {};
-    //             const value = row.original[column.id];
-    //
-    //             // ✅ DATE HANDLING (Excel-safe)
-    //             if (meta.type === 'date') {
-    //                 const date = value instanceof Date ? value : new Date(value);
-    //
-    //                 if (!isNaN(date)) {
-    //                     filteredRow[header] = excelDate(
-    //                         date,
-    //                         meta.useUTC ?? false
-    //                     );
-    //                 } else {
-    //                     filteredRow[header] = value;
-    //                 }
-    //                 return;
-    //             }
-    //
-    //             // 🔢 Numbers
-    //             if (typeof value === 'number') {
-    //                 filteredRow[header] = value;
-    //                 return;
-    //             }
-    //
-    //             // 🔢 Numeric strings
-    //             if (typeof value === 'string' &&
-    //                 !isNaN(parseFloat(value)) &&
-    //                 isFinite(value)) {
-    //                 filteredRow[header] = parseFloat(value);
-    //                 return;
-    //             }
-    //
-    //             // 🧱 Fallback
-    //             filteredRow[header] = value;
-    //         });
-    //
-    //         return filteredRow;
-    //     });
-    //
-    //     const worksheet = XLSX.utils.json_to_sheet(rowData);
-    //
-    //     // ✅ Apply Excel date formatting
-    //     visibleColumns.forEach(column => {
-    //         const meta = column.columnDef.meta || {};
-    //         if (meta.type !== 'date') return;
-    //
-    //         const format = meta.excelFormat || 'mm/dd/yyyy';
-    //
-    //         Object.keys(worksheet).forEach(cell => {
-    //             if (!cell.startsWith('!') && typeof worksheet[cell]?.v === 'number') {
-    //                 worksheet[cell].t = 'n'; // numeric
-    //                 worksheet[cell].z = format;
-    //             }
-    //         });
-    //     });
-    //
-    //     const workbook = XLSX.utils.book_new();
-    //     XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Summary Report');
-    //
-    //     const filename = `BIRCH Summary Report ${new Date().toLocaleDateString()}.xlsx`;
-    //     XLSX.writeFile(workbook, filename);
-    // };
-
     const handleExportRows = (table, rows) => {
         const visibleColumns = table
             .getAllColumns()
@@ -358,14 +285,15 @@ const  SummaryReportMaterial = () => {
                 const meta = column.columnDef.meta || {};
                 const value = row.original[column.id];
 
-                // ✅ DATE HANDLING (CSV-safe)
+                // ✅ DATE HANDLING (Excel-safe)
                 if (meta.type === 'date') {
                     const date = value instanceof Date ? value : new Date(value);
 
                     if (!isNaN(date)) {
-                        filteredRow[header] = meta.useUTC
-                            ? date.toISOString().split('T')[0]
-                            : date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                        filteredRow[header] = excelDate(
+                            date,
+                            meta.useUTC ?? false
+                        );
                     } else {
                         filteredRow[header] = value;
                     }
@@ -379,41 +307,113 @@ const  SummaryReportMaterial = () => {
                 }
 
                 // 🔢 Numeric strings
-                if (
-                    typeof value === 'string' &&
+                if (typeof value === 'string' &&
                     !isNaN(parseFloat(value)) &&
-                    isFinite(value)
-                ) {
+                    isFinite(value)) {
                     filteredRow[header] = parseFloat(value);
                     return;
                 }
 
                 // 🧱 Fallback
-                filteredRow[header] = value ?? '';
+                filteredRow[header] = value;
             });
 
             return filteredRow;
         });
 
-        // ✅ Convert to worksheet
         const worksheet = XLSX.utils.json_to_sheet(rowData);
 
-        // ✅ Convert worksheet to CSV
-        const csv = XLSX.utils.sheet_to_csv(worksheet);
+        // ✅ Apply Excel date formatting
+        visibleColumns.forEach(column => {
+            const meta = column.columnDef.meta || {};
+            if (meta.type !== 'date') return;
 
-        // ✅ Trigger download
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
+            const format = meta.excelFormat || 'mm/dd/yyyy';
 
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `BIRCH Summary Report ${new Date().toLocaleDateString()}.csv`;
-        document.body.appendChild(link);
-        link.click();
+            Object.keys(worksheet).forEach(cell => {
+                if (!cell.startsWith('!') && typeof worksheet[cell]?.v === 'number') {
+                    worksheet[cell].t = 'n'; // numeric
+                    worksheet[cell].z = format;
+                }
+            });
+        });
 
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'BIRCH Summary Report');
+
+        const filename = `BIRCH Summary Report ${new Date().toLocaleDateString()}.xlsx`;
+        XLSX.writeFile(workbook, filename);
     };
+
+    // const handleExportRows = (table, rows) => {
+    //     const visibleColumns = table
+    //         .getAllColumns()
+    //         .filter(col => col.getIsVisible());
+    //
+    //     const rowData = rows.map(row => {
+    //         const filteredRow = {};
+    //
+    //         visibleColumns.forEach(column => {
+    //             const header = column.columnDef.header;
+    //             const meta = column.columnDef.meta || {};
+    //             const value = row.original[column.id];
+    //
+    //             // ✅ DATE HANDLING (CSV-safe)
+    //             if (meta.type === 'date') {
+    //                 const date = value instanceof Date ? value : new Date(value);
+    //
+    //                 if (!isNaN(date)) {
+    //                     filteredRow[header] = meta.useUTC
+    //                         ? date.toISOString().split('T')[0]
+    //                         : date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    //                 } else {
+    //                     filteredRow[header] = value;
+    //                 }
+    //                 return;
+    //             }
+    //
+    //             // 🔢 Numbers
+    //             if (typeof value === 'number') {
+    //                 filteredRow[header] = value;
+    //                 return;
+    //             }
+    //
+    //             // 🔢 Numeric strings
+    //             if (
+    //                 typeof value === 'string' &&
+    //                 !isNaN(parseFloat(value)) &&
+    //                 isFinite(value)
+    //             ) {
+    //                 filteredRow[header] = parseFloat(value);
+    //                 return;
+    //             }
+    //
+    //             // 🧱 Fallback
+    //             filteredRow[header] = value ?? '';
+    //         });
+    //
+    //         return filteredRow;
+    //     });
+    //
+    //     // ✅ Convert to worksheet
+    //     const worksheet = XLSX.utils.json_to_sheet(rowData);
+    //
+    //     // ✅ Convert worksheet to CSV
+    //     const csv = XLSX.utils.sheet_to_csv(worksheet);
+    //
+    //     // ✅ Trigger download
+    //     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    //     const url = URL.createObjectURL(blob);
+    //
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.download = `BIRCH Summary Report ${new Date().toLocaleDateString()}.csv`;
+    //     document.body.appendChild(link);
+    //     link.click();
+    //
+    //     document.body.removeChild(link);
+    //     URL.revokeObjectURL(url);
+    // };
 
 
     const handleExportData = () => {

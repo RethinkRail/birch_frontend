@@ -33,6 +33,15 @@ const  PartReport = () => {
         { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
         { accessorKey: 'unit_cost', header: 'Unit Cost', enableSorting: true },
         { accessorKey: 'cost', header: 'Total Cost', enableSorting: true },
+        { accessorKey: 'rate', header: 'Rate', enableSorting: true },
+
+        { accessorKey: 'owner_invoice_date', header: 'Owner Invoice Date', enableSorting: true },
+        { accessorKey: 'owner_invoice_number', header: 'Owner Invoice #', enableSorting: true },
+
+        { accessorKey: 'lesse_invoice_date', header: 'Lesse Invoice Date', enableSorting: true },
+        { accessorKey: 'lesse_invoice_number', header: 'Lesse Invoice #', enableSorting: true },
+
+        { accessorKey: 'revenue_category', header: 'Revenue Category', enableSorting: true },
         { accessorKey: 'tech_sign_off_date', header: 'Tech Sign Off Date', enableSorting: true },
     ], []);
 
@@ -52,19 +61,25 @@ const  PartReport = () => {
             toastId.current = toast.loading("Fetching data...");
             try {
                 const response = await axios.get(process.env.REACT_APP_BIRCH_API_URL+'get_part_report');
+                console.log(response.data);
                 const result = [];
                 const partsNewReport = []
                 response.data.forEach(item => {
                     // Get status from workupdates
                     const status = `${item.workupdates[0].statuscode.code} ${item.workupdates[0].statuscode.title}`;
-
+                    // const owner_invoice_date = item.invoice_date;
+                    // const owner_invoice_number = item.invoice_number;
+                    // const secondary_owner_invoice_date = item.secondary_owner_info.invoice_date;
+                    // const secondary_owner_invoice_number = item.secondary_owner_info.invoice_number;
                     // Create a map to track unique job parts based on their code
                     const jobPartsMap = new Map();
 
                     item.joblist.forEach(job => {
                         const techSignOfDate = job.crew_checked_time?new Date(job.crew_checked_time).toLocaleDateString():''
                         const line_number = job.line_number
+                        const rev_category = job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
                         job.jobparts.forEach(part => {
+                            const totalcost = part.totalcost;
                             // Ensure part and part.parts exist
                             if (part && part.parts) {
                                 const { code, title } = part.parts;
@@ -90,7 +105,25 @@ const  PartReport = () => {
                                     title,
                                     quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
                                     unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
-                                    cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
+                                    cost: round2Dec(parseFloat(purchase_cost * quantity)) ,// Calculate and round total cost for this part
+                                    rate: round2Dec(parseFloat(totalcost / quantity)) ,
+                                    owner_invoice_date:
+                                        item.invoice_date &&
+                                        new Date(item.invoice_date).getFullYear() !== 1900
+                                            ? new Date(item.invoice_date).toLocaleDateString()
+                                            : "",
+
+                                    owner_invoice_number: item.invoice_number ?? "",
+
+                                    lesse_invoice_date:
+                                        item.secondary_owner_info?.invoice_date &&
+                                        new Date(item.secondary_owner_info.invoice_date).getFullYear() !== 1900
+                                            ? new Date(item.secondary_owner_info.invoice_date).toLocaleDateString()
+                                            : "",
+
+                                    lesse_invoice_number:
+                                        item.secondary_owner_info?.invoice_number ?? "",
+                                    revenue_category: rev_category,
                                 }
 
                                 partsNewReport.push(singleRow)
@@ -125,7 +158,7 @@ const  PartReport = () => {
                 });
 
 
-
+                console.log(partsNewReport);
                 setData(partsNewReport);
                 toast.update(toastId.current, {
                     render: "All data loaded",

@@ -36,10 +36,10 @@ const Home = () => {
     onMessage(messaging, (payload) => {
         if(payload.data.type === 'new_order'){
             getActiveTasks()
-            getWorkOrderById(parseInt(payload.data.value))
+            //getWorkOrderById(parseInt(payload.data.value))
         }else if(payload.data.type === 'updated_wo'){
             console.log("Push received wo updated")
-            getWorkOrderById(parseInt(payload.data.value))
+            //getWorkOrderById(parseInt(payload.data.value))
         } else if(payload.data.type === 'routing'){
             getActiveTasks()
         }else if(payload.data.type ==='deleted_order'){

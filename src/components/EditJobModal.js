@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import {useEffect, useRef, useState} from "react"
 import axios from "axios"
 import {round2Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
@@ -16,7 +16,11 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     // const [hourlyRate, setHourlyRate] = useState(editData?editData.labor_rate: workOrder.railcar.owner_railcar_owner_idToowner.labor_rate)
     const [totalCost, setTotalCost] = useState('')
 
-    console.log(markupPercent)
+    const jobDescRef = useRef(null);
+
+
+
+
     //logic for new part
     const [jobParts, setJobParts] = useState([])
 
@@ -154,7 +158,15 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
         setTotalNet(netLabor + netVariableLabor + netMaterial);
     }, [totalLabor, totalVariableLabor, totalMaterial]);
 
+    useEffect(() => {
+        if (!jobDescRef.current) return;
 
+        // Only set if empty (prevents cursor reset)
+        if (jobDescRef.current.textContent === "") {
+            jobDescRef.current.textContent =
+                inputValues.job_description || "";
+        }
+    }, [inputValues.job_description]);
     useEffect(() => {
         const handleInputValuesChange = () => {
             const laborRate = Number(inputValues["labor_rate"]);
@@ -907,14 +919,25 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             <label className="capitalize text-[12px] font-medium text-[#002e54]">
                                 Description of Repair
                             </label>
-                            <textarea
-                                rows={6}
-                                disabled={workOrder.locked_by != null}
-                                className="text-[12px] w-full border border-[#002e54] rounded-md p-2 outline-none resize-none focus:ring-1 focus:ring-[#002e54]"
-                                value={inputValues["job_description"]}
-                                onChange={(e) => handleChange("job_description", e.target.value)}
-                                placeholder="Enter description of repair"
-                            ></textarea>
+
+
+
+                            <div
+                                ref={jobDescRef}
+                                contentEditable
+                                suppressContentEditableWarning
+                                spellCheck={false}
+                                className="text-[12px] w-full min-h-[120px] border border-[#002e54] rounded-md p-2 outline-none focus:ring-1 focus:ring-[#002e54] whitespace-pre-wrap normal-case"
+                                onInput={(e) =>
+                                    handleChange(
+                                        "job_description",
+                                        e.currentTarget.textContent
+                                    )
+                                }
+
+                            >
+                            </div>
+
                         </div>
 
                         {/* Right-Side Form Fields */}

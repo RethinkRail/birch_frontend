@@ -65,6 +65,7 @@ const  PartReport = () => {
                 const result = [];
                 const partsNewReport = []
                 response.data.forEach(item => {
+                    console.log(item)
                     // Get status from workupdates
                     const status = `${item.workupdates[0].statuscode.code} ${item.workupdates[0].statuscode.title}`;
                     // const owner_invoice_date = item.invoice_date;
@@ -75,6 +76,7 @@ const  PartReport = () => {
                     const jobPartsMap = new Map();
 
                     item.joblist.forEach(job => {
+                        console.log(job)
                         const techSignOfDate = job.crew_checked_time?new Date(job.crew_checked_time).toLocaleDateString():''
                         const line_number = job.line_number
                         const rev_category = job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
@@ -115,35 +117,19 @@ const  PartReport = () => {
 
                                     owner_invoice_number: item.invoice_number ?? "",
 
-                                    lesse_invoice_date:
+                                    lesse_invoice_date:job.secondary_bill_to_id?
                                         item.secondary_owner_info?.invoice_date &&
                                         new Date(item.secondary_owner_info.invoice_date).getFullYear() !== 1900
                                             ? new Date(item.secondary_owner_info.invoice_date).toLocaleDateString()
-                                            : "",
+                                            : "":"",
 
-                                    lesse_invoice_number:
-                                        item.secondary_owner_info?.invoice_number ?? "",
+                                    lesse_invoice_number:job.secondary_bill_to_id?
+                                        item.secondary_owner_info?.invoice_number ?? "":"",
                                     revenue_category: rev_category,
                                 }
 
                                 partsNewReport.push(singleRow)
-                                // If the part code is already in the map, update quantity and cost
-                                // if (jobPartsMap.has(code)) {
-                                //     const existingPart = jobPartsMap.get(code);
-                                //     existingPart.quantity = round2Dec(parseFloat(existingPart.quantity) + parseFloat(quantity));  // Increase the quantity
-                                //     existingPart.cost = round2Dec(parseFloat(existingPart.cost) + parseFloat(parseFloat(purchase_cost)*parseFloat(quantity))); // Update total cost
-                                // } else {
-                                //     // Add new part to the map
-                                //     jobPartsMap.set(code, {
-                                //         railcar_id: item.railcar_id,
-                                //         status: status,
-                                //         code,
-                                //         title,
-                                //         quantity: round2Dec(parseFloat(quantity)), // Round quantity to 2 decimals
-                                //         unit_cost: round2Dec(parseFloat(purchase_cost)), // Round quantity to 2 decimals
-                                //         cost: round2Dec(parseFloat(purchase_cost * quantity)) // Calculate and round total cost for this part
-                                //     });
-                                // }
+
                             } else {
                                 console.warn(`Missing part data: ${JSON.stringify(part)}`);
                             }
@@ -192,6 +178,8 @@ const  PartReport = () => {
     });
 
     const handleExportRows = (table,rows) => {
+        console.log(rows);
+        console.log(table);
         const visibleColumns = table.getAllColumns().filter(column => column.getIsVisible() === true);
 
         // Map the rows to include only the visible columns and use the column headers

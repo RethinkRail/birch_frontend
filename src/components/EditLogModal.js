@@ -81,7 +81,6 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
             [name]: value,
         });
     };
-
     const handleSubmit = (e) => {
         e.preventDefault();
 

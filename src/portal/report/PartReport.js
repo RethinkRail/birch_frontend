@@ -135,12 +135,6 @@ const  PartReport = () => {
                             }
                         });
                     });
-
-                    // Convert the map back to an array
-                    // const jobpartsArray = Array.from(jobPartsMap.values());
-                    //
-                    // // Add the consolidated job parts to the result
-                    // result.push(...jobpartsArray);
                 });
 
 

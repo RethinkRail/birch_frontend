@@ -24,7 +24,7 @@ const CreateWorkOrder = ({setWorkOrderModalShowing, routingMatrix, createWO}) =>
         const handleFetchTable = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}table?table=railcar`)
-                console.log(`The response gotten is`, response.data.schema)
+                console.log(`The response  is`, response.data.schema)
                 setTableSchema(response.data.schema)
             } catch (error) {
                 console.log(error, "An error occured when fetching table ")

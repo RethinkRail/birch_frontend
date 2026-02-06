@@ -7,10 +7,11 @@ import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee, isBilledToThirdParty,  createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
     console.log(jobs)
 
-
+    console.log(isBilledToLessee)
+    console.log(isBilledToThirdParty)
 
     // ParentModal related stuffs can be found below
     const [modalShowing, setModalShowing] = useState(false)
@@ -18,12 +19,16 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     const [isWebServiceCalling,setIsWebserviceCalling]= useState(false)
     const [tableData, setTableData] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({
-        is_billed_to_lessee: false,
+        secondary_bill_to_id: false,
+        third_party_billing_id: false,
         id:false
     });
     useEffect(() => {
-        setColumnVisibility({ id:false,secondary_bill_to_id: isBilledToLessee }); //programmatically show firstName column
-    }, [isBilledToLessee]);
+        setColumnVisibility({ id:false,secondary_bill_to_id: isBilledToLessee,third_party_billing_id: isBilledToThirdParty  });
+    }, [isBilledToLessee,isBilledToThirdParty]);
+
+
+
 
     useEffect(() => {
         console.log(jobs);
@@ -76,7 +81,8 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 material: round2Dec(job.material_cost),
                 net: round2Dec(net),
                 rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-                secondary_bill_to_id: job.secondary_bill_to_id
+                secondary_bill_to_id: job.secondary_bill_to_id,
+                third_party_billing_id: job.third_party_billing_id
             };
         });
         console.log(jobListData);
@@ -261,11 +267,31 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         }));
     };
 
-    const handleJobBillToLessee = async (job_id,is_checked) =>{
-        //onChange={(e) => updateLockForTimeClocking(e.target.checked)}
-       //secondary_bill_to_id,job_id,workId
-        await updateBillToLesseForAJob(is_checked?workOrder.railcar.owner_railcar_lessee_idToowner.id:null,job_id,workOrder.id)
-    }
+    const handleJobBillingChange = async (
+        job_id,
+        billToField,
+        isChecked
+    ) => {
+        let billToId = null;
+        console.log(workOrder)
+        if (isChecked) {
+            if (billToField === 'secondary_bill_to_id') {
+                billToId = workOrder.railcar.owner_railcar_lessee_idToowner.id;
+            }
+
+            if (billToField === 'third_party_billing_id') {
+                billToId = workOrder.railcar.owner_railcar_third_party_idToowner.id; // or selected value
+            }
+        }
+
+        await updateBillToLesseForAJob(
+            billToField,
+            billToId,
+            job_id,
+            workOrder.id
+        );
+    };
+
 
     const [copiedJob, setCopiedJob] = useState([])
 
@@ -314,7 +340,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             { accessorKey: 'cc', header: 'CC', size: 3 },
             { accessorKey: 'jobcode', header: 'JC', size: 3 },
             { accessorKey: 'aq', header: 'AQ', size: 3 },
-            { accessorKey: 'description', header: 'Description of Repair', size: 15 },
+            { accessorKey: 'description', header: 'Description of Repair', size: 12 },
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
             {
                 accessorKey: 'labor_time',
@@ -335,17 +361,43 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     );
                 },
             },
-
             { accessorKey: 'labor', header: 'Labor cost$', size: 2 },
             { accessorKey: 'material', header: 'Material', size: 2 },
             { accessorKey: 'net', header: 'Net Cost', size: 2 },
             { accessorKey: 'rev', header: 'Revenue', size: 2  },
             {
                 accessorKey: 'secondary_bill_to_id',
-                header: 'Bill to Lessee',
+                header: 'Lessee',
                 size: 2,
                 Cell: ({ row }) => {
                     const isBilled = row.getValue('secondary_bill_to_id');
+                    console.log(isBilled)
+                    return (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <input
+                                type="checkbox"
+                                checked={isBilled  != null}
+                                disabled={workOrder.locked_by != null}
+                                onChange={(e) =>
+                                    handleJobBillingChange(
+                                        row.getValue('id'),
+                                        'secondary_bill_to_id',
+                                        e.target.checked
+                                    )
+                                }
+
+                                className="checkbox checkbox-primary"
+                            />
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'third_party_billing_id',
+                header: '3RD PARTY',
+                size: 2,
+                Cell: ({ row }) => {
+                    const isBilled = row.getValue('third_party_billing_id');
 
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -353,7 +405,14 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                                 type="checkbox"
                                 checked={isBilled  != null}
                                 disabled={workOrder.locked_by != null}
-                                onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
+                                onChange={(e) =>
+                                    handleJobBillingChange(
+                                        row.getValue('id'),
+                                        'third_party_billing_id',
+                                        e.target.checked
+                                    )
+                                }
+
                                 className="checkbox checkbox-primary"
                             />
                         </div>
@@ -364,29 +423,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         [jobs],
     );
 
-    function swapLineNumbers(data, lineNumber1, lineNumber2) {
-
-        // Find the objects with the given line numbers
-        const obj1 = data.find(item => item.ln === lineNumber1);
-        const obj2 = data.find(item => item.ln === lineNumber2);
-
-        // Swap their line numbers
-        if (obj1 && obj2) {
-            [obj1.ln, obj2.ln] = [obj2.ln, obj1.ln];
-        }
-        data.sort((a, b) => a.ln - b.ln)
-
-        const original_job1 = jobs.find(item => item.line_number === lineNumber1);
-        const original_job2 = jobs.find(item => item.line_number === lineNumber2);
-
-        // Swap their line numbers
-        if (original_job1 && original_job2) {
-            [original_job1.line_number, original_job2.line_number] = [original_job2.line_number, original_job1.line_number];
-        }
-        jobs.sort((a, b) => a.line_number - b.line_number)
-
-        return data;
-    }
 
     function reorderLines(data, toLine, fromLine) {
         if (fromLine === toLine) return data; // No changes needed if the positions are the same

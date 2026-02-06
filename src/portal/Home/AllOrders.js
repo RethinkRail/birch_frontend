@@ -806,75 +806,101 @@ const AllOrders = () => {
                 console.log(error);
             });
     }
-    const handleBillingInformationChanged = async (is_for_owner, work_id, purchase_order, invoice_number, invoice_date, invoice_net_days) => {
-        const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
-        let data = qs.stringify({
-            'is_for_owner': is_for_owner,
-            'workorder_id': work_id,
-            'user_id': userId,
-            'purchase_order': purchase_order,
-            'invoice_number': invoice_number,
-            'invoice_date': invoice_date,
-            'invoice_net_days': invoice_net_days,
+    const handleBillingInformationChanged = async (type, work_id, purchase_order, invoice_number, invoice_date, invoice_net_days) => {
+        const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'];
+        const data = qs.stringify({
+            type,
+            workorder_id: work_id,
+            user_id: userId,
+            purchase_order,
+            invoice_number,
+            invoice_date,
+            invoice_net_days
         });
-        let config = {
+
+        const config = {
             method: 'post',
             url: process.env.REACT_APP_BIRCH_API_URL + 'update_billing_information',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data: data
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            data
         };
-        return axios.request(config)
-            .then((response) => {
-                console.log("calling done");
-                console.log(response);
-                const updatedWO= updateObjectByIdInsideArray(workOrders,'id',response.data.id, response.data)
-                setWorkOrders(updatedWO)
-                return true;
-            })
-            .catch((error) => {
-                console.log(error);
-                console.log("An error occurred when handling billing");
-                return false;
-            });
-    }
-    const handleBillToLessee = async (work_id, lessee_id, is_billed_to_lessee, work_order) => {
-        const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
-        let data = qs.stringify({
-            'work_id': work_id,
-            'user_id': userId,
-            'lessee_id': lessee_id,
-            'is_billed_to_lessee': is_billed_to_lessee,
-            'work_order': work_order,
 
-        });
-        console.log(data)
-        let config = {
-            method: 'post',
-            url: process.env.REACT_APP_BIRCH_API_URL + 'update_bill_to_lessee',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data: data
-        };
-        axios.request(config)
-            .then((response) => {
-                console.log("calling done")
-                console.log(response.data)
-                getWorkOrderById(work_id)
-                // if (is_billed_to_lessee) {
-                //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
-                //     setWorkOrders(updatedWorkOrders)
-                // } else {
-                //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
-                //     setWorkOrders(updatedWorkOrders)
-                // }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        try {
+            const response = await axios.request(config);
+            const updatedWO = updateObjectByIdInsideArray(workOrders, 'id', response.data.id, response.data);
+            setWorkOrders(updatedWO);
+            return true;
+        } catch (error) {
+            console.log("Error updating billing:", error);
+            return false;
+        }
     }
+    // const handleBillToLessee = async (work_id, lessee_id, is_billed_to_lessee, work_order) => {
+    //     const userId = JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+    //     let data = qs.stringify({
+    //         'work_id': work_id,
+    //         'user_id': userId,
+    //         'lessee_id': lessee_id,
+    //         'is_billed_to_lessee': is_billed_to_lessee,
+    //         'work_order': work_order,
+    //
+    //     });
+    //     console.log(data)
+    //     let config = {
+    //         method: 'post',
+    //         url: process.env.REACT_APP_BIRCH_API_URL + 'update_bill_to_lessee',
+    //         headers: {
+    //             'Content-Type': 'application/x-www-form-urlencoded'
+    //         },
+    //         data: data
+    //     };
+    //     axios.request(config)
+    //         .then((response) => {
+    //             console.log("calling done")
+    //             console.log(response.data)
+    //             getWorkOrderById(work_id)
+    //             // if (is_billed_to_lessee) {
+    //             //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: response.data})
+    //             //     setWorkOrders(updatedWorkOrders)
+    //             // } else {
+    //             //     const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {secondary_owner_info: null})
+    //             //     setWorkOrders(updatedWorkOrders)
+    //             // }
+    //         })
+    //         .catch((error) => {
+    //             console.log(error);
+    //         });
+    // }
+
+
+    const handleBillToLesseeOrThirdParty = async (
+        work_id,
+        lessee_id,
+        third_party_id,
+        is_billed,
+        work_order
+    ) => {
+        const userId = JSON.parse(
+            localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)
+        )['id'];
+
+        const data = qs.stringify({
+            work_id,
+            user_id: userId,
+            lessee_id,        // can be null
+            third_party_id,   // can be null
+            is_billed,        // true / false
+            work_order
+        });
+
+        axios.post(
+            process.env.REACT_APP_BIRCH_API_URL + 'update_bill_to_lessee',
+            data,
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        )
+            .then(() => getWorkOrderById(work_id))
+            .catch(console.log);
+    };
     const createWO = async (railcar_id, reason, rm) => {
         let data = qs.stringify({
             'railcar_id': railcar_id,
@@ -1123,29 +1149,35 @@ const AllOrders = () => {
             });
     }
 
-    const updateBillToLesseForAJob = async (secondary_bill_to_id,job_id,workId) =>{
+    const updateBillToLesseForAJob = async (
+        billToField,          // 'secondary_bill_to_id' | 'third_party_billing_id'
+        billToId,
+        job_id,
+        workId
+    ) => {
         const requestData = {
-            secondary_bill_to_id: secondary_bill_to_id,
-            user_id:JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id'] ,
-            work_id:workId ,
+            bill_to_field: billToField,
+            bill_to_id: billToId,
+            user_id: JSON.parse(
+                localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)
+            )['id'],
+            work_id: workId,
         };
 
-        console.log(requestData)
-        return axios.patch(process.env.REACT_APP_BIRCH_API_URL+`update_lessee_billing/${job_id}`, requestData)
+        return axios.patch(
+            process.env.REACT_APP_BIRCH_API_URL + `update_lessee_billing/${job_id}`,
+            requestData
+        )
             .then(response => {
-                // Handle success
-                console.log('Success:', response.data);
-                // const updatedWo = updateSecondaryBillToId(workOrders,workId,job_id,secondary_bill_to_id)
-                // setWorkOrders(updatedWo)
-                getWorkOrderById(workId)
+                getWorkOrderById(workId);
+                return true;
             })
             .catch(error => {
-                // Handle error
-
-                console.error('Error:', error.response ? error.response.data : error.message);
-                return false
+                console.error(error.response ? error.response.data : error.message);
+                return false;
             });
-    }
+    };
+
 
     useEffect(() => {
         localStorage.removeItem("jobsToBePasted", null)
@@ -1239,7 +1271,7 @@ const AllOrders = () => {
                         updateRE={handleChangeRE}
                         updateEP={handleChangeEP}
                         updateOwnerBilling={handleBillingInformationChanged}
-                        updateBillToLessee={handleBillToLessee}
+                        updateBillToLessee={handleBillToLesseeOrThirdParty}
                         searchCar = {searchCar}
                         createAjob = {createAjob}
                         pasteJobs = {pasteJobs}

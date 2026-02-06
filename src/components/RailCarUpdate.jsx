@@ -3,16 +3,16 @@ import React, { useState, useEffect } from 'react';
 import Select from 'react-select'
 const RailcarUpdate = ({ editRowData, tableSchema, inputValues, setInputValues, relatedData, setRelatedData, rfid }) => {
 
-    const fields = [{Field: "rfid", Type: "string"}, {Field: "type_id", Type: "int"}, {Field: "owner_id", Type: "int"}, {Field: "lessee_id", Type: "int"}, {Field: "last_product_id", Type: "int"}]
+    const fields = [{Field: "rfid", Type: "string"}, {Field: "type_id", Type: "int"}, {Field: "owner_id", Type: "int"}, {Field: "lessee_id", Type: "int"},{Field: "third_party_id", Type: "int"},  {Field: "last_product_id", Type: "int"}]
 
 
     // Setting the initial value of the input field when the modal appears
     useEffect(() => {
         if (editRowData) {
-            // console.log(editRowData, "This is the edit row data")
-            // console.log(tableSchema, "Table Schema")
-            // console.log(relatedData, "Related Data")
-            // console.log(fields, "These are the fields")
+            console.log(editRowData, "This is the edit row data")
+            console.log(tableSchema, "Table Schema")
+            console.log(relatedData, "Related Data")
+            console.log(fields, "These are the fields")
 
             const inputValueCopy = {...editRowData}
             if(relatedData) {

@@ -60,7 +60,7 @@ const OrderDetails = ({
                       }) => {
 
     // Method to show update and cancel button when purchase order, invoice number, invoice date, due date changes
-
+    console.log(workOrder)
     const [ownerPurchaseOrderOriginal, setOwnerPurchaseOrderOriginal] = useState()
     const [ownerInvoiceNumberOriginal, setOwnerInvoiceNumberOriginal] = useState()
     const [ownerInvoiceDateOriginal, setOwnerInvoiceDateOriginal] = useState()
@@ -75,6 +75,17 @@ const OrderDetails = ({
     const [lesseeDueDateOriginal, setLesseeDueDateOriginal] = useState()
     const [lesseeInvoiceNetDaysOriginal, setLesseeInvoiceNetDaysOriginal] = useState()
     const [showButtonsLessee, setShowButtonsLessee] = useState(false)
+    const [showButtonsThirdParty, setShowButtonsThirdParty] = useState(false);
+
+    // method to show update and cancel button when for thirdparty
+    const [thirdPartyPurchaseOrderOriginal, setThirdPartyPurchaseOrderOriginal] = useState();
+    const [thirdPartyInvoiceNumberOriginal, setThirdPartyInvoiceNumberOriginal] = useState();
+    const [thirdPartyInvoiceDateOriginal, setThirdPartyInvoiceDateOriginal] = useState();
+    const [thirdPartyDueDateOriginal, setThirdPartyDueDateOriginal] = useState();
+    const [thirdPartyInvoiceNetDaysOriginal, setThirdPartyInvoiceNetDaysOriginal] = useState();
+
+
+
     const [partReport, setPartReport] = useState([])
     const [jobs, setJobs] = useState([])
     const statusCommentDropDownInDetails = useRef(null);
@@ -87,6 +98,7 @@ const OrderDetails = ({
 
     const [ownerPurchaseOrder, setOwnerPurchaseOrder] = useState(null)
     const [lesseePurchaseOrder, setLesseePurchaseOrder] = useState(null)
+
     const [purchaseorderChangedForOwner, setPurchaseOrderChangedForOwner] = useState(false)
     const [purchaseorderChangedForLessee, setPurchaseOrderChangedForLessee] = useState(false)
 
@@ -107,6 +119,27 @@ const OrderDetails = ({
     const [invoiceDateChangedForOwner, setInvoiceDateChangedForOwner] = useState(false)
     const [invoiceDateChangedForLessee, setInvoiceDateChangedForLessee] = useState(false)
 
+    // Billing info changed flags
+    const [isBillingInformationChangedForThirdParty, setIsBillingInformationChangedForThirdParty] = useState(false);
+
+    // Purchase Order
+    const [thirdPartyPurchaseOrder, setThirdPartyPurchaseOrder] = useState(null);
+    const [purchaseorderChangedForThirdParty, setPurchaseOrderChangedForThirdParty] = useState(false);
+
+    // Invoice Number
+    const [thirdPartyInvoiceNumber, setThirdPartyInvoiceNumber] = useState(null);
+    const [invoiceChangedForThirdParty, setInvoiceChangedForThirdParty] = useState(false);
+
+    // Invoice Net Days
+    const [thirdPartyInvoiceNetDays, setThirdPartyInvoiceNetDays] = useState(null);
+    const [invoiceNetDaysChangedForThirdParty, setInvoiceNetDaysChangedForThirdParty] = useState(false);
+
+    // Invoice Date
+    const [thirdPartyInvoiceDate, setThirdPartyInvoiceDate] = useState(null);
+    const [invoiceDateChangedForThirdParty, setInvoiceDateChangedForThirdParty] = useState(false);
+
+
+
 
     const [mo_wk, setMo_wk] = useState(null);
     const [sp, setSP] = useState(null);
@@ -116,6 +149,7 @@ const OrderDetails = ({
     const [storageInformation,setStorageInformation ]= useState([])
 
     const [isBilledToLessee, setIsBilledToLessee] = useState(false)
+    const [isBilledToThirdParty, setIsBilledToThirdParty] = useState(false)
 
     //for checklist
     const [currentWorkOrderStatus, setCurrentWorkOrderStatus] = useState(null)
@@ -139,17 +173,13 @@ const OrderDetails = ({
             setIsBillingInformationChangedForOwner(false)
         }
     }
-    const reasonToComeRef = useRef(null);
+
     const mowkRef = useRef(null);
     const spRef = useRef(null);
     const tqRef = useRef(null);
     const reRef = useRef(null);
     const epRef = useRef(null);
-    const ownerPurchaseOrderRef = useRef(null);
-    const lesseePurchaseOrderRef = useRef(null);
-    const ownerInvoiceNumberRef = useRef(null);
-    const ownerInvoiceDaterRef = useRef(null);
-    const ownerInvoiceNetDaysrRef = useRef(null);
+
     //const debouncedMOWK = useDebounce(workOrder.mo_wk, 300);
 
     const [railCarLog,setRailcarLog]=useState([])
@@ -222,78 +252,200 @@ const OrderDetails = ({
         setTotalMatCost(totalMaterialCost)
 
     };
+    //
+    // useEffect(() => {
+    //     if (!workOrder) {
+    //         //console.warn("workOrder is null or undefined");
+    //         return;
+    //     }
+    //     //console.log(workOrder)
+    //     setReasonToCome(workOrder.reason_to_come ?? "");
+    //     setJobs(workOrder.joblist ?? []);
+    //     setIsStatusDropDownModalOpenInDetails(false);
+    //
+    //     setupdatedStatusCode("");
+    //     setIsReasonToComeChanged(false);
+    //
+    //     setIsBillingInformationChangedForOwner(false);
+    //     setIsBillingInformationChangedForLessee(false);
+    //     setIsBillingInformationChangedForThirdParty(false);
+    //
+    //
+    //     setOwnerPurchaseOrder(workOrder.purchase_order ?? "");
+    //     setOwnerPurchaseOrderOriginal(workOrder.purchase_order ?? "");
+    //     setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? "");
+    //     setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? "");
+    //     setPurchaseOrderChangedForOwner(false);
+    //     setPurchaseOrderChangedForLessee(false);
+    //
+    //     setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+    //     setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+    //     setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? "");
+    //     setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? "");
+    //     setInvoiceChangedForOwner(false);
+    //     setInvoiceChangedForLessee(false);
+    //
+    //     setOwnerInvoiceNetDays(workOrder.invoice_net_days ?? 0);
+    //     setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days ?? 0);
+    //     setLesseeInvoiceNetDays(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+    //     setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
+    //     setInvoiceNetDaysChangedForOwner(false);
+    //     setInvoiceNetDaysChangedForLessee(false);
+    //     setOwnerInvoiceDate(workOrder.invoice_date ?? null);
+    //     setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
+    //
+    //     setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0)));
+    //
+    //     const secondaryOwnerInfo = workOrder.secondary_owner_info ?? {};
+    //     const thirdPartyInfo = workOrder.third_party_info ?? {};
+    //     setLesseeInvoiceDate(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+    //     setLesseeInvoiceDateOriginal(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+    //
+    //     const invDateLessee = secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
+    //     const invNetDateLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
+    //
+    //     setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null);
+    //
+    //     setInvoiceDateChangedForOwner(false);
+    //     setInvoiceDateChangedForLessee(false);
+    //
+    //     setMo_wk(workOrder.mo_wk ?? 0);
+    //     setSP(workOrder.sp ?? 0);
+    //     setTQ(workOrder.tq ?? 0);
+    //     setRE(workOrder.re ?? 0);
+    //     setEP(workOrder.ep ?? 0);
+    //     setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
+    //     setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
+    //     setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
+    //     setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
+    //     setIsBilledToLessee(
+    //         secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
+    //     );
+    //
+    //     setIsBilledToThirdParty(
+    //         thirdPartyInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
+    //     );
+    //
+    //
+    //     setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id)
+    //     calculateJobCosts(workOrder.joblist ?? []);
+    //     workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
+    //     getRailCarTimeLog();
+    //     setStorageInformation(workOrder.storage_information ?? {});
+    //     fetchPartReport()
+    // }, [workOrder]);
+
 
     useEffect(() => {
         if (!workOrder) {
-            //console.warn("workOrder is null or undefined");
             return;
         }
-        //console.log(workOrder)
+
+        // General WorkOrder Setup
         setReasonToCome(workOrder.reason_to_come ?? "");
         setJobs(workOrder.joblist ?? []);
         setIsStatusDropDownModalOpenInDetails(false);
-
         setupdatedStatusCode("");
         setIsReasonToComeChanged(false);
 
+        // Reset Billing Info Changed Flags
         setIsBillingInformationChangedForOwner(false);
         setIsBillingInformationChangedForLessee(false);
+        setIsBillingInformationChangedForThirdParty(false);
 
+        // --- Owner ---
         setOwnerPurchaseOrder(workOrder.purchase_order ?? "");
         setOwnerPurchaseOrderOriginal(workOrder.purchase_order ?? "");
-        setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? "");
-        setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? "");
         setPurchaseOrderChangedForOwner(false);
-        setPurchaseOrderChangedForLessee(false);
 
         setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
         setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
-        setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? "");
-        setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? "");
         setInvoiceChangedForOwner(false);
-        setInvoiceChangedForLessee(false);
 
         setOwnerInvoiceNetDays(workOrder.invoice_net_days ?? 0);
         setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days ?? 0);
-        setLesseeInvoiceNetDays(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
-        setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
         setInvoiceNetDaysChangedForOwner(false);
-        setInvoiceNetDaysChangedForLessee(false);
+
         setOwnerInvoiceDate(workOrder.invoice_date ?? null);
         setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
 
-        setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0)));
+        setOwnerDueDateOriginal(
+            new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0))
+        );
+        setInvoiceDateChangedForOwner(false);
 
+        // --- Lessee ---
         const secondaryOwnerInfo = workOrder.secondary_owner_info ?? {};
+        setLesseePurchaseOrder(secondaryOwnerInfo.purchase_order ?? "");
+        setLesseePurchaseOrderOriginal(secondaryOwnerInfo.purchase_order ?? "");
+        setPurchaseOrderChangedForLessee(false);
+
+        setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
+        setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
+        setInvoiceChangedForLessee(false);
+
+        setLesseeInvoiceNetDays(secondaryOwnerInfo.invoice_net_days ?? 0);
+        setLesseeInvoiceNetDaysOriginal(secondaryOwnerInfo.invoice_net_days ?? 0);
+        setInvoiceNetDaysChangedForLessee(false);
+
         setLesseeInvoiceDate(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
         setLesseeInvoiceDateOriginal(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
 
         const invDateLessee = secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
-        const invNetDateLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
-
-        setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null);
-
-        setInvoiceDateChangedForOwner(false);
+        const invNetDaysLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
+        setLesseeDueDateOriginal(
+            invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDaysLessee)) : null
+        );
         setInvoiceDateChangedForLessee(false);
+
+        // --- Third Party ---
+        const thirdPartyInfo = workOrder.third_party_info ?? {};
+        setThirdPartyPurchaseOrder(thirdPartyInfo.purchase_order ?? "");
+        setThirdPartyPurchaseOrderOriginal(thirdPartyInfo.purchase_order ?? "");
+        setPurchaseOrderChangedForThirdParty(false);
+
+        setThirdPartyInvoiceNumber(thirdPartyInfo.invoice_number ?? "");
+        setThirdPartyInvoiceNumberOriginal(thirdPartyInfo.invoice_number ?? "");
+        setInvoiceChangedForThirdParty(false);
+
+        setThirdPartyInvoiceNetDays(thirdPartyInfo.invoice_net_days ?? 0);
+        setThirdPartyInvoiceNetDaysOriginal(thirdPartyInfo.invoice_net_days ?? 0);
+        setInvoiceNetDaysChangedForThirdParty(false);
+
+        setThirdPartyInvoiceDate(thirdPartyInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+        setThirdPartyInvoiceDateOriginal(thirdPartyInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
+
+        const invDateThirdParty = thirdPartyInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
+        const invNetDaysThirdParty = thirdPartyInfo.invoice_net_days ?? 0;
+        setThirdPartyDueDateOriginal(
+            invDateThirdParty !== process.env.REACT_APP_DEFAULT_DATE
+                ? new Date(addDays(invDateThirdParty, invNetDaysThirdParty))
+                : null
+        );
+        setInvoiceDateChangedForThirdParty(false);
+
+        // --- Billing flags ---
+        setIsBilledToLessee(
+            secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
+        );
+        setIsBilledToThirdParty(
+            thirdPartyInfo && Object.keys(thirdPartyInfo).length > 0 ? true : false
+        );
+
+        // --- Other WorkOrder properties ---
         setMo_wk(workOrder.mo_wk ?? 0);
         setSP(workOrder.sp ?? 0);
         setTQ(workOrder.tq ?? 0);
         setRE(workOrder.re ?? 0);
         setEP(workOrder.ep ?? 0);
-        setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
-        setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
-        setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
-        setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
-        setIsBilledToLessee(
-            secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
-        );
-        setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id)
+        setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id);
         calculateJobCosts(workOrder.joblist ?? []);
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
         getRailCarTimeLog();
         setStorageInformation(workOrder.storage_information ?? {});
-        fetchPartReport()
+        fetchPartReport();
     }, [workOrder]);
+
 
 
     const fetchPartReport = async () => {
@@ -386,18 +538,89 @@ const OrderDetails = ({
         updateEP(workOrder.id, ep)
     }
 
-    const handleIsBilledToLessee = (e) => {
-        const is_checked = e.target.checked
-        if (is_checked) {
-            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
-            setIsBilledToLessee(true)
-            setJobs(workOrder.joblist)
-        } else {
-            updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
-            setIsBilledToLessee(false)
-            setJobs(workOrder.joblist)
+    // const handleIsBilledToLessee = (e) => {
+    //     const is_checked = e.target.checked
+    //     if (is_checked) {
+    //         updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
+    //         setIsBilledToLessee(true)
+    //         setJobs(workOrder.joblist)
+    //     } else {
+    //         updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
+    //         setIsBilledToLessee(false)
+    //         setJobs(workOrder.joblist)
+    //     }
+    // }
+
+
+    // const handleIsBilledToLessee = (e, billingTarget) => {
+    //     const is_checked = e.target.checked;
+    //
+    //     let lessee_id = null;
+    //     let third_party_id = null;
+    //
+    //     if (is_checked) {
+    //         if (billingTarget === 'LESSEE') {
+    //             lessee_id = workOrder.railcar.owner_railcar_lessee_idToowner.id;
+    //         }
+    //
+    //         if (billingTarget === 'THIRD_PARTY') {
+    //             third_party_id = workOrder.railcar.third_party_idToowner.id;
+    //         }
+    //     }
+    //
+    //     updateBillToLessee(
+    //         workOrder.id,
+    //         lessee_id,
+    //         third_party_id,
+    //         is_checked,
+    //         workOrder.work_order
+    //     );
+    //
+    //     setIsBilledToLessee(is_checked);
+    //     setJobs(workOrder.joblist);
+    // };
+
+
+    const handleBillingToggle = (e, type) => {
+        const checked = e.target.checked;
+
+        let lessee_id = null;
+        let third_party_id = null;
+
+        // IMPORTANT:
+        // Always send the ID for the toggled side
+        // Never send the other one
+        if (type === 'LESSEE') {
+            lessee_id =
+                workOrder.railcar.owner_railcar_lessee_idToowner?.id || null;
         }
-    }
+
+        if (type === 'THIRD_PARTY') {
+            third_party_id =
+                workOrder.railcar.owner_railcar_third_party_idToowner?.id || null;
+        }
+
+        updateBillToLessee(
+            workOrder.id,
+            lessee_id,
+            third_party_id,
+            checked,                // true = add, false = remove
+            workOrder.work_order
+        );
+
+        // Update local UI state only for the toggled checkbox
+        if (type === 'LESSEE') {
+            setIsBilledToLessee(checked);
+        }
+
+        if (type === 'THIRD_PARTY') {
+            setIsBilledToThirdParty(checked);
+        }
+
+        setJobs(workOrder.joblist);
+    };
+
+
 
     const deleteWorkOrder = (id,work_order) =>{
         const confirmDelete = window.confirm("Are you sure you want to delete this work order?");
@@ -422,22 +645,55 @@ const OrderDetails = ({
         }
     }
 
-    const changeNetDays = (isForOwner, days,) => {
-        if (isForOwner) {
-            if (days != ownerInvoiceNetDays) {
-                console.log(days)
-                setOwnerInvoiceNetDays(days)
-                checkBillingInformationChangedForOwner()
-            }
+    // const changeNetDays = (isForOwner, days,) => {
+    //     if (isForOwner) {
+    //         if (days != ownerInvoiceNetDays) {
+    //             console.log(days)
+    //             setOwnerInvoiceNetDays(days)
+    //             checkBillingInformationChangedForOwner()
+    //         }
+    //
+    //     } else {
+    //         if (days != lesseeInvoiceNetDays) {
+    //             setLesseeInvoiceNetDays(days)
+    //             setLesseeInvoiceNetDays(days)
+    //             setInvoiceNetDaysChangedForLessee(true)
+    //         }
+    //     }
+    // }
 
+    const changeNetDays = (type, days) => {
+        let currentNetDays;
+        let setNetDays;
+        let setChangedFlag;
+
+        // Determine which type we are updating
+        if (type === "OWNER") {
+            currentNetDays = ownerInvoiceNetDays;
+            setNetDays = setOwnerInvoiceNetDays;
+            setChangedFlag = () => checkBillingInformationChangedForOwner(); // reuse your existing function
+        } else if (type === "LESSEE") {
+            currentNetDays = lesseeInvoiceNetDays;
+            setNetDays = setLesseeInvoiceNetDays;
+            setChangedFlag = () => setInvoiceNetDaysChangedForLessee(true);
+        } else if (type === "THIRD_PARTY") {
+            currentNetDays = thirdPartyInvoiceNetDays;
+            setNetDays = setThirdPartyInvoiceNetDays;
+            setChangedFlag = () => setInvoiceNetDaysChangedForThirdParty(true);
         } else {
-            if (days != lesseeInvoiceNetDays) {
-                setLesseeInvoiceNetDays(days)
-                setLesseeInvoiceNetDays(days)
-                setInvoiceNetDaysChangedForLessee(true)
-            }
+            console.warn("Unknown billing type for Net Days change:", type);
+            return;
         }
-    }
+
+        if (days !== currentNetDays) {
+            console.log(`${type} net days changed:`, days);
+            setNetDays(days);
+            setChangedFlag();
+        }
+    };
+
+
+
 
     const handleArrivalDate = (newDate) => {
         updateArrivalDate(workOrder.id, newDate)
@@ -591,6 +847,28 @@ const OrderDetails = ({
         }
     }
 
+    const handleInvoiceClickThirdParty = () => {
+        if (thirdPartyInvoiceNumber == null || thirdPartyInvoiceNumber == "") {
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: process.env.REACT_APP_BIRCH_API_URL + 'get_last_invoice',
+                headers: {}
+            };
+
+            axios.request(config)
+                .then((response) => {
+                    console.log(response.data[0].f0)
+                    setThirdPartyInvoiceNumber(invoiceGeneratorFromLastInvoce(response.data[0].f0))
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else {
+            setThirdPartyInvoiceNumber(invoiceGeneratorFromLastInvoce(thirdPartyInvoiceNumber))
+        }
+    }
+
 
     const invoiceGeneratorFromLastInvoce = (last_invoice_number) => {
         let lastFour = last_invoice_number.slice(-4)
@@ -690,6 +968,12 @@ const OrderDetails = ({
         setLesseePurchaseOrder(() => value)
     }
 
+    const handThirdpartyPurchaseOrderChange = (event) => {
+        const value = event.target.value.toString()
+        setThirdPartyPurchaseOrder(() => value)
+    }
+
+
     const handleInvoiceNumberChangeOwner = (event) => {
         const value = event.target.value.toString().trim()
         setOwnerInvoiceNumber(() => value)
@@ -700,60 +984,125 @@ const OrderDetails = ({
         setLesseeInvoiceNumber(value)
     }
 
+    const handleInvoiceNumberChangeThirdParty = (event) => {
+        const value = event.target.value.toString().trim()
+        setThirdPartyInvoiceNumber(value)
+    }
+
     const handleOwnerInvoiceDateChanged = (value) => {
 
         setOwnerInvoiceDate(value)
     }
 
-    function toSqlDatetime(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
+
 
     const handleLesseeInvoiceDateChanged = (value) => {
         console.log("lessee invoice date changed")
         setLesseeInvoiceDate(value)
     }
 
+    const handleThirdPartyInvoiceDateChanged = (value) => {
+        console.log("lessee invoice date changed")
+        setThirdPartyInvoiceDate(value)
+    }
 
-    const handleDueDateChanged = (isFowOwner, date) => {
-        console.log("due date is changed")
+
+
+    const handleDueDateChanged = (type, date) => {
+        console.log("due date is changed");
+
+        let referenceDate;
+        let setNetDays;
+
+        // Determine which type we are updating
+        if (type === "OWNER") {
+            referenceDate = ownerInvoiceDate;
+            setNetDays = setOwnerInvoiceNetDays;
+        } else if (type === "LESSEE") {
+            referenceDate = lesseeInvoiceDate;
+            setNetDays = setLesseeInvoiceNetDays;
+        } else if (type === "THIRD_PARTY") {
+            referenceDate = thirdPartyInvoiceDate;
+            setNetDays = setThirdPartyInvoiceNetDays;
+        } else {
+            console.warn("Unknown billing type for due date change:", type);
+            return;
+        }
+
         const date1 = date;
-        const date2 = new Date(isFowOwner ? ownerInvoiceDate : lesseeInvoiceDate);
+        const date2 = new Date(referenceDate);
+
         const timeDifference = date1.getTime() - date2.getTime();
         const dayDifference = timeDifference / (1000 * 3600 * 24);
-        console.log(dayDifference)
-        if (isFowOwner) {
-            setOwnerInvoiceNetDays(dayDifference)
-        } else {
-            setLesseeInvoiceNetDays(dayDifference)
-        }
-    }
 
-    const updateBillingInformation = async (isForOwner) => {
-        console.log(ownerInvoiceDate)
-        if (isForOwner) {
-            const result =  await updateBilling(true, workOrder.id, ownerPurchaseOrder, ownerInvoiceNumber, ownerInvoiceDate, ownerInvoiceNetDays)
-            if(result){
-                setOwnerPurchaseOrderOriginal(ownerPurchaseOrder)
-                setOwnerInvoiceNumberOriginal(ownerInvoiceNumber)
-                setOwnerInvoiceDateOriginal(ownerInvoiceDate)
-                setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays)
-                setShowButtonsOwner(false)
-            }
-        } else {
-            const result = await updateBilling(false, workOrder.id, lesseePurchaseOrder, lesseeInvoiceNumber, lesseeInvoiceDate, lesseeInvoiceNetDays)
-            if(result){
-                setLesseePurchaseOrder(lesseePurchaseOrder)
-                setLesseeInvoiceNumber(lesseeInvoiceNumber)
-                setLesseeInvoiceDate(lesseeInvoiceDate)
-                setLesseeInvoiceNetDays(lesseeInvoiceNetDays)
-                setShowButtonsLessee(false)
+        console.log(`${type} day difference:`, dayDifference);
+
+        setNetDays(dayDifference);
+    };
+
+
+    const updateBillingInformation = async (type) => {
+        let result = false;
+
+        if (type === "OWNER") {
+            result = await updateBilling(
+                "OWNER",
+                workOrder.id,
+                ownerPurchaseOrder,
+                ownerInvoiceNumber,
+                ownerInvoiceDate,
+                ownerInvoiceNetDays
+            );
+
+            if (result) {
+                setOwnerPurchaseOrderOriginal(ownerPurchaseOrder);
+                setOwnerInvoiceNumberOriginal(ownerInvoiceNumber);
+                setOwnerInvoiceDateOriginal(ownerInvoiceDate);
+                setOwnerInvoiceNetDaysOriginal(ownerInvoiceNetDays);
+                setShowButtonsOwner(false);
             }
         }
-    }
+
+        if (type === "LESSEE") {
+            result = await updateBilling(
+                "LESSEE",
+                workOrder.id,
+                lesseePurchaseOrder,
+                lesseeInvoiceNumber,
+                lesseeInvoiceDate,
+                lesseeInvoiceNetDays
+            );
+
+            if (result) {
+                setLesseePurchaseOrderOriginal(lesseePurchaseOrder);
+                setLesseeInvoiceNumberOriginal(lesseeInvoiceNumber);
+                setLesseeInvoiceDateOriginal(lesseeInvoiceDate);
+                setLesseeInvoiceNetDaysOriginal(lesseeInvoiceNetDays);
+                setShowButtonsLessee(false);
+            }
+        }
+
+        if (type === "THIRD_PARTY") {
+            console.log("third party billing information updated")
+            result = await updateBilling(
+                "THIRD_PARTY",
+                workOrder.id,
+                thirdPartyPurchaseOrder,
+                thirdPartyInvoiceNumber,
+                thirdPartyInvoiceDate,
+                thirdPartyInvoiceNetDays
+            );
+
+            if (result) {
+                setThirdPartyPurchaseOrderOriginal(thirdPartyPurchaseOrder);
+                setThirdPartyInvoiceNumberOriginal(thirdPartyInvoiceNumber);
+                setThirdPartyInvoiceDateOriginal(thirdPartyInvoiceDate);
+                setThirdPartyInvoiceNetDaysOriginal(thirdPartyInvoiceNetDays);
+                setShowButtonsThirdParty(false);
+            }
+        }
+    };
+
 
     const formatTasks = (tasks) => {
         const taskMap = new Map();
@@ -933,6 +1282,53 @@ const OrderDetails = ({
         handleCheckForButtonsLessee()
     }, [lesseeInvoiceDate, lesseeInvoiceNetDays, lesseePurchaseOrder, lesseeInvoiceNumber])
 
+
+    useEffect(() => {
+        const handleCheckForButtonsThirdParty = () => {
+            // Calculate the due date for third party
+            let calc = thirdPartyInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE
+                ? new Date(addDays(thirdPartyInvoiceDate, thirdPartyInvoiceNetDays))
+                : null;
+
+            // Check if any value has changed compared to the original
+            if (
+                thirdPartyPurchaseOrder !== thirdPartyPurchaseOrderOriginal ||
+                thirdPartyInvoiceNumber !== thirdPartyInvoiceNumberOriginal ||
+                thirdPartyInvoiceDate !== thirdPartyInvoiceDateOriginal ||
+                (calc !== null && String(calc) !== String(thirdPartyDueDateOriginal))
+            ) {
+                console.log("Show buttons for Third Party will be set to true");
+
+                thirdPartyPurchaseOrder !== thirdPartyPurchaseOrderOriginal
+                    ? console.log(`third party purchase order failed`)
+                    : console.log(`third party purchase order pass`);
+
+                thirdPartyInvoiceNumber !== thirdPartyInvoiceNumberOriginal
+                    ? console.log(`third party invoice number failed`)
+                    : console.log(`third party invoice number pass`);
+
+                thirdPartyInvoiceDate !== thirdPartyInvoiceDateOriginal
+                    ? console.log(`third party invoice date failed`)
+                    : console.log(`third party invoice date pass`);
+
+                console.log(addDays(thirdPartyInvoiceDate, thirdPartyInvoiceNetDays), "changed");
+                console.log(thirdPartyDueDateOriginal, "original");
+
+                calc !== thirdPartyDueDateOriginal
+                    ? console.log(`third party due date failed`)
+                    : console.log(`third party due date pass`);
+
+                setShowButtonsThirdParty(true);
+            } else {
+                setShowButtonsThirdParty(false);
+            }
+        };
+
+        handleCheckForButtonsThirdParty();
+    }, [thirdPartyInvoiceDate, thirdPartyInvoiceNetDays, thirdPartyPurchaseOrder, thirdPartyInvoiceNumber]);
+
+
+
     const handleCancel = () => {
         setOwnerPurchaseOrder(ownerPurchaseOrderOriginal)
         setOwnerInvoiceNumber(ownerInvoiceNumberOriginal)
@@ -945,6 +1341,13 @@ const OrderDetails = ({
         setLesseeInvoiceNumber(lesseeInvoiceNumberOriginal)
         setLesseeInvoiceDate(lesseeInvoiceDateOriginal)
         setLesseeInvoiceNetDays(lesseeInvoiceNetDaysOriginal)
+    }
+
+    const handleThirdPartyCancel = () => {
+        setThirdPartyPurchaseOrder(thirdPartyPurchaseOrderOriginal)
+        setThirdPartyInvoiceNumber(thirdPartyInvoiceNumberOriginal)
+        setThirdPartyInvoiceDate(thirdPartyInvoiceDateOriginal)
+        setThirdPartyInvoiceNetDays(thirdPartyInvoiceNetDaysOriginal)
     }
 
     return (
@@ -1382,7 +1785,7 @@ const OrderDetails = ({
                                 {/*Car information */}
                                 <div className="w-full bg-white p-4  mt-[24px]" id="car_info">
                                     <h6 className='font-semibold'>Car Information</h6>
-                                    <div className="mt-[5px]  grid grid-cols-6 gap-10">
+                                    <div className="mt-[5px]  grid grid-cols-7 gap-8">
                                         <div className="">
                                             <p className='font-normal '>Equipment</p>
                                             <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar_id}</p>
@@ -1407,6 +1810,12 @@ const OrderDetails = ({
                                             <p className='font-normal '>Lesse</p>
                                             <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_lessee_idToowner.name}</p>
                                         </div>
+
+                                        <div className="">
+                                            <p className='font-normal '>Third Party</p>
+                                            <p className='text-[#979C9E] mt-[5px]'>{workOrder.railcar.owner_railcar_third_party_idToowner?.name}</p>
+                                        </div>
+
                                     </div>
                                 </div>
                                 {/*End Car information */}
@@ -1418,6 +1827,7 @@ const OrderDetails = ({
                                         workOrder={workOrder}
                                         commonData = {commonData}
                                         isBilledToLessee={isBilledToLessee}
+                                        isBilledToThirdParty={isBilledToThirdParty}
                                         createAjob={createAjob}
                                         updateAJob={updateAJob}
                                         deleteJob={deleteJob}
@@ -1884,8 +2294,21 @@ const OrderDetails = ({
                                                     <input
                                                         disabled={workOrder.locked_by != null}
                                                         type="checkbox"
-                                                        onChange={handleIsBilledToLessee}
+                                                        onChange={(e) => handleBillingToggle(e, 'LESSEE')}
                                                         checked={isBilledToLessee}
+                                                        className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
+                                                </div>
+                                            </div>
+
+                                            <div className='mt-[8px] '>
+                                                <div className='p-1 align-middle  inline-block'>
+                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
+                                                        BILL TO Third Party </p>
+                                                    <input
+                                                        disabled={workOrder.locked_by != null}
+                                                        type="checkbox"
+                                                        onChange={(e) => handleBillingToggle(e, 'THIRD_PARTY')}
+                                                        checked={isBilledToThirdParty}
                                                         className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
                                                 </div>
                                             </div>
@@ -2013,16 +2436,16 @@ const OrderDetails = ({
                                             customInput={<CustomDateInputFullWidth
                                                 value={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}/>}
                                             selected={ownerInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE  ? new Date(addDays(ownerInvoiceDate, ownerInvoiceNetDays)) : null}
-                                            onChange={newDate => handleDueDateChanged(true, newDate)}
+                                            onChange={newDate => handleDueDateChanged("OWNER", newDate)}
                                             showYearDropdown
                                             disabled={workOrder.locked_by != null}
                                             dateFormat="MM-dd-yyyy"
                                         />
                                         {!workOrder.locked_by && (
                                             <div className='mt-4'>
-                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer' onClick={() => changeNetDays(true, 30)}>Net 30</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays(true, 60)}>Net 60</span>
-                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays(true, 90)}>Net 90</span>
+                                                <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer' onClick={() => changeNetDays("OWNER", 30)}>Net 30</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays("OWNER", 60)}>Net 60</span>
+                                                <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer' onClick={() => changeNetDays("OWNER", 90)}>Net 90</span>
                                             </div>
                                         )}
 
@@ -2111,7 +2534,7 @@ const OrderDetails = ({
                                             <span>
                                                 <button
                                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded  cursor-pointer"
-                                                    onClick={() => updateBillingInformation(true)}
+                                                    onClick={() => updateBillingInformation("OWNER")}
                                                 >
                                                     UPDATE
                                                 </button>
@@ -2217,7 +2640,7 @@ const OrderDetails = ({
                                                 customInput={<CustomDateInputFullWidth
                                                     value={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}/>}
                                                 selected={lesseeInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(lesseeInvoiceDate, lesseeInvoiceNetDays)) : null}
-                                                onChange={newDate => handleDueDateChanged(false, newDate)}
+                                                onChange={newDate => handleDueDateChanged("LESSEE", newDate)}
                                                 showYearDropdown
                                                 disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
@@ -2225,11 +2648,11 @@ const OrderDetails = ({
                                             {!workOrder.locked_by && (
                                                 <div className='mt-4'>
                                                     <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
-                                                          onClick={() => changeNetDays(false, 30)}>Net 30</span>
+                                                          onClick={() => changeNetDays("LESSEE", 30)}>Net 30</span>
                                                     <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                          onClick={() => changeNetDays(false, 60)}>Net 60</span>
+                                                          onClick={() => changeNetDays("LESSEE", 60)}>Net 60</span>
                                                     <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
-                                                          onClick={() => changeNetDays(false, 90)}>Net 90</span>
+                                                          onClick={() => changeNetDays("LESSEE", 90)}>Net 90</span>
                                                 </div>
                                             )}
                                         </div>
@@ -2319,7 +2742,7 @@ const OrderDetails = ({
                                                     <span>
                                                         <button
                                                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded  cursor-pointer"
-                                                            onClick={() => updateBillingInformation(false)}
+                                                            onClick={() => updateBillingInformation("LESSEE")}
                                                         >
                                                             UPDATE
                                                         </button>
@@ -2341,6 +2764,198 @@ const OrderDetails = ({
                                 </div>
                             )}
                             {/*End Order information Lessee */}
+
+
+                            {isBilledToThirdParty && (
+                                <div className="w-full bg-white p-4 mb-10 mt-[24px] rounded-none">
+
+                                    <h6 className="font-semibold">Billing Information (Third Party)</h6>
+
+                                    <div className="grid grid-cols-3 gap-x-0.5">
+                                        {/* LEFT COLUMN */}
+                                        <div className="p-2">
+                                            <p>Purchase Order</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full"
+                                                value={thirdPartyPurchaseOrder}
+                                                disabled={workOrder.locked_by != null}
+                                                onChange={handThirdpartyPurchaseOrderChange}
+                                            />
+
+                                            <p className="mt-2">INVOICE NUMBER</p>
+
+
+                                            <div className="relative">
+
+                                                <input type="text" id="invoice_number_input_lessee" disabled={workOrder.locked_by!=null}
+                                                       value={thirdPartyInvoiceNumber}
+                                                       className="input input-bordered h-8 mt-2 w-full"
+                                                       onChange={handleInvoiceNumberChangeThirdParty}
+                                                />
+                                                <button type="submit"
+                                                        className="text-white absolute end-2.5 bottom-2 "
+                                                        onClick={handleInvoiceClickThirdParty}>;
+
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M6.99935 3.00002C7.36754 3.00002 7.66602 2.70154 7.66602 2.33335C7.66602 1.96516 7.36754 1.66669 6.99935 1.66669C6.63116 1.66669 6.33268 1.96516 6.33268 2.33335C6.33268 2.70154 6.63116 3.00002 6.99935 3.00002Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M6.99935 7.66669C7.36754 7.66669 7.66602 7.36821 7.66602 7.00002C7.66602 6.63183 7.36754 6.33335 6.99935 6.33335C6.63116 6.33335 6.33268 6.63183 6.33268 7.00002C6.33268 7.36821 6.63116 7.66669 6.99935 7.66669Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M6.99935 12.3334C7.36754 12.3334 7.66602 12.0349 7.66602 11.6667C7.66602 11.2985 7.36754 11 6.99935 11C6.63116 11 6.33268 11.2985 6.33268 11.6667C6.33268 12.0349 6.63116 12.3334 6.99935 12.3334Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M11.666 3.00002C12.0342 3.00002 12.3327 2.70154 12.3327 2.33335C12.3327 1.96516 12.0342 1.66669 11.666 1.66669C11.2978 1.66669 10.9993 1.96516 10.9993 2.33335C10.9993 2.70154 11.2978 3.00002 11.666 3.00002Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M11.666 7.66669C12.0342 7.66669 12.3327 7.36821 12.3327 7.00002C12.3327 6.63183 12.0342 6.33335 11.666 6.33335C11.2978 6.33335 10.9993 6.63183 10.9993 7.00002C10.9993 7.36821 11.2978 7.66669 11.666 7.66669Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M11.666 12.3334C12.0342 12.3334 12.3327 12.0349 12.3327 11.6667C12.3327 11.2985 12.0342 11 11.666 11C11.2978 11 10.9993 11.2985 10.9993 11.6667C10.9993 12.0349 11.2978 12.3334 11.666 12.3334Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M2.33268 3.00002C2.70087 3.00002 2.99935 2.70154 2.99935 2.33335C2.99935 1.96516 2.70087 1.66669 2.33268 1.66669C1.96449 1.66669 1.66602 1.96516 1.66602 2.33335C1.66602 2.70154 1.96449 3.00002 2.33268 3.00002Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M2.33268 7.66669C2.70087 7.66669 2.99935 7.36821 2.99935 7.00002C2.99935 6.63183 2.70087 6.33335 2.33268 6.33335C1.96449 6.33335 1.66602 6.63183 1.66602 7.00002C1.66602 7.36821 1.96449 7.66669 2.33268 7.66669Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                        <path
+                                                            d="M2.33268 12.3334C2.70087 12.3334 2.99935 12.0349 2.99935 11.6667C2.99935 11.2985 2.70087 11 2.33268 11C1.96449 11 1.66602 11.2985 1.66602 11.6667C1.66602 12.0349 1.96449 12.3334 2.33268 12.3334Z"
+                                                            stroke="#98A2B3" strokeWidth="2" strokeLinecap="round"
+                                                            strokeLinejoin="round"/>
+                                                    </svg>
+
+                                                </button>
+                                            </div>
+
+
+
+                                            <p className="mt-2">Invoice Date</p>
+
+
+                                            <DatePicker
+                                                style={{width: '100%'}}
+                                                customInput={<CustomDateInputFullWidth
+                                                    value={thirdPartyInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(thirdPartyInvoiceDate) : null}/>}
+                                                selected={thirdPartyInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(thirdPartyInvoiceDate) : null}
+                                                onChange={newDate => handleThirdPartyInvoiceDateChanged(newDate)}
+                                                showYearDropdown
+                                                disabled ={workOrder.locked_by != null}
+                                                dateFormat="MM-dd-yyyy"
+                                                todayButton="Today"
+                                            />
+                                            <p className="mt-2">Due Date</p>
+                                            <DatePicker
+                                                customInput={<CustomDateInputFullWidth
+                                                    value={thirdPartyInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(thirdPartyInvoiceDate, thirdPartyInvoiceNetDays)) : null}/>}
+                                                selected={thirdPartyInvoiceDate !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(thirdPartyInvoiceDate, thirdPartyInvoiceNetDays)) : null}
+                                                onChange={newDate => handleDueDateChanged("THIRD_PARTY", newDate)}
+                                                showYearDropdown
+                                                disabled ={workOrder.locked_by != null}
+                                                dateFormat="MM-dd-yyyy"
+                                            />
+                                            {!workOrder.locked_by && (
+                                                <div className='mt-4'>
+                                                    <span className='bg-blue-50 p-2 mt-[8px] cursor-pointer'
+                                                          onClick={() => changeNetDays("THIRD_PARTY", 30)}>Net 30</span>
+                                                    <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                          onClick={() => changeNetDays("THIRD_PARTY", 60)}>Net 60</span>
+                                                    <span className='bg-blue-50 p-2 mt-8 ml-2 cursor-pointer'
+                                                          onClick={() => changeNetDays("THIRD_PARTY", 90)}>Net 90</span>
+                                                </div>
+                                            )}
+
+
+                                        </div>
+
+                                        {/* MIDDLE COLUMN */}
+                                        <div className="p-2">
+                                            <p>Bill To</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.name}
+                                            />
+
+                                            <p className="mt-1">Address line 1</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full uppercase"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.address_line1}
+                                            />
+
+                                            <p className="mt-1">Address line 2</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full uppercase"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.address_line2}
+                                            />
+                                        </div>
+
+                                        {/* RIGHT COLUMN */}
+                                        <div className="p-2 uppercase">
+                                            <p>Contact Name</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.contact_name}
+                                            />
+
+                                            <p className="mt-1">Contact Number</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.contact_number}
+                                            />
+
+                                            <p className="mt-1">EMAIL</p>
+                                            <input
+                                                type="text"
+                                                className="input input-bordered h-8 mt-2 w-full"
+                                                disabled
+                                                value={workOrder.railcar.owner_railcar_third_party_idToowner.contact_email}
+                                            />
+
+                                            {showButtonsThirdParty && (
+                                                <div className="mt-8">
+                                                    <button
+                                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                                        onClick={() => updateBillingInformation("THIRD_PARTY")}
+                                                    >
+                                                        UPDATE
+                                                    </button>
+
+                                                    <button
+                                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+                                                        onClick={handleThirdPartyCancel}
+                                                    >
+                                                        CANCEL
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
 
                             {/*Storage information*/}
                             {workOrder.is_storage ==1 &&(

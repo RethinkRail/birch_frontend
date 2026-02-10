@@ -113,7 +113,7 @@ export function printATask(workOrder) {
 /**
  *  This method will generate BRC
  * @param workOrder  the work order
- * @param forWhom 1 - combined , 2 for owner , 3 lessee
+ * @param forWhom 1 - combined , 2 for owner , 3 lessee , 4 third party
  */
 export function printBRC(workOrder,forWhom) {
     console.log("Print BRC Clicked")
@@ -224,7 +224,7 @@ export function printBRC(workOrder,forWhom) {
                 job_table += row_html;
             }
         }else if (forWhom==2){
-            if(myjob.secondary_bill_to_id == null){
+            if(myjob.secondary_bill_to_id == null && myjob.third_party_billing_id == null){
                 var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
                 var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
                 aq = aq == null ? "" : aq;
@@ -263,7 +263,50 @@ export function printBRC(workOrder,forWhom) {
                 materialCost += Number(round2Dec(mat_cost_single_job))
                 job_table += row_html;
             }
-        }else {
+        }else if (forWhom==4){
+            if(myjob.third_party_billing_id !== null){
+                var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
+                var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
+                aq = aq == null ? "" : aq;
+                rq = rq == null ? "" : rq;
+                var row_html = "<tr><td>" + myjob.line_number + "</td>";
+                row_html += "<td>" + myjob.locationcode.code + "</td>";
+                row_html += "<td>" + myjob.quantity + "</td>";
+                row_html += "<td>" + myjob.conditioncode.code + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_appliedTojobcode.code + "</td>";
+                row_html += "<td>" + aq + "</td>";
+                row_html += "<td>" + myjob.job_description + "</td>";
+                row_html += "<td class='no-print'>" + myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name + "</td>";
+                row_html += "<td>" + ('0' + myjob.whymadecode.code).slice(-2) + "</td>";
+                row_html += "<td>" + myjob.jobcode_joblist_job_code_removedTojobcode.code + "</td>";
+                row_html += "<td>" + rq + "</td>";
+                row_html += "<td>" + myjob.responsibilitycode.code + "</td>";
+                row_html += "<td>" + dollarFormated(laborCostCalculated) + "</td>";
+
+                //total_material_cost +=item.quantity*round2Dec( item.purchase_cost * (1 + round2Dec(item.markup_percent) * 1))
+                var mat_cost_single_job = 0.0;
+                myjob.jobparts.forEach(function (part) {
+                    // var single_part_cost = round2Dec(part.quantity) * (round2Dec(part.purchase_cost) * (1 + round2Dec(part.markup_percent) * 1))
+                    // mat_cost_single_job += Number(round2Dec(single_part_cost))
+
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_part_cost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_single_job += Number(round2Dec(single_part_cost));
+                });
+
+                row_html += "<td>" + dollarFormated(Number(round2Dec(mat_cost_single_job))) + "</td>";
+                row_html += "<td>" + dollarFormated(laborCostCalculated + mat_cost_single_job) + "</td></tr>";
+                netCost += round2Dec(Number(round2Dec(laborCostCalculated + mat_cost_single_job)))
+                laborCost += Number(round2Dec(laborCostCalculated))
+                //var rounded_mat_cost = round2Dec(mat_cost_single_job)
+                materialCost += Number(round2Dec(mat_cost_single_job))
+                job_table += row_html;
+            }
+        }
+
+
+        else {
             var aq = myjob.qualifiercode_joblist_qualifier_applied_idToqualifiercode?.code || "";
             var rq = myjob.qualifiercode_joblist_qualifier_removed_idToqualifiercode?.code || "";
             aq = aq == null ? "" : aq;
@@ -435,8 +478,32 @@ export function printInvoice(workorder, forWhom) {
                 net_cost +=Number(round2Dec((labor_cost+material_cost)))
 
             }
-        }else if(forWhom==2){
-            if(job.secondary_bill_to_id == null){
+        } else if(forWhom ==4){
+            if(job.third_party_billing_id != null){
+
+
+                const laborCost =calculateLaborCost(job);
+                labor_cost += Number(round2Dec(laborCost));
+                console.log(laborCost);
+                // Calculate labor hours
+                const laborHours = calculateLaborHours(job);
+                total_hour += Number(round2Dec(laborHours));
+
+                let mat_cost_for_a_job =0
+                job.jobparts.forEach(part => {
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const materialCost = Number(round2Dec(purchaseCost + markup));
+                    mat_cost_for_a_job += Number(round2Dec(materialCost));
+                });
+                net_cost +=Number(round2Dec((labor_cost+material_cost)))
+
+            }
+        }
+
+
+        else if(forWhom==2){
+            if(job.secondary_bill_to_id == null && job.third_party_billing_id == null){
                 const laborCost = calculateLaborCost(job)
                 labor_cost += Number(round2Dec(laborCost));
 
@@ -518,7 +585,33 @@ export function printInvoice(workorder, forWhom) {
         //ownerName=workorder.railcar.owner_railcar_lessee_idToowner.name
         net_days = workorder.secondary_owner_info.invoice_net_days
         due_date = workorder.secondary_owner_info.invoice_date != null ?  convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date,net_days):""
-    }else {
+    }
+
+    else if(forWhom==4){
+        purchase_order = workorder.third_party_info.purchase_order;
+
+        owner_obj = [{
+            name: workorder.railcar.owner_railcar_third_party_idToowner.name ? workorder.railcar.owner_railcar_third_party_idToowner.name : '',
+            contact_name: workorder.railcar.owner_railcar_third_party_idToowner.contact_name ? workorder.railcar.owner_railcar_third_party_idToowner.contact_name : '',
+            address_line1: workorder.railcar.owner_railcar_third_party_idToowner.address_line1 ? workorder.railcar.owner_railcar_third_party_idToowner.address_line1 : '',
+            address_line2: workorder.railcar.owner_railcar_third_party_idToowner.address_line2 ? workorder.railcar.owner_railcar_third_party_idToowner.address_line2 : '',
+            city: workorder.railcar.owner_railcar_third_party_idToowner.city ? workorder.railcar.owner_railcar_third_party_idToowner.city : '',
+            state: workorder.railcar.owner_railcar_third_party_idToowner.state ? workorder.railcar.owner_railcar_third_party_idToowner.state : '',
+            zip_code: workorder.railcar.owner_railcar_third_party_idToowner.zip_code ? workorder.railcar.owner_railcar_third_party_idToowner.zip_code : ''
+        }];
+
+        invoice_number = workorder.secondary_owner_info.invoice_number;
+        inv_date = workorder.secondary_owner_info.invoice_date != null
+            ? convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date)
+            : "";
+
+        net_days = workorder.secondary_owner_info.invoice_net_days;
+
+        due_date = workorder.secondary_owner_info.invoice_date != null
+            ? convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date, net_days)
+            : "";
+    }
+    else {
 
         purchase_order = workorder.purchase_order
         owner_obj = [{
@@ -595,7 +688,23 @@ export function printInvoice(workorder, forWhom) {
                     }
                 }
             }
-        }else if(forWhom ==2){
+        }
+        else if(forWhom==4){
+            if(myjob.third_party_billing_id != null){
+                if (laborCostCalculated > 0) {
+                    const laborCost = calculateLaborCost(myjob);
+                    if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
+
+                        var new_val = revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name) + Number(laborCost);
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, new_val)
+                    } else {
+                        revenuewMap.set(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name, Number(laborCost))
+                    }
+                }
+            }
+        }
+
+        else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
                 if (laborCostCalculated > 0) {
                     const laborCost = calculateLaborCost(myjob);
@@ -654,7 +763,19 @@ export function printInvoice(workorder, forWhom) {
                     all_parts_for_sort.push(item)
                 });
             }
-        }else if(forWhom ==2){
+        }
+        else if(forWhom==4){
+            if(myjob.third_party_billing_id != null){
+                myjob.jobparts.forEach(function (item) {
+                    rate_per_line += myjob.labor_rate;
+                    total_job_line++;
+                    item.rev_primary = myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name
+                    all_parts_for_sort.push(item)
+                });
+            }
+        }
+
+        else if(forWhom ==2){
             if(myjob.secondary_bill_to_id ==null){
                 myjob.jobparts.forEach(function (item) {
                     rate_per_line += myjob.labor_rate;

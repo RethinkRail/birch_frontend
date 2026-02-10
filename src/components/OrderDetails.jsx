@@ -252,88 +252,6 @@ const OrderDetails = ({
         setTotalMatCost(totalMaterialCost)
 
     };
-    //
-    // useEffect(() => {
-    //     if (!workOrder) {
-    //         //console.warn("workOrder is null or undefined");
-    //         return;
-    //     }
-    //     //console.log(workOrder)
-    //     setReasonToCome(workOrder.reason_to_come ?? "");
-    //     setJobs(workOrder.joblist ?? []);
-    //     setIsStatusDropDownModalOpenInDetails(false);
-    //
-    //     setupdatedStatusCode("");
-    //     setIsReasonToComeChanged(false);
-    //
-    //     setIsBillingInformationChangedForOwner(false);
-    //     setIsBillingInformationChangedForLessee(false);
-    //     setIsBillingInformationChangedForThirdParty(false);
-    //
-    //
-    //     setOwnerPurchaseOrder(workOrder.purchase_order ?? "");
-    //     setOwnerPurchaseOrderOriginal(workOrder.purchase_order ?? "");
-    //     setLesseePurchaseOrder(workOrder.secondary_owner_info?.purchase_order ?? "");
-    //     setLesseePurchaseOrderOriginal(workOrder.secondary_owner_info?.purchase_order ?? "");
-    //     setPurchaseOrderChangedForOwner(false);
-    //     setPurchaseOrderChangedForLessee(false);
-    //
-    //     setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
-    //     setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
-    //     setLesseeInvoiceNumber(workOrder.secondary_owner_info?.invoice_number ?? "");
-    //     setLesseeInvoiceNumberOriginal(workOrder.secondary_owner_info?.invoice_number ?? "");
-    //     setInvoiceChangedForOwner(false);
-    //     setInvoiceChangedForLessee(false);
-    //
-    //     setOwnerInvoiceNetDays(workOrder.invoice_net_days ?? 0);
-    //     setOwnerInvoiceNetDaysOriginal(workOrder.invoice_net_days ?? 0);
-    //     setLesseeInvoiceNetDays(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
-    //     setLesseeInvoiceNetDaysOriginal(workOrder.secondary_owner_info?.invoice_net_days ?? 0);
-    //     setInvoiceNetDaysChangedForOwner(false);
-    //     setInvoiceNetDaysChangedForLessee(false);
-    //     setOwnerInvoiceDate(workOrder.invoice_date ?? null);
-    //     setOwnerInvoiceDateOriginal(workOrder.invoice_date ?? null);
-    //
-    //     setOwnerDueDateOriginal(new Date(addDays(workOrder.invoice_date ?? new Date(), workOrder.invoice_net_days ?? 0)));
-    //
-    //     const secondaryOwnerInfo = workOrder.secondary_owner_info ?? {};
-    //     const thirdPartyInfo = workOrder.third_party_info ?? {};
-    //     setLesseeInvoiceDate(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
-    //     setLesseeInvoiceDateOriginal(secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE);
-    //
-    //     const invDateLessee = secondaryOwnerInfo.invoice_date ?? process.env.REACT_APP_DEFAULT_DATE;
-    //     const invNetDateLessee = secondaryOwnerInfo.invoice_net_days ?? 0;
-    //
-    //     setLesseeDueDateOriginal(invDateLessee !== process.env.REACT_APP_DEFAULT_DATE ? new Date(addDays(invDateLessee, invNetDateLessee)) : null);
-    //
-    //     setInvoiceDateChangedForOwner(false);
-    //     setInvoiceDateChangedForLessee(false);
-    //
-    //     setMo_wk(workOrder.mo_wk ?? 0);
-    //     setSP(workOrder.sp ?? 0);
-    //     setTQ(workOrder.tq ?? 0);
-    //     setRE(workOrder.re ?? 0);
-    //     setEP(workOrder.ep ?? 0);
-    //     setOwnerInvoiceNumber(workOrder.invoice_number ?? "");
-    //     setOwnerInvoiceNumberOriginal(workOrder.invoice_number ?? "");
-    //     setLesseeInvoiceNumber(secondaryOwnerInfo.invoice_number ?? "");
-    //     setLesseeInvoiceNumberOriginal(secondaryOwnerInfo.invoice_number ?? "");
-    //     setIsBilledToLessee(
-    //         secondaryOwnerInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
-    //     );
-    //
-    //     setIsBilledToThirdParty(
-    //         thirdPartyInfo && Object.keys(secondaryOwnerInfo).length > 0 ? true : false
-    //     );
-    //
-    //
-    //     setCurrentWorkOrderStatus(workOrder.workupdates[0].status_id)
-    //     calculateJobCosts(workOrder.joblist ?? []);
-    //     workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
-    //     getRailCarTimeLog();
-    //     setStorageInformation(workOrder.storage_information ?? {});
-    //     fetchPartReport()
-    // }, [workOrder]);
 
 
     useEffect(() => {
@@ -538,47 +456,6 @@ const OrderDetails = ({
         updateEP(workOrder.id, ep)
     }
 
-    // const handleIsBilledToLessee = (e) => {
-    //     const is_checked = e.target.checked
-    //     if (is_checked) {
-    //         updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, true, workOrder.work_order)
-    //         setIsBilledToLessee(true)
-    //         setJobs(workOrder.joblist)
-    //     } else {
-    //         updateBillToLessee(workOrder.id, workOrder.railcar.owner_railcar_lessee_idToowner.id, false, workOrder.work_order)
-    //         setIsBilledToLessee(false)
-    //         setJobs(workOrder.joblist)
-    //     }
-    // }
-
-
-    // const handleIsBilledToLessee = (e, billingTarget) => {
-    //     const is_checked = e.target.checked;
-    //
-    //     let lessee_id = null;
-    //     let third_party_id = null;
-    //
-    //     if (is_checked) {
-    //         if (billingTarget === 'LESSEE') {
-    //             lessee_id = workOrder.railcar.owner_railcar_lessee_idToowner.id;
-    //         }
-    //
-    //         if (billingTarget === 'THIRD_PARTY') {
-    //             third_party_id = workOrder.railcar.third_party_idToowner.id;
-    //         }
-    //     }
-    //
-    //     updateBillToLessee(
-    //         workOrder.id,
-    //         lessee_id,
-    //         third_party_id,
-    //         is_checked,
-    //         workOrder.work_order
-    //     );
-    //
-    //     setIsBilledToLessee(is_checked);
-    //     setJobs(workOrder.joblist);
-    // };
 
 
     const handleBillingToggle = (e, type) => {
@@ -1151,7 +1028,7 @@ const OrderDetails = ({
 
     const handleListItemClick = (what_to_download) => {
 
-        if (isBilledToLessee) {
+        if (isBilledToLessee || isBilledToThirdParty) {
             if(what_to_download==='aar'){
                 setDocToDownload("aar")
             }else if(what_to_download === 'brc'){
@@ -1218,13 +1095,32 @@ const OrderDetails = ({
                     if(workOrder.secondary_owner_info.purchase_order != ''){
                         printInvoice(workOrder,3)
                     }else {
-                        alert("Purchase order required")
+                        alert("Purchase order required lessee")
                     }
                 }else {
                     printInvoice(workOrder,3)
                 }
             }
-        } else if (option === 'combined') {
+        } else if (option === 'third_party') {
+            if(docToDownload==='aar'){
+                printAAR(workOrder, false, 4);
+            }else if(docToDownload==='brc'){
+                printBRC(workOrder,4)
+            }else if(docToDownload==='invoice'){
+                if(workOrder.railcar.owner_railcar_third_party_idToowner.is_po == 1){
+                    if(workOrder.third_party_info.purchase_order != ''){
+                        printInvoice(workOrder,4)
+                    }else {
+                        alert("Purchase order required for 3RD party")
+                    }
+                }else {
+                    printInvoice(workOrder,4)
+                }
+            }
+        }
+
+
+        else if (option === 'combined') {
             if(docToDownload==='aar'){
                 printAAR(workOrder, false, 1);
             }else if(docToDownload==='brc'){
@@ -1562,9 +1458,19 @@ const OrderDetails = ({
                                     <Button onClick={() => handleButtonClick('owner')} color="primary">
                                         For Owner
                                     </Button>
-                                    <Button onClick={() => handleButtonClick('lessee')} color="primary">
-                                        For Lessee
-                                    </Button>
+
+
+                                    {isBilledToLessee &&(
+                                        <Button onClick={() => handleButtonClick('lessee')} color="primary">
+                                            For Lessee
+                                        </Button>
+                                    )}
+                                    {isBilledToThirdParty &&(
+                                        <Button onClick={() => handleButtonClick('third_party')} color="primary">
+                                            For 3RD Party
+                                        </Button>
+                                    )}
+
                                     <Button onClick={() => handleButtonClick('combined')} color="primary">
                                         Combined
                                     </Button>
@@ -1665,9 +1571,17 @@ const OrderDetails = ({
                                         <Button onClick={() => handleButtonClick('owner')} color="primary">
                                             For Owner
                                         </Button>
-                                        <Button onClick={() => handleButtonClick('lessee')} color="primary">
-                                            For Lessee
-                                        </Button>
+                                        {isBilledToLessee &&(
+                                            <Button onClick={() => handleButtonClick('lessee')} color="primary">
+                                                For Lessee
+                                            </Button>
+                                        )}
+                                        {isBilledToThirdParty &&(
+                                            <Button onClick={() => handleButtonClick('third_party')} color="primary">
+                                                For 3RD Party
+                                            </Button>
+                                        )}
+
                                         <Button onClick={() => handleButtonClick('combined')} color="primary">
                                             Combined
                                         </Button>
@@ -1676,110 +1590,6 @@ const OrderDetails = ({
                             </div>
 
                             {/*End Side menu*/}
-
-
-                            {/*Job menu*/}
-                            {/*<div className="absolute top-2/4 right-4 hidden lg:block">*/}
-                            {/*    <ul tabIndex={0} className="dropdown-content z-[1] menu  shadow bg-white p-0">*/}
-                            {/*        <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('brc')}>*/}
-                            {/*        <span className="p-1">*/}
-                            {/*            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"*/}
-                            {/*                 xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*                <path*/}
-                            {/*                    d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"*/}
-                            {/*                    stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"*/}
-                            {/*                    strokeLinejoin="round"/>*/}
-                            {/*            </svg>*/}
-                            {/*            BRC*/}
-                            {/*        </span>*/}
-                            {/*        </li>*/}
-                            {/*        <li className='flex h-fit text-[10px] p-0'  onClick={()=>handleListItemClick('aar')}>*/}
-                            {/*        <span className="p-1">*/}
-                            {/*            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"*/}
-                            {/*                 xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*                <path*/}
-                            {/*                    d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"*/}
-                            {/*                    stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"*/}
-                            {/*                    strokeLinejoin="round"/>*/}
-                            {/*            </svg>*/}
-                            {/*            ARR-500B*/}
-                            {/*        </span>*/}
-                            {/*        </li>*/}
-                            {/*        <li className='flex h-fit text-[10px] p-0'  onClick={()=>printBBOM(workOrder)}>*/}
-                            {/*        <span className="p-1">*/}
-                            {/*            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"*/}
-                            {/*                 xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*                <path*/}
-                            {/*                    d="M14.1665 14.1667L18.3332 10L14.1665 5.83333M5.83317 5.83333L1.6665 10L5.83317 14.1667M11.6665 2.5L8.33317 17.5"*/}
-                            {/*                    stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"*/}
-                            {/*                    strokeLinejoin="round"/>*/}
-                            {/*            </svg>*/}
-                            {/*            BBOM*/}
-                            {/*        </span>*/}
-                            {/*        </li>*/}
-                            {/*        <li className='flex h-fit text-[10px] p-0' onClick={()=>handleListItemClick('invoice')}>*/}
-                            {/*        <span className="p-1">*/}
-                            {/*            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"*/}
-                            {/*                 xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*                <path*/}
-                            {/*                    d="M11.6668 9.16663H6.66683M8.3335 12.5H6.66683M13.3335 5.83329H6.66683M16.6668 5.66663V14.3333C16.6668 15.7334 16.6668 16.4335 16.3943 16.9683C16.1547 17.4387 15.7722 17.8211 15.3018 18.0608C14.767 18.3333 14.067 18.3333 12.6668 18.3333H7.3335C5.93336 18.3333 5.2333 18.3333 4.69852 18.0608C4.22811 17.8211 3.84566 17.4387 3.60598 16.9683C3.3335 16.4335 3.3335 15.7334 3.3335 14.3333V5.66663C3.3335 4.26649 3.3335 3.56643 3.60598 3.03165C3.84566 2.56124 4.22811 2.17879 4.69852 1.93911C5.2333 1.66663 5.93336 1.66663 7.3335 1.66663H12.6668C14.067 1.66663 14.767 1.66663 15.3018 1.93911C15.7722 2.17879 16.1547 2.56124 16.3943 3.03165C16.6668 3.56643 16.6668 4.26649 16.6668 5.66663Z"*/}
-                            {/*                    stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"*/}
-                            {/*                    strokeLinejoin="round"/>*/}
-                            {/*            </svg>*/}
-                            {/*            Invoice*/}
-                            {/*        </span>*/}
-                            {/*        </li>*/}
-                            {/*        <li className='flex h-fit text-[10px] p-0' onClick={()=>printATask(workOrder)}>*/}
-                            {/*        <span className="p-1">*/}
-                            {/*            <svg width="10" height="10" viewBox="0 0 20 20" fill="none"*/}
-                            {/*                 xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*                <path*/}
-                            {/*                    d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"*/}
-                            {/*                    stroke="#23393D" strokeWidth="1.3" strokeLinecap="round"*/}
-                            {/*                    strokeLinejoin="round"/>*/}
-                            {/*            </svg>*/}
-                            {/*            Work Order*/}
-                            {/*        </span>*/}
-                            {/*        </li>*/}
-
-                            {/*        <li*/}
-                            {/*            className={`flex h-fit text-[10px] p-0 ${workOrder.locked_by>0 || workOrder?.joblist.length > 0 ? 'opacity-50' : 'cursor-pointer'}`}*/}
-                            {/*            style={{ pointerEvents: workOrder?.joblist.length > 0 ? 'none' : 'auto' } } onClick={()=>deleteWorkOrder(workOrder.id,workOrder.work_order)}*/}
-                            {/*        >*/}
-                            {/*      <span className="p-1">*/}
-                            {/*        <svg width="10" height="10" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">*/}
-                            {/*          <path*/}
-                            {/*              d="M17.5 9.99996L7.5 9.99996M17.5 4.99996L7.5 4.99996M17.5 15L7.5 15M4.16667 9.99996C4.16667 10.4602 3.79357 10.8333 3.33333 10.8333C2.8731 10.8333 2.5 10.4602 2.5 9.99996C2.5 9.53972 2.8731 9.16663 3.33333 9.16663C3.79357 9.16663 4.16667 9.53972 4.16667 9.99996ZM4.16667 4.99996C4.16667 5.4602 3.79357 5.83329 3.33333 5.83329C2.8731 5.83329 2.5 5.4602 2.5 4.99996C2.5 4.53972 2.8731 4.16663 3.33333 4.16663C3.79357 4.16663 4.16667 4.53972 4.16667 4.99996ZM4.16667 15C4.16667 15.4602 3.79357 15.8333 3.33333 15.8333C2.8731 15.8333 2.5 15.4602 2.5 15C2.5 14.5397 2.8731 14.1666 3.33333 14.1666C3.79357 14.1666 4.16667 14.5397 4.16667 15Z"*/}
-                            {/*              stroke="#23393D" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"*/}
-                            {/*          />*/}
-                            {/*        </svg>*/}
-                            {/*        DELETE*/}
-                            {/*      </span>*/}
-                            {/*        </li>*/}
-
-
-                            {/*    </ul>*/}
-                            {/*    <Dialog*/}
-                            {/*        open={openDialog}*/}
-                            {/*        onClose={handleDialogClose}*/}
-                            {/*        container={() => document.querySelector('#orderDetailsModal')} // Ensure it appears within the correct component*/}
-                            {/*        style={{ zIndex: 1300 }} // Ensure it has a proper zIndex*/}
-                            {/*    >*/}
-                            {/*        <DialogTitle>Select from the  Options</DialogTitle>*/}
-                            {/*        <DialogActions>*/}
-                            {/*            <Button onClick={() => handleButtonClick('owner')} color="primary">*/}
-                            {/*                For Owner*/}
-                            {/*            </Button>*/}
-                            {/*            <Button onClick={() => handleButtonClick('lessee')} color="primary">*/}
-                            {/*                For Lessee*/}
-                            {/*            </Button>*/}
-                            {/*            <Button onClick={() => handleButtonClick('combined')} color="primary">*/}
-                            {/*                Combined*/}
-                            {/*            </Button>*/}
-                            {/*        </DialogActions>*/}
-                            {/*    </Dialog>*/}
-                            {/*</div>*/}
-                            {/*End Job menu*/}
 
                             <div className=" w-full">
                                 {/*Car information */}
@@ -2299,19 +2109,21 @@ const OrderDetails = ({
                                                         className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
                                                 </div>
                                             </div>
-
-                                            <div className='mt-[8px] '>
-                                                <div className='p-1 align-middle  inline-block'>
-                                                    <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
-                                                        BILL TO Third Party </p>
-                                                    <input
-                                                        disabled={workOrder.locked_by != null}
-                                                        type="checkbox"
-                                                        onChange={(e) => handleBillingToggle(e, 'THIRD_PARTY')}
-                                                        checked={isBilledToThirdParty}
-                                                        className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
+                                            {workOrder.railcar.owner_railcar_third_party_idToowner != null && (
+                                                <div className='mt-[8px] '>
+                                                    <div className='p-1 align-middle  inline-block'>
+                                                        <p className='text-xs font-normal w-max float-left align-middle mt-[4px]'>
+                                                            BILL TO Third Party </p>
+                                                        <input
+                                                            disabled={workOrder.locked_by != null}
+                                                            type="checkbox"
+                                                            onChange={(e) => handleBillingToggle(e, 'THIRD_PARTY')}
+                                                            checked={isBilledToThirdParty}
+                                                            className=" checkbox checkbox-primary float-left ml-2 align-middle"/>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
+
 
                                         </div>
 

@@ -27,6 +27,7 @@ const OrderDetails = ({
                           updateInspectedDate,
                           updateCleanDate,
                           updateRepairScheduleDate,
+                          updateDefectCardDate,
                           updateValveTearDownDate,
                           updateValveAssemblyDate,
                           updatePaintDate,
@@ -589,6 +590,10 @@ const OrderDetails = ({
     const handleRepairScheduleDate = (newDate) => {
         updateRepairScheduleDate(workOrder.id, newDate)
         newDate == null ? workOrder.repair_schedule_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.repair_schedule_date = new Date(newDate)
+    }
+    const handleDefectCardDate = (newDate) => {
+        updateDefectCardDate(workOrder.id, newDate)
+        newDate == null ? workOrder.defect_card_date = process.env.REACT_APP_DEFAULT_DATE : workOrder.defect_card_date = new Date(newDate)
     }
     const handlePaintDate = (newDate) => {
         updatePaintDate(workOrder.id, newDate)
@@ -1950,15 +1955,7 @@ const OrderDetails = ({
                                                   />
                                                 </span>
                                             </div>
-                                            <div className="p-1">
-                                                <p className='text-xs font-normal '>MO/WK</p>
-                                                <span>
-                                                <input type="text" disabled={workOrder.locked_by!=null}
-                                                       className="flex items-center justify-between  border  rounded-[4px] w-[90px] whitespace-nowrap overflow-hidden h-[32px] p-1"
-                                                       id="mo_wk_in_details" ref={mowkRef} onChange={handleMOWK}
-                                                       value={mo_wk} onKeyUp={postMOWKUpdate}/>
-                                                </span>
-                                            </div>
+
 
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Repair date</p>
@@ -1988,9 +1985,37 @@ const OrderDetails = ({
                                                 </span>
                                             </div>
 
+                                            <div className="p-1">
+                                                <p className='text-xs font-normal '>Defect card date</p>
+                                                <span>
+                                              <DatePicker
+                                                  customInput={
+                                                      <CustomDateInputFullWidth
+                                                          value={
+                                                              workOrder.defect_card_date !== process.env.REACT_APP_DEFAULT_DATE
+                                                                  ? new Date(workOrder.defect_card_date).toLocaleDateString()
+                                                                  : null
+                                                          }
+                                                      />
+                                                  }
+                                                  selected={
+                                                      workOrder.defect_card_date !== process.env.REACT_APP_DEFAULT_DATE
+                                                          ? new Date(workOrder.defect_card_date)
+                                                          : null
+                                                  }
+                                                  disabled={workOrder.locked_by!=null}
+                                                  isClearable ={workOrder.locked_by==null}
+                                                  onChange={newDate => handleDefectCardDate(newDate)}
+                                                  showYearDropdown
+                                                  dateFormat="MM-dd-yyyy"
+                                              />
+
+                                                </span>
+                                            </div>
+
 
                                         </div>
-                                        <div className="mt-[8px]  grid grid-cols-4 gap-1">
+                                        <div className="mt-[8px]  grid grid-cols-5 gap-1">
                                             <div className="p-1">
                                                 <p className='text-xs font-normal '>Special Process</p>
                                                 <span>
@@ -2033,6 +2058,15 @@ const OrderDetails = ({
                                                 </span>
                                             </div>
 
+                                            <div className="p-1">
+                                                <p className='text-xs font-normal '>MO/WK</p>
+                                                <span>
+                                                <input type="text" disabled={workOrder.locked_by!=null}
+                                                       className="flex items-center justify-between  border  rounded-[4px] w-[90px] whitespace-nowrap overflow-hidden h-[32px] p-1"
+                                                       id="mo_wk_in_details" ref={mowkRef} onChange={handleMOWK}
+                                                       value={mo_wk} onKeyUp={postMOWKUpdate}/>
+                                                </span>
+                                            </div>
 
                                         </div>
                                     </div>

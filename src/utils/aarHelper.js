@@ -276,7 +276,22 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         wheel_detail: wheel_detail,
         value: null
     };
-
+    let defect_card_jic_party = {
+        name: 'defect_card_jic_party',
+        column: 139,
+        length: 4,
+        format: 'A/N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
+    let defect_card_jic_date = {
+        name: 'defect_card_jic_date',
+        column: 143,
+        length: 6,
+        format: 'N',
+        wheel_detail: wheel_detail,
+        value: null
+    };
     let labor_charge = {
         name: 'labor_charge',
         column: 149,
@@ -865,7 +880,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         net_cost = Number(round2Dec(labor_cost + material_cost))
     } else if (forWhom == 2) {
         workorder.joblist.forEach((myjob, i) => {
-            if (myjob.secondary_bill_to_id == null ) {
+            if (myjob.third_party_billing_id ==null) {
                 number_of_jobs++;
 
                 const laborCost = calculateLaborCost(myjob);
@@ -1066,6 +1081,19 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
+            defect_card_jic_party.value = getObjComputedValue(
+                defect_card_jic_party,
+                item.responsibilitycode == 3
+                    ? null
+                    : (item.defect_card_jic_party ? item.defect_card_jic_party : null)
+            );
+
+            defect_card_jic_date.value = getObjComputedValue(
+                defect_card_jic_date,
+                item.responsibilitycode == 3
+                    ? null
+                    : (item.defect_card_date ? item.defect_card_date : null)
+            );
 
             const laborCost = calculateLaborCost(item);
 
@@ -1157,7 +1185,8 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_job_code.value = getObjComputedValue(removed_job_code);
             removed_qualifier.value = getObjComputedValue(removed_qualifier);
             responsibility_code.value = getObjComputedValue(responsibility_code);
-
+            defect_card_jic_party.value = getObjComputedValue(defect_card_jic_party);
+            defect_card_jic_date.value = getObjComputedValue(defect_card_jic_date);
             labor_charge.value = getObjComputedValue(labor_charge);
             material_charge.value = getObjComputedValue(material_charge);
             machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator);
@@ -1177,6 +1206,8 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 + removed_job_code.value
                 + removed_qualifier.value
                 + responsibility_code.value
+                + defect_card_jic_party.value
+                + defect_card_jic_date.value
                 + labor_charge.value
                 + material_charge.value
                 + mat_sign
@@ -1227,12 +1258,10 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             if (forWhom == 1) {
 
                 en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
-                //console.log(en_txt)
             }
             if (forWhom == 2) {
-                if (item.secondary_bill_to_id == null ) {
+                if (item.third_party_billing_id ==null) {
                     en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
-                    //console.log(en_txt)
                 }
             }
             if (forWhom == 3) {

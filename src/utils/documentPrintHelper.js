@@ -705,7 +705,7 @@ export function printInvoice(workorder, forWhom) {
         }
 
         else if(forWhom ==2){
-            if(myjob.secondary_bill_to_id ==null){
+            if(myjob.secondary_bill_to_id ==null && myjob.third_party_billing_id ==null){
                 if (laborCostCalculated > 0) {
                     const laborCost = calculateLaborCost(myjob);
                     if (revenuewMap.get(myjob.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name)) {
@@ -776,7 +776,7 @@ export function printInvoice(workorder, forWhom) {
         }
 
         else if(forWhom ==2){
-            if(myjob.secondary_bill_to_id ==null){
+            if(myjob.secondary_bill_to_id ==null && myjob.third_party_billing_id ==null){
                 myjob.jobparts.forEach(function (item) {
                     rate_per_line += myjob.labor_rate;
                     total_job_line++;

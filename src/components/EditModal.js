@@ -215,6 +215,10 @@ const EditModal = ({setModalShowing, fields, selectedTable, setTable, editRowDat
                 if(selectedTable==='railcar'){
                     setTable((prev) => prev.map((pr) => pr.rfid === newData.rfid ? newData : pr));
                 }
+                if(selectedTable==='jobcode' || selectedTable==='conditioncode' || selectedTable==='locationcode'){
+                    setTable((prev) => prev.map((pr) => pr.code === newData.code ? newData : pr));
+                }
+
                 if (newData.id) {
                     setTable((prev) => prev.map((pr) => pr.id === newData.id ? newData : pr));
                 } else if (newData.code) {

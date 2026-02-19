@@ -1081,19 +1081,25 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
-            defect_card_jic_party.value = getObjComputedValue(
-                defect_card_jic_party,
-                item.responsibilitycode == 3
-                    ? null
-                    : (item.defect_card_jic_party ? item.defect_card_jic_party : null)
-            );
 
-            defect_card_jic_date.value = getObjComputedValue(
-                defect_card_jic_date,
-                item.responsibilitycode == 3
-                    ? null
-                    : (item.defect_card_date ? item.defect_card_date : null)
-            );
+            if(item.responsibilitycode.code==3){
+                defect_card_jic_party.value = getObjComputedValue(
+                    defect_card_jic_party,
+                    item.responsibilitycode.code == 3
+                        ? (workorder.railcar.owner_railcar_defect_card_partyToowner ? workorder.railcar.owner_railcar_defect_card_partyToowner.abbreviation : null)
+                        : null
+                );
+
+                defect_card_jic_date.value = getObjComputedValue(
+                    defect_card_jic_date,
+                    item.responsibilitycode.code == 3
+                        ? (workorder.defect_card_date ? new Date( workorder.defect_card_date) : null)
+                        : null
+                );
+            }else {
+                defect_card_jic_party.value = getObjComputedValue(null)
+                defect_card_jic_date.value = getObjComputedValue(null)
+            }
 
             const laborCost = calculateLaborCost(item);
 

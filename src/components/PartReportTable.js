@@ -11,6 +11,7 @@ import DataTable from "react-data-table-component";
 import axios from "axios";
 import { FaArrowDown } from "react-icons/fa";
 
+
 const PartReportTable = ({ initialData }) => {
     // --- Stock Status Popup ---
     const [stockPopupOpen, setStockPopupOpen] = useState(false);
@@ -72,39 +73,41 @@ const PartReportTable = ({ initialData }) => {
 
     // --- Main table columns ---
     const columns = [
-        { name: "Code", selector: row => row.code, sortable: true, width: "9%" },
-        { name: "Line", selector: row => row.line_number, sortable: true, width: "7%" },
-        { name: "Title", selector: row => row.title, sortable: true, width: "20%" },
+        { name: "Code", selector: row => row.code, sortable: true, width: "120px" },
+        { name: "Line", selector: row => row.line_number, sortable: true, width: "80px" },
+        { name: "Title", selector: row => row.title, sortable: true, grow: 2, wrap: true },
+
         {
             name: "Cost",
             selector: row => row.purchase_cost,
-            width: "8%",
+            width: "120px",
             cell: row => {
                 const isPriceHigher = parseFloat(row.purchase_cost) < parseFloat(row.price_in_inventory);
                 return (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                        {row.purchase_cost.toFixed(2)}
-                        {isPriceHigher && <FaArrowDown style={{ color: 'red', marginLeft: '5px' }} />}
-                    </span>
+                    <span className="flex items-center">
+          {row.purchase_cost.toFixed(2)}
+                        {isPriceHigher && <FaArrowDown className="text-red-500 ml-1" />}
+        </span>
                 );
             }
         },
-        { name: "Inventory Price", selector: row => row.price_in_inventory, sortable: true, cell: row => <span>{row.price_in_inventory.toFixed(2)}</span>, width: "14%" },
-        { name: "Quantity", selector: row => row.quantity, sortable: true, width: "10%" },
+
+        { name: "Inventory Price", selector: row => row.price_in_inventory, width: "150px" },
+        { name: "Quantity", selector: row => row.quantity, width: "100px" },
         {
             name: "Quantity Available",
             selector: row => row.quantity_available,
-            sortable: true,
-            width: "14%",
+            width: "160px",
             cell: row => (
-                <span style={{ cursor: "pointer", color: "blue" }} onClick={() => fetchStockStatusReport(row.code)}>
-                    {row.quantity_available > 0 ? row.quantity_available.toFixed(2) : 0}
-                </span>
+                <span className="cursor-pointer text-blue-600" onClick={() => fetchStockStatusReport(row.code)}>
+        {row.quantity_available > 0 ? row.quantity_available.toFixed(2) : 0}
+      </span>
             )
         },
-        { name: "Condition", selector: row => row.condition, sortable: true, width: "10%" },
-        { name: "Availability", selector: row => row.availability, sortable: true, width: "10%" },
+        { name: "Condition", selector: row => row.condition, width: "120px" },
+        { name: "Availability", selector: row => row.availability, width: "120px" },
     ];
+
 
     const conditionalRowStyles = [
         { when: row => row.is_anomaly, style: { backgroundColor: 'lightyellow' } }
@@ -112,7 +115,7 @@ const PartReportTable = ({ initialData }) => {
 
     return (
         <div>
-            <div className="flex justify-between mb-5 items-center">
+            <div className="flex justify-between mb-5 items-center overflow-x-auto ">
                 <h6 className="font-semibold">Parts List</h6>
             </div>
 

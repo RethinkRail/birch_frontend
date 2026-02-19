@@ -988,26 +988,35 @@ const OrderDetails = ({
 
     const formatTasks = (tasks) => {
         const taskMap = new Map();
+
         // Populate hashmap
         tasks.forEach(task => {
-            const {task_description, user_routing_matrix_task_assignment_assigneeTouser} = task;
-            const {name} = user_routing_matrix_task_assignment_assigneeTouser;
+            const { task_description, user_routing_matrix_task_assignment_assigneeTouser } = task;
+            const user = user_routing_matrix_task_assignment_assigneeTouser;
 
             if (!taskMap.has(task_description)) {
                 taskMap.set(task_description, []);
             }
-            taskMap.get(task_description).push(name);
+
+            // Store full user object
+            taskMap.get(task_description).push(user);
         });
 
         // Generate formatted string
         let result = "";
         taskMap.forEach((users, description) => {
-            const userList = users.join('/');
+
+            const userList = users
+                .filter(u => u && u.is_active == 1)   // filter active users
+                .map(u => u.name)                     // get names
+                .join('/');
+
             result += `${description}: ${userList}\n`;
         });
 
-        return result.trim(); // Remove trailing newline
-    }
+        return result.trim();
+    };
+
 
     const updateStorage = async (is_checked) =>{
 

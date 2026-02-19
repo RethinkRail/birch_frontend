@@ -298,7 +298,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
     const columns = useMemo(
         () => [
-            { accessorKey: 'id', header: 'id', size: 2 },
+            { accessorKey: 'id', header: 'id', size: 1 },
             { accessorKey: 'ln', header: 'Line', size: 2 ,
                 Cell: ({ row }) => {
                     return (
@@ -340,7 +340,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             { accessorKey: 'cc', header: 'CC', size: 3 },
             { accessorKey: 'jobcode', header: 'JC', size: 3 },
             { accessorKey: 'aq', header: 'AQ', size: 3 },
-            { accessorKey: 'description', header: 'Description of Repair', size: 12 },
+            { accessorKey: 'description', header: 'Description of Repair', size: 10},
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
             {
                 accessorKey: 'labor_time',

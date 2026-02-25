@@ -64,7 +64,9 @@ const Navbar = () => {
                         { title: 'Revenue by Department', path: '/rev_by_department' },
                         { title: 'Rev. Recog. By DEPT', path: '/revenue_recognition_by_department' },
                         { title: 'Rev. Recog. By Inventory', path: '/revenue_recognition_by_inventory' },
+                        { title: 'Profitability Report', path: '/profitability_report' },
                         { title: 'Billed Cars', path: '/billed_cars' }
+
                     ]
                 },
                 {

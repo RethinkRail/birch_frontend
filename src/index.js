@@ -46,6 +46,7 @@ import MaintenanceOrders from "./portal/Home/MaintenanceOrders";
 import TemplateOrders from "./portal/Home/TemplateOrders";
 import EnRouteDispoOrders from "./portal/Home/EnRouteDispoOrders";
 import DepartmentAccumulationReport from "./components/DepartmentAccumulationReport";
+import ProfitabilityReport from "./portal/report/Profitabilityreport";
 
 //Original
 if ('serviceWorker' in navigator) {
@@ -317,6 +318,13 @@ root.render(
                 <Route path="/department_checklist_report" element={
                     <ProtectedRoute>
                         <DepartmentChecklistReport/>
+                    </ProtectedRoute>
+                }>
+                </Route>
+
+                <Route path="/profitability_report" element={
+                    <ProtectedRoute>
+                        <ProfitabilityReport/>
                     </ProtectedRoute>
                 }>
                 </Route>

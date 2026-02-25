@@ -6,12 +6,10 @@ import {
 import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
+import {showToastMessage} from "../utils/CommonHelper";
 
 const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee, isBilledToThirdParty,  createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
-    console.log(jobs)
 
-    console.log(isBilledToLessee)
-    console.log(isBilledToThirdParty)
 
     // ParentModal related stuffs can be found below
     const [modalShowing, setModalShowing] = useState(false)
@@ -31,7 +29,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
 
     useEffect(() => {
-        console.log(jobs);
+
         jobs.sort((a, b) => a.line_number - b.line_number)
         const today = new Date();
         const cutoffDate = new Date("2025-11-01");
@@ -47,15 +45,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
             let laborCost = calculateLaborCost(job);
 
-            // New rule: responsibility code = 3 AND today > 2025-11-01
-            // if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
-            //     laborCost =
-            //         1 * perItemFixed +
-            //         Math.max(qty, 0) * perItemVariable;
-            // } else {
-            //     // Old rule
-            //     laborCost = perItemVariable * qty;
-            // }
 
             laborCost = round2Dec(laborCost);
             const net = parseFloat(job.material_cost)+parseFloat(laborCost);
@@ -85,7 +74,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 third_party_billing_id: job.third_party_billing_id
             };
         });
-        console.log(jobListData);
         setTableData(jobListData);
     }, [jobs]);
 
@@ -423,44 +411,27 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         [jobs],
     );
 
+    function reorderLines(data, fromLine, toLine) {
 
-    function reorderLines(data, toLine, fromLine) {
-        if (fromLine === toLine) return data; // No changes needed if the positions are the same
+        if (fromLine === toLine) return data;
 
-        // Sort data by line numbers
-        data.sort((a, b) => a.ln - b.ln);
+        const sorted = [...data].sort((a, b) => a.ln - b.ln);
 
-        // Find the item to move
-        const itemToMove = data.find(item => item.ln === fromLine);
+        const fromIndex = sorted.findIndex(x => x.ln === fromLine);
+        const toIndex = sorted.findIndex(x => x.ln === toLine);
 
-        if (!itemToMove) {
-            console.error("Invalid `fromLine` number provided.");
-            return data;
-        }
+        if (fromIndex === -1 || toIndex === -1) return data;
 
-        // Remove the item from its current position
-        const remainingItems = data.filter(item => item.ln !== fromLine);
+        const [moved] = sorted.splice(fromIndex, 1);
 
-        // Determine the new index for the item
-        const toIndex = remainingItems.findIndex(item => item.ln === toLine);
+        sorted.splice(toIndex, 0, moved);
 
-        if (toIndex === -1) {
-            console.error("Invalid `toLine` number provided.");
-            return data;
-        }
-
-        // Insert the item at the new position
-        remainingItems.splice(toIndex, 0, itemToMove);
-
-        // Reassign line numbers to maintain sequential order
-        remainingItems.forEach((item, index) => {
-            item.ln = index + 1;
+        sorted.forEach((item, i) => {
+            item.ln = i + 1;
         });
 
-        return remainingItems;
+        return sorted;
     }
-
-
     const table = useMaterialReactTable({
         columns,
         data: tableData,
@@ -492,31 +463,30 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     const line_from=draggingRow.original.ln
                     const line_to=hoveredRow.original.ln
                     setIsWebserviceCalling(true)
-                    const updatedTable = reorderLines(tableData,hoveredRow.original.ln,draggingRow.original.ln)
-                    //console.log(updatedTable)
+                    const updatedTable = reorderLines(tableData,draggingRow.original.ln,hoveredRow.original.ln)
+                    console.log(updatedTable)
+                    const filtered = updatedTable.map(({ id, ln }) => ({ id, ln }));
+                    console.log(filtered)
                     setTableData([...updatedTable]);
-                    // console.log(tableData)
-                    // console.log(jobs)
                     const requestData = {
-                        line_one: line_from,
-                        line_two: line_to,
-                        work_order: workOrder.work_order,
+                        joblist: filtered,
                         user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
-                        work_id:workOrder.id
+                        work_id: workOrder.id
                     };
 
                     console.log(requestData)
-                    axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
+                    axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_line_number/', requestData)
                         .then(response => {
                             console.log('Success:', response.data);
                             setIsWebserviceCalling(false)
-                            if(response.status==200){
-
+                            if(response.status!==200){
+                                setTableData([...tableData]);
                             }
                         })
                         .catch(error => {
                             setIsWebserviceCalling(false)
                             console.error('Error:', error.response ? error.response.data : error.message);
+                            alert("Something went wrong in moving lines. Please try again later")
                             setTableData(tableData);
                         });
 

@@ -36,6 +36,14 @@ const ProfitabilityReport = () => {
     }, [startDate, endDate]);
 
     const handleRetrieve = async () => {
+        if (!startDate || !endDate) {
+            toast.error("Please select both start and end dates");
+            return;
+        }
+        if (new Date(startDate) > new Date(endDate)) {
+            toast.error("Start date cannot be after end date");
+            return;
+        }
         setData([]);
         toastId.current = toast.loading("Fetching data...");
         try {
@@ -96,7 +104,15 @@ const ProfitabilityReport = () => {
         { key: "material_cost", label: "Material Cost", format: (v) => `$${formatNumber(v)}` },
         { key: "total", label: "Total", format: (v) => `$${formatNumber(v)}`, bold: true },
 
-        { key: "_actual_labor", label: "Actual Labor Cost", calc: true, highlight: "blue" },
+
+        {
+            key: "_actual_labor",
+            label: "Actual Labor Cost",
+            calc: true,
+            highlight: "blue",
+            format: (v) => `$${formatNumber(parseFloat(v))}`
+        },
+
         { key: "original_material", label: "Original Material", format: (v) => `$${formatNumber(v)}` },
 
         { key: "_total_actual", label: "Total Actual Cost", calc: true, bold: true },
@@ -113,10 +129,9 @@ const ProfitabilityReport = () => {
 
         { key: "hours_difference", label: "Hours Difference" },
     ];
-
     const getCellValue = (row, item, idx) => {
         const c = getCalc(item, idx);
-        if (row.key === "_actual_labor") return `$${round2Dec(c.actualLabor)}`;
+        if (row.key === "_actual_labor") return `$${formatNumber(c.actualLabor)}`;
         if (row.key === "_total_actual") return `$${round2Dec(c.totalActual)}`;
         if (row.key === "_net_revenue") return `$${round2Dec(c.netRevenue)}`;
         if (row.key === "_profit") return `${round2Dec(c.profit)}%`;
@@ -284,7 +299,9 @@ const ProfitabilityReport = () => {
                                         className={rowIdx % 2 === 0 ? "bg-gray-50" : "bg-white"}
                                     >
                                         {/* Label cell */}
-                                        <td className={`p-3 text-xs text-gray-600 border-b border-gray-100 whitespace-nowrap ${row.bold ? 'font-bold text-gray-800' : 'font-medium'}`}>
+                                        <td
+                                            className={`p-3 text-xs text-gray-600 border-b border-gray-100 whitespace-nowrap sticky left-0 z-10 ${row.bold ? 'font-bold text-gray-800' : 'font-medium'} ${rowIdx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                                        >
                                             {row.label}
                                         </td>
                                         {/* Value cells */}

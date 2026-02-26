@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import axios from "axios"
 import {round2Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
@@ -19,6 +19,59 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
     console.log(markupPercent)
     //logic for new part
     const [jobParts, setJobParts] = useState([])
+
+    const partOptions = useMemo(() =>
+        commonData.parts.map((part) => ({
+            value: part.id,
+            label: `${part.code}: ${part.title}`,
+        })), [commonData.parts])
+
+    const locationCodeOptions = useMemo(() =>
+        commonData.location_codes.map((locationcode) => ({
+            value: locationcode.code,
+            label: `${locationcode.code}: ${locationcode.title}`,
+        })), [commonData.location_codes])
+
+    const conditionCodeOptions = useMemo(() =>
+        commonData.condition_codes.map((conditioncode) => ({
+            value: conditioncode.code,
+            label: `${conditioncode.code}: ${conditioncode.title}`,
+        })), [commonData.condition_codes])
+
+    const jobCodeOptions = useMemo(() =>
+        commonData.job_codes.map((jobcode) => ({
+            value: jobcode.code,
+            label: `${jobcode.code}: ${jobcode.title}`,
+        })), [commonData.job_codes])
+
+    const qualifierCodeOptions = useMemo(() => [
+        { value: null, label: "Select an option" },
+        ...commonData.qualifier_codes.map((qualifiercode) => ({
+            value: qualifiercode.id,
+            label: `${qualifiercode.code}: ${qualifiercode.title}`,
+        }))
+    ], [commonData.qualifier_codes])
+
+    const qualifierRemovedOptions = useMemo(() =>
+        commonData.qualifier_codes.map((qcr) => ({
+            value: qcr.id,
+            label: `${qcr.code}: ${qcr.title}`,
+        })), [commonData.qualifier_codes])
+
+    const wmcCodeOptions = useMemo(() =>
+        commonData.wmc_codes.map((wmc) => ({
+            value: wmc.code,
+            label: `${wmc.code}: ${wmc.title}`,
+        })), [commonData.wmc_codes])
+
+    const responsibilityCodeOptions = useMemo(() =>
+        commonData.responsibility_codes.map((rc) => ({
+            value: rc.code,
+            label: `${rc.code}: ${rc.title}`,
+        })), [commonData.responsibility_codes])
+
+    const customFilterOption = (option, inputValue) =>
+        option.label.toLowerCase().includes(inputValue.toLowerCase())
 
 
     // for edit modal
@@ -667,16 +720,11 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 name="loc"
                                 id="loc"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling with your class names
-                                value={commonData.location_codes.map((locationcode) => ({
-                                    value: locationcode.code,
-                                    label: `${locationcode.code}: ${locationcode.title}`,
-                                })).find(option => option.value === inputValues["location_code"])}
+                                classNamePrefix="react-select"
+                                value={locationCodeOptions.find(option => option.value === inputValues["location_code"])}
                                 onChange={(selectedOption) => handleChange("location_code", selectedOption?.value)}
-                                options={commonData.location_codes.map((locationcode) => ({
-                                    value: locationcode.code,
-                                    label: `${locationcode.code}: ${locationcode.title}`,
-                                }))}
+                                options={locationCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
@@ -690,16 +738,11 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 name="cc"
                                 id="cc"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To apply your custom styles
-                                value={commonData.condition_codes.map((conditioncode) => ({
-                                    value: conditioncode.code,
-                                    label: `${conditioncode.code}: ${conditioncode.title}`,
-                                })).find(option => option.value === inputValues["condition_code"])}
+                                classNamePrefix="react-select"
+                                value={conditionCodeOptions.find(option => option.value === inputValues["condition_code"])}
                                 onChange={(selectedOption) => handleChange("condition_code", selectedOption?.value)}
-                                options={commonData.condition_codes.map((conditioncode) => ({
-                                    value: conditioncode.code,
-                                    label: `${conditioncode.code}: ${conditioncode.title}`,
-                                }))}
+                                options={conditionCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
@@ -722,41 +765,25 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 name="job"
                                 id="job"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.job_codes.map((jobcode) => ({
-                                    value: jobcode.code,
-                                    label: `${jobcode.code}: ${jobcode.title}`,
-                                })).find(option => option.value === inputValues["job_code"])}
+                                classNamePrefix="react-select"
+                                value={jobCodeOptions.find(option => option.value === inputValues["job_code"])}
                                 onChange={(selectedOption) => handleChange("job_code", selectedOption?.value)}
-                                options={commonData.job_codes.map((jobcode) => ({
-                                    value: jobcode.code,
-                                    label: `${jobcode.code}: ${jobcode.title}`,
-                                }))}
+                                options={jobCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Applied (AQ)</label>
                             <Select
-                                name="loc"
-                                id="loc"
+                                name="qualifier_applied"
+                                id="qualifier_applied"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={[
-                                    { value: null, label: "Select an option" },
-                                    ...commonData.qualifier_codes.map((qualifiercode) => ({
-                                        value: qualifiercode.id,
-                                        label: `${qualifiercode.code}: ${qualifiercode.title}`,
-                                    }))
-                                ].find(option => option.value === inputValues["qualifier_code"])}
+                                classNamePrefix="react-select"
+                                value={qualifierCodeOptions.find(option => option.value === inputValues["qualifier_code"])}
                                 onChange={(selectedOption) => handleChange("qualifier_code", selectedOption?.value)}
-                                options={[
-                                    { value: null, label: "Select an option" },
-                                    ...commonData.qualifier_codes.map((qualifiercode) => ({
-                                        value: qualifiercode.id,
-                                        label: `${qualifiercode.code}: ${qualifiercode.title}`,
-                                    }))
-                                ]}
+                                options={qualifierCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
 
@@ -765,19 +792,14 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Why Made Code (WMC)</label>
                             <Select
-                                name="cc"
-                                id="cc"
+                                name="wmc"
+                                id="wmc"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.wmc_codes.map((wmc) => ({
-                                    value: wmc.code,
-                                    label: `${wmc.code}: ${wmc.title}`,
-                                })).find(option => option.value === inputValues["why_made_code"])}
+                                classNamePrefix="react-select"
+                                value={wmcCodeOptions.find(option => option.value === inputValues["why_made_code"])}
                                 onChange={(selectedOption) => handleChange("why_made_code", selectedOption?.value)}
-                                options={commonData.wmc_codes.map((wmc) => ({
-                                    value: wmc.code,
-                                    label: `${wmc.code}: ${wmc.title}`,
-                                }))}
+                                options={wmcCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
@@ -790,57 +812,42 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Jobe Code Removed (JCR)</label>
                             <Select
-                                name="loc"
-                                id="loc"
+                                name="job_removed"
+                                id="job_removed"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.job_codes.map((jobcode) => ({
-                                    value: jobcode.code,
-                                    label: `${jobcode.code}: ${jobcode.title}`,
-                                })).find(option => option.value === inputValues["job_code_removed"])}
+                                classNamePrefix="react-select"
+                                value={jobCodeOptions.find(option => option.value === inputValues["job_code_removed"])}
                                 onChange={(selectedOption) => handleChange("job_code_removed", selectedOption?.value)}
-                                options={commonData.job_codes.map((jobcode) => ({
-                                    value: jobcode.code,
-                                    label: `${jobcode.code}: ${jobcode.title}`,
-                                }))}
+                                options={jobCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Qualifier Removed (RQ)</label>
                             <Select
-                                name="loc"
-                                id="loc"
+                                name="qualifier_removed"
+                                id="qualifier_removed"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.qualifier_codes.map((qcr) => ({
-                                    value: qcr.id,
-                                    label: `${qcr.code}: ${qcr.title}`,
-                                })).find(option => option.value === inputValues["qualifier_code_removed"])}
+                                classNamePrefix="react-select"
+                                value={qualifierRemovedOptions.find(option => option.value === inputValues["qualifier_code_removed"])}
                                 onChange={(selectedOption) => handleChange("qualifier_code_removed", selectedOption?.value)}
-                                options={commonData.qualifier_codes.map((qcr) => ({
-                                    value: qcr.id,
-                                    label: `${qcr.code}: ${qcr.title}`,
-                                }))}
+                                options={qualifierRemovedOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-[12px] capitalize'>Responsibility Code (RC)</label>
                             <Select
-                                name="cc"
-                                id="cc"
+                                name="rc"
+                                id="rc"
                                 isDisabled={workOrder.locked_by != null}
-                                classNamePrefix="react-select" // To allow custom styling
-                                value={commonData.responsibility_codes.map((rc) => ({
-                                    value: rc.code,
-                                    label: `${rc.code}: ${rc.title}`,
-                                })).find(option => option.value === inputValues["responsibility_code"])}
+                                classNamePrefix="react-select"
+                                value={responsibilityCodeOptions.find(option => option.value === inputValues["responsibility_code"])}
                                 onChange={(selectedOption) => handleChange("responsibility_code", selectedOption?.value)}
-                                options={commonData.responsibility_codes.map((rc) => ({
-                                    value: rc.code,
-                                    label: `${rc.code}: ${rc.title}`,
-                                }))}
+                                options={responsibilityCodeOptions}
+                                filterOption={customFilterOption}
                                 placeholder="Select an option"
                             />
                         </div>
@@ -856,15 +863,13 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
 
                         </div>
                         <Select
-                            name="loc"
-                            id="loc"
+                            name="part"
+                            id="part"
                             isDisabled={workOrder.locked_by != null}
-                            classNamePrefix="react-select" // To allow custom styling
+                            classNamePrefix="react-select"
                             onChange={(selectedOption) => handlePartChange(selectedOption?.value)}
-                            options={commonData.parts.map((part) => ({
-                                value: part.id,
-                                label: `${part.code}: ${part.title}`,
-                            }))}
+                            options={partOptions}
+                            filterOption={customFilterOption}
                             placeholder="Select an option"
                         />
                     </div>

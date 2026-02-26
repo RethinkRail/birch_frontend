@@ -79,23 +79,39 @@ const ProfitabilityReport = () => {
         return new Date(val).toISOString().split("T")[0];
     };
 
+
+
+    const formatNumber = (v) =>
+        Number(v ?? 0).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
     const rows = [
-        {key: "owner", label: "Owner"},
-        {key: "railcar_id", label: "Railcar ID"},
-        {key: "invoice_date", label: "Invoice Date", format: (v) => formatDate(v)},
-        {key: "labor_cost", label: "Labor Cost", format: (v) => `$${round2Dec(v)}`},
-        {key: "material_cost", label: "Material Cost", format: (v) => `$${round2Dec(v)}`},
-        {key: "total", label: "Total", format: (v) => `$${round2Dec(v)}`, bold: true},
-        {key: "_actual_labor", label: "Actual Labor Cost", calc: true, highlight: "blue"},
-        {key: "original_material", label: "Original Material", format: (v) => `$${round2Dec(v)}`},
-        {key: "_total_actual", label: "Total Actual Cost", calc: true, bold: true},
-        {key: "_other_cost", label: "Other Cost", input: true},
-        {key: "_net_revenue", label: "Net Revenue", calc: true, highlight: "revenue"},
-        {key: "_profit", label: "Profit %", calc: true, highlight: "revenue"},
-        {key: "hours_applied", label: "Hours Applied", format: (v) => `$${round2Dec(v)}`},
-        {key: "labor_hour_estimated", label: "Hours Billed", format: (v) => `$${round2Dec(v)}`},
-        {key: "utilization", label: "Utilization", format: (v) => `${v}%`},
-        {key: "hours_difference", label: "Hours Difference"},
+        { key: "owner", label: "Owner" },
+        { key: "railcar_id", label: "Railcar ID" },
+        { key: "invoice_date", label: "Invoice Date", format: (v) => formatDate(v) },
+
+        { key: "labor_cost", label: "Labor Cost", format: (v) => `$${formatNumber(v)}` },
+        { key: "material_cost", label: "Material Cost", format: (v) => `$${formatNumber(v)}` },
+        { key: "total", label: "Total", format: (v) => `$${formatNumber(v)}`, bold: true },
+
+        { key: "_actual_labor", label: "Actual Labor Cost", calc: true, highlight: "blue" },
+        { key: "original_material", label: "Original Material", format: (v) => `$${formatNumber(v)}` },
+
+        { key: "_total_actual", label: "Total Actual Cost", calc: true, bold: true },
+
+        { key: "_other_cost", label: "Other Cost", input: true },
+
+        { key: "_net_revenue", label: "Net Revenue", calc: true, highlight: "revenue" },
+        { key: "_profit", label: "Profit %", calc: true, highlight: "revenue" },
+
+        { key: "hours_applied", label: "Hours Applied", format: (v) => formatNumber(v) },
+        { key: "labor_hour_estimated", label: "Hours Billed", format: (v) => formatNumber(v) },
+
+        { key: "utilization", label: "Utilization", format: (v) => `${Number(v ?? 0).toLocaleString("en-US")}%` },
+
+        { key: "hours_difference", label: "Hours Difference" },
     ];
 
     const getCellValue = (row, item, idx) => {

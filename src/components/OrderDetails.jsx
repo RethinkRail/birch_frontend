@@ -873,19 +873,33 @@ const OrderDetails = ({
 
     const handleOwnerInvoiceDateChanged = (value) => {
 
-        setOwnerInvoiceDate(value)
+        if(value != null){
+            setOwnerInvoiceDate(value)
+        }else {
+            setOwnerInvoiceDate(process.env.REACT_APP_DEFAULT_DATE )
+        }
+
     }
 
 
 
     const handleLesseeInvoiceDateChanged = (value) => {
         console.log("lessee invoice date changed")
-        setLesseeInvoiceDate(value)
+        if(value != null){
+            setLesseeInvoiceDate(value)
+        }else {
+            setLesseeInvoiceDate(new Date(process.env.REACT_APP_DEFAULT_DATE ))
+        }
+
     }
 
     const handleThirdPartyInvoiceDateChanged = (value) => {
-        console.log("lessee invoice date changed")
-        setThirdPartyInvoiceDate(value)
+        if(value != null){
+            setThirdPartyInvoiceDate(value)``
+        }   else {
+            setThirdPartyInvoiceDate(new Date(process.env.REACT_APP_DEFAULT_DATE ))``
+        }
+
     }
 
 
@@ -2284,6 +2298,7 @@ const OrderDetails = ({
                                             disabled={workOrder.locked_by != null}
                                             dateFormat="MM-dd-yyyy"
                                             todayButton="Today"
+                                            isClearable
                                         />
 
                                         <p className='mt-2'>Due Date</p>
@@ -2488,6 +2503,7 @@ const OrderDetails = ({
                                                 disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
                                                 todayButton="Today"
+                                                isClearable
                                             />
 
                                             <p className='mt-2'>Due Date</p>
@@ -2710,6 +2726,7 @@ const OrderDetails = ({
                                                 disabled ={workOrder.locked_by != null}
                                                 dateFormat="MM-dd-yyyy"
                                                 todayButton="Today"
+                                                isClearable
                                             />
                                             <p className="mt-2">Due Date</p>
                                             <DatePicker

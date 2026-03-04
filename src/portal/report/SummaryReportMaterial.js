@@ -91,6 +91,37 @@ const  SummaryReportMaterial = () => {
     };
     const isValidDate = (dateStr) =>
         dateStr && dateStr !== '1900-01-01T00:00:00.000Z';
+
+    const calculateLaborCostForASingleJob = (job) => {
+        const qty = Number(job.quantity);
+
+        const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+        const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
+
+        let calculatedLabor = 0;
+
+        // Responsibility = 3 → use special formula
+        if (Number(job.responsibilitycode?.code) === 3) {
+
+            if (qty === 1) {
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
+
+            } else if (qty > 1) {
+                calculatedLabor =
+                    (1 * perItemLaborFixed) +        // fixed only once
+                    (qty * perItemLaborVariable);    // variable applied to all qty
+            }
+
+        } else {
+            // Normal logic for responsibility != 3
+            //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+            calculatedLabor = (qty * perItemLaborVariable);
+        }
+
+        return round2Dec(calculatedLabor);
+    };
     const transformData = (data) => {
         console.log(data)
 
@@ -135,9 +166,19 @@ const  SummaryReportMaterial = () => {
                 return sum + jobTime;
             }, 0) / 3600;
 
-            const mhr_estimated = joblist.reduce((sum, job) => sum + (job.labor_time * job.quantity || 0), 0);
+            const mhr_estimated = joblist.reduce((sum, job) => sum + (job.variable_labor_time * job.quantity || 0), 0);
+
+
+
             const material_cost = joblist.reduce((sum, job) => sum + (job.material_cost || 0), 0);
-            const labor_cost = joblist.reduce((sum, job) => sum + (job.labor_rate * job.labor_time * job.quantity || 0), 0);
+
+
+            const labor_cost = (joblist || []).reduce(
+                (sum, job) => sum + (Number(calculateLaborCostForASingleJob(job)) || 0),
+                0
+            );
+
+            console.log(labor_cost)
 
             const total_cost = material_cost + labor_cost;
             //console.log(workupdates[0].user.name)

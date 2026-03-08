@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# generated service worker (keys injected from .env at build time)
+/public/firebase-messaging-sw.js
+
 # production
 /build
 

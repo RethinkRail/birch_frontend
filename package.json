@@ -52,9 +52,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "generate-firebase-sw": "node scripts/generate-firebase-sw.js",
-    "start": "npm run generate-firebase-sw && react-scripts start",
-    "build": "npm run generate-firebase-sw && react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

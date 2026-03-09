@@ -34,6 +34,7 @@ const Home = () => {
     //CLoud messaging
 
     onMessage(messaging, (payload) => {
+        console.log("Message received. ", payload);
        if(payload.data.type === 'updated_wo'){
             console.log("Push received wo updated")
             getWorkOrderById(parseInt(payload.data.value))

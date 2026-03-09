@@ -460,20 +460,20 @@ const  SummaryReportMaterial = () => {
     const handleExportData = () => {
         const csv = generateCsv(csvConfig)(data);
         download(csvConfig)(csv);
-    };
+    };<div className="form-control w-fit">
+        <label className="label cursor-pointer">
+            <span className="label-text mr-5">Only Invoiced Cars</span>
+            <input
+                type="checkbox"
+                className="toggle"
+                checked={onlyInvoicedCars}
+                onChange={handleOnlyInvoicedToggle}
+            />
+        </label>
+    </div>
     return (
         <div className="p-4">
-            <div className="form-control w-fit">
-                <label className="label cursor-pointer">
-                    <span className="label-text mr-5">Only Invoiced Cars</span>
-                    <input
-                        type="checkbox"
-                        className="toggle"
-                        checked={onlyInvoicedCars}
-                        onChange={handleOnlyInvoicedToggle}
-                    />
-                </label>
-            </div>
+
 
             <div className="form-control w-fit">
                 <label className="label cursor-pointer">

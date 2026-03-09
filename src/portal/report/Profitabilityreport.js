@@ -100,20 +100,20 @@ const ProfitabilityReport = () => {
         { key: "railcar_id", label: "Railcar ID" },
         { key: "invoice_date", label: "Invoice Date", format: (v) => formatDate(v) },
 
-        { key: "labor_cost", label: "Labor Cost", format: (v) => `$${formatNumber(v)}` },
-        { key: "material_cost", label: "Material Cost", format: (v) => `$${formatNumber(v)}` },
-        { key: "total", label: "Total", format: (v) => `$${formatNumber(v)}`, bold: true },
+        { key: "labor_cost", label: "Labor Revenue", format: (v) => `$${formatNumber(v)}` },
+        { key: "material_cost", label: "Material Revenue", format: (v) => `$${formatNumber(v)}` },
+        { key: "total", label: "Total Revenue", format: (v) => `$${formatNumber(v)}`, bold: true },
 
 
         {
             key: "_actual_labor",
-            label: "Actual Labor Cost",
+            label: "Applied Labor Cost",
             calc: true,
             highlight: "blue",
             format: (v) => `$${formatNumber(parseFloat(v))}`
         },
 
-        { key: "original_material", label: "Original Material", format: (v) => `$${formatNumber(v)}` },
+        { key: "original_material", label: " Material Cost", format: (v) => `$${formatNumber(v)}` },
 
         { key: "_total_actual", label: "Total Actual Cost", calc: true, bold: true },
 

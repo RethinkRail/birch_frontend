@@ -29,6 +29,7 @@ const WorkOrderDataTable = ({
                                 updateInspectedDate,
                                 updateCleanDate,
                                 updateRepairScheduleDate,
+                                updateDefectCardDate,
                                 updatePaintDate,
                                 updateExteriorPaintDate,
                                 updatePDDate,
@@ -715,6 +716,7 @@ const WorkOrderDataTable = ({
                         updateInspectedDate={updateInspectedDate}
                         updateCleanDate={updateCleanDate}
                         updateRepairScheduleDate={updateRepairScheduleDate}
+                        updateDefectCardDate={updateDefectCardDate}
                         updateValveTearDownDate={updateValveTearDownDate}
                         updateValveAssemblyDate={updateValveAssemblyDate}
                         updatePaintDate={updatePaintDate}

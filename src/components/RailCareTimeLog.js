@@ -41,7 +41,8 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
     const calculateUtilazation = (workOrder) =>{
         console.log("workorder in railcar time log")
         console.log(workOrder)
-        const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc + item.labor_time * item.quantity, 0) : 0;
+        const laborHours = workOrder.joblist != null ? workOrder.joblist.reduce((acc, item) => acc +
+            ( (item.labor_time_aar * item.quantity)+(item.variable_labor_time*item.quantity)), 0) : 0;
         const durationHours = workOrder.time_log.reduce((acc, item) => acc + item.logged_time_in_seconds / 3600, 0);
         const percentage = durationHours === 0 ? 0 : (durationHours / laborHours) * 100;
         setUtilization(percentage)
@@ -63,7 +64,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
             const loggedHours = loggedSeconds / 3600;
 
             // Estimated labor time
-            const estimatedHours = (job.labor_time || 0) * (job.quantity || 1);
+            const estimatedHours = (Number(round2Dec(job.labor_time_aar)) * job.quantity) +(Number(round2Dec(job.variable_labor_time)) * job.quantity);
 
             if (!categoryHours[category]) {
                 categoryHours[category] = {
@@ -266,7 +267,7 @@ const RailCareTimeLog = ({ railcarLog,locked_for_time_clockinhg,workOrder,laboor
         },
         {
             name: 'HOURS ESTIMATED',
-            selector: row => round2Dec(row.labor_time*row.quantity),
+            selector: row => Number(round2Dec(row.labor_time_aar*row.quantity))+Number(round2Dec(row.variable_labor_time*row.quantity)),
             sortable: true,
             width: "10%",
         },

@@ -56,7 +56,10 @@ const RevenueByCustomer = () => {
         { accessorKey: 'name', header: 'Customer', enableSorting: true, size: 50 },
         { accessorKey: 'invoice_date', header: 'Invoice Date', enableSorting: true },
         { accessorKey: 'railcar_id', header: 'Car Number', enableSorting: true },
-        { accessorKey: 'total_cost', header: 'Revenue', enableSorting: true }
+        { accessorKey: 'total_cost', header: 'Revenue', enableSorting: true },
+        { accessorKey: 'arrival_date', header: 'Arrival Date', enableSorting: true },
+        { accessorKey: 'shipped_date', header: 'Shipped Date', enableSorting: true },
+        { accessorKey: 'dis', header: 'DIS', enableSorting: true }
     ], []);
 
     const [columns, setColumns] = useState(initialColumns);

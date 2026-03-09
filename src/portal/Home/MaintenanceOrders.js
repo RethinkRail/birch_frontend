@@ -36,10 +36,10 @@ const Home = () => {
     onMessage(messaging, (payload) => {
         if(payload.data.type === 'new_order'){
             getActiveTasks()
-            getWorkOrderById(parseInt(payload.data.value))
+            //getWorkOrderById(parseInt(payload.data.value))
         }else if(payload.data.type === 'updated_wo'){
             console.log("Push received wo updated")
-            getWorkOrderById(parseInt(payload.data.value))
+            //getWorkOrderById(parseInt(payload.data.value))
         } else if(payload.data.type === 'routing'){
             getActiveTasks()
         }else if(payload.data.type ==='deleted_order'){
@@ -291,6 +291,32 @@ const Home = () => {
         axios.request(config)
             .then((response) => {
                 const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {repair_schedule_date: response.data})
+                setWorkOrders(updatedWorkOrders)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    const handleDefectCardDate = (work_id, date) => {
+        let data = qs.stringify({
+            'defect_card_date': date ? date.toISOString() : null,
+            'workorder_id': work_id,
+            'user_id': JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: process.env.REACT_APP_BIRCH_API_URL + 'update_defect_card_date',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+
+        axios.request(config)
+            .then((response) => {
+                const updatedWorkOrders = updateObjectByIdInsideArray(workOrders, 'id', work_id, {defect_card_date: response.data})
                 setWorkOrders(updatedWorkOrders)
             })
             .catch((error) => {
@@ -1214,6 +1240,7 @@ const Home = () => {
                         updateInspectedDate={handleInspectedlDate}
                         updateCleanDate={handleChangeCleanDate}
                         updateRepairScheduleDate={handleChangeRepairScheduleDate}
+                        updateDefectCardDate={handleDefectCardDate}
                         updatePaintDate={handleChangeInteriorPaintDate}
                         updateExteriorPaintDate={handleChangeExteriorPaintDate}
                         updatePDDate={handleChangePDDate}

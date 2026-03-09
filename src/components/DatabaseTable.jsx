@@ -67,6 +67,7 @@ const DatabaseTable = () => {
         }
     }, [searchTerm, table]);
     useEffect(() => {
+        console.log("fetching table")
         const handleFetchTable = async () => {
             try {
                 if (!selectedTable || selectedTable === null) {

@@ -6,10 +6,9 @@ import {
 import { round2Dec } from "../utils/NumberHelper";
 import EditJobModal from './EditJobModal';
 import axios, {all} from "axios";
+import {showToastMessage} from "../utils/CommonHelper";
 
-const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee,createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
-    console.log(jobs)
-
+const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLessee, isBilledToThirdParty,  createAjob,updateAJob,deleteJob,updateBillToLesseForAJob }) => {
 
 
     // ParentModal related stuffs can be found below
@@ -18,15 +17,19 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
     const [isWebServiceCalling,setIsWebserviceCalling]= useState(false)
     const [tableData, setTableData] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({
-        is_billed_to_lessee: false,
+        secondary_bill_to_id: false,
+        third_party_billing_id: false,
         id:false
     });
     useEffect(() => {
-        setColumnVisibility({ id:false,secondary_bill_to_id: isBilledToLessee }); //programmatically show firstName column
-    }, [isBilledToLessee]);
+        setColumnVisibility({ id:false,secondary_bill_to_id: isBilledToLessee,third_party_billing_id: isBilledToThirdParty  });
+    }, [isBilledToLessee,isBilledToThirdParty]);
+
+
+
 
     useEffect(() => {
-        console.log(jobs);
+
         jobs.sort((a, b) => a.line_number - b.line_number)
         const today = new Date();
         const cutoffDate = new Date("2025-11-01");
@@ -42,15 +45,6 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             const perItemVariable = round2Dec(varLaborRate*varLaborTime);
             let laborCost = calculateLaborCost(job);
 
-            // New rule: responsibility code = 3 AND today > 2025-11-01
-            // if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
-            //     laborCost =
-            //         1 * perItemFixed +
-            //         Math.max(qty, 0) * perItemVariable;
-            // } else {
-            //     // Old rule
-            //     laborCost = perItemVariable * qty;
-            // }
 
             laborCost = round2Dec(laborCost);
             const net = parseFloat(job.material_cost)+parseFloat(laborCost);
@@ -76,10 +70,10 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                 material: round2Dec(job.material_cost),
                 net: round2Dec(net),
                 rev: job.jobcode_joblist_job_code_appliedTojobcode.job_or_revenue_category.name,
-                secondary_bill_to_id: job.secondary_bill_to_id
+                secondary_bill_to_id: job.secondary_bill_to_id,
+                third_party_billing_id: job.third_party_billing_id
             };
         });
-        console.log(jobListData);
         setTableData(jobListData);
     }, [jobs]);
 
@@ -114,40 +108,34 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
 
 
     const calculateLaborCost = (job) => {
-        const today = new Date();
-        const cutoffDate = new Date("2025-11-01");
+        const qty = Number(job.quantity);
 
-        const laborTimeAar = parseFloat(job.labor_time_aar);
-        const laborRate = parseFloat(job.labor_rate);
-        const varLaborTime = parseFloat(job.variable_labor_time);
-        const varLaborRate = parseFloat(job.variable_labor_rate);
-        const qty = parseFloat(job.quantity);
+        const perItemLaborFixed = round2Dec(job.labor_rate) * round2Dec(job.labor_time_aar);
+        const perItemLaborVariable = round2Dec(job.variable_labor_rate * job.variable_labor_time);
 
-        let laborCost = 0;
-        console.log(job.quantity);
-        if (parseInt(job.responsibilitycode.code) === 3 && today > cutoffDate) {
+        let calculatedLabor = 0;
 
-            if (qty > 1) {
-                // Case: responsibility_code = 3 AND quantity = 1
-                laborCost =
-                    1 * laborTimeAar * laborRate +
-                    qty * varLaborTime * varLaborRate;
+        // Responsibility = 3 → use special formula
+        if (Number(job.responsibilitycode?.code) === 3) {
 
-            } else  {
+            if (qty === 1) {
+                calculatedLabor =
+                    (qty * perItemLaborFixed) +
+                    (qty * perItemLaborVariable);
 
-                laborCost =
-                    qty * laborTimeAar * laborRate +
-                    qty * varLaborTime * varLaborRate;
-
+            } else if (qty > 1) {
+                calculatedLabor =
+                    (1 * perItemLaborFixed) +        // fixed only once
+                    (qty * perItemLaborVariable);    // variable applied to all qty
             }
 
-            console.log(laborCost)
         } else {
-            // old rule
-            laborCost = laborTimeAar * laborRate * qty;
+            // Normal logic for responsibility != 3
+            //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+            calculatedLabor = (qty * perItemLaborVariable);
         }
 
-        return round2Dec(laborCost);
+        return round2Dec(calculatedLabor);
     };
 
 
@@ -223,7 +211,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                         ? null
                         : job.qualifiercode_joblist_qualifier_removed_idToqualifiercode.id,
                 responsibility_code: job.responsibilitycode?.code,
-                labor_cost,
+                labor_cost:Number(labor_cost),
                 labor_time: job.labor_time,
                 labor_time_aar: job.labor_time_aar,
                 labor_rate: job.labor_rate,
@@ -267,18 +255,38 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         }));
     };
 
-    const handleJobBillToLessee = async (job_id,is_checked) =>{
-        //onChange={(e) => updateLockForTimeClocking(e.target.checked)}
-       //secondary_bill_to_id,job_id,workId
-        await updateBillToLesseForAJob(is_checked?workOrder.railcar.owner_railcar_lessee_idToowner.id:null,job_id,workOrder.id)
-    }
+    const handleJobBillingChange = async (
+        job_id,
+        billToField,
+        isChecked
+    ) => {
+        let billToId = null;
+        console.log(workOrder)
+        if (isChecked) {
+            if (billToField === 'secondary_bill_to_id') {
+                billToId = workOrder.railcar.owner_railcar_lessee_idToowner.id;
+            }
+
+            if (billToField === 'third_party_billing_id') {
+                billToId = workOrder.railcar.owner_railcar_third_party_idToowner.id; // or selected value
+            }
+        }
+
+        await updateBillToLesseForAJob(
+            billToField,
+            billToId,
+            job_id,
+            workOrder.id
+        );
+    };
+
 
     const [copiedJob, setCopiedJob] = useState([])
 
 
     const columns = useMemo(
         () => [
-            { accessorKey: 'id', header: 'id', size: 2 },
+            { accessorKey: 'id', header: 'id', size: 1 },
             { accessorKey: 'ln', header: 'Line', size: 2 ,
                 Cell: ({ row }) => {
                     return (
@@ -320,7 +328,7 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
             { accessorKey: 'cc', header: 'CC', size: 3 },
             { accessorKey: 'jobcode', header: 'JC', size: 3 },
             { accessorKey: 'aq', header: 'AQ', size: 3 },
-            { accessorKey: 'description', header: 'Description of Repair', size: 15 },
+            { accessorKey: 'description', header: 'Description of Repair', size: 10},
             { accessorKey: 'wmc', header: 'WMC', size: 5 },
             {
                 accessorKey: 'labor_time',
@@ -341,17 +349,43 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     );
                 },
             },
-
             { accessorKey: 'labor', header: 'Labor cost$', size: 2 },
             { accessorKey: 'material', header: 'Material', size: 2 },
             { accessorKey: 'net', header: 'Net Cost', size: 2 },
             { accessorKey: 'rev', header: 'Revenue', size: 2  },
             {
                 accessorKey: 'secondary_bill_to_id',
-                header: 'Bill to Lessee',
+                header: 'Lessee',
                 size: 2,
                 Cell: ({ row }) => {
                     const isBilled = row.getValue('secondary_bill_to_id');
+                    console.log(isBilled)
+                    return (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <input
+                                type="checkbox"
+                                checked={isBilled  != null}
+                                disabled={workOrder.locked_by != null}
+                                onChange={(e) =>
+                                    handleJobBillingChange(
+                                        row.getValue('id'),
+                                        'secondary_bill_to_id',
+                                        e.target.checked
+                                    )
+                                }
+
+                                className="checkbox checkbox-primary"
+                            />
+                        </div>
+                    );
+                },
+            },
+            {
+                accessorKey: 'third_party_billing_id',
+                header: '3RD PARTY',
+                size: 2,
+                Cell: ({ row }) => {
+                    const isBilled = row.getValue('third_party_billing_id');
 
                     return (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -359,7 +393,14 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                                 type="checkbox"
                                 checked={isBilled  != null}
                                 disabled={workOrder.locked_by != null}
-                                onChange={(e) => handleJobBillToLessee(row.getValue('id'),e.target.checked)}
+                                onChange={(e) =>
+                                    handleJobBillingChange(
+                                        row.getValue('id'),
+                                        'third_party_billing_id',
+                                        e.target.checked
+                                    )
+                                }
+
                                 className="checkbox checkbox-primary"
                             />
                         </div>
@@ -370,67 +411,27 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
         [jobs],
     );
 
-    function swapLineNumbers(data, lineNumber1, lineNumber2) {
+    function reorderLines(data, fromLine, toLine) {
 
-        // Find the objects with the given line numbers
-        const obj1 = data.find(item => item.ln === lineNumber1);
-        const obj2 = data.find(item => item.ln === lineNumber2);
+        if (fromLine === toLine) return data;
 
-        // Swap their line numbers
-        if (obj1 && obj2) {
-            [obj1.ln, obj2.ln] = [obj2.ln, obj1.ln];
-        }
-        data.sort((a, b) => a.ln - b.ln)
+        const sorted = [...data].sort((a, b) => a.ln - b.ln);
 
-        const original_job1 = jobs.find(item => item.line_number === lineNumber1);
-        const original_job2 = jobs.find(item => item.line_number === lineNumber2);
+        const fromIndex = sorted.findIndex(x => x.ln === fromLine);
+        const toIndex = sorted.findIndex(x => x.ln === toLine);
 
-        // Swap their line numbers
-        if (original_job1 && original_job2) {
-            [original_job1.line_number, original_job2.line_number] = [original_job2.line_number, original_job1.line_number];
-        }
-        jobs.sort((a, b) => a.line_number - b.line_number)
+        if (fromIndex === -1 || toIndex === -1) return data;
 
-        return data;
-    }
+        const [moved] = sorted.splice(fromIndex, 1);
 
-    function reorderLines(data, toLine, fromLine) {
-        if (fromLine === toLine) return data; // No changes needed if the positions are the same
+        sorted.splice(toIndex, 0, moved);
 
-        // Sort data by line numbers
-        data.sort((a, b) => a.ln - b.ln);
-
-        // Find the item to move
-        const itemToMove = data.find(item => item.ln === fromLine);
-
-        if (!itemToMove) {
-            console.error("Invalid `fromLine` number provided.");
-            return data;
-        }
-
-        // Remove the item from its current position
-        const remainingItems = data.filter(item => item.ln !== fromLine);
-
-        // Determine the new index for the item
-        const toIndex = remainingItems.findIndex(item => item.ln === toLine);
-
-        if (toIndex === -1) {
-            console.error("Invalid `toLine` number provided.");
-            return data;
-        }
-
-        // Insert the item at the new position
-        remainingItems.splice(toIndex, 0, itemToMove);
-
-        // Reassign line numbers to maintain sequential order
-        remainingItems.forEach((item, index) => {
-            item.ln = index + 1;
+        sorted.forEach((item, i) => {
+            item.ln = i + 1;
         });
 
-        return remainingItems;
+        return sorted;
     }
-
-
     const table = useMaterialReactTable({
         columns,
         data: tableData,
@@ -462,31 +463,30 @@ const JoblistTable = ({ jobs, workOrder, handlePaste, commonData, isBilledToLess
                     const line_from=draggingRow.original.ln
                     const line_to=hoveredRow.original.ln
                     setIsWebserviceCalling(true)
-                    const updatedTable = reorderLines(tableData,hoveredRow.original.ln,draggingRow.original.ln)
-                    //console.log(updatedTable)
+                    const updatedTable = reorderLines(tableData,draggingRow.original.ln,hoveredRow.original.ln)
+                    console.log(updatedTable)
+                    const filtered = updatedTable.map(({ id, ln }) => ({ id, ln }));
+                    console.log(filtered)
                     setTableData([...updatedTable]);
-                    // console.log(tableData)
-                    // console.log(jobs)
                     const requestData = {
-                        line_one: line_from,
-                        line_two: line_to,
-                        work_order: workOrder.work_order,
+                        joblist: filtered,
                         user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))["id"],
-                        work_id:workOrder.id
+                        work_id: workOrder.id
                     };
 
                     console.log(requestData)
-                    axios.post(process.env.REACT_APP_BIRCH_API_URL+'swap_line_number/', requestData)
+                    axios.post(process.env.REACT_APP_BIRCH_API_URL+'update_line_number/', requestData)
                         .then(response => {
                             console.log('Success:', response.data);
                             setIsWebserviceCalling(false)
-                            if(response.status==200){
-
+                            if(response.status!==200){
+                                setTableData([...tableData]);
                             }
                         })
                         .catch(error => {
                             setIsWebserviceCalling(false)
                             console.error('Error:', error.response ? error.response.data : error.message);
+                            alert("Something went wrong in moving lines. Please try again later")
                             setTableData(tableData);
                         });
 

@@ -38,7 +38,8 @@ function calculateLaborCost(job) {
 
     } else {
         // Normal logic for responsibility != 3
-        calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        //calculatedLabor = (qty * perItemLaborFixed) + (qty * perItemLaborVariable);
+        calculatedLabor = (qty * perItemLaborVariable);
     }
 
     return round2Dec(calculatedLabor);
@@ -785,27 +786,35 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
 
     const owner = my_new_order.railcar.owner_railcar_owner_idToowner;
     const lessee = my_new_order.railcar.owner_railcar_lessee_idToowner;
+    const third_party = my_new_order.railcar.owner_railcar_third_party_idToowner;
 
+
+    const party =
+        forWhom === 4 ? third_party :
+            (forWhom === 1 || forWhom === 2) ? owner :
+                lessee;
 
     var owner_address = {
-        "id": forWhom == 1 || forWhom == 2 ? owner.id : lessee.id,
-        "name": forWhom == 1 || forWhom == 2 ? owner.name : lessee.name,
-        "labor_rate": forWhom == 1 || forWhom == 2 ? owner.labor_rate : lessee.labor_rate,
-        "markup_percent": forWhom == 1 || forWhom == 2 ? owner.markup_percent : lessee.markup_percent,
-        "abbreviation": forWhom == 1 || forWhom == 2 ? owner.abbreviation : lessee.abbreviation,
-        "billing_address": forWhom == 1 || forWhom == 2 ? owner.billing_address : lessee.billing_address,
-        "address_line1": forWhom == 1 || forWhom == 2 ? owner.address_line1 : lessee.address_line1,
-        "address_line2": forWhom == 1 || forWhom == 2 ? owner.address_line2 : lessee.address_line2,
-        "city": forWhom == 1 || forWhom == 2 ? owner.city : lessee.city,
-        "state": forWhom == 1 || forWhom == 2 ? owner.state : lessee.state,
-        "country": forWhom == 1 || forWhom == 2 ? owner.country : lessee.country,
-        "zip_code": forWhom == 1 || forWhom == 2 ? owner.zip_code : lessee.zip_code,
-        "contact_name": forWhom == 1 || forWhom == 2 ? owner.contact_name : lessee.contact_name,
-        "contact_number": forWhom == 1 || forWhom == 2 ? owner.contact_number : lessee.contact_number,
-        "contact_email": forWhom == 1 || forWhom == 2 ? owner.contact_email : lessee.contact_email,
-        "is_po": forWhom == 1 || forWhom == 2 ? owner.is_po : lessee.is_po,
-        "is_active": forWhom == 1 || forWhom == 2 ? owner.is_active : lessee.is_active
-    }
+        id: party.id,
+        name: party.name,
+        labor_rate: party.labor_rate,
+        markup_percent: party.markup_percent,
+        abbreviation: party.abbreviation,
+        billing_address: party.billing_address,
+        address_line1: party.address_line1,
+        address_line2: party.address_line2,
+        city: party.city,
+        state: party.state,
+        country: party.country,
+        zip_code: party.zip_code,
+        contact_name: party.contact_name,
+        contact_number: party.contact_number,
+        contact_email: party.contact_email,
+        is_po: party.is_po,
+        is_active: party.is_active
+    };
+
+
 
     // ====================================================================================
     // setting required values
@@ -871,7 +880,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         net_cost = Number(round2Dec(labor_cost + material_cost))
     } else if (forWhom == 2) {
         workorder.joblist.forEach((myjob, i) => {
-            if (myjob.secondary_bill_to_id == null) {
+            if (myjob.third_party_billing_id ==null) {
                 number_of_jobs++;
 
                 const laborCost = calculateLaborCost(myjob);
@@ -892,7 +901,32 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             }
         });
         net_cost = Number(round2Dec(labor_cost + material_cost))
-    } else {
+    }
+    else if(forWhom == 4){
+        workorder.joblist.forEach((myjob, i) => {
+            if (myjob.third_party_billing_id !== null) {
+                number_of_jobs++;
+
+                const laborCost = calculateLaborCost(myjob);
+                labor_cost += Number(round2Dec(laborCost));
+
+                // Calculate labor hours
+                const laborHours = Number(myjob.labor_time_aar) * myjob.quantity;
+                total_hour += Number(round2Dec(laborHours));
+
+                // Calculate material cost
+                myjob.jobparts.forEach(part => {
+                    const purchaseCost = Number(round2Dec(part.purchase_cost)) * part.quantity;
+                    const markup = Number(round2Dec(purchaseCost)) * Number(round2Dec(part.markup_percent));
+                    const single_mat_cost = Number(round2Dec(purchaseCost + markup));
+                    total_material_cost += Number(round2Dec(single_mat_cost));
+                });
+            }
+        });
+        net_cost = Number(round2Dec(labor_cost + material_cost))
+    }
+
+    else {
         workorder.joblist.forEach((myjob, i) => {
             if (myjob.secondary_bill_to_id !== null) {
                 number_of_jobs++;
@@ -927,11 +961,40 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
     total_record_count.value = getObjComputedValue(total_record_count, number_of_jobs);
     total_labor_charge.value = getObjComputedValue(total_labor_charge, costs.labor_cost * 100);
     total_material_charge.value = getObjComputedValue(total_material_charge, total_material_cost * 100);
-    account_date.value = getObjComputedValue(account_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
-    invoice_number.value = getObjComputedValue(invoice_number, forWhom == 1 || forWhom == 2 ? workorder.invoice_number : workorder.secondary_owner_info.invoice_number);
-    invoice_date.value = getObjComputedValue(invoice_date, forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) : new Date(workorder.secondary_owner_info.invoice_date));
 
-    let inv_number = forWhom == 1 || forWhom == 2 ? workorder.invoice_number : workorder.secondary_owner_info.invoice_number
+    account_date.value = getObjComputedValue(
+        account_date,
+        forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) :
+            forWhom == 3 ? new Date(workorder.secondary_owner_info.invoice_date) :
+                forWhom == 4 ? new Date(workorder.third_party_info.invoice_date) :
+                    null
+    );
+
+    invoice_number.value = getObjComputedValue(
+        invoice_number,
+        forWhom == 1 || forWhom == 2 ? workorder.invoice_number :
+            forWhom == 3 ? workorder.secondary_owner_info.invoice_number :
+                forWhom == 4 ? workorder.third_party_info.invoice_number :
+                    null
+    );
+
+    invoice_date.value = getObjComputedValue(
+        invoice_date,
+        forWhom == 1 || forWhom == 2 ? new Date(workorder.invoice_date) :
+            forWhom == 3 ? new Date(workorder.secondary_owner_info.invoice_date) :
+                forWhom == 4 ? new Date(workorder.third_party_info.invoice_date) :
+                    null
+    );
+
+
+    let inv_number =
+        forWhom == 1 || forWhom == 2 ? workorder.invoice_number :
+            forWhom == 3 ? workorder.secondary_owner_info.invoice_number :
+                forWhom == 4 ? workorder.third_party_info.invoice_number :
+                    null;
+
+
+
     price_master_file_indicator.value = getObjComputedValue(price_master_file_indicator, _price_master_file_indicator);
 
     repairing_party_invoice_number.value = getObjComputedValue(repairing_party_invoice_number, _repairing_party_invoice_number == null ? inv_number : _repairing_party_invoice_number);
@@ -1017,6 +1080,26 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_job_code.value = getObjComputedValue(removed_job_code, item.jobcode_joblist_job_code_removedTojobcode ? item.jobcode_joblist_job_code_removedTojobcode.code.substring(0, 4) : null);
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
+
+
+            if(item.responsibilitycode.code==3){
+                defect_card_jic_party.value = getObjComputedValue(
+                    defect_card_jic_party,
+                    item.responsibilitycode.code == 3
+                        ? (workorder.railcar.owner_railcar_defect_card_partyToowner ? workorder.railcar.owner_railcar_defect_card_partyToowner.abbreviation : null)
+                        : null
+                );
+
+                defect_card_jic_date.value = getObjComputedValue(
+                    defect_card_jic_date,
+                    item.responsibilitycode.code == 3
+                        ? (workorder.defect_card_date ? new Date( workorder.defect_card_date) : null)
+                        : null
+                );
+            }else {
+                defect_card_jic_party.value = getObjComputedValue(null)
+                defect_card_jic_date.value = getObjComputedValue(null)
+            }
 
             const laborCost = calculateLaborCost(item);
 
@@ -1181,16 +1264,21 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             if (forWhom == 1) {
 
                 en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
-                //console.log(en_txt)
             }
             if (forWhom == 2) {
-                if (item.secondary_bill_to_id == null) {
+                if (item.third_party_billing_id ==null) {
                     en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
-                    //console.log(en_txt)
                 }
             }
             if (forWhom == 3) {
                 if (item.secondary_bill_to_id !== null) {
+                    en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
+                    //console.log(en_txt)
+                }
+            }
+
+            if (forWhom == 4) {
+                if (item.third_party_billing_id!== null) {
                     en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
                     //console.log(en_txt)
                 }
@@ -1416,154 +1504,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
     //     document.body.appendChild(downloadLink);
     // }
     downloadLink.click();
-
-    // ====================================================================================
-    // this function is currently not being used
-    // if wanna use this function then don't move this out of its parent function printAAR
-    // ====================================================================================
-
-    // function Decode(txt) {
-    //     console.log("decode")
-    //     var lines = {}
-    //     txt.split('\n').forEach((line, i) => {
-    //         if (line.length > 0) {
-    //             if (!Object.keys(lines).includes(line[0])) {
-    //                 lines[line[0]] = [];
-    //             }
-    //             lines[line[0]].push(line);
-    //         }
-    //     });
-    //     if (lines['1']) {
-    //         billing_invoicing_party = getDecodedValue(billing_invoicing_party, lines['1'][0]);
-    //         billed_party = getDecodedValue(billed_party, lines['1'][0]);
-    //         account_date = getDecodedValue(account_date, lines['1'][0]);
-    //         invoice_number = getDecodedValue(invoice_number, lines['1'][0]);
-    //         price_master_file_indicator = getDecodedValue(price_master_file_indicator, lines['1'][0]);
-    //         detail_source = getDecodedValue(detail_source, lines['1'][0]);
-    //         document_reference_number = getDecodedValue(document_reference_number, lines['1'][0]);
-    //         car_initial = getDecodedValue(car_initial, lines['1'][0]);
-    //         car_number = getDecodedValue(car_number, lines['1'][0]);
-    //         kind_of_car_symbol = getDecodedValue(kind_of_car_symbol, lines['1'][0]);
-    //         load_empty_indicator = getDecodedValue(load_empty_indicator, lines['1'][0]);
-
-    //         repair_date = getDecodedValue(repair_date, lines['1'][0]);
-    //         splc = getDecodedValue(splc, lines['1'][0]);
-    //         repairing_party = getDecodedValue(repairing_party, lines['1'][0]);
-    //         repairing_party_invoice_number = getDecodedValue(repairing_party_invoice_number, lines['1'][0]);
-    //         repairing_party_document_reference_number = getDecodedValue(repairing_party_document_reference_number, lines['1'][0]);
-    //         repair_facility_type = getDecodedValue(repair_facility_type, lines['1'][0]);
-
-    //         var jobs = [];
-
-    //         for (var i = 0; i < lines['1'].length; i++) {
-    //             var item = {};
-
-    //             location_on_car = getDecodedValue(location_on_car, lines['1'][i]);
-    //             quantity = getDecodedValue(quantity, lines['1'][i]);
-    //             condition_code = getDecodedValue(condition_code, lines['1'][i]);
-    //             applied_job_code = getDecodedValue(applied_job_code, lines['1'][i]);
-    //             applied_qualifier = getDecodedValue(applied_qualifier, lines['1'][i]);
-    //             why_made_code = getDecodedValue(why_made_code, lines['1'][i]);
-    //             removed_job_code = getDecodedValue(removed_job_code, lines['1'][i]);
-    //             removed_qualifier = getDecodedValue(removed_qualifier, lines['1'][i]);
-    //             responsibility_code = getDecodedValue(responsibility_code, lines['1'][i]);
-    //             labor_charge = getDecodedValue(labor_charge, lines['1'][i]) / 100;
-    //             material_charge = getDecodedValue(material_charge, lines['1'][i]) / 100;
-    //             wheel_narrative = getDecodedValue(wheel_narrative, lines['1'][i]);
-    //             labor_rate = getDecodedValue(labor_rate, lines['1'][i]) / 100;
-    //             line_number = getDecodedValue(line_number, lines['1'][i]);
-
-    //             item['loc'] = location_on_car.result;
-    //             item['qty'] = quantity.result;
-    //             item['cc'] = condition_code.result;
-    //             item['jc'] = applied_job_code.result;
-    //             item['aq'] = applied_qualifier.result;
-    //             item['wmc'] = why_made_code.result;
-    //             item['jcr'] = removed_job_code.result;
-    //             item['rq'] = removed_qualifier.result;
-    //             item['rc'] = responsibility_code.result;
-    //             item['labor_cost'] = labor_charge.result / 100;
-    //             item['material_cost'] = material_charge.result / 100;
-    //             item['net_cost'] = item['labor_cost'] + item['material_cost'];
-    //             item['des'] = wheel_narrative.result;
-    //             item['labor_rate'] = labor_rate.result / 100;
-    //             item['ln'] = line_number.result;
-    //             jobs.push(item);
-    //         }
-    //         data = jobs;
-    //         expanded_splc = getDecodedValue(expanded_splc, lines['1'][0]);
-    //         cif_repairing_party = getDecodedValue(cif_repairing_party, lines['1'][0]);
-    //         cif_billing_invoicing_party = getDecodedValue(cif_billing_invoicing_party, lines['1'][0]);
-    //         cif_billed_party = getDecodedValue(cif_billed_party, lines['1'][0]);
-    //         cif_defect_jic_party = getDecodedValue(cif_defect_jic_party, lines['1'][0]);
-    //         repair_facility_arrival_date = getDecodedValue(repair_facility_arrival_date, lines['1'][0]);
-    //         railinc_inbound_date_stamp = getDecodedValue(railinc_inbound_date_stamp, lines['1'][0]);
-    //         railinc_outbound_date_stamp = getDecodedValue(railinc_outbound_date_stamp, lines['1'][0]);
-    //         resubmitted_invoice_indicator = getDecodedValue(resubmitted_invoice_indicator, lines['1'][0]);
-    //         original_invoice_number = getDecodedValue(original_invoice_number, lines['1'][0]);
-    //         original_account_date = getDecodedValue(original_account_date, lines['1'][0]);
-    //         aar_component_id = getDecodedValue(aar_component_id, lines['1'][0]);
-    //         ddct_incident_id = getDecodedValue(ddct_incident_id, lines['1'][0]);
-    //         reserved_for_future_crb_use_5 = getDecodedValue(reserved_for_future_crb_use_5, lines['1'][0]);
-    //         free_user_area = getDecodedValue(free_user_area, lines['1'][0]);
-    //     }
-    //     if (lines['6']) {
-    //         for (var i = 0; i < lines['6'].length; i++) {
-    //             rt_contact_type = getDecodedValue(rt_contact_type, lines['6'][i]);
-    //             var id = rt_contact_type.result;
-    //             if (id == "RT") {
-    //                 rt_contact_type = getDecodedValue(rt_contact_type, lines['6'][i]);
-    //                 rt_company_name = getDecodedValue(rt_company_name, lines['6'][i]);
-    //                 rt_name = getDecodedValue(rt_name, lines['6'][i]);
-    //                 rt_title = getDecodedValue(rt_title, lines['6'][i]);
-    //                 rt_phone = getDecodedValue(rt_phone, lines['6'][i]);
-    //                 rt_fax = getDecodedValue(rt_fax, lines['6'][i]);
-    //                 rt_email = getDecodedValue(rt_email, lines['6'][i]);
-    //                 rt_address1 = getDecodedValue(rt_address1, lines['6'][i]);
-    //                 rt_address2 = getDecodedValue(rt_address2, lines['6'][i]);
-    //                 rt_address3 = getDecodedValue(rt_address3, lines['6'][i]);
-    //                 rt_address4 = getDecodedValue(rt_address4, lines['6'][i]);
-    //                 rt_city = getDecodedValue(rt_city, lines['6'][i]);
-    //                 rt_state = getDecodedValue(rt_state, lines['6'][i]);
-    //                 rt_country_code = getDecodedValue(rt_country_code, lines['6'][i]);
-    //                 rt_zip_code = getDecodedValue(rt_zip_code, lines['6'][i]);
-    //             } else {
-    //                 bp_contact_type = getDecodedValue(bp_contact_type, lines['6'][i]);
-    //                 bp_company_name = getDecodedValue(bp_company_name, lines['6'][i]);
-    //                 bp_name = getDecodedValue(bp_name, lines['6'][i]);
-    //                 bp_title = getDecodedValue(bp_title, lines['6'][i]);
-    //                 bp_phone = getDecodedValue(bp_phone, lines['6'][i]);
-    //                 bp_fax = getDecodedValue(bp_fax, lines['6'][i]);
-    //                 bp_email = getDecodedValue(bp_email, lines['6'][i]);
-    //                 bp_address1 = getDecodedValue(bp_address1, lines['6'][i]);
-    //                 bp_address2 = getDecodedValue(bp_address2, lines['6'][i]);
-    //                 bp_address3 = getDecodedValue(bp_address3, lines['6'][i]);
-    //                 bp_address4 = getDecodedValue(bp_address4, lines['6'][i]);
-    //                 bp_city = getDecodedValue(bp_city, lines['6'][i]);
-    //                 bp_state = getDecodedValue(bp_state, lines['6'][i]);
-    //                 bp_country_code = getDecodedValue(bp_country_code, lines['6'][i]);
-    //                 bp_zip_code = getDecodedValue(bp_zip_code, lines['6'][i]);
-    //             }
-    //         }
-    //     }
-    //     if (lines['8']) {
-    //         total_record_count = getDecodedValue(total_record_count, lines['8'][0]);
-    //         total_labor_charge = getDecodedValue(total_labor_charge, lines['8'][0]);
-    //         total_material_charge = getDecodedValue(total_material_charge, lines['8'][0]);
-    //         total_sign = getDecodedValue(total_sign, lines['8'][0]);
-    //         invoice_date = getDecodedValue(invoice_date, lines['8'][0]);
-    //         taxpayer_id = getDecodedValue(taxpayer_id, lines['8'][0]);
-    //         payment_term = getDecodedValue(payment_term, lines['8'][0]);
-    //         payment_due_date = getDecodedValue(payment_due_date, lines['8'][0]);
-    //         railinc_inbound_date = getDecodedValue(railinc_inbound_date, lines['8'][0]);
-    //         railinc_outbound_date = getDecodedValue(railinc_outbound_date, lines['8'][0]);
-    //     }
-    //     if (lines['9']) {
-
-    //     }
-    //     return lines;
-    // }
-
 }
 
 function getObjComputedValue(data, value) {

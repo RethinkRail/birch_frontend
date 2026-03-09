@@ -12,6 +12,7 @@ import axios from "axios";
 import Datetime from "react-datetime";
 import {round2Dec} from "../utils/NumberHelper";
 import {toUTCDateTime} from "../utils/DateTimeHelper";
+import {Textarea} from "flowbite-react";
 
 const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
     console.log(entry)
@@ -30,6 +31,7 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
         logged_time_in_seconds:entry.logged_time_in_seconds,
         railcar_id:entry.railcar_id,
         notes:entry.notes,
+        updated_notes:"",
         user_id: JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['id']
     });
     console.log(formData)
@@ -79,22 +81,38 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
             [name]: value,
         });
     };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        setFormData((prevState) => ({
-            ...prevState,
-            notes: formData.notes+"##"+'Time edited by '+JSON.parse(localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE))['name'],  // Update only car_id
-        }))
 
-        if(formData.logged_time_in_seconds <0){
-            alert("Out time can't be greater than in time")
-            return
+        if (formData.logged_time_in_seconds < 0) {
+            alert("Out time can't be greater than in time");
+            return;
         }
-        // Call the onSave function and pass the updated data
-        onSave({ ...entry, ...formData });
-        onClose(); // Close the modal after saving
+
+        const user = JSON.parse(
+            localStorage.getItem(process.env.REACT_APP_USER_TOKEN_LOCAL_STORAGE)
+        );
+        console.log(formData)
+        // const updatedNotes =
+        //     `${formData.notes}#${formData.updated_notes} ` +
+        //     `Updated by ${user.name}`;
+        const updatedNotes = formData.updated_notes
+        console.log(updatedNotes)
+        const updatedFormData = {
+            ...formData,
+            notes: updatedNotes,
+        };
+
+
+        // Update state (for UI consistency)
+        setFormData(updatedFormData);
+
+        // Save with the updated value
+        onSave({ ...entry, ...updatedFormData });
+
+        onClose();
     };
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -175,6 +193,20 @@ const EditLogModal = ({ entry,carsToEdit, onClose, onSave }) => {
                                     console.error("Invalid date selected."); // Optional: log or handle the error
                                     // You can also set the state to an empty string or previous valid date if needed
                                 }
+                            }}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block mb-1">Manager's Note</label>
+                        <Textarea
+                            className="w-full border-2 rounded p-1"
+                            value={formData.updated_notes || ""}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setFormData(prev => ({
+                                    ...prev,
+                                    updated_notes: value
+                                }));
                             }}
                         />
                     </div>

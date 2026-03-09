@@ -1250,19 +1250,19 @@ const ReportDates = () => {
                     <div className="bg-gray-50 shadow rounded-xl px-6 py-4 flex gap-6 text-sm text-gray-800">
                         <div className="flex flex-col items-end">
                             <span className="font-semibold text-green-500">Total Regular Hours</span>
-                            <span>{round2Dec(grandTotals.standard)}</span>
+                            <span>{ hhMMFormat?decimalToHHMM(grandTotals.standard):round2Dec(grandTotals.standard)}</span>
                         </div>
                         <div className="flex flex-col items-end">
                             <span className="font-semibold text-red-300">Total Overtime Hours</span>
-                            <span>{round2Dec(grandTotals.overtime)}</span>
+                            <span>{ hhMMFormat?decimalToHHMM(grandTotals.overtime):round2Dec(grandTotals.overtime)}</span>
                         </div>
                         <div className="flex flex-col items-end">
                             <span className="font-semibold text-black-200">Total Payable Hours</span>
-                            <span>{round2Dec(grandTotals.payable)}</span>
+                            <span>{ hhMMFormat?decimalToHHMM(grandTotals.payable):round2Dec(grandTotals.payable)}</span>
                         </div>
                         <div className="flex flex-col items-end">
                             <span className="font-semibold text-yellow-600">Total Break Hours</span>
-                            <span>{round2Dec(grandTotals.break)}</span>
+                            <span>{ hhMMFormat?decimalToHHMM(grandTotals.break):round2Dec(grandTotals.break)}</span>
                         </div>
                     </div>
                 </div>

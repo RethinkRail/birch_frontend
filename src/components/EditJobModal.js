@@ -4,6 +4,7 @@ import {round2Dec} from "../utils/NumberHelper";
 import {showToastMessage} from "../utils/CommonHelper";
 import {toast} from "react-toastify";
 import Select from "react-select";
+import { WindowedMenuList } from "react-windowed-select";
 
 
 const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
@@ -867,6 +868,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                             id="part"
                             isDisabled={workOrder.locked_by != null}
                             classNamePrefix="react-select"
+                            components={{ MenuList: WindowedMenuList }}
                             onChange={(selectedOption) => handlePartChange(selectedOption?.value)}
                             options={partOptions}
                             filterOption={customFilterOption}

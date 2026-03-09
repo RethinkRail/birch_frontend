@@ -7,6 +7,7 @@ import Select from "react-select";
 import { WindowedMenuList } from "react-windowed-select";
 
 
+
 const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, editData, setEditData ,createAjob,updateAJob,deleteJob}) => {
     console.log(workOrder)
     console.log(editData)
@@ -767,6 +768,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 id="job"
                                 isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select"
+                                components={{ MenuList: WindowedMenuList }}
                                 value={jobCodeOptions.find(option => option.value === inputValues["job_code"])}
                                 onChange={(selectedOption) => handleChange("job_code", selectedOption?.value)}
                                 options={jobCodeOptions}
@@ -817,6 +819,7 @@ const EditJobModal = ({ lineNumber, workOrder  , commonData,setModalShowing, edi
                                 id="job_removed"
                                 isDisabled={workOrder.locked_by != null}
                                 classNamePrefix="react-select"
+                                components={{ MenuList: WindowedMenuList }}
                                 value={jobCodeOptions.find(option => option.value === inputValues["job_code_removed"])}
                                 onChange={(selectedOption) => handleChange("job_code_removed", selectedOption?.value)}
                                 options={jobCodeOptions}

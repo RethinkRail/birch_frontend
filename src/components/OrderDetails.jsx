@@ -4,7 +4,7 @@ import qs from "qs";
 import {toast} from "react-toastify";
 import axios from "axios";
 import CustomDateInputFullWidth from "./CustomDateInputFullWidth";
-import {addDays} from "flowbite-react/lib/esm/components/Datepicker/helpers";
+
 import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import DatePicker from "react-datepicker";
 import {printATask, printBBOM, printBRC, printInvoice} from '../utils/documentPrintHelper';
@@ -253,7 +253,7 @@ const OrderDetails = ({
         setTotalMatCost(totalMaterialCost)
 
     };
-
+    const addDays = (date, days) => { const d = new Date(date); d.setDate(d.getDate() + days); return d; };
 
     useEffect(() => {
         if (!workOrder) {
@@ -362,7 +362,10 @@ const OrderDetails = ({
         workOrder.joblist?.sort((a, b) => a.line_number - b.line_number);
         getRailCarTimeLog();
         setStorageInformation(workOrder.storage_information ?? {});
-        fetchPartReport();
+        Promise.all([
+            getRailCarTimeLog(),
+            fetchPartReport()
+        ]);
     }, [workOrder]);
 
 
@@ -380,9 +383,10 @@ const OrderDetails = ({
         }
     };
 
-    const getRailCarTimeLog =async () => {
+    const getRailCarTimeLog = async () => {
         const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_time_log_by_work_id/${workOrder.id}`);
-        setRailcarLog(response.data)
+        setRailcarLog(response.data);
+        return response;
     }
     const formatDateToSQL = (date) => {
         const year = date.getFullYear();

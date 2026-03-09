@@ -267,13 +267,7 @@ const WorkOrderDataTable = ({
             });
     };
     const workOrdersTableColumn = [
-        {
-            name: "LHR",
-            selector: row => row.lhr,
-            sortable: true,
-            width: '4%',
-            cell: (row) => <LHRCell workOrder={row.work_order} workId={row.work_id} />,
-        },
+
         {
             name: "DIF",
             selector: row => row.dif,

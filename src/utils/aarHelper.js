@@ -46,6 +46,7 @@ function calculateLaborCost(job) {
 }
 
 export function printAAR(item, _wheel_detail = false, forWhom) {
+    console.log(item)
     let data = null;
     let wheel_detail = _wheel_detail;
     let record_format = {
@@ -880,7 +881,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         net_cost = Number(round2Dec(labor_cost + material_cost))
     } else if (forWhom == 2) {
         workorder.joblist.forEach((myjob, i) => {
-            if (myjob.third_party_billing_id ==null) {
+            if (myjob.secondary_bill_to_id == null && myjob.third_party_billing_id ==null) {
                 number_of_jobs++;
 
                 const laborCost = calculateLaborCost(myjob);
@@ -1081,7 +1082,6 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             removed_qualifier.value = getObjComputedValue(removed_qualifier, item.qualifiercode_joblist_qualifier_removed_idToqualifiercode ? item.qualifiercode_joblist_qualifier_removed_idToqualifiercode.code : null);
             responsibility_code.value = getObjComputedValue(responsibility_code, item.responsibilitycode ? item.responsibilitycode.code : null);
 
-
             if(item.responsibilitycode.code==3){
                 defect_card_jic_party.value = getObjComputedValue(
                     defect_card_jic_party,
@@ -1097,13 +1097,16 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                         : null
                 );
             }else {
-                defect_card_jic_party.value = getObjComputedValue(null)
-                defect_card_jic_date.value = getObjComputedValue(null)
+                defect_card_jic_party.value = null
+                defect_card_jic_date.value = null
             }
+
+
 
             const laborCost = calculateLaborCost(item);
 
             labor_charge.value = getObjComputedValue(labor_charge, Math.abs(laborCost) * 100);
+            repair_facility_arrival_date.value = getObjComputedValue(repair_facility_arrival_date, workorder.arrival_date ? new Date(workorder.arrival_date) : null);
 
             var mat_cost_single_job = 0
             item.jobparts.forEach(function (part) {
@@ -1195,6 +1198,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
             defect_card_jic_date.value = getObjComputedValue(defect_card_jic_date);
             labor_charge.value = getObjComputedValue(labor_charge);
             material_charge.value = getObjComputedValue(material_charge);
+            repair_facility_arrival_date.value = getObjComputedValue(repair_facility_arrival_date);
             machine_priceable_indicator.value = getObjComputedValue(machine_priceable_indicator);
             wrong_repair_indicator.value = getObjComputedValue(wrong_repair_indicator);
 
@@ -1266,7 +1270,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
                 en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
             }
             if (forWhom == 2) {
-                if (item.third_party_billing_id ==null) {
+                if (item.secondary_bill_to_id == null  && item.third_party_billing_id ==null) {
                     en_txt += padStringTo500(invoice_header + repair_header + repair_detail + narrative_detail + other_detail) + "\n";
                 }
             }
@@ -1496,13 +1500,7 @@ export function printAAR(item, _wheel_detail = false, forWhom) {
         // Chrome allows the link to be clicked without actually adding it to the DOM.
         downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
     }
-    // else {
-    //     // Firefox requires the link to be added to the DOM before it can be clicked.
-    //     downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-    //     downloadLink.onclick = destroyClickedElement;
-    //     downloadLink.style.display = "none";
-    //     document.body.appendChild(downloadLink);
-    // }
+
     downloadLink.click();
 }
 

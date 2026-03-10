@@ -600,15 +600,15 @@ export function printInvoice(workorder, forWhom) {
             zip_code: workorder.railcar.owner_railcar_third_party_idToowner.zip_code ? workorder.railcar.owner_railcar_third_party_idToowner.zip_code : ''
         }];
 
-        invoice_number = workorder.secondary_owner_info.invoice_number;
-        inv_date = workorder.secondary_owner_info.invoice_date != null
-            ? convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date)
+        invoice_number = workorder.third_party_info.invoice_number;
+        inv_date = workorder.third_party_info.invoice_date != null
+            ? convertSqlWithTZToFormattedDate(workorder.third_party_info.invoice_date)
             : "";
 
-        net_days = workorder.secondary_owner_info.invoice_net_days;
+        net_days = workorder.third_party_info.invoice_net_days;
 
-        due_date = workorder.secondary_owner_info.invoice_date != null
-            ? convertSqlWithTZToFormattedDate(workorder.secondary_owner_info.invoice_date, net_days)
+        due_date = workorder.third_party_info.invoice_date != null
+            ? convertSqlWithTZToFormattedDate(workorder.third_party_info.invoice_date, net_days)
             : "";
     }
     else {
@@ -657,13 +657,22 @@ export function printInvoice(workorder, forWhom) {
     // console.log(owner_obj)
     var owner_address = '';
     if (owner_obj != null && owner_obj.length > 0) {
+        console.log(owner_obj);
         owner_obj = owner_obj[0];
+
         if (owner_obj.contact_name != '') {
             owner_address += owner_obj.contact_name + '\n';
         }
-        owner_address += owner_obj.address_line1?owner_obj.address_line1:'' + '\n' + owner_obj.address_line2? owner_obj.address_line2:'' + '\n';
-        owner_address += owner_obj.city ?owner_obj.city:''+ ', ' + owner_obj.state ? owner_obj.state:''+ ' ' + owner_obj.zip_code? owner_obj.zip_code:'';
+
+        owner_address += (owner_obj.address_line1 ? owner_obj.address_line1 : '') + '\n' +
+            (owner_obj.address_line2 ? owner_obj.address_line2 : '') + '\n';
+
+        owner_address += (owner_obj.city ? owner_obj.city : '') + ', ' +
+            (owner_obj.state ? owner_obj.state : '') + ' ' +
+            (owner_obj.zip_code ? owner_obj.zip_code : '');
     }
+
+
     var lessee = workorder.railcar.owner_railcar_lessee_idToowner.name
     var splc = workorder.yard.splc;
     var arr_date = convertSqlWithTZToFormattedDate(workorder.arrival_date);

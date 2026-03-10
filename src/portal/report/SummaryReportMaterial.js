@@ -23,7 +23,7 @@ import * as XLSX from 'xlsx';
 
 const  SummaryReportMaterial = () => {
     const toastId = useRef(null)
-    const [onlyInvoicedCars, setOnlyInvoicedCars] = useState(false);
+    const [invoiceFilter, setInvoiceFilter] = useState('both');
     const [shipped, setShipped] = useState(false);
     const initialColumns = useMemo(() => [
         { accessorKey: 'rfid', header: 'RFID', enableSorting: true },
@@ -81,9 +81,8 @@ const  SummaryReportMaterial = () => {
     };
 
 
-    // Toggle handlers
-    const handleOnlyInvoicedToggle = () => {
-        setOnlyInvoicedCars(prev => !prev);
+    const handleInvoiceFilterChange = (e) => {
+        setInvoiceFilter(e.target.value);
     };
 
     const handleShippedToggle = () => {
@@ -204,10 +203,11 @@ const  SummaryReportMaterial = () => {
 
     const handleGenerate = async () => {
         try {
+            console.log(invoiceFilter)
             toastId.current = toast.loading("Fetching data...")
             const response = await axios.post(process.env.REACT_APP_BIRCH_API_URL+'get_summary_report/', {
                 is_shipped: shipped,
-                is_invoiced: onlyInvoicedCars
+                invoice_filter: invoiceFilter
             });
             const modifiedData = transformData(response.data)
             const formattedData = modifiedData.map(item => {
@@ -460,20 +460,47 @@ const  SummaryReportMaterial = () => {
     const handleExportData = () => {
         const csv = generateCsv(csvConfig)(data);
         download(csvConfig)(csv);
-    };<div className="form-control w-fit">
-        <label className="label cursor-pointer">
-            <span className="label-text mr-5">Only Invoiced Cars</span>
-            <input
-                type="checkbox"
-                className="toggle"
-                checked={onlyInvoicedCars}
-                onChange={handleOnlyInvoicedToggle}
-            />
-        </label>
-    </div>
+    };
     return (
         <div className="p-4">
-
+            <div className="form-control w-fit">
+                <span className="label-text font-semibold mb-1">Invoice Filter</span>
+                <div className="flex gap-4">
+                    <label className="label cursor-pointer gap-2">
+                        <input
+                            type="radio"
+                            name="invoiceFilter"
+                            className="radio radio-sm"
+                            value="invoiced"
+                            checked={invoiceFilter === 'invoiced'}
+                            onChange={handleInvoiceFilterChange}
+                        />
+                        <span className="label-text">Invoiced</span>
+                    </label>
+                    <label className="label cursor-pointer gap-2">
+                        <input
+                            type="radio"
+                            name="invoiceFilter"
+                            className="radio radio-sm"
+                            value="not_invoiced"
+                            checked={invoiceFilter === 'not_invoiced'}
+                            onChange={handleInvoiceFilterChange}
+                        />
+                        <span className="label-text">Not Invoiced</span>
+                    </label>
+                    <label className="label cursor-pointer gap-2">
+                        <input
+                            type="radio"
+                            name="invoiceFilter"
+                            className="radio radio-sm"
+                            value="both"
+                            checked={invoiceFilter === 'both'}
+                            onChange={handleInvoiceFilterChange}
+                        />
+                        <span className="label-text">Both</span>
+                    </label>
+                </div>
+            </div>
 
             <div className="form-control w-fit">
                 <label className="label cursor-pointer">
@@ -631,7 +658,3 @@ const  SummaryReportMaterial = () => {
 };
 
 export default SummaryReportMaterial;
-
-
-
-

@@ -267,7 +267,24 @@ const WorkOrderDataTable = ({
             });
     };
     const workOrdersTableColumn = [
-
+        {
+            name: "LHR",
+            selector: row => row.lhr?.percentage ?? 0,
+            sortable: true,
+            width: '4%',
+            cell: (row) => {
+                const lhr = row.lhr;
+                if (!lhr) return <span>—</span>;
+                return (
+                    <span
+                        className="cursor-alias tooltip tooltip-right before:whitespace-pre-wrap before:content-[attr(data-tip)]"
+                        data-tip={`Estimated Hour: ${(lhr.totalEstimatedHours ?? 0).toFixed(2)}\nHours Applied: ${(lhr.totalAppliedHours ?? 0).toFixed(2)}`}
+                    >
+                {`${(lhr.percentage ?? 0).toFixed(2)}%`}
+            </span>
+                );
+            },
+        },
         {
             name: "DIF",
             selector: row => row.dif,

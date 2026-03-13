@@ -1,8 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import {auth, messaging} from "../firebase";
-import qs from "qs";
-import axios from "axios";
+
 import {getToken} from "firebase/messaging";
 
 const ProtectedRoute = (props) => {

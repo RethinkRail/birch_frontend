@@ -109,7 +109,7 @@ const Home = () => {
 
     const loadMoreWorkOrders = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder_simplified_home_screen`);
+            const response = await axios.get(`${process.env.REACT_APP_BIRCH_API_URL}get_active_workorder_simplified_home_screen_lhr`);
             const allWorkOrders = response.data.active_workorder;
 
             setWorkOrders(allWorkOrders);

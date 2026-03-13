@@ -6,7 +6,7 @@
  **/
 
 
-import React, {useEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import axios from "axios";
 import {toast} from "react-toastify";
 import {FaDownload} from "react-icons/fa";
@@ -31,10 +31,6 @@ const ProfitabilityReport = () => {
         setEndDate(e.target.value);
     };
 
-    useEffect(() => {
-        console.log("Updated startDate:", startDate);
-    }, [startDate, endDate]);
-
     const handleRetrieve = async () => {
         if (!startDate || !endDate) {
             toast.error("Please select both start and end dates");
@@ -51,8 +47,13 @@ const ProfitabilityReport = () => {
                 start_date: startDate,
                 end_date: endDate
             });
+            console.log(response.data);
             setData(response.data);
-            setOtherCosts({});
+            const initialOtherCosts = {};
+            response.data.forEach((item, idx) => {
+                initialOtherCosts[idx] = item.other_cost ?? "";
+            });
+            setOtherCosts(initialOtherCosts);
             toast.update(toastId.current, {
                 render: "All data loaded",
                 autoClose: 1000,
@@ -71,10 +72,41 @@ const ProfitabilityReport = () => {
         }
     };
 
+    const handleUpdate = async () => {
+        const updates = data.map((item, idx) => ({
+            work_id: item.work_id,
+            type_of_customer: item.type_of_customer,
+            other_cost: parseFloat(otherCosts[idx]) || 0
+        }));
+        console.log(updates);
+        toastId.current = toast.loading("Updating...");
+        try {
+            await axios.post(process.env.REACT_APP_BIRCH_API_URL + 'update_profitability_other_cost', {updates}, {
+                headers: {'Content-Type': 'application/json'}
+            });
+            toast.update(toastId.current, {
+                render: "Updated successfully",
+                autoClose: 1000,
+                type: "success",
+                hideProgressBar: true,
+                isLoading: false
+            });
+        } catch (error) {
+            toast.update(toastId.current, {
+                render: "Failed to update",
+                autoClose: 2000,
+                type: "error",
+                hideProgressBar: true,
+                isLoading: false
+            });
+        }
+    };
+
     const getCalc = (row, idx) => {
         const actualLabor = rate * (row.hours_applied || 0);
         const origMat = row.original_material || 0;
         const totalActual = actualLabor + origMat;
+        console.log(totalActual)
         const oc = parseFloat(otherCosts[idx]) || 0;
         const total = row.total || 0;
         const netRevenue = total - totalActual - oc;
@@ -96,8 +128,11 @@ const ProfitabilityReport = () => {
         });
 
     const rows = [
+        { key: "work_id", label: "Work ID", hidden: true },
         { key: "owner", label: "Owner" },
+        { key: "type_of_customer", label: "Type of Customer", hidden: true },
         { key: "railcar_id", label: "Railcar ID" },
+        { key: "reason_to_come", label: "Reason for shopping" },
         { key: "invoice_date", label: "Invoice Date", format: (v) => formatDate(v) },
 
         { key: "labor_cost", label: "Labor Revenue", format: (v) => `$${formatNumber(v)}` },
@@ -270,6 +305,12 @@ const ProfitabilityReport = () => {
                                 <FaDownload style={{marginRight: '8px'}}/>
                                 Export All
                             </button>
+                            <button
+                                onClick={handleUpdate}
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out"
+                            >
+                                Update All
+                            </button>
                         </div>
 
                         {/* Horizontal Table */}
@@ -293,7 +334,7 @@ const ProfitabilityReport = () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {rows.map((row, rowIdx) => (
+                                {rows.filter(r => !r.hidden).map((row, rowIdx) => (
                                     <tr
                                         key={row.key}
                                         className={rowIdx % 2 === 0 ? "bg-gray-50" : "bg-white"}
